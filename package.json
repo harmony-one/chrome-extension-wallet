@@ -8,9 +8,15 @@
     "type": "git",
     "url": "git+https://github.com/coolcottontail/onewallet.git"
   },
+  "scripts": {
+    "dev": "webpack --config ./build/webpack.dev.js --hide-modules",
+    "build": "webpack --config ./build/webpack.prod.js --progress  --hide-modules --colors"
+  },
   "dependencies": {
     "@harmony-js/core": "^0.1.36",
     "aes-js": "^3.1.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "lodash": "^4.17.10",
     "moment": "^2.23.0",
@@ -28,10 +34,6 @@
     "vuex": "^3.0.1",
     "vuex-persist": "^1.4.3",
     "vuex-router-sync": "^5.0.0"
-  },
-  "scripts": {
-    "dev": "webpack --config ./build/webpack.dev.js --hide-modules",
-    "build": "webpack --config ./build/webpack.prod.js -p --progress  --hide-modules --colors"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
