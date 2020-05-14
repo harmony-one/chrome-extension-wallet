@@ -276,65 +276,62 @@ export function checkAddress(address) {
     return isValidAddress(address)
 }
 
-export async function transferToken(from, to, fromShard, toShard, amount, privateKey, gasLimit = "21000", gasPrice = 1 ) {
+export async function transferToken(receiver, fromShard, toShard, amount, privateKey, gasLimit = "210000", gasPrice = 2 ) {
     let harmony = getHarmony()
-    let account = harmony.wallet.addByPrivateKey(privateKey)
-    let explorerLink = 'https://explorer.testnet.harmony.one/#/tx/'
 
-    let transactionObj = {
-        from: from,
-        to: to,
-        shardID: '0x'+fromShard.toString(16),
-        toShardID: '0x'+toShard.toString(16),
-        value: new Unit(amount).asEther().toWei().toString(),
-        gasLimit: new Unit(gasLimit).asWei().toWei().toString(),
-        gasPrice: new Unit(gasPrice).asWei().toWei().toString(),
-        chainId: store.state.network.chainId,
-    };
+    //1e18
+    const txn = harmony.transactions.newTx({
+        //  token send to
+        to: receiver,
+        // amount to send
+        value: new harmony.utils.Unit(amount).asEther().toWei().toString(),
+        // gas limit, you can use string
+        gasLimit: gasLimit,
+        // send token from shardID
+        shardID: typeof fromShard === 'string' ? Number.parseInt(fromShard, 10) : fromShard,
+        // send token to toShardID
+        toShardID: typeof toShard === 'string' ? Number.parseInt(toShard, 10) : toShard,
+        // gas Price, you can use Unit class, and use Gwei, then remember to use toWei(), which will be transformed to BN
+        gasPrice: new harmony.utils.Unit(gasPrice ).asGwei().toWei().toString(),
+    });
 
-    let txn = harmony.transactions.newTx(transactionObj, true);
-    let message = ""
-    let status = true
-
+    // update the shard information
     await getShardInfo();
-    harmony.blockchain.messenger.setDefaultShardID(fromShard)
-    account.signTransaction(txn, true)
-            .then(signed => {
-            signed
-                .sendTransaction()
-                .then(res => {
-                    let [transaction, hash] = res;
-                    let url = explorerLink + hash;
-                    console.log(url)
-                    transaction.confirm(hash).then(res => {
-                        console.log(res);
-                        if (res.txStatus == "CONFIRMED") {
-                            // this.balanceUpdate();
-                           console.log("trasnsaction_succeed");
-                           status  = true;
-                           message = url;
-                        }
-                    });
-                })
-                .catch(err => {
-                    console.log(err);
-                    console.log("transfer_fail");
-                    this.transferring = false;
-                    message = err.toString();
-                    status  = false;
-                });
+
+    // sign the transaction use wallet;
+    const account = harmony.wallet.addByPrivateKey(privateKey)
+    const signedTxn = await account.signTransaction(txn);
+
+    signedTxn
+        .observed()
+        .on('transactionHash', (txnHash) => {
+            // console.log('--- hash ---');
+            // console.log(txnHash);
         })
-            .catch(err => {
-                console.log(err);
-                console.log("transfer_fail");
-                this.transferring = false;
-                message = err.toString();
-                status  = false;
-         });
+        .on('error', (error) => {
+            return {
+                result: false,
+                mesg: "failed to sign transaction",
+            }
+        });
+
+    const [sentTxn, txnHash] = await signedTxn.sendTransaction();
+    const confiremdTxn = await sentTxn.confirm(txnHash);
+
+    var explorerLink
+    if (confiremdTxn.isConfirmed()) {
+        explorerLink = getNetworkLink('/tx/'  + txnHash)
+        // console.log(explorerLink);
+    } else {
+        return {
+            result: false,
+            mesg: "can not confirm transaction " + txnHash,
+        }
+    }
 
     return {
-        result: status,
-        mesg: message,
+        result: true,
+        mesg: explorerLink,
     }
 }
 

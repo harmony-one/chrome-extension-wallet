@@ -5,7 +5,7 @@
         <main class="main">
             <form @submit.prevent="showConfirmDialog" action="" method="post" class="auth-form" autocomplete="off">
                 <div v-show="message.show" class="message" :class="[ message.type ]">
-                    {{ message.text }}
+                    <a href="confirmation link in explorer">{{ message.text }}</a>
                 </div>
 
                 <label class="input-label">
@@ -133,17 +133,21 @@
                 }
 
                 try {
-                    let ret = transferToken(this.wallet.address, this.receipient, this.fromShard, this.toShard, amount, wallet.privateKey)
+                    let ret = await transferToken(this.receipient, this.fromShard, this.toShard, amount, wallet.privateKey)
+
                     this.$store.commit('loading', false)
                     this.message.show = true
 
                     if (ret.result) {
                         this.message.type = 'success'
-                        this.message.text = 'Payment has been successfully sent'
+                        this.message.text = ret.mesg
                     }else {
                         this.message.type =  'error'
                         this.message.text =  ret.mesg
                     }
+
+                    console.log("this.message.type ", this.message.type )
+                    console.log("this.message.text ", this.message.text )
 
                     this.loadTokens()
                     this.receipient = ''
