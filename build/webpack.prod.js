@@ -19,7 +19,7 @@ module.exports = merge(baseWebpack, {
         new webpack.HashedModuleIdsPlugin(),
         new ZipPlugin({
             path: '..',
-            filename: 'tronmask.zip'
+            filename: 'onewallet.zip'
         })
     ]
 })

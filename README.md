@@ -12,7 +12,7 @@
  
 ## Build Extension
 
-* Install [node.js](https://nodejs.org/) and npm.
+* Install [node.js](https://nodejs.org/) and npm. 
 * Install dependencies :
   ```
   npm install
@@ -21,12 +21,13 @@
   ```
   npm run build
   ```
-* Uncompressed build can be found in `/dist` folder, compressed build is `tronmask.zip`.
+* Uncompressed build can be found in `/dist` folder, compressed build is `onewallet.zip`.
 * Go to Chrome Extensions page and activate the Developer Mode.
 * Click `Load Unpacked` button and point it to `/dist` folder.
 
-## Development
-* Install [node.js](https://nodejs.org/) and npm.
+## Development 
+
+* Install [node.js](https://nodejs.org/) and npm (I used node.js version v10.17.0 on my Mac)
 * Install dependencies :
   ```
   npm install
