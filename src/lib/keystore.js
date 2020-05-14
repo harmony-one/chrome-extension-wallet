@@ -380,7 +380,7 @@ export function  getNetworkLink(path) {
             break;
         }
         case "OpensSakingNet": {
-            basic = "https://explorer.os.harmony.one/#";
+            basic = "https://explorer.os.hmny.io/#";
             break;
         }
         case "Localnet": {
