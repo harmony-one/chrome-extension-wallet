@@ -2,7 +2,7 @@
   <div>
     <app-header subtitle="Send Payment" @refresh="refreshTokens" />
 
-    <main class="main">
+    <main class="main page-send">
       <form
         @submit.prevent="showConfirmDialog"
         action
@@ -13,58 +13,95 @@
         <div v-show="message.show" class="message" :class="[message.type]">
           <a href="confirmation link in explorer">{{ message.text }}</a>
         </div>
-
+        <div class="row">
+          <label class="input-label receipient">
+            Receipient Address
+            <input
+              class="input-field"
+              type="text"
+              name="address"
+              v-model="receipient"
+            />
+          </label>
+          <label class="input-label shard">
+            To Shard
+            <input
+              class="input-field"
+              type="number"
+              name="to-shard"
+              v-model="toShard"
+            />
+          </label>
+        </div>
+        <div class="row">
+          <label class="input-label amount">
+            Amount
+            <input
+              class="input-field"
+              type="number"
+              name="amount"
+              v-model="amount"
+              step="any"
+            />
+          </label>
+          <label class="input-label token">
+            Token
+            <select class="input-field" v-model="selectedToken">
+              <option
+                v-for="token in account.tokens"
+                :key="token.name"
+                :value="token"
+                >{{ getTokenName(token) }}</option
+              >
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <label class="input-label gas-price">
+            Gas Price
+            <input
+              class="input-field"
+              type="number"
+              name="gasprice"
+              v-model="gasPrice"
+              step="any"
+            />
+          </label>
+          <label class="input-label gas-limit">
+            Gas Limit
+            <input
+              class="input-field"
+              type="number"
+              name="gaslimit"
+              v-model="gasLimit"
+              placeholder="Gas Limit"
+            />
+          </label>
+          <label class="input-label gas-one">
+            &nbsp;
+            <input
+              class="input-field"
+              type="text"
+              name="gasone"
+              readonly
+              :value="getStringFromOnes"
+            />
+          </label>
+        </div>
         <label class="input-label">
-          Receipient Address
-          <input
-            class="input-field"
-            type="text"
-            name="address"
-            v-model="receipient"
+          Input Data
+          <textarea
+            class="input-field input-data"
+            type="textarea"
+            name="inputdata"
+            placeholder="Please enter hexadecimal data (optional)"
+            v-model="inputData"
           />
         </label>
-        <label class="input-label">
-          Token
-          <select class="input-field" v-model="selectedToken">
-            <option
-              v-for="token in account.tokens"
-              :key="token.name"
-              :value="token"
-              >{{ getTokenName(token) }}</option
-            >
-          </select>
-        </label>
-
-        <label class="input-label">
+        <!-- <label class="input-label">
           From Shard
-          <input
-            class="input-field"
-            type="number"
-            name="from-shard"
-            v-model="fromShard"
-          />
-        </label>
-
-        <label class="input-label">
-          To Shard
-          <input
-            class="input-field"
-            type="number"
-            name="to-shard"
-            v-model="toShard"
-          />
-        </label>
-
-        <label class="input-label">
-          Amount
-          <input
-            class="input-field"
-            type="number"
-            name="amount"
-            v-model="amount"
-            step="any"
-          />
-        </label>
+          <input class="input-field" type="number" name="from-shard" v-model="fromShard" />
+        </label>-->
 
         <button class="button brand" type="submit">Send</button>
       </form>
@@ -101,6 +138,9 @@ export default {
     fromShard: 0,
     toShard: 0,
     receipient: "",
+    gasPrice: 1,
+    gasLimit: 21000,
+    inputData: "",
     selectedToken: false,
     message: {
       show: false,
@@ -110,6 +150,9 @@ export default {
   }),
 
   computed: {
+    ...mapState({
+      wallet: (state) => state.wallet,
+    }),
     confirmDialogText() {
       return `
                     Are you sure you want to transfer
@@ -120,9 +163,9 @@ export default {
                     <div><strong>${this.receipient}</strong> ?</div>
                 `;
     },
-    ...mapState({
-      wallet: (state) => state.wallet,
-    }),
+    getStringFromOnes() {
+      return parseFloat(this.gasLimit / Math.pow(10, 9)).toFixed(6) + "ONE";
+    },
   },
 
   mounted() {
@@ -282,3 +325,30 @@ export default {
   },
 };
 </script>
+<style lang="css">
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.page-send .receipient,
+.page-send .amount {
+  width: 75%;
+  margin-right: 10px;
+}
+.page-send .token,
+.page-send .shard {
+  width: 25%;
+}
+.page-send .gas-price,
+.page-send .gas-limit {
+  width: 32%;
+  margin-right: 10px;
+}
+.page-send .gas-one {
+  width: 36%;
+}
+.page-send .input-data {
+  height: 100px;
+}
+</style>
