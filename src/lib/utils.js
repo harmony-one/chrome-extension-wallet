@@ -1,7 +1,7 @@
 export function getTokenAmount(rawAmount, precision = 6) {
-    return rawAmount
+  return rawAmount;
 }
 
 export function getTokenRawAmount(amount, precision = 6) {
-    return amount * Math.pow(10, precision)
+  return amount * Math.pow(10, precision);
 }

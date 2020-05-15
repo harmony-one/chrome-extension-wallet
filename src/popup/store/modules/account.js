@@ -1,65 +1,65 @@
 export default {
-    namespaced: true,
+  namespaced: true,
 
-    state: {
-        balance: 0,
-        bandwidth: 0,
-        freeBandwidth: 0,
-        frozen: 0,
-        frozenExpires: 0,
-        tokens: [],
-        transfers: [],
-        transactions:[],
-        shardArray:[],
-        shard:0,
+  state: {
+    balance: 0,
+    bandwidth: 0,
+    freeBandwidth: 0,
+    frozen: 0,
+    frozenExpires: 0,
+    tokens: [],
+    transfers: [],
+    transactions: [],
+    shardArray: [],
+    shard: 0,
+  },
+
+  mutations: {
+    change(state, account) {
+      state.balance = account.balance;
+      state.shardArray = account.shardArray;
+      state.shard = account.shard;
+
+      state.bandwidth = account.bandwidth;
+      state.freeBandwidth = account.freeBandwidth;
+      state.frozen = account.frozen;
+      state.frozenExpires = account.frozenExpires;
     },
 
-    mutations: {
-        change(state, account) {
-            state.balance = account.balance
-            state.shardArray = account.shardArray
-            state.shard = account.shard
+    shard(state, shard) {
+      state.shard = shard;
+    },
 
-            state.bandwidth = account.bandwidth
-            state.freeBandwidth = account.freeBandwidth
-            state.frozen = account.frozen
-            state.frozenExpires = account.frozenExpires
-        },
+    shardArray(state, shardArray) {
+      state.shardArray = shardArray;
+    },
 
-        shard(state, shard) {
-            state.shard = shard
-        },
+    balance(state, balance) {
+      state.balance = balance;
+    },
 
-        shardArray(state, shardArray) {
-            state.shardArray = shardArray
-        },
+    frozen(state, frozen) {
+      state.frozen = frozen;
+    },
 
-        balance(state, balance) {
-            state.balance = balance
-        },
+    tokens(state, tokens) {
+      state.tokens = tokens;
+    },
 
-        frozen(state, frozen) {
-            state.frozen = frozen
-        },
+    transfers(state, transfers) {
+      state.transfers = transfers;
+    },
 
-        tokens(state, tokens) {
-            state.tokens = tokens
-        },
+    pushTransfers(state, transfers) {
+      state.transfers.push(...transfers);
+    },
 
-        transfers(state, transfers) {
-            state.transfers = transfers
-        },
+    transactions(state, transactions) {
+      state.transactions = transactions;
+    },
 
-        pushTransfers(state, transfers) {
-            state.transfers.push(...transfers)
-        },
-
-        transactions(state, transactions) {
-            state.transactions = transactions
-        },
-
-        pushTransactions(state, transactions) {
-            state.transactions.push(...transactions)
-        }
-    }
-}
+    pushTransactions(state, transactions) {
+      state.transactions.push(...transactions);
+    },
+  },
+};

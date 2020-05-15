@@ -1,15 +1,15 @@
-import tokens from '../../../tokens'
+import tokens from "../../../tokens";
 
 export default {
-    namespaced: true,
+  namespaced: true,
 
-    state: {
-        tokens: tokens
+  state: {
+    tokens: tokens,
+  },
+
+  mutations: {
+    tokens(state, tokens) {
+      state.tokens = tokens;
     },
-
-    mutations: {
-        tokens(state, tokens) {
-            state.tokens = tokens
-        }
-    }
-}
+  },
+};
