@@ -33,7 +33,7 @@ html {
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
-  background: #fafafa;
+  background: #f7f7ff;
   color: #424242;
   width: 370px;
   height: 600px;
@@ -150,7 +150,9 @@ textarea.input-field:read-only,
   background: #eeeeee;
 }
 .input-field:focus {
-  border-color: #bdbdbd;
+  outline: none;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.25em rgba(0, 123, 255, 0.25);
 }
 .input-field::placeholder {
   color: #9e9e9e;
@@ -196,13 +198,13 @@ a.button {
 }
 
 .button.brand {
-  background: #f44336;
+  background: #0a93eb;
   color: #fafafa;
   font-weight: 600;
 }
 .button.brand:hover,
 .button.brand:focus {
-  background: #d32f2f;
+  background: #0987d7;
 }
 
 .input-group {
