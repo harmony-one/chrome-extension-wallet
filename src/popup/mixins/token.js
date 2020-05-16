@@ -15,7 +15,6 @@ export default {
 
       // tokens[data.tokens[i].id] = data.tokens[i].name + ';' + data.tokens[i].abbr + ';' + data.tokens[i].precision
       tokens["H2O"] = "H2O" + ";" + "H2O" + ";" + "6";
-      tokens["USDC"] = "USDC" + ";" + "USDC" + ";" + "6";
 
       this.$store.commit("hrc20/tokens", tokens);
     },
