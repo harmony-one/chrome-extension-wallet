@@ -329,8 +329,8 @@ export async function transferToken(
   signedTxn
     .observed()
     .on("transactionHash", (txnHash) => {
-      // console.log('--- hash ---');
-      // console.log(txnHash);
+       console.log('--- hash ---');
+       console.log(txnHash);
     })
     .on("error", (error) => {
       return {
@@ -345,7 +345,7 @@ export async function transferToken(
   var explorerLink;
   if (confiremdTxn.isConfirmed()) {
     explorerLink = getNetworkLink("/tx/" + txnHash);
-    // console.log(explorerLink);
+    console.log(explorerLink);
   } else {
     return {
       result: false,

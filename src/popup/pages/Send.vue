@@ -25,12 +25,13 @@
           </label>
           <label class="input-label shard">
             To Shard
-            <input
-              class="input-field"
-              type="number"
-              name="to-shard"
-              v-model="toShard"
-            />
+              <select class="input-field" v-model="toShard">
+                  <option
+                      v-for="item in account.shardArray"
+                      :value="item.shardID"
+                      :key="item.shardID"
+                  >{{item.shardID}}</option>
+              </select>
           </label>
         </div>
         <div class="row">
@@ -164,7 +165,7 @@ export default {
                 `;
     },
     getStringFromOnes() {
-      return parseFloat(this.gasLimit / Math.pow(10, 9)).toFixed(6) + "ONE";
+      return parseFloat(this.gasPrice * this.gasLimit / Math.pow(10, 9)).toFixed(6) + "ONE";
     },
   },
 
@@ -183,6 +184,10 @@ export default {
         this.selectedToken = this.account.tokens[0];
       }
       console.log("selected token = ", this.selectedToken);
+    },
+
+    getStringFromOnes() {
+      return parseFloat(this.gasLimit * this.gasLimit / Math.pow(10, 9)).toFixed(6) + "ONE";
     },
 
     async loadTokens() {
@@ -214,12 +219,17 @@ export default {
       }
 
       try {
+
+        // use the current selected account in the Account window
+        this.fromShard = this.account.shard
         let ret = await transferToken(
           this.receipient,
           this.fromShard,
           this.toShard,
           amount,
-          wallet.privateKey
+          wallet.privateKey,
+          this.gasLimit,
+          this.gasPrice
         );
 
         this.$store.commit("loading", false);
