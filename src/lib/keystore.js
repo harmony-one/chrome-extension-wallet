@@ -272,7 +272,7 @@ export async function getBalance(address, shardId) {
 
 export async function getShardInfo() {
   //set sharding
-  const res = await harmony.blockchain.getShardingStructure();
+  const res = await getHarmony().blockchain.getShardingStructure();
   getHarmony().shardingStructures(res.result);
 
   return res.result;

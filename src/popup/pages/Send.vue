@@ -1,6 +1,6 @@
 <template>
   <div>
-    <app-header subtitle="Send Payment" @refresh="refreshTokens" />
+    <app-header subtitle="Send Payment" @refresh="refreshAccount" />
 
     <main class="main page-send">
       <form
@@ -183,6 +183,7 @@ export default {
         this.selectedToken = this.account.tokens[0];
       }
     },
+
     async loadTokens() {
       await this.loadBalance();
       this.setSelectedToken();
@@ -304,7 +305,7 @@ export default {
       this.message.show = false;
       this.$store.commit("loading", true);
       this.loadTokens();
-      await this.refreshAccount();
+      await this.loadShardingInfo();
     },
 
     getTokenName(token) {

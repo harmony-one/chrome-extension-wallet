@@ -24,7 +24,6 @@ export default {
       let balance = Unit.Wei(result).toEther();
       this.$store.commit("account/balance", balance);
 
-      console.log(" address= ", this.address, " shard= ", this.account.shard, " balance = ", balance);
       //TODO: update this fake token balances
       var tokens = [
         {
@@ -43,10 +42,9 @@ export default {
 
     async refreshAccount() {
       this.$store.commit("loading", true);
-      console.log("refreshing shard");
+      // window.location.reload();
       await this.loadShardingInfo();
       await this.loadBalance();
-      window.location.reload();
       this.$store.commit("loading", false);
     },
   },
