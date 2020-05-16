@@ -179,17 +179,10 @@ export default {
 
   methods: {
     setSelectedToken() {
-      console.log("this.account.tokens = ", this.account.tokens);
       if (this.account.tokens.length > 0) {
         this.selectedToken = this.account.tokens[0];
       }
-      console.log("selected token = ", this.selectedToken);
     },
-
-    getStringFromOnes() {
-      return parseFloat(this.gasLimit * this.gasLimit / Math.pow(10, 9)).toFixed(6) + "ONE";
-    },
-
     async loadTokens() {
       await this.loadBalance();
       this.setSelectedToken();
@@ -307,10 +300,11 @@ export default {
       this.$refs.confirmDialog.showDialog();
     },
 
-    refreshTokens() {
+    async refreshTokens() {
       this.message.show = false;
       this.$store.commit("loading", true);
       this.loadTokens();
+      await this.refreshAccount();
     },
 
     getTokenName(token) {
