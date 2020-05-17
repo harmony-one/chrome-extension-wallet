@@ -15,7 +15,7 @@ sync(store, router);
 Vue.use(VueIntl);
 Vue.use(vClickOutside);
 Vue.use(VueClipboard);
-Vue.use(VModal, { dialog: true });
+Vue.use(VModal, { dialog: true, dynamic: true, injectModalsContainer: true });
 
 Vue.setLocale("en-US");
 

@@ -2,7 +2,7 @@
   <div>
     <app-header @refresh="refreshAccount" />
 
-    <main class="main">
+    <main class="main page-token">
       <div v-if="account.tokens.length === 0" class="message-empty">
         No tokens found
       </div>
@@ -50,7 +50,7 @@ export default {
 </script>
 
 <style>
-.token {
+.page-token .token {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -60,14 +60,14 @@ export default {
   padding: 1rem;
   margin-bottom: 0.75rem;
 }
-.token span {
+.page-token .token span {
   display: block;
 }
-.token-name {
+.page-token .token-name {
   color: #9e9e9e;
   font-size: 0.875rem;
 }
-.token-balance {
+.page-token .token-balance {
   font-size: 1rem;
   font-weight: 600;
   text-align: right;
