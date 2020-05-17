@@ -1,7 +1,6 @@
 <template>
   <div>
     <app-header subtitle="Send Payment" @refresh="refreshData" />
-
     <main class="main page-send">
       <form
         @submit.prevent="showConfirmDialog"
@@ -174,7 +173,7 @@ export default {
       return this.wallet.address;
     },
     getStringFromOnes() {
-      return parseFloat(this.gasLimit / Math.pow(10, 9)).toFixed(6) + "ONE";
+      return parseFloat(this.gasPrice * this.gasLimit / Math.pow(10, 9)).toFixed(6) + "ONE";
     },
     getNetworkFee() {
       return Number(0.000024); //used mockup data, need to be calculated later
@@ -191,11 +190,9 @@ export default {
 
   methods: {
     setSelectedToken() {
-      console.log("this.account.tokens = ", this.account.tokens);
       if (this.account.tokens.length > 0) {
         this.selectedToken = this.account.tokens[0];
       }
-      console.log("selected token = ", this.selectedToken);
     },
 
     async loadTokens() {
@@ -227,12 +224,17 @@ export default {
       }
 
       try {
+
+        // use the current selected account in the Account window
+        this.fromShard = this.account.shard
         let ret = await transferToken(
           this.receipient,
           this.fromShard,
           this.toShard,
           amount,
-          wallet.privateKey
+          wallet.privateKey,
+          this.gasLimit,
+          this.gasPrice
         );
 
         this.$store.commit("loading", false);
