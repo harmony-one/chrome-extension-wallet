@@ -24,16 +24,16 @@
       </div>
       <div class="invoice-row">
         <div>Subtotal</div>
-        <div>{{ getDisplayAmount(subTotal) }} ONE</div>
+        <div>{{ getDisplayAmount(subTotal) }} {{ unitName }}</div>
       </div>
       <div class="invoice-row">
         <div>Gas Fee</div>
-        <div>{{ getDisplayAmount(gasFee) }} ONE</div>
+        <div>{{ getDisplayAmount(gasFee) }} {{ unitName }}</div>
       </div>
       <div class="invoice-divider"></div>
       <div class="invoice-row">
         <div>Total</div>
-        <div>{{ getDisplayAmount(getTotal) }} ONE</div>
+        <div>{{ getDisplayAmount(getTotal) }} {{ unitName }}</div>
       </div>
       <div class="password-content">
         <label class="input-label">
@@ -64,7 +64,15 @@ export default {
     password: "",
     showError: false,
   }),
-  props: ["fromAddr", "toAddr", "subTotal", "gasFee", "fromShard", "toShard"],
+  props: [
+    "fromAddr",
+    "toAddr",
+    "subTotal",
+    "gasFee",
+    "fromShard",
+    "toShard",
+    "unitName",
+  ],
   computed: {
     ...mapState(["wallet"]),
     getTotal() {

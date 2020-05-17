@@ -99,11 +99,6 @@
             v-model="inputData"
           />
         </label>
-        <!-- <label class="input-label">
-          From Shard
-          <input class="input-field" type="number" name="from-shard" v-model="fromShard" />
-        </label>-->
-
         <button class="button brand" type="submit">Send</button>
       </form>
     </main>
@@ -115,6 +110,7 @@
       :gasFee="getNetworkFee"
       :fromShard="fromShard"
       :toShard="toShard"
+      :unitName="getUnitName"
       ref="approveDialog"
       @confirmed="sendPayment"
     />
@@ -159,21 +155,18 @@ export default {
     ...mapState({
       wallet: (state) => state.wallet,
     }),
-    confirmDialogText() {
-      return `
-                    Are you sure you want to transfer
-                    <div><strong>${this.amount} ${this.getTokenName(
-        this.selectedToken
-      )}</strong></div>
-                    <div>to</div>
-                    <div><strong>${this.receipient}</strong> ?</div>
-                `;
+    getUnitName() {
+      return this.getTokenName(this.selectedToken);
     },
     getFromAddress() {
       return this.wallet.address;
     },
     getStringFromOnes() {
-      return parseFloat(this.gasPrice * this.gasLimit / Math.pow(10, 9)).toFixed(6) + "ONE";
+      return (
+        parseFloat((this.gasPrice * this.gasLimit) / Math.pow(10, 9)).toFixed(
+          6
+        ) + "ONE"
+      );
     },
     getNetworkFee() {
       return Number(0.000024); //used mockup data, need to be calculated later
@@ -224,9 +217,8 @@ export default {
       }
 
       try {
-
         // use the current selected account in the Account window
-        this.fromShard = this.account.shard
+        this.fromShard = this.account.shard;
         let ret = await transferToken(
           this.receipient,
           this.fromShard,
