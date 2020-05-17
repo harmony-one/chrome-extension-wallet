@@ -1,7 +1,6 @@
 <template>
   <div>
-    <app-header subtitle="Send Payment" @refresh="refreshAccount" />
-
+    <app-header subtitle="Send Payment" @refresh="refreshData" />
     <main class="main page-send">
       <form
         @submit.prevent="showConfirmDialog"
@@ -25,13 +24,14 @@
           </label>
           <label class="input-label shard">
             To Shard
-              <select class="input-field" v-model="toShard">
-                  <option
-                      v-for="item in account.shardArray"
-                      :value="item.shardID"
-                      :key="item.shardID"
-                  >{{item.shardID}}</option>
-              </select>
+            <select class="input-field" v-model="toShard">
+              <option
+                v-for="shard in account.shardArray"
+                :key="shard.shardID"
+                :value="shard.shardID"
+                >{{ shard.shardID }}</option
+              >
+            </select>
           </label>
         </div>
         <div class="row">
@@ -108,9 +108,14 @@
       </form>
     </main>
 
-    <confirm-dialog
-      :text="confirmDialogText"
-      ref="confirmDialog"
+    <approve-dialog
+      :fromAddr="getFromAddress"
+      :toAddr="receipient"
+      :subTotal="amount"
+      :gasFee="getNetworkFee"
+      :fromShard="fromShard"
+      :toShard="toShard"
+      ref="approveDialog"
       @confirmed="sendPayment"
     />
   </div>
@@ -124,14 +129,14 @@ import { isValidAddress } from "@harmony-js/utils";
 import API from "../../lib/api";
 import account from "../mixins/account";
 import AppHeader from "../components/AppHeader.vue";
-import ConfirmDialog from "../components/ConfirmDialog.vue";
+import ApproveDialog from "../components/ApproveDialog.vue";
 
 export default {
   mixins: [account],
 
   components: {
     AppHeader,
-    ConfirmDialog,
+    ApproveDialog,
   },
 
   data: () => ({
@@ -164,8 +169,14 @@ export default {
                     <div><strong>${this.receipient}</strong> ?</div>
                 `;
     },
+    getFromAddress() {
+      return this.wallet.address;
+    },
     getStringFromOnes() {
       return parseFloat(this.gasPrice * this.gasLimit / Math.pow(10, 9)).toFixed(6) + "ONE";
+    },
+    getNetworkFee() {
+      return Number(0.000024); //used mockup data, need to be calculated later
     },
   },
 
@@ -298,14 +309,14 @@ export default {
         return false;
       }
 
-      this.$refs.confirmDialog.showDialog();
+      this.$refs.approveDialog.showDialog();
     },
 
-    async refreshTokens() {
+    refreshData() {
       this.message.show = false;
       this.$store.commit("loading", true);
       this.loadTokens();
-      await this.loadShardingInfo();
+      this.loadShardingInfo();
     },
 
     getTokenName(token) {

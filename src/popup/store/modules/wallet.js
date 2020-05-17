@@ -2,13 +2,9 @@ export default {
   namespaced: true,
 
   state: {
-    activeWallet: {
-      address: false,
-      keypass: false,
-      keystore: false,
-      name: "",
-    },
-    wallets: [],
+    address: false,
+    keypass: false,
+    keystore: false,
   },
 
   mutations: {
