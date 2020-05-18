@@ -1,11 +1,9 @@
 <template>
   <div>
-    <app-header @refresh="refreshAccount" />
+    <app-header @refresh="refreshAccount" headerTab="main-tab" />
 
     <main class="main page-token">
-      <div v-if="account.tokens.length === 0" class="message-empty">
-        No tokens found
-      </div>
+      <div v-if="account.tokens.length === 0" class="message-empty">No tokens found</div>
 
       <div v-else>
         <div
@@ -15,15 +13,17 @@
           v-show="token.name !== '_'"
         >
           <span class="token-name">{{ getHRC20Details(token.name)[1] }}</span>
-          <span class="token-balance">{{
+          <span class="token-balance">
+            {{
             $formatNumber(
-              getTokenAmount(token.balance, getHRC20Details(token.name)[2]),
-              {
-                maximumSignificantDigits:
-                  parseInt(getHRC20Details(token.name)[2]) + 1,
-              }
+            getTokenAmount(token.balance, getHRC20Details(token.name)[2]),
+            {
+            maximumSignificantDigits:
+            parseInt(getHRC20Details(token.name)[2]) + 1,
+            }
             )
-          }}</span>
+            }}
+          </span>
         </div>
       </div>
     </main>
@@ -38,14 +38,14 @@ export default {
   mixins: [account],
 
   components: {
-    AppHeader,
+    AppHeader
   },
 
   mounted() {
     if (this.account.tokens.length === 0) {
       this.loadBalance();
     }
-  },
+  }
 };
 </script>
 

@@ -103,6 +103,11 @@ a:hover {
 .auth-logo {
   margin-top: 1rem;
 }
+.main-logo {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
 .auth-title {
   font-size: 2rem;
   margin: 1rem 0;
@@ -263,7 +268,9 @@ a.button {
 .message.success {
   background: #dcedc8;
   border-left-color: #aed581;
-  color: #7cb342;
+  color: #0044ff;
+  word-wrap: break-word;
+  cursor: pointer;
 }
 
 .line-through {

@@ -9,8 +9,11 @@
         class="auth-form"
         autocomplete="off"
       >
-        <div v-show="message.show" class="message" :class="[message.type]">
-          <a href="confirmation link in explorer">{{ message.text }}</a>
+        <div v-show="message.show" class="message" :class="[message.type]" @click="onMessageClick">
+          <span
+            v-if="message.type ==='success'"
+          >Transaction Sucess: Click here to see the transaction</span>
+          <span v-else>{{message.text}}</span>
         </div>
         <div class="row">
           <label class="input-label receipient">
@@ -29,8 +32,7 @@
                 v-for="shard in account.shardArray"
                 :key="shard.shardID"
                 :value="shard.shardID"
-                >{{ shard.shardID }}</option
-              >
+              >{{ shard.shardID }}</option>
             </select>
           </label>
         </div>
@@ -52,8 +54,7 @@
                 v-for="token in account.tokens"
                 :key="token.name"
                 :value="token"
-                >{{ getTokenName(token) }}</option
-              >
+              >{{ getTokenName(token) }}</option>
             </select>
           </label>
         </div>
@@ -132,7 +133,7 @@ export default {
 
   components: {
     AppHeader,
-    ApproveDialog,
+    ApproveDialog
   },
 
   data: () => ({
@@ -147,13 +148,13 @@ export default {
     message: {
       show: false,
       type: "error",
-      text: "",
-    },
+      text: ""
+    }
   }),
 
   computed: {
     ...mapState({
-      wallet: (state) => state.wallet,
+      wallet: state => state.wallet
     }),
     getUnitName() {
       return this.getTokenName(this.selectedToken);
@@ -170,7 +171,7 @@ export default {
     },
     getNetworkFee() {
       return Number(0.000024); //used mockup data, need to be calculated later
-    },
+    }
   },
 
   mounted() {
@@ -187,7 +188,9 @@ export default {
         this.selectedToken = this.account.tokens[0];
       }
     },
-
+    onMessageClick() {
+      if (this.message.type == "success") window.open(this.message.text);
+    },
     async loadTokens() {
       await this.loadBalance();
       this.setSelectedToken();
@@ -327,10 +330,10 @@ export default {
       }
 
       return this.$formatNumber(this.getTokenAmount(token.balance, precision), {
-        maximumSignificantDigits: precision + 1,
+        maximumSignificantDigits: precision + 1
       });
-    },
-  },
+    }
+  }
 };
 </script>
 <style lang="css">

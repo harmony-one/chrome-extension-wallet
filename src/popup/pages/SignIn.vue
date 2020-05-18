@@ -6,17 +6,9 @@
 
     <h1 class="auth-title">Harmony</h1>
 
-    <div v-show="error.show" class="message error">
-      {{ error.message }}
-    </div>
+    <div v-show="error.show" class="message error">{{ error.message }}</div>
 
-    <form
-      @submit="submitForm"
-      action=""
-      method="post"
-      class="auth-form"
-      autocomplete="off"
-    >
+    <form @submit="submitForm" action method="post" class="auth-form" autocomplete="off">
       <input
         class="input-field"
         type="password"
@@ -31,12 +23,8 @@
         <span>or</span>
       </div>
 
-      <router-link class="button" to="/create-wallet"
-        >Create New Wallet</router-link
-      >
-      <router-link class="button" to="/import-wallet"
-        >Import Wallet from Private Key</router-link
-      >
+      <router-link class="button" to="/create-wallet">Create New Wallet</router-link>
+      <router-link class="button" to="/import-wallet">Import Wallet from Private Key</router-link>
     </form>
   </div>
 </template>
@@ -50,13 +38,13 @@ export default {
     password: "",
     error: {
       show: false,
-      message: "",
-    },
+      message: ""
+    }
   }),
 
   computed: mapState({
-    address: (state) => state.wallet.address,
-    keystore: (state) => state.wallet.keystore,
+    address: state => state.wallet.address,
+    keystore: state => state.wallet.keystore
   }),
 
   methods: {
@@ -75,7 +63,7 @@ export default {
       this.$store.commit("wallet/address", wallet.address);
       this.$store.commit("wallet/keypass", this.password);
       this.$router.push("/");
-    },
-  },
+    }
+  }
 };
 </script>
