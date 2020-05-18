@@ -1,6 +1,6 @@
 <template>
   <div>
-    <app-header @refresh="refreshAccount" headerTab="create-tab" />
+    <app-header headerTab="create-tab" />
     <main class="main connect-wallet">
       <div class="main-logo">
         <img src="images/harmony.png" alt="Harmony" />
@@ -13,8 +13,12 @@
         </button>
       </div>
       <div class="button-group">
-        <button class="actionBtn outline" @click="$router.push('/')">Cancel</button>
-        <button class="actionBtn" type="submit" @click="connect">Connect</button>
+        <button class="actionBtn outline" @click="$router.push('/')">
+          Cancel
+        </button>
+        <button class="actionBtn" type="submit" @click="connect">
+          Connect
+        </button>
       </div>
     </main>
   </div>
@@ -28,18 +32,21 @@ export default {
   data: () => ({
     error: {
       show: false,
-      message: ""
-    }
+      message: "",
+    },
   }),
   components: {
-    AppHeader
+    AppHeader,
   },
   methods: {
-    connect() {}
-  }
+    connect() {},
+  },
 };
 </script>
 <style scoped>
+.connect-wallet {
+  text-align: center;
+}
 .button-group {
   display: flex;
   justify-content: space-between;
@@ -80,6 +87,14 @@ export default {
   padding: 2rem;
   width: 200px;
   border-radius: 10px;
+}
+.but-ledger:hover,
+.but-ledger:focus {
+  border-color: #0987d7;
+  cursor: pointer;
+}
+.but-ledger:active {
+  background: #f0f0f0;
 }
 .wallet-group {
   display: flex;

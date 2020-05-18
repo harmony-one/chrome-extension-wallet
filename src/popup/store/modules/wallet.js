@@ -2,7 +2,11 @@ export default {
   namespaced: true,
 
   state: {
-    address: false,
+    active: {
+      name: "",
+      address: false,
+    },
+    accountList: [],
     keypass: false,
     keystore: false,
   },

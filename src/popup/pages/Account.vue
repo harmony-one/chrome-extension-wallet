@@ -4,11 +4,16 @@
 
     <main class="main">
       <div class="box highlight">
+        <div class="account-box" @click="onClickAccount()">
+          <h2 class="name-label">Account 1</h2>
+          <div class="box-address">{{ compressAddress(address) }}</div>
+        </div>
+
         <div class="box-label">Account Balance</div>
 
-        <div
-          class="box-balance"
-        >{{ $formatNumber(account.balance, { maximumSignificantDigits: 7 }) }}</div>
+        <div class="box-balance">
+          {{ $formatNumber(account.balance, { maximumSignificantDigits: 7 }) }}
+        </div>
         <div class="box-balance-code">ONE</div>
 
         <!-- Shard -->
@@ -18,11 +23,9 @@
             v-for="item in account.shardArray"
             :value="item.shardID"
             :key="item.shardID"
-          >{{ item.shardID }}</option>
+            >{{ item.shardID }}</option
+          >
         </select>
-
-        <div class="box-address-label">Address</div>
-        <div class="box-address">{{ address }}</div>
 
         <div class="box-buttons">
           <router-link class="green" to="/receive">
@@ -33,6 +36,13 @@
           </router-link>
         </div>
       </div>
+      <notifications
+        group="copied"
+        width="180"
+        type="info"
+        max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -47,11 +57,11 @@ export default {
 
   components: {
     AppHeader,
-    MainTab
+    MainTab,
   },
 
   data: () => ({
-    shard: 0
+    shard: 0,
   }),
 
   mounted() {
@@ -74,17 +84,53 @@ export default {
       this.$store.commit("account/shard", newValue);
       this.loadBalance();
       // window.location.reload();
-    }
+    },
   },
 
   methods: {
+    onClickAccount() {
+      this.$copyText(this.address)
+        .then(() => {
+          this.$notify({
+            group: "copied",
+            text: "Copied to Clipboard",
+          });
+        })
+        .error((err) => {
+          console.log(err);
+        });
+    },
     compressAddress(address) {
       return (
         address.substr(0, 15) +
         "..." +
         address.substr(address.length - 5, address.length)
       );
-    }
-  }
+    },
+  },
 };
 </script>
+<style scoped>
+.name-label {
+  margin: 0.5rem;
+}
+.account-box {
+  border-radius: 10px;
+  padding: 0.5rem;
+  margin: 0 3rem 1.5rem 3rem;
+}
+.account-box:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+.account-box:active {
+  background: #f0f0f0;
+}
+.toast-container {
+  border-radius: 5px;
+  max-width: 200px;
+}
+.notifiaction-container {
+  margin-top: 50px;
+}
+</style>

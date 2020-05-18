@@ -2,6 +2,7 @@ import Vue from "vue";
 import Router from "vue-router";
 import SignIn from "./pages/SignIn.vue";
 import CreateWallet from "./pages/CreateWallet.vue";
+import CreatePassword from "./pages/CreatePassword.vue";
 import ImportWallet from "./pages/ImportWallet.vue";
 import ConnectHardwareWallet from "./pages/ConnectHardwareWallet.vue";
 import Account from "./pages/Account.vue";
@@ -96,12 +97,17 @@ const router = new Router({
       name: "connect-hardware-wallet",
       component: ConnectHardwareWallet,
     },
+    {
+      path: "/create-password",
+      name: "create-password",
+      component: CreatePassword,
+    },
   ],
 });
 
 router.beforeEach((to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresAuth)) {
-    if (!store.state.wallet.address) {
+    if (!store.state.wallet.active.address) {
       next({ path: "/signin" });
     } else {
       next();

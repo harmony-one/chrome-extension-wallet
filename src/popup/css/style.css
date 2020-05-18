@@ -317,7 +317,6 @@ a.button {
   font-size: 0.625rem;
   text-transform: uppercase;
   color: #bdbdbd;
-  padding: 0 0 1rem;
 }
 
 .box-balance {
@@ -421,7 +420,8 @@ a.button {
   text-overflow: ellipsis;
   font-size: 0.75rem;
   font-weight: 600;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #9e9e9e;
 }
 
 .message-empty {

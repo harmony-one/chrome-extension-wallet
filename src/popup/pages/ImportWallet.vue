@@ -1,6 +1,6 @@
 <template>
   <div>
-    <app-header @refresh="refreshAccount" headerTab="create-tab" />
+    <app-header headerTab="create-tab" />
     <main class="main import-wallet">
       <div class="main-logo">
         <img src="images/harmony.png" alt="Harmony" />
@@ -20,14 +20,17 @@
           <span v-else>Paste your mnemonic</span>
           <input
             class="input-field"
-            type="text"
+            type="password"
             name="name"
             ref="name"
             v-model="privateKey"
-            :placeholder="selectType === 'key' ? 'Input the private key' : 'Input the mnemonic'"
+            :placeholder="
+              selectType === 'key'
+                ? 'Input the private key'
+                : 'Input the mnemonic'
+            "
             v-on:keyup.enter="importKey"
           />
-          <div class="error" v-show="showError">Password is incorrect</div>
         </label>
       </div>
       <div v-else class="file-row">
@@ -47,7 +50,7 @@ import AppHeader from "../components/AppHeader.vue";
 import {
   encryptKeyStore,
   validatePrivateKey,
-  importPriveKey
+  importPriveKey,
 } from "../../lib/keystore";
 
 export default {
@@ -56,16 +59,16 @@ export default {
     privateKey: "",
     error: {
       show: false,
-      message: ""
+      message: "",
     },
-    selectType: "key"
+    selectType: "key",
   }),
   components: {
-    AppHeader
+    AppHeader,
   },
   computed: mapState({
-    address: state => state.wallet.address,
-    keystore: state => state.wallet.keystore
+    address: (state) => state.wallet.address,
+    keystore: (state) => state.wallet.keystore,
   }),
 
   methods: {
@@ -91,8 +94,8 @@ export default {
       this.$store.commit("wallet/keypass", this.password);
       this.$store.commit("wallet/keystore", keystore);
       this.$router.push("/");
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>

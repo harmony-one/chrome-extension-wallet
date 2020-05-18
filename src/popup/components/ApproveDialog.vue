@@ -15,12 +15,12 @@
       <p>Sending</p>
       <div class="address-content">
         <div>
-          <b>{{ minifyAddress(fromAddr) }}</b> of
+          <b>{{ compressAddress(fromAddr) }}</b> of
           <b>{{ fromShard }}</b> Shard
           to
         </div>
         <div>
-          <b>{{ minifyAddress(toAddr) }}</b> of
+          <b>{{ compressAddress(toAddr) }}</b> of
           <b>{{ toShard }}</b> Shard
         </div>
       </div>
@@ -87,8 +87,12 @@ export default {
       this.password = "";
       this.$modal.show("approve-dialog");
     },
-    minifyAddress(str) {
-      return str.slice(0, 20) + "...";
+    compressAddress(address) {
+      return (
+        address.substr(0, 15) +
+        "..." +
+        address.substr(address.length - 5, address.length)
+      );
     },
     getDisplayAmount(num) {
       return Number(num).toFixed(6);

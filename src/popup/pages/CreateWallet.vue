@@ -1,6 +1,6 @@
 <template>
   <div>
-    <app-header @refresh="refreshAccount" headerTab="create-tab" />
+    <app-header headerTab="create-tab" />
     <main class="main create-wallet">
       <div class="main-logo">
         <img src="images/harmony.png" alt="Harmony" />
@@ -34,15 +34,15 @@ import AppHeader from "../components/AppHeader.vue";
 export default {
   mixins: [account],
   data: () => ({
-    name: ""
+    name: "",
   }),
   components: {
-    AppHeader
+    AppHeader,
   },
   methods: {
-    create() {}
+    create() {},
   },
-  mounted() {}
+  mounted() {},
 };
 </script>
 
