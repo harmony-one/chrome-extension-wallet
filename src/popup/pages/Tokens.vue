@@ -3,7 +3,9 @@
     <app-header @refresh="refreshAccount" headerTab="main-tab" />
 
     <main class="main page-token">
-      <div v-if="account.tokens.length === 0" class="message-empty">No tokens found</div>
+      <div v-if="account.tokens.length === 0" class="message-empty">
+        No tokens found
+      </div>
 
       <div v-else>
         <div
@@ -15,13 +17,13 @@
           <span class="token-name">{{ getHRC20Details(token.name)[1] }}</span>
           <span class="token-balance">
             {{
-            $formatNumber(
-            getTokenAmount(token.balance, getHRC20Details(token.name)[2]),
-            {
-            maximumSignificantDigits:
-            parseInt(getHRC20Details(token.name)[2]) + 1,
-            }
-            )
+              $formatNumber(
+                getTokenAmount(token.balance, getHRC20Details(token.name)[2]),
+                {
+                  maximumSignificantDigits:
+                    parseInt(getHRC20Details(token.name)[2]) + 1,
+                }
+              )
             }}
           </span>
         </div>
@@ -38,19 +40,19 @@ export default {
   mixins: [account],
 
   components: {
-    AppHeader
+    AppHeader,
   },
 
   mounted() {
     if (this.account.tokens.length === 0) {
       this.loadBalance();
     }
-  }
+  },
 };
 </script>
 
-<style>
-.page-token .token {
+<style scoped>
+.token {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -60,14 +62,14 @@ export default {
   padding: 1rem;
   margin-bottom: 0.75rem;
 }
-.page-token .token span {
+.token span {
   display: block;
 }
-.page-token .token-name {
+.token-name {
   color: #9e9e9e;
   font-size: 0.875rem;
 }
-.page-token .token-balance {
+.token-balance {
   font-size: 1rem;
   font-weight: 600;
   text-align: right;
