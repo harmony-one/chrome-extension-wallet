@@ -1,14 +1,14 @@
 <template>
   <div>
-    <app-header @refresh="refreshAccount" />
+    <app-header @refresh="refreshAccount" headerTab="main-tab" />
 
     <main class="main">
       <div class="box highlight">
         <div class="box-label">Account Balance</div>
 
-        <div class="box-balance">
-          {{ $formatNumber(account.balance, { maximumSignificantDigits: 7 }) }}
-        </div>
+        <div
+          class="box-balance"
+        >{{ $formatNumber(account.balance, { maximumSignificantDigits: 7 }) }}</div>
         <div class="box-balance-code">ONE</div>
 
         <!-- Shard -->
@@ -18,18 +18,19 @@
             v-for="item in account.shardArray"
             :value="item.shardID"
             :key="item.shardID"
-            >{{ item.shardID }}</option
-          >
+          >{{ item.shardID }}</option>
         </select>
 
         <div class="box-address-label">Address</div>
         <div class="box-address">{{ address }}</div>
 
         <div class="box-buttons">
-          <router-link class="green" to="/receive"
-            ><span>Receive</span></router-link
-          >
-          <router-link class="red" to="/send"><span>Send</span></router-link>
+          <router-link class="green" to="/receive">
+            <span>Receive</span>
+          </router-link>
+          <router-link class="red" to="/send">
+            <span>Send</span>
+          </router-link>
         </div>
       </div>
     </main>
@@ -39,16 +40,18 @@
 <script>
 import account from "../mixins/account";
 import AppHeader from "../components/AppHeader.vue";
+import MainTab from "../components/MainTab.vue";
 
 export default {
   mixins: [account],
 
   components: {
     AppHeader,
+    MainTab
   },
 
   data: () => ({
-    shard: 0,
+    shard: 0
   }),
 
   mounted() {
@@ -71,7 +74,7 @@ export default {
       this.$store.commit("account/shard", newValue);
       this.loadBalance();
       // window.location.reload();
-    },
+    }
   },
 
   methods: {
@@ -81,7 +84,7 @@ export default {
         "..." +
         address.substr(address.length - 5, address.length)
       );
-    },
-  },
+    }
+  }
 };
 </script>

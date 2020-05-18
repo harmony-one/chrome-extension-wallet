@@ -15,11 +15,13 @@
       <p>Sending</p>
       <div class="address-content">
         <div>
-          <b>{{ minifyAddress(fromAddr) }}</b> of <b>{{ fromShard }}</b> Shard
+          <b>{{ minifyAddress(fromAddr) }}</b> of
+          <b>{{ fromShard }}</b> Shard
           to
         </div>
         <div>
-          <b>{{ minifyAddress(toAddr) }}</b> of <b>{{ toShard }}</b> Shard
+          <b>{{ minifyAddress(toAddr) }}</b> of
+          <b>{{ toShard }}</b> Shard
         </div>
       </div>
       <div class="invoice-row">
@@ -62,7 +64,7 @@ import { mapState } from "vuex";
 export default {
   data: () => ({
     password: "",
-    showError: false,
+    showError: false
   }),
   props: [
     "fromAddr",
@@ -71,13 +73,13 @@ export default {
     "gasFee",
     "fromShard",
     "toShard",
-    "unitName",
+    "unitName"
   ],
   computed: {
     ...mapState(["wallet"]),
     getTotal() {
       return Number(this.subTotal) + Number(this.gasFee);
-    },
+    }
   },
   methods: {
     showDialog() {
@@ -101,8 +103,8 @@ export default {
     },
     reject() {
       this.$modal.hide("approve-dialog");
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -166,7 +168,7 @@ export default {
   text-decoration: none;
   cursor: pointer;
 }
-button {
+.modal button {
   font-size: 13px;
   margin: 8px;
   font-weight: 400;
@@ -180,16 +182,16 @@ button {
   outline: none;
   border: none;
 }
-button:hover,
-button:focus {
+.modal button:hover,
+.modal button:focus {
   background-color: #0987d7;
 }
-button.outline {
+.modal button.outline {
   background: rgba(10, 147, 235, 0.05);
   border: 2px solid #0a93eb;
   color: black;
 }
-button:disabled {
+.modal button:disabled {
   background: #e0e0e0;
   color: #888;
 }

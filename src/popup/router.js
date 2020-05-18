@@ -3,6 +3,7 @@ import Router from "vue-router";
 import SignIn from "./pages/SignIn.vue";
 import CreateWallet from "./pages/CreateWallet.vue";
 import ImportWallet from "./pages/ImportWallet.vue";
+import ConnectHardwareWallet from "./pages/ConnectHardwareWallet.vue";
 import Account from "./pages/Account.vue";
 import Tokens from "./pages/Tokens.vue";
 import Transfers from "./pages/Transfers.vue";
@@ -90,6 +91,11 @@ const router = new Router({
       name: "import-wallet",
       component: ImportWallet,
     },
+    {
+      path: "/connect-hardware-wallet",
+      name: "connect-hardware-wallet",
+      component: ConnectHardwareWallet,
+    },
   ],
 });
 
@@ -102,7 +108,7 @@ router.beforeEach((to, from, next) => {
     }
   } else if (to.matched.some((record) => record.meta.requiresKeystore)) {
     if (!store.state.wallet.keystore) {
-      next({ path: "/create-wallet" });
+      next({ path: "/create-password" });
     } else {
       next();
     }
