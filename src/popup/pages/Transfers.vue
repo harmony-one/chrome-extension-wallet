@@ -1,11 +1,9 @@
 <template>
   <div>
-    <app-header @refresh="refreshTransfers" />
+    <app-header @refresh="refreshTransfers" headerTab="main-tab" />
 
     <main class="main">
-      <div v-if="transfers.length === 0" class="message-empty">
-        No transfers yet
-      </div>
+      <div v-if="transfers.length === 0" class="message-empty">No transfers yet</div>
 
       <div v-else>
         <div>
@@ -48,25 +46,22 @@
               <span
                 v-if="isOutgoingTransfer(transfer)"
                 class="transfer-address"
-              >
-                {{ compressAddress(transfer.to) }}
-              </span>
-              <span v-else class="transfer-address">
-                {{ compressAddress(transfer.from) }}
-              </span>
+              >{{ compressAddress(transfer.to) }}</span>
+              <span v-else class="transfer-address">{{ compressAddress(transfer.from) }}</span>
 
               <span class="transfer-address">{{ formatShard(transfer) }}</span>
-              <span class="transfer-date">{{
+              <span class="transfer-date">
+                {{
                 formatTimestamp(Number(transfer.timestamp) * 1000)
-              }}</span>
+                }}
+              </span>
             </span>
 
-            <span v-if="isOutgoingTransfer(transfer)" class="transfer-amount">
-              - {{ formatTokenAmount(transfer) }}
-            </span>
-            <span v-else class="transfer-amount incoming">
-              + {{ formatTokenAmount(transfer) }}
-            </span>
+            <span
+              v-if="isOutgoingTransfer(transfer)"
+              class="transfer-amount"
+            >- {{ formatTokenAmount(transfer) }}</span>
+            <span v-else class="transfer-amount incoming">+ {{ formatTokenAmount(transfer) }}</span>
           </external-link>
         </div>
 
@@ -75,8 +70,7 @@
           v-show="transfers.length < txCount && !loadMoreLoading"
           href="#"
           @click="loadMore"
-          >Load More</a
-        >
+        >Load More</a>
       </div>
     </main>
   </div>
@@ -89,7 +83,7 @@ const { Unit } = require("@harmony-js/utils");
 import {
   getTransfers,
   getNetworkLink,
-  getTransactionCount,
+  getTransactionCount
 } from "../../lib/keystore";
 import API from "../../lib/api";
 import AppHeader from "../components/AppHeader.vue";
@@ -101,20 +95,19 @@ export default {
 
   components: {
     AppHeader,
-    ExternalLink,
+    ExternalLink
   },
 
   data: () => ({
     limit: 100,
     txCount: 1,
     page: 0,
-    loadMoreLoading: false,
+    loadMoreLoading: false
   }),
 
   computed: mapState({
-    address: (state) => state.wallet.address,
-    keystore: (state) => state.wallet.keystore,
-    transfers: (state) => state.account.transfers,
+    address: state => state.wallets.active.address,
+    transfers: state => state.account.transfers
   }),
 
   mounted() {
@@ -207,8 +200,8 @@ export default {
         " to " +
         transfer.toShardID.toString()
       );
-    },
-  },
+    }
+  }
 };
 </script>
 

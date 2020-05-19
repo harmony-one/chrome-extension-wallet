@@ -9,7 +9,7 @@ export default {
 
   computed: mapState({
     account: (state) => state.account,
-    address: (state) => state.wallet.address,
+    address: (state) => state.wallets.active.address,
   }),
 
   methods: {

@@ -1,11 +1,9 @@
 <template>
   <div>
-    <app-header @refresh="refreshAccount" />
+    <app-header @refresh="refreshAccount" headerTab="main-tab" />
 
     <main class="main page-token">
-      <div v-if="account.tokens.length === 0" class="message-empty">
-        No tokens found
-      </div>
+      <div v-if="account.tokens.length === 0" class="message-empty">No tokens found</div>
 
       <div v-else>
         <div
@@ -15,15 +13,22 @@
           v-show="token.name !== '_'"
         >
           <span class="token-name">{{ getHRC20Details(token.name)[1] }}</span>
-          <span class="token-balance">{{
+          <span class="token-balance">
+            {{
             $formatNumber(
-              getTokenAmount(token.balance, getHRC20Details(token.name)[2]),
-              {
-                maximumSignificantDigits:
-                  parseInt(getHRC20Details(token.name)[2]) + 1,
-              }
+            getTokenAmount(token.balance, getHRC20Details(token.name)[2]),
+            {
+            maximumSignificantDigits:
+            parseInt(getHRC20Details(token.name)[2]) + 1,
+            }
             )
-          }}</span>
+            }}
+          </span>
+          <button
+            v-show="token.name === 'H2O'"
+            class="but-token"
+            @click="$router.push('/send-token')"
+          >Send</button>
         </div>
       </div>
     </main>
@@ -38,19 +43,19 @@ export default {
   mixins: [account],
 
   components: {
-    AppHeader,
+    AppHeader
   },
 
   mounted() {
     if (this.account.tokens.length === 0) {
       this.loadBalance();
     }
-  },
+  }
 };
 </script>
 
-<style>
-.page-token .token {
+<style scoped>
+.token {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -60,18 +65,32 @@ export default {
   padding: 1rem;
   margin-bottom: 0.75rem;
 }
-.page-token .token span {
+.token span {
   display: block;
 }
-.page-token .token-name {
+.token-name {
   color: #9e9e9e;
   font-size: 0.875rem;
 }
-.page-token .token-balance {
+.token-balance {
   font-size: 1rem;
   font-weight: 600;
   text-align: right;
   word-break: break-all;
   padding-left: 1rem;
+}
+.but-token {
+  border-radius: 5px;
+  color: black;
+  width: 60px;
+  background: white;
+  border: 1px solid #eee;
+}
+.but-token:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+.but-token:active {
+  background: #f0f0f0;
 }
 </style>
