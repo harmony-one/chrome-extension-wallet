@@ -51,8 +51,15 @@
             v-show="wallets.accounts.length > 0"
             class="outline"
             @click="$router.push('/')"
-          >Cancel</button>
-          <button @click="importKey" :class="!wallets.accounts.length? 'full-width' : ''">Import</button>
+          >
+            Cancel
+          </button>
+          <button
+            @click="importKey"
+            :class="!wallets.accounts.length ? 'full-width' : ''"
+          >
+            Import
+          </button>
         </div>
       </div>
       <div v-else>
@@ -95,11 +102,25 @@
           </label>
         </div>
         <div class="button-group">
-          <button class="outline" @click="() => { scene = 1 }">Back</button>
+          <button
+            class="outline"
+            @click="
+              () => {
+                scene = 1;
+              }
+            "
+          >
+            Back
+          </button>
           <button @click="importAcc" :disabled="!name">Import Account</button>
         </div>
       </div>
-      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -112,7 +133,7 @@ import {
   validatePrivateKey,
   importPriveKey,
   createAccount,
-  decryptKeyStore
+  decryptKeyStore,
 } from "../../lib/keystore";
 
 export default {
@@ -125,13 +146,13 @@ export default {
     mnemonic: "",
     scene: 1,
     selectType: "key",
-    file: null
+    file: null,
   }),
   components: {
-    AppHeader
+    AppHeader,
   },
   computed: {
-    ...mapState(["wallets"])
+    ...mapState(["wallets"]),
   },
 
   methods: {
@@ -143,7 +164,7 @@ export default {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Please enter a valid private key"
+          text: "Please enter a valid private key",
         });
         return false;
       }
@@ -151,7 +172,7 @@ export default {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Please enter a valid mnemonic"
+          text: "Please enter a valid mnemonic",
         });
         return false;
       }
@@ -160,7 +181,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Please select a file"
+            text: "Please select a file",
           });
           return false;
         } else {
@@ -182,7 +203,7 @@ export default {
       if (this.name === "") {
         this.$notify({
           group: "notify",
-          text: "Invalid account name"
+          text: "Invalid account name",
         });
         return false;
       }
@@ -190,7 +211,7 @@ export default {
         this.$notify({
           group: "notify",
           type: "warn",
-          text: "Password must be longer than 8 characters"
+          text: "Password must be longer than 8 characters",
         });
         return false;
       }
@@ -201,7 +222,7 @@ export default {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Password doesn't match"
+          text: "Password doesn't match",
         });
         return false;
       }
@@ -216,7 +237,7 @@ export default {
           name: this.name,
           address,
           keystore,
-          keypass: this.password
+          keypass: this.password,
         };
       } else if (this.selectType == "mnemonic") {
         const walletFromMnemonic = createAccount(
@@ -228,7 +249,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Mnemonic is invalid"
+            text: "Mnemonic is invalid",
           });
           return false;
         }
@@ -239,7 +260,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Password is incorect or keystore file is invalid"
+            text: "Password is incorrect or keystore file is invalid",
           });
           return false;
         }
@@ -247,15 +268,15 @@ export default {
           name: this.name,
           addres: walletFromFile.address,
           keystore: this.keyFromFile,
-          keypass: this.password
+          keypass: this.password,
         };
       }
       if (wallet.address) {
         this.$store.commit("wallets/addAccount", wallet);
         this.$router.push("/");
       }
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
