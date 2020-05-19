@@ -201,10 +201,15 @@ export function decryptKeyStore(password, keystore) {
   if (!password) {
     return false;
   }
-
-  const { key, address, salt } = JSON.parse(
-    bytesToString(hexStr2byteArray(keystore))
-  );
+  let key, address, salt;
+  try {
+    const keyJson = JSON.parse(bytesToString(hexStr2byteArray(keystore)));
+    key = keyJson.key;
+    address = keyJson.address;
+    salt = keyJson.salt;
+  } catch (e) {
+    return false;
+  }
 
   console.log("password =", password);
   console.log("key =", key);
@@ -214,7 +219,7 @@ export function decryptKeyStore(password, keystore) {
   const privateKey = decryptString(password, salt, key);
 
   console.log("privte key = ", privateKey);
-
+  if (!validatePrivateKey(privateKey)) return false;
   const oneAddress = importPriveKey(privateKey);
   console.log("decrypted address = ", oneAddress);
 
@@ -228,30 +233,25 @@ export function decryptKeyStore(password, keystore) {
   return false;
 }
 
-export function createAccount(name, password) {
-  let seed = getHarmony().wallet.newMnemonic();
-  const keyStore = encryptPhrase(seed, password);
-  const account = getHarmony().wallet.addByMnemonic(seed);
+export function generatePhrase() {
+  return getHarmony().wallet.newMnemonic();
+}
 
-  const newAccount = {
-    name,
-    recoverByCode: true,
-    keyStore,
-    address: getAddress(account.address).bech32,
-  };
-
-  // const existedAccounts = await getAccounts()
-  // await saveValue({ accounts: [...existedAccounts, newAccount] })
-  //return newAccount
-
+export function createAccount(name, seed, password) {
+  let account;
+  try {
+    account = getHarmony().wallet.addByMnemonic(seed);
+  } catch (e) {
+    return false;
+  }
   let address = getAddress(account.address).bech32;
   let privateKey = account.privateKey;
-  let passwd = password;
-
+  const keystore = encryptKeyStore(password, privateKey, address);
   return {
-    privateKey,
+    name,
     address,
-    passwd,
+    keystore,
+    keypass: password,
   };
 }
 
@@ -329,8 +329,8 @@ export async function transferToken(
   signedTxn
     .observed()
     .on("transactionHash", (txnHash) => {
-       console.log('--- hash ---');
-       console.log(txnHash);
+      console.log("--- hash ---");
+      console.log(txnHash);
     })
     .on("error", (error) => {
       return {

@@ -1,82 +1,294 @@
 <template>
-  <div class="auth">
-    <div class="auth-logo">
-      <img src="images/harmony.png" alt="OneWallet" />
-    </div>
+  <div>
+    <app-header headerTab="create-tab" />
+    <main class="main import-wallet">
+      <div class="main-logo">
+        <img src="images/harmony.png" alt="Harmony" />
+      </div>
+      <div v-if="scene === 1">
+        <div class="type-row">
+          <div class="row-label">Select Type</div>
+          <select class="input-field type-select" v-model="selectType">
+            <option value="key">Private Key</option>
+            <option value="mnemonic">Mnemonic</option>
+            <option value="keystore">Harmony Keystore (CLI)</option>
+          </select>
+        </div>
+        <div v-if="selectType !== 'keystore'">
+          <div v-if="selectType === 'key'">
+            <label class="input-label big-label">
+              Paste your private Key
+              <input
+                class="input-field"
+                type="password"
+                name="priavtekey"
+                ref="priavtekey"
+                v-model="privateKey"
+                placeholder="Input the private key"
+                v-on:keyup.enter="importKey"
+              />
+            </label>
+          </div>
+          <div v-else>
+            <label class="input-label">
+              Paste your Mnemonic
+              <textarea
+                class="input-field"
+                name="mnemonic"
+                ref="mnemonic"
+                v-model="mnemonic"
+                placeholder="Input the Mnemonic"
+              />
+            </label>
+          </div>
+        </div>
+        <div v-else class="file-row">
+          <input type="file" class="file-field" @change="onSelectFile" />
+        </div>
 
-    <h1 class="auth-title">Harmony</h1>
+        <div class="button-group">
+          <button
+            v-show="wallets.accounts.length > 0"
+            class="outline"
+            @click="$router.push('/')"
+          >Cancel</button>
+          <button @click="importKey" :class="!wallets.accounts.length? 'full-width' : ''">Import</button>
+        </div>
+      </div>
+      <div v-else>
+        <label class="input-label">
+          Account Name
+          <input
+            class="input-field"
+            type="text"
+            name="name"
+            ref="name"
+            v-model="name"
+            placeholder="Input the account name"
+          />
+        </label>
 
-    <div v-show="error.show" class="message error">{{ error.message }}</div>
-
-    <form @submit="submitForm" action method="post" class="auth-form" autocomplete="off">
-      <input class="input-field" type="text" placeholder="Private Key" v-model="privateKey" />
-      <input
-        class="input-field"
-        type="password"
-        name="password"
-        placeholder="New Password (min 8 chars)"
-        v-model="password"
-      />
-
-      <div
-        class="form-info"
-      >This password encrypts your private key. Make sure to remember this password as you will need it to unlock your wallet.</div>
-
-      <button class="button brand" type="submit">Import Wallet from Private Key</button>
-      <a class="auth-link" @click="$router.back()">Cancel</a>
-    </form>
+        <label class="input-label">
+          <span v-if="selectType !== 'keystore'">Password</span>
+          <span v-else>Enter your keystore Password</span>
+          <input
+            class="input-field"
+            type="password"
+            name="password"
+            ref="password"
+            v-model="password"
+            placeholder="Input the password"
+          />
+        </label>
+        <div v-if="selectType !== 'keystore'">
+          <label class="input-label">
+            Confirm Password
+            <input
+              class="input-field"
+              type="password"
+              name="password_confirm"
+              ref="password_confirm"
+              v-model="password_confirm"
+              placeholder="Confirm the password"
+              v-on:keyup.enter="importAcc"
+            />
+          </label>
+        </div>
+        <div class="button-group">
+          <button class="outline" @click="() => { scene = 1 }">Back</button>
+          <button @click="importAcc" :disabled="!name">Import Account</button>
+        </div>
+      </div>
+      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
+    </main>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
+import AppHeader from "../components/AppHeader.vue";
 import {
   encryptKeyStore,
   validatePrivateKey,
-  importPriveKey
+  importPriveKey,
+  createAccount,
+  decryptKeyStore
 } from "../../lib/keystore";
 
 export default {
   data: () => ({
+    name: "",
     password: "",
+    password_confirm: "",
     privateKey: "",
-    error: {
-      show: false,
-      message: ""
-    }
+    keyFromFile: "",
+    mnemonic: "",
+    scene: 1,
+    selectType: "key",
+    file: null
   }),
-
-  computed: mapState({
-    address: state => state.wallet.address,
-    keystore: state => state.wallet.keystore
-  }),
+  components: {
+    AppHeader
+  },
+  computed: {
+    ...mapState(["wallets"])
+  },
 
   methods: {
-    submitForm(e) {
-      e.preventDefault();
-
+    onSelectFile(event) {
+      this.file = event.target.files[0];
+    },
+    async importKey() {
+      if (this.selectType === "key" && !validatePrivateKey(this.privateKey)) {
+        this.$notify({
+          group: "notify",
+          type: "error",
+          text: "Please enter a valid private key"
+        });
+        return false;
+      }
+      if (this.selectType === "mnemonic" && this.mnemonic === "") {
+        this.$notify({
+          group: "notify",
+          type: "error",
+          text: "Please enter a valid mnemonic"
+        });
+        return false;
+      }
+      if (this.selectType === "keystore") {
+        if (!this.file) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Please select a file"
+          });
+          return false;
+        } else {
+          const _this = this;
+          await new Promise((resolve, reject) => {
+            let reader = new window.FileReader();
+            reader.onload = function(event) {
+              _this.keyFromFile = event.target.result;
+              resolve();
+            };
+            reader.readAsBinaryString(this.file);
+          });
+        }
+      }
+      this.scene = 2;
+    },
+    importAcc() {
+      let wallet;
+      if (this.name === "") {
+        this.$notify({
+          group: "notify",
+          text: "Invalid account name"
+        });
+        return false;
+      }
       if (this.password.length < 8) {
-        this.error.show = true;
-        this.error.message = "Password is not long enough";
-
+        this.$notify({
+          group: "notify",
+          type: "warn",
+          text: "Password must be longer than 8 characters"
+        });
         return false;
       }
-
-      if (!validatePrivateKey(this.privateKey)) {
-        this.error.show = true;
-        this.error.message = "Please enter a valid private key";
-
+      if (
+        this.selectType !== "keystore" &&
+        this.password !== this.password_confirm
+      ) {
+        this.$notify({
+          group: "notify",
+          type: "error",
+          text: "Password doesn't match"
+        });
         return false;
       }
-
-      const address = importPriveKey(this.privateKey);
-      const keystore = encryptKeyStore(this.password, this.privateKey, address);
-
-      this.$store.commit("wallet/address", address);
-      this.$store.commit("wallet/keypass", this.password);
-      this.$store.commit("wallet/keystore", keystore);
-      this.$router.push("/");
+      if (this.selectType === "key") {
+        const address = importPriveKey(this.privateKey);
+        const keystore = encryptKeyStore(
+          this.password,
+          this.privateKey,
+          address
+        );
+        wallet = {
+          name: this.name,
+          address,
+          keystore,
+          keypass: this.password
+        };
+      } else if (this.selectType == "mnemonic") {
+        const walletFromMnemonic = createAccount(
+          this.name,
+          this.mnemonic,
+          this.password
+        );
+        if (!walletFromMnemonic) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Mnemonic is invalid"
+          });
+          return false;
+        }
+        wallet = walletFromMnemonic;
+      } else {
+        const walletFromFile = decryptKeyStore(this.password, this.keyFromFile);
+        if (!walletFromFile) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Password is incorect or keystore file is invalid"
+          });
+          return false;
+        }
+        wallet = {
+          name: this.name,
+          addres: walletFromFile.address,
+          keystore: this.keyFromFile,
+          keypass: this.password
+        };
+      }
+      if (wallet.address) {
+        this.$store.commit("wallets/addAccount", wallet);
+        this.$router.push("/");
+      }
     }
   }
 };
 </script>
+<style scoped>
+.type-row {
+  display: flex;
+  justify-content: space-between;
+}
+.row-label {
+  width: 35%;
+  margin: auto;
+  color: black;
+  justify-content: center;
+}
+.type-select {
+  width: 65%;
+}
+.file-field {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  width: 300px;
+}
+.file-row {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+}
+input[type="file"] {
+  border: 1px solid #0a93eb;
+  border-radius: 3px;
+  padding: 0.5rem 1rem;
+}
+.import-wallet .big-label {
+  font-size: 1rem;
+  color: black;
+}
+</style>

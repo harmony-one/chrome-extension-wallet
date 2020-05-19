@@ -103,6 +103,10 @@ a:hover {
 .auth-logo {
   margin-top: 1rem;
 }
+.main-logo {
+  display: flex;
+  justify-content: center;
+}
 .auth-title {
   font-size: 2rem;
   margin: 1rem 0;
@@ -169,44 +173,58 @@ textarea.input-field:read-only,
   margin: 0.25rem 0 0;
 }
 
-.button,
+.notifiaction-container {
+  margin-top: 50px;
+}
+.button-group {
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-between;
+}
+button,
 a.button {
-  display: block;
-  margin: 0.75rem 0;
-  padding: 0.875rem;
-  width: 100%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-  border: none;
-  border-radius: 5px;
-  background: #ffffff;
-  color: #757575;
-  font-size: 0.875rem;
-  line-height: 1;
   text-align: center;
+  font-size: 13px;
+  padding: 10px;
+  font-weight: 400;
+  min-width: 60px;
+  width: 45%;
+  color: white;
+  border-radius: 0.3rem;
   cursor: pointer;
-  outline: 0;
-}
-.button:disabled {
-  opacity: 0.5;
-}
-.button:hover,
-.button:focus {
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-}
-.button:active {
-  transform: translateY(1px);
-}
-
-.button.brand {
   background: #0a93eb;
-  color: #fafafa;
-  font-weight: 600;
+  /* transition: all 0.2s ease; */
+  white-space: nowrap;
+  outline: none;
+  border: none;
 }
-.button.brand:hover,
-.button.brand:focus {
-  background: #0987d7;
+button:hover {
+  background-color: #0987d7;
 }
-
+button:active {
+  background-color: #1f6bb7;
+}
+button.outline {
+  background: rgba(10, 147, 235, 0.05);
+  border: 2px solid #0a93eb;
+  color: black;
+}
+button.outline:hover {
+  background-color: #c7e7fc;
+}
+button.outline:active {
+  background-color: #76baff;
+}
+button.outline:disabled,
+button:disabled {
+  background: #e0e0e0;
+  border: none;
+  color: #888;
+}
+.full-width {
+  width: 100%;
+  height: 40px;
+}
 .input-group {
   display: flex;
   margin: 0.75rem 0;
@@ -223,6 +241,8 @@ a.button {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border: 1px solid #d9d9d9;
+  background: #ddd;
+  color: black;
   box-shadow: none;
   font-size: 1rem;
   margin: 0;
@@ -263,7 +283,9 @@ a.button {
 .message.success {
   background: #dcedc8;
   border-left-color: #aed581;
-  color: #7cb342;
+  color: #465410;
+  word-wrap: break-word;
+  cursor: pointer;
 }
 
 .line-through {
@@ -289,6 +311,13 @@ a.button {
   z-index: 10;
 }
 
+.divider {
+  height: 1px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  width: 100%;
+  border-top: 1px solid #bbb;
+}
 .box {
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
   background: #ffffff;
@@ -309,8 +338,7 @@ a.button {
 .box-label {
   font-size: 0.625rem;
   text-transform: uppercase;
-  color: #bdbdbd;
-  padding: 0 0 1rem;
+  color: #555;
 }
 
 .box-balance {
@@ -319,7 +347,7 @@ a.button {
   word-wrap: break-word;
 }
 .box-balance-code {
-  color: #9e9e9e;
+  color: #666;
   font-size: 1rem;
   text-transform: uppercase;
   padding: 0 0 1rem;
@@ -404,7 +432,7 @@ a.button {
 .box-address-label {
   font-size: 0.625rem;
   text-transform: uppercase;
-  color: #9e9e9e;
+  color: #555;
   margin: 0.5rem 0 0.25rem;
 }
 .box-address {
@@ -414,7 +442,8 @@ a.button {
   text-overflow: ellipsis;
   font-size: 0.75rem;
   font-weight: 600;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #555;
 }
 
 .message-empty {

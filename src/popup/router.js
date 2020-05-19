@@ -1,12 +1,14 @@
 import Vue from "vue";
 import Router from "vue-router";
-import SignIn from "./pages/SignIn.vue";
+// import SignIn from "./pages/SignIn.vue";
 import CreateWallet from "./pages/CreateWallet.vue";
 import ImportWallet from "./pages/ImportWallet.vue";
+import ConnectHardwareWallet from "./pages/ConnectHardwareWallet.vue";
 import Account from "./pages/Account.vue";
 import Tokens from "./pages/Tokens.vue";
 import Transfers from "./pages/Transfers.vue";
 import Send from "./pages/Send.vue";
+import SendToken from "./pages/SendToken.vue";
 import Receive from "./pages/Receive.vue";
 import PrivateKey from "./pages/PrivateKey.vue";
 import About from "./pages/About.vue";
@@ -21,7 +23,7 @@ const router = new Router({
       name: "account",
       component: Account,
       meta: {
-        requiresAuth: true,
+        requiredAccount: true,
       },
     },
     {
@@ -29,7 +31,7 @@ const router = new Router({
       name: "tokens",
       component: Tokens,
       meta: {
-        requiresAuth: true,
+        requiredAccount: true,
       },
     },
     {
@@ -37,7 +39,7 @@ const router = new Router({
       name: "transfers",
       component: Transfers,
       meta: {
-        requiresAuth: true,
+        requiredAccount: true,
       },
     },
     {
@@ -45,7 +47,15 @@ const router = new Router({
       name: "send",
       component: Send,
       meta: {
-        requiresAuth: true,
+        requiredAccount: true,
+      },
+    },
+    {
+      path: "/send-token",
+      name: "send-token",
+      component: SendToken,
+      meta: {
+        requiredAccount: true,
       },
     },
     {
@@ -53,7 +63,7 @@ const router = new Router({
       name: "receive",
       component: Receive,
       meta: {
-        requiresAuth: true,
+        requiredAccount: true,
       },
     },
     {
@@ -61,24 +71,13 @@ const router = new Router({
       name: "private-key",
       component: PrivateKey,
       meta: {
-        requiresAuth: true,
+        requiredAccount: true,
       },
     },
     {
       path: "/about",
       name: "about",
       component: About,
-      meta: {
-        requiresAuth: true,
-      },
-    },
-    {
-      path: "/signin",
-      name: "signin",
-      component: SignIn,
-      meta: {
-        requiresKeystore: true,
-      },
     },
     {
       path: "/create-wallet",
@@ -90,18 +89,17 @@ const router = new Router({
       name: "import-wallet",
       component: ImportWallet,
     },
+    {
+      path: "/connect-hardware-wallet",
+      name: "connect-hardware-wallet",
+      component: ConnectHardwareWallet,
+    },
   ],
 });
 
 router.beforeEach((to, from, next) => {
-  if (to.matched.some((record) => record.meta.requiresAuth)) {
-    if (!store.state.wallet.address) {
-      next({ path: "/signin" });
-    } else {
-      next();
-    }
-  } else if (to.matched.some((record) => record.meta.requiresKeystore)) {
-    if (!store.state.wallet.keystore) {
+  if (to.matched.some((record) => record.meta.requiredAccount)) {
+    if (!store.state.wallets.active.keystore) {
       next({ path: "/create-wallet" });
     } else {
       next();
