@@ -174,44 +174,58 @@ textarea.input-field:read-only,
   margin: 0.25rem 0 0;
 }
 
-.button,
+.notifiaction-container {
+  margin-top: 50px;
+}
+.button-group {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+}
+button,
 a.button {
-  display: block;
-  margin: 0.75rem 0;
-  padding: 0.875rem;
-  width: 100%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-  border: none;
-  border-radius: 5px;
-  background: #ffffff;
-  color: #757575;
-  font-size: 0.875rem;
-  line-height: 1;
   text-align: center;
+  font-size: 13px;
+  padding: 10px;
+  font-weight: 400;
+  min-width: 70px;
+  width: 45%;
+  color: white;
+  border-radius: 0.3rem;
   cursor: pointer;
-  outline: 0;
-}
-.button:disabled {
-  opacity: 0.5;
-}
-.button:hover,
-.button:focus {
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-}
-.button:active {
-  transform: translateY(1px);
-}
-
-.button.brand {
   background: #0a93eb;
-  color: #fafafa;
-  font-weight: 600;
+  transition: all 0.5s ease;
+  white-space: nowrap;
+  outline: none;
+  border: none;
 }
-.button.brand:hover,
-.button.brand:focus {
-  background: #0987d7;
+button:hover {
+  background-color: #0987d7;
 }
-
+button:active {
+  background-color: #1f6bb7;
+}
+button.outline {
+  background: rgba(10, 147, 235, 0.05);
+  border: 2px solid #0a93eb;
+  color: black;
+}
+button.outline:hover {
+  background-color: #c7e7fc;
+}
+button.outline:active {
+  background-color: #76baff;
+}
+button.outline:disabled,
+button:disabled {
+  background: #e0e0e0;
+  border: none;
+  color: #888;
+}
+.full-width {
+  width: 100%;
+}
 .input-group {
   display: flex;
   margin: 0.75rem 0;
@@ -228,6 +242,8 @@ a.button {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border: 1px solid #d9d9d9;
+  background: #ddd;
+  color: black;
   box-shadow: none;
   font-size: 1rem;
   margin: 0;
@@ -268,7 +284,7 @@ a.button {
 .message.success {
   background: #dcedc8;
   border-left-color: #aed581;
-  color: #0044ff;
+  color: #465410;
   word-wrap: break-word;
   cursor: pointer;
 }

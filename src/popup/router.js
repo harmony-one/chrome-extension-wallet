@@ -1,8 +1,7 @@
 import Vue from "vue";
 import Router from "vue-router";
-import SignIn from "./pages/SignIn.vue";
+// import SignIn from "./pages/SignIn.vue";
 import CreateWallet from "./pages/CreateWallet.vue";
-import CreatePassword from "./pages/CreatePassword.vue";
 import ImportWallet from "./pages/ImportWallet.vue";
 import ConnectHardwareWallet from "./pages/ConnectHardwareWallet.vue";
 import Account from "./pages/Account.vue";
@@ -23,7 +22,7 @@ const router = new Router({
       name: "account",
       component: Account,
       meta: {
-        requiresAuth: true,
+        requiredAccount: true,
       },
     },
     {
@@ -31,7 +30,7 @@ const router = new Router({
       name: "tokens",
       component: Tokens,
       meta: {
-        requiresAuth: true,
+        requiredAccount: true,
       },
     },
     {
@@ -39,7 +38,7 @@ const router = new Router({
       name: "transfers",
       component: Transfers,
       meta: {
-        requiresAuth: true,
+        requiredAccount: true,
       },
     },
     {
@@ -47,7 +46,7 @@ const router = new Router({
       name: "send",
       component: Send,
       meta: {
-        requiresAuth: true,
+        requiredAccount: true,
       },
     },
     {
@@ -55,7 +54,7 @@ const router = new Router({
       name: "receive",
       component: Receive,
       meta: {
-        requiresAuth: true,
+        requiredAccount: true,
       },
     },
     {
@@ -63,24 +62,13 @@ const router = new Router({
       name: "private-key",
       component: PrivateKey,
       meta: {
-        requiresAuth: true,
+        requiredAccount: true,
       },
     },
     {
       path: "/about",
       name: "about",
       component: About,
-      meta: {
-        requiresAuth: true,
-      },
-    },
-    {
-      path: "/signin",
-      name: "signin",
-      component: SignIn,
-      meta: {
-        requiresKeystore: true,
-      },
     },
     {
       path: "/create-wallet",
@@ -97,24 +85,13 @@ const router = new Router({
       name: "connect-hardware-wallet",
       component: ConnectHardwareWallet,
     },
-    {
-      path: "/create-password",
-      name: "create-password",
-      component: CreatePassword,
-    },
   ],
 });
 
 router.beforeEach((to, from, next) => {
-  if (to.matched.some((record) => record.meta.requiresAuth)) {
-    if (!store.state.wallet.active.address) {
-      next({ path: "/signin" });
-    } else {
-      next();
-    }
-  } else if (to.matched.some((record) => record.meta.requiresKeystore)) {
-    if (!store.state.wallet.keystore) {
-      next({ path: "/create-password" });
+  if (to.matched.some((record) => record.meta.requiredAccount)) {
+    if (!store.state.wallets.active.keystore) {
+      next({ path: "/create-wallet" });
     } else {
       next();
     }

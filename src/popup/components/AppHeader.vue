@@ -84,15 +84,21 @@
         <nav class="dropdown-menu" v-show="showDropdownMenu">
           <span class="dropdown-menu-label">My Accounts</span>
           <div class="dropdown-menu-divider"></div>
-          <div class="dropdown-menu-item">
-            <i class="fa fa-check"></i>
-            <router-link to="/">Account 1</router-link>
-          </div>
-          <div class="dropdown-menu-item">
-            <router-link to="/">Account 2</router-link>
-          </div>
-          <div class="dropdown-menu-item">
-            <router-link to="/">Account 3</router-link>
+          <div class="account-content" ref="accountcontent">
+            <div
+              class="dropdown-menu-item"
+              v-for="(account, index) in wallets.accounts"
+              :key="index"
+            >
+              <i
+                v-show="account.address === wallets.active.address && ((selectedIndex=index) || 1)"
+                class="fa fa-check"
+              ></i>
+              <a
+                @click.prevent="() => {selectAccount(account.address)}"
+                :class="account.address === wallets.active.address ? 'active': ''"
+              >{{account.name}}</a>
+            </div>
           </div>
           <div class="dropdown-menu-divider"></div>
           <div class="dropdown-menu-item">
@@ -107,7 +113,7 @@
             <i class="fa fa-plug"></i>
             <router-link to="/connect-hardware-wallet">Connect Hardware Wallet</router-link>
           </div>
-          <div class="dropdown-menu-item">
+          <div class="dropdown-menu-item" v-show="wallets.accounts.length > 0">
             <i class="fa fa-upload"></i>
             <router-link to="/private-key">Export Private Key</router-link>
           </div>
@@ -115,10 +121,6 @@
           <div class="dropdown-menu-item">
             <i class="fa fa-info-circle"></i>
             <router-link to="/about">About Harmony</router-link>
-          </div>
-          <div class="dropdown-menu-item">
-            <i class="fa fa-sign-out"></i>
-            <a @click.prevent="logout" href="#">Logout</a>
           </div>
         </nav>
       </div>
@@ -160,22 +162,28 @@ export default {
   data: () => ({
     showDropdownMenu: false,
     showNetworkDropdown: false,
-    networks: []
+    networks: [],
+    selectedIndex: 0
   }),
 
   computed: mapState({
+    wallets: state => state.wallets,
     myroute: state => state.route,
     currentNetwork: state => state.network
   }),
 
   mounted() {
     this.networks = Config.networks;
-    console.log("Appheader.vue------>", this.headerTab);
   },
 
   methods: {
     toggleDropdownMenu() {
       this.showDropdownMenu = this.showDropdownMenu ? false : true;
+      this.$nextTick(() => {
+        const offset =
+          this.$refs.accountcontent.scrollHeight / this.wallets.accounts.length;
+        this.$refs.accountcontent.scrollTop = this.selectedIndex * offset;
+      });
     },
 
     hideDropdownMenu() {
@@ -195,16 +203,14 @@ export default {
       this.$store.commit("network/change", network);
       this.refreshData();
     },
-
+    selectAccount(address) {
+      this.$store.commit("wallets/setActive", address);
+      this.hideDropdownMenu();
+      this.refreshData();
+    },
     refreshData() {
       this.$emit("refresh");
       this.showDropdownMenu = false;
-    },
-
-    logout() {
-      this.$store.commit("wallet/address", false);
-      this.$store.commit("wallet/keypass", false);
-      this.$router.push("/signin");
     }
   }
 };
@@ -226,7 +232,10 @@ i {
   padding-left: 0.5rem;
   position: absolute;
 }
-
+.account-content {
+  max-height: 160px;
+  overflow: auto;
+}
 .dropdown-menu-item {
   display: flex;
   flex-direction: row;
@@ -345,6 +354,7 @@ a.network-toggle:hover {
 }
 .dropdown-menu a {
   display: block;
+  flex: 1;
   padding: 0.8rem 2rem;
   font-size: 1rem;
   color: #757575;
@@ -352,6 +362,9 @@ a.network-toggle:hover {
 .dropdown-menu a:hover,
 .dropdown-menu a:focus {
   color: #d32f2f;
+}
+.dropdown-menu a.active {
+  background: #f0f0f0;
 }
 .dropdown-menu-label {
   padding: 0.8rem 1rem;

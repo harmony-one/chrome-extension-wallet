@@ -214,7 +214,7 @@ export function decryptKeyStore(password, keystore) {
   const privateKey = decryptString(password, salt, key);
 
   console.log("privte key = ", privateKey);
-
+  if (!validatePrivateKey(privateKey)) return false;
   const oneAddress = importPriveKey(privateKey);
   console.log("decrypted address = ", oneAddress);
 
@@ -228,17 +228,20 @@ export function decryptKeyStore(password, keystore) {
   return false;
 }
 
-export function createAccount(name, password) {
-  let seed = getHarmony().wallet.newMnemonic();
-  const keyStore = encryptPhrase(seed, password);
+export function generatePhrase() {
+  return getHarmony().wallet.newMnemonic();
+}
+
+export function createAccount(name, seed, password) {
+  // const keyStore = encryptPhrase(seed, password);
   const account = getHarmony().wallet.addByMnemonic(seed);
 
-  const newAccount = {
-    name,
-    recoverByCode: true,
-    keyStore,
-    address: getAddress(account.address).bech32,
-  };
+  // const newAccount = {
+  //   name,
+  //   recoverByCode: true,
+  //   keyStore,
+  //   address: getAddress(account.address).bech32,
+  // };
 
   // const existedAccounts = await getAccounts()
   // await saveValue({ accounts: [...existedAccounts, newAccount] })
@@ -246,12 +249,12 @@ export function createAccount(name, password) {
 
   let address = getAddress(account.address).bech32;
   let privateKey = account.privateKey;
-  let passwd = password;
-
+  const keystore = encryptKeyStore(password, privateKey, address);
   return {
-    privateKey,
+    name,
     address,
-    passwd,
+    keystore,
+    keypass: password,
   };
 }
 
@@ -329,8 +332,8 @@ export async function transferToken(
   signedTxn
     .observed()
     .on("transactionHash", (txnHash) => {
-       console.log('--- hash ---');
-       console.log(txnHash);
+      console.log("--- hash ---");
+      console.log(txnHash);
     })
     .on("error", (error) => {
       return {

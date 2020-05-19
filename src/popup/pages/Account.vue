@@ -5,15 +5,15 @@
     <main class="main">
       <div class="box highlight">
         <div class="account-box" @click="onClickAccount()">
-          <h2 class="name-label">Account 1</h2>
+          <h2 class="name-label">{{wallets.active.name}}</h2>
           <div class="box-address">{{ compressAddress(address) }}</div>
         </div>
 
         <div class="box-label">Account Balance</div>
 
-        <div class="box-balance">
-          {{ $formatNumber(account.balance, { maximumSignificantDigits: 7 }) }}
-        </div>
+        <div
+          class="box-balance"
+        >{{ $formatNumber(account.balance, { maximumSignificantDigits: 7 }) }}</div>
         <div class="box-balance-code">ONE</div>
 
         <!-- Shard -->
@@ -23,8 +23,7 @@
             v-for="item in account.shardArray"
             :value="item.shardID"
             :key="item.shardID"
-            >{{ item.shardID }}</option
-          >
+          >{{ item.shardID }}</option>
         </select>
 
         <div class="box-buttons">
@@ -36,13 +35,7 @@
           </router-link>
         </div>
       </div>
-      <notifications
-        group="copied"
-        width="180"
-        type="info"
-        max="2"
-        class="notifiaction-container"
-      />
+      <notifications group="copied" width="180" :max="2" class="notifiaction-container" />
     </main>
   </div>
 </template>
@@ -51,19 +44,22 @@
 import account from "../mixins/account";
 import AppHeader from "../components/AppHeader.vue";
 import MainTab from "../components/MainTab.vue";
+import { mapState } from "vuex";
 
 export default {
   mixins: [account],
 
   components: {
     AppHeader,
-    MainTab,
+    MainTab
   },
 
   data: () => ({
-    shard: 0,
+    shard: 0
   }),
-
+  computed: {
+    ...mapState(["wallets"])
+  },
   mounted() {
     if (
       typeof this.account.shard !== "undefined" ||
@@ -84,21 +80,18 @@ export default {
       this.$store.commit("account/shard", newValue);
       this.loadBalance();
       // window.location.reload();
-    },
+    }
   },
 
   methods: {
     onClickAccount() {
-      this.$copyText(this.address)
-        .then(() => {
-          this.$notify({
-            group: "copied",
-            text: "Copied to Clipboard",
-          });
-        })
-        .error((err) => {
-          console.log(err);
+      this.$copyText(this.address).then(() => {
+        this.$notify({
+          group: "copied",
+          type: "info",
+          text: "Copied to Clipboard"
         });
+      });
     },
     compressAddress(address) {
       return (
@@ -106,8 +99,8 @@ export default {
         "..." +
         address.substr(address.length - 5, address.length)
       );
-    },
-  },
+    }
+  }
 };
 </script>
 <style scoped>
@@ -129,8 +122,5 @@ export default {
 .toast-container {
   border-radius: 5px;
   max-width: 200px;
-}
-.notifiaction-container {
-  margin-top: 50px;
 }
 </style>

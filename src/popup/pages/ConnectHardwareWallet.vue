@@ -13,12 +13,8 @@
         </button>
       </div>
       <div class="button-group">
-        <button class="actionBtn outline" @click="$router.push('/')">
-          Cancel
-        </button>
-        <button class="actionBtn" type="submit" @click="connect">
-          Connect
-        </button>
+        <button class="outline" @click="$router.push('/')">Cancel</button>
+        <button type="submit" @click="connect">Connect</button>
       </div>
     </main>
   </div>
@@ -32,15 +28,15 @@ export default {
   data: () => ({
     error: {
       show: false,
-      message: "",
-    },
+      message: ""
+    }
   }),
   components: {
-    AppHeader,
+    AppHeader
   },
   methods: {
-    connect() {},
-  },
+    connect() {}
+  }
 };
 </script>
 <style scoped>
@@ -53,34 +49,6 @@ export default {
 }
 .form-label {
   font-size: 0.8rem;
-}
-.actionBtn {
-  font-size: 13px;
-  padding: 10px;
-  font-weight: 400;
-  min-width: 70px;
-  width: 45%;
-  color: white;
-  border-radius: 0.3rem;
-  cursor: pointer;
-  background: #0a93eb;
-  transition: all 0.5s ease;
-  white-space: nowrap;
-  outline: none;
-  border: none;
-}
-.actionBtn:hover,
-.actionBtn:focus {
-  background-color: #0987d7;
-}
-.actionBtn:disabled {
-  background: #e0e0e0;
-  color: #888;
-}
-.actionBtn.outline {
-  background: rgba(10, 147, 235, 0.05) !important;
-  border: 2px solid #0987d7 !important;
-  color: black !important;
 }
 .but-ledger {
   background: white;
