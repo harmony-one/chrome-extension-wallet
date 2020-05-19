@@ -6,7 +6,6 @@ export default {
       name: "",
       address: false,
       keystore: false,
-      keypass: false, //currently we are saving the keypass without encryption. We absolutely have to encrypt this for security
     },
     accounts: [],
   },
@@ -22,17 +21,5 @@ export default {
       const acc = state.accounts.find((acc) => acc.address === payload);
       state.active = acc;
     },
-
-    // address(state, address) {
-    //   state.address = address;
-    // },
-
-    // keypass(state, keypass) {
-    //   state.keypass = keypass;
-    // },
-
-    // keystore(state, keystore) {
-    //   state.keystore = keystore;
-    // },
   },
 };

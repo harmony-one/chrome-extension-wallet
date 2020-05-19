@@ -237,7 +237,6 @@ export default {
           name: this.name,
           address,
           keystore,
-          keypass: this.password,
         };
       } else if (this.selectType == "mnemonic") {
         const walletFromMnemonic = createAccount(
@@ -268,7 +267,6 @@ export default {
           name: this.name,
           addres: walletFromFile.address,
           keystore: this.keyFromFile,
-          keypass: this.password,
         };
       }
       if (wallet.address) {

@@ -251,7 +251,6 @@ export function createAccount(name, seed, password) {
     name,
     address,
     keystore,
-    keypass: password,
   };
 }
 
