@@ -13,8 +13,12 @@
         </button>
       </div>
       <div class="button-group">
-        <button class="outline" @click="$router.push('/')">Cancel</button>
-        <button type="submit" @click="connect">Connect</button>
+        <button
+          v-show="wallets.accounts.length > 0"
+          class="outline"
+          @click="$router.push('/')"
+        >Cancel</button>
+        <button :class="!wallets.accounts.length? 'full-width' : ''" @click="connect">Connect</button>
       </div>
     </main>
   </div>
@@ -31,11 +35,16 @@ export default {
       message: ""
     }
   }),
+  computed: {
+    ...mapState(["wallets"])
+  },
   components: {
     AppHeader
   },
   methods: {
-    connect() {}
+    connect() {
+      //Todo to connect to a ledger wallet
+    }
   }
 };
 </script>
@@ -54,6 +63,7 @@ export default {
   background: white;
   padding: 2rem;
   width: 200px;
+  border: 1px solid #ddd;
   border-radius: 10px;
 }
 .but-ledger:hover,

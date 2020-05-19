@@ -104,7 +104,6 @@ a:hover {
   margin-top: 1rem;
 }
 .main-logo {
-  margin-top: 1rem;
   display: flex;
   justify-content: center;
 }
@@ -179,7 +178,6 @@ textarea.input-field:read-only,
 }
 .button-group {
   margin-top: 30px;
-  margin-bottom: 30px;
   display: flex;
   justify-content: space-between;
 }
@@ -189,13 +187,13 @@ a.button {
   font-size: 13px;
   padding: 10px;
   font-weight: 400;
-  min-width: 70px;
+  min-width: 60px;
   width: 45%;
   color: white;
   border-radius: 0.3rem;
   cursor: pointer;
   background: #0a93eb;
-  transition: all 0.5s ease;
+  /* transition: all 0.2s ease; */
   white-space: nowrap;
   outline: none;
   border: none;
@@ -225,6 +223,7 @@ button:disabled {
 }
 .full-width {
   width: 100%;
+  height: 40px;
 }
 .input-group {
   display: flex;
@@ -312,6 +311,13 @@ button:disabled {
   z-index: 10;
 }
 
+.divider {
+  height: 1px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  width: 100%;
+  border-top: 1px solid #bbb;
+}
 .box {
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
   background: #ffffff;
@@ -332,7 +338,7 @@ button:disabled {
 .box-label {
   font-size: 0.625rem;
   text-transform: uppercase;
-  color: #bdbdbd;
+  color: #555;
 }
 
 .box-balance {
@@ -341,7 +347,7 @@ button:disabled {
   word-wrap: break-word;
 }
 .box-balance-code {
-  color: #9e9e9e;
+  color: #666;
   font-size: 1rem;
   text-transform: uppercase;
   padding: 0 0 1rem;
@@ -426,7 +432,7 @@ button:disabled {
 .box-address-label {
   font-size: 0.625rem;
   text-transform: uppercase;
-  color: #9e9e9e;
+  color: #555;
   margin: 0.5rem 0 0.25rem;
 }
 .box-address {
@@ -437,7 +443,7 @@ button:disabled {
   font-size: 0.75rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: #9e9e9e;
+  color: #555;
 }
 
 .message-empty {

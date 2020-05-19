@@ -147,14 +147,6 @@ export default {
 .medium {
   height: 100px;
 }
-.divider {
-  height: 1px;
-  margin-top: 15px;
-  margin-bottom: 15px;
-  width: 100%;
-  border-top: 1px solid #bbb;
-}
-
 .center {
   display: flex;
   justify-content: center;

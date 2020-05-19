@@ -8,6 +8,7 @@ import Account from "./pages/Account.vue";
 import Tokens from "./pages/Tokens.vue";
 import Transfers from "./pages/Transfers.vue";
 import Send from "./pages/Send.vue";
+import SendToken from "./pages/SendToken.vue";
 import Receive from "./pages/Receive.vue";
 import PrivateKey from "./pages/PrivateKey.vue";
 import About from "./pages/About.vue";
@@ -45,6 +46,14 @@ const router = new Router({
       path: "/send",
       name: "send",
       component: Send,
+      meta: {
+        requiredAccount: true,
+      },
+    },
+    {
+      path: "/send-token",
+      name: "send-token",
+      component: SendToken,
       meta: {
         requiredAccount: true,
       },

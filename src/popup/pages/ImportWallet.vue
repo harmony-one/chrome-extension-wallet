@@ -69,7 +69,8 @@
         </label>
 
         <label class="input-label">
-          Password
+          <span v-if="selectType !== 'keystore'">Password</span>
+          <span v-else>Enter your keystore Password</span>
           <input
             class="input-field"
             type="password"
@@ -79,18 +80,20 @@
             placeholder="Input the password"
           />
         </label>
-        <label class="input-label">
-          Confirm Password
-          <input
-            class="input-field"
-            type="password"
-            name="password_confirm"
-            ref="password_confirm"
-            v-model="password_confirm"
-            placeholder="Confirm the password"
-            v-on:keyup.enter="importAcc"
-          />
-        </label>
+        <div v-if="selectType !== 'keystore'">
+          <label class="input-label">
+            Confirm Password
+            <input
+              class="input-field"
+              type="password"
+              name="password_confirm"
+              ref="password_confirm"
+              v-model="password_confirm"
+              placeholder="Confirm the password"
+              v-on:keyup.enter="importAcc"
+            />
+          </label>
+        </div>
         <div class="button-group">
           <button class="outline" @click="() => { scene = 1 }">Back</button>
           <button @click="importAcc" :disabled="!name">Import Account</button>
@@ -107,7 +110,9 @@ import AppHeader from "../components/AppHeader.vue";
 import {
   encryptKeyStore,
   validatePrivateKey,
-  importPriveKey
+  importPriveKey,
+  createAccount,
+  decryptKeyStore
 } from "../../lib/keystore";
 
 export default {
@@ -133,7 +138,7 @@ export default {
     onSelectFile(event) {
       this.file = event.target.files[0];
     },
-    importKey() {
+    async importKey() {
       if (this.selectType === "key" && !validatePrivateKey(this.privateKey)) {
         this.$notify({
           group: "notify",
@@ -157,22 +162,23 @@ export default {
             type: "error",
             text: "Please select a file"
           });
+          return false;
         } else {
-          let reader = new window.FileReader();
-          reader.onload = function(event) {
-            this.keyFromFile = event.target.result;
-            /*
-            validate the keystore file here --- only validate, we will use the keystore in the importAcc() function
-            if (!isKeyStoreValid()) { this.$notify({group: "notify",type: "error",text: "Keystore file is invalid"}); }
-            */
-          };
-          reader.readAsBinaryString(this.file);
+          const _this = this;
+          await new Promise((resolve, reject) => {
+            let reader = new window.FileReader();
+            reader.onload = function(event) {
+              _this.keyFromFile = event.target.result;
+              resolve();
+            };
+            reader.readAsBinaryString(this.file);
+          });
         }
-        return false;
       }
       this.scene = 2;
     },
     importAcc() {
+      let wallet;
       if (this.name === "") {
         this.$notify({
           group: "notify",
@@ -188,7 +194,10 @@ export default {
         });
         return false;
       }
-      if (this.password !== this.password_confirm) {
+      if (
+        this.selectType !== "keystore" &&
+        this.password !== this.password_confirm
+      ) {
         this.$notify({
           group: "notify",
           type: "error",
@@ -203,18 +212,47 @@ export default {
           this.privateKey,
           address
         );
-        const wallet = {
+        wallet = {
           name: this.name,
           address,
           keystore,
           keypass: this.password
         };
+      } else if (this.selectType == "mnemonic") {
+        const walletFromMnemonic = createAccount(
+          this.name,
+          this.mnemonic,
+          this.password
+        );
+        if (!walletFromMnemonic) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Mnemonic is invalid"
+          });
+          return false;
+        }
+        wallet = walletFromMnemonic;
+      } else {
+        const walletFromFile = decryptKeyStore(this.password, this.keyFromFile);
+        if (!walletFromFile) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Password is incorect or keystore file is invalid"
+          });
+          return false;
+        }
+        wallet = {
+          name: this.name,
+          addres: walletFromFile.address,
+          keystore: this.keyFromFile,
+          keypass: this.password
+        };
+      }
+      if (wallet.address) {
         this.$store.commit("wallets/addAccount", wallet);
         this.$router.push("/");
-      } else if (this.selectType == "mnemonic") {
-        //Todo when you select the mnemonic
-      } else {
-        //Todo when you select the keystore
       }
     }
   }
