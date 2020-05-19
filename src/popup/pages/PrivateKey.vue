@@ -78,7 +78,6 @@
             :value="index"
             >{{ account.name }}</option
           >
-          <option>asdfjasdflajskldfjklasdjfklajsldkfjklasdkjl</option>
         </select>
         <div class="form-info center">{{ getAddress }}</div>
         <div class="divider"></div>
