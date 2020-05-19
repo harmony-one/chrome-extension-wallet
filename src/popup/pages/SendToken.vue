@@ -1,7 +1,7 @@
 <template>
   <div>
-    <app-header subtitle="Send Payment" @refresh="refreshData" />
-    <main class="main page-send">
+    <app-header subtitle="Send Token" />
+    <main class="main page-send-token">
       <div v-if="scene === 1">
         <form
           @submit.prevent="showConfirmDialog"
@@ -21,49 +21,25 @@
             >Transaction Sucess: Click here to see the transaction</span>
             <span v-else>{{message.text}}</span>
           </div>
-          <div class="row">
-            <label class="input-label receipient">
-              Receipient Address
-              <input
-                class="input-field"
-                type="text"
-                name="address"
-                v-model="receipient"
-              />
-            </label>
-            <label class="input-label shard">
-              To Shard
-              <select class="input-field" v-model="toShard">
-                <option
-                  v-for="shard in account.shardArray"
-                  :key="shard.shardID"
-                  :value="shard.shardID"
-                >{{ shard.shardID }}</option>
-              </select>
-            </label>
-          </div>
-          <div class="row">
-            <label class="input-label amount">
-              Amount
-              <input
-                class="input-field"
-                type="number"
-                name="amount"
-                v-model="amount"
-                step="any"
-              />
-            </label>
-            <label class="input-label token">
-              Token
-              <select class="input-field" v-model="selectedToken">
-                <option
-                  v-for="token in account.tokens"
-                  :key="token.name"
-                  :value="token"
-                >{{ getTokenName(token) }}</option>
-              </select>
-            </label>
-          </div>
+          <label class="input-label">
+            Receipient Address
+            <input
+              class="input-field"
+              type="text"
+              name="address"
+              v-model="receipient"
+            />
+          </label>
+          <label class="input-label">
+            Amount
+            <input
+              class="input-field"
+              type="number"
+              name="amount"
+              v-model="amount"
+              step="any"
+            />
+          </label>
           <div class="row">
             <label class="input-label gas-price">
               Gas Price
@@ -223,7 +199,14 @@ export default {
   methods: {
     setSelectedToken() {
       if (this.account.tokens.length > 0) {
-        this.selectedToken = this.account.tokens[0];
+        this.selectedToken = this.account.tokens.find(
+          elem => elem.name === "H2O"
+        );
+        if (!this.selectedToken) {
+          this.message.show = true;
+          this.message.type = "error";
+          this.message.text = "H2O Token not found";
+        }
       }
     },
     getString(one, addSpace = true) {
@@ -254,14 +237,10 @@ export default {
       this.$store.commit("loading", true);
       let amount = this.amount;
 
-      if (this.selectedToken.name === "_") {
-        amount = getTokenAmount(this.amount);
-      } else {
-        amount = getTokenRawAmount(
-          this.amount,
-          this.getHRC20Details(this.selectedToken.name)[2]
-        );
-      }
+      amount = getTokenRawAmount(
+        this.amount,
+        this.getHRC20Details(this.selectedToken.name)[2]
+      );
 
       try {
         // use the current selected account in the Account window
@@ -307,20 +286,13 @@ export default {
     },
 
     showConfirmDialog() {
+      console.log(this.selectedToken);
       this.message.show = false;
 
       if (!isValidAddress(this.receipient)) {
         this.message.show = true;
         this.message.type = "error";
         this.message.text = "Invalid recipient address";
-
-        return false;
-      }
-
-      if (!this.selectedToken) {
-        this.message.show = true;
-        this.message.type = "error";
-        this.message.text = "Please select token that you want to send";
 
         return false;
       }
@@ -352,13 +324,6 @@ export default {
       this.scene = 2;
     },
 
-    refreshData() {
-      this.message.show = false;
-      this.$store.commit("loading", true);
-      this.loadTokens();
-      this.loadShardingInfo();
-    },
-
     getTokenName(token) {
       if (token.name === "_") {
         return "ONE";
@@ -366,18 +331,6 @@ export default {
 
       return token.name;
     },
-    /* defined but not used
-    getTokenBalance(token) {
-      let precision = 6;
-
-      if (token.name !== "_") {
-        precision = parseInt(this.getHRC20Details(token.name)[2]);
-      }
-
-      return this.$formatNumber(this.getTokenAmount(token.balance, precision), {
-        maximumSignificantDigits: precision + 1
-      });
-    },*/
     compressAddress(address) {
       return (
         address.substr(0, 15) +
@@ -393,15 +346,6 @@ export default {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-}
-.receipient,
-.amount {
-  width: 75%;
-  margin-right: 10px;
-}
-.token,
-.shard {
-  width: 25%;
 }
 .gas-price,
 .gas-limit {

@@ -201,10 +201,15 @@ export function decryptKeyStore(password, keystore) {
   if (!password) {
     return false;
   }
-
-  const { key, address, salt } = JSON.parse(
-    bytesToString(hexStr2byteArray(keystore))
-  );
+  let key, address, salt;
+  try {
+    const keyJson = JSON.parse(bytesToString(hexStr2byteArray(keystore)));
+    key = keyJson.key;
+    address = keyJson.address;
+    salt = keyJson.salt;
+  } catch (e) {
+    return false;
+  }
 
   console.log("password =", password);
   console.log("key =", key);
@@ -233,20 +238,12 @@ export function generatePhrase() {
 }
 
 export function createAccount(name, seed, password) {
-  // const keyStore = encryptPhrase(seed, password);
-  const account = getHarmony().wallet.addByMnemonic(seed);
-
-  // const newAccount = {
-  //   name,
-  //   recoverByCode: true,
-  //   keyStore,
-  //   address: getAddress(account.address).bech32,
-  // };
-
-  // const existedAccounts = await getAccounts()
-  // await saveValue({ accounts: [...existedAccounts, newAccount] })
-  //return newAccount
-
+  let account;
+  try {
+    account = getHarmony().wallet.addByMnemonic(seed);
+  } catch (e) {
+    return false;
+  }
   let address = getAddress(account.address).bech32;
   let privateKey = account.privateKey;
   const keystore = encryptKeyStore(password, privateKey, address);

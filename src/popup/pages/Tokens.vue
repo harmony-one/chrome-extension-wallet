@@ -3,9 +3,7 @@
     <app-header @refresh="refreshAccount" headerTab="main-tab" />
 
     <main class="main page-token">
-      <div v-if="account.tokens.length === 0" class="message-empty">
-        No tokens found
-      </div>
+      <div v-if="account.tokens.length === 0" class="message-empty">No tokens found</div>
 
       <div v-else>
         <div
@@ -17,15 +15,20 @@
           <span class="token-name">{{ getHRC20Details(token.name)[1] }}</span>
           <span class="token-balance">
             {{
-              $formatNumber(
-                getTokenAmount(token.balance, getHRC20Details(token.name)[2]),
-                {
-                  maximumSignificantDigits:
-                    parseInt(getHRC20Details(token.name)[2]) + 1,
-                }
-              )
+            $formatNumber(
+            getTokenAmount(token.balance, getHRC20Details(token.name)[2]),
+            {
+            maximumSignificantDigits:
+            parseInt(getHRC20Details(token.name)[2]) + 1,
+            }
+            )
             }}
           </span>
+          <button
+            v-show="token.name === 'H2O'"
+            class="but-token"
+            @click="$router.push('/send-token')"
+          >Send</button>
         </div>
       </div>
     </main>
@@ -40,14 +43,14 @@ export default {
   mixins: [account],
 
   components: {
-    AppHeader,
+    AppHeader
   },
 
   mounted() {
     if (this.account.tokens.length === 0) {
       this.loadBalance();
     }
-  },
+  }
 };
 </script>
 
@@ -75,5 +78,19 @@ export default {
   text-align: right;
   word-break: break-all;
   padding-left: 1rem;
+}
+.but-token {
+  border-radius: 5px;
+  color: black;
+  width: 60px;
+  background: white;
+  border: 1px solid #eee;
+}
+.but-token:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+.but-token:active {
+  background: #f0f0f0;
 }
 </style>

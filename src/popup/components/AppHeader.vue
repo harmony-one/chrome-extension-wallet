@@ -82,22 +82,24 @@
         </a>
 
         <nav class="dropdown-menu" v-show="showDropdownMenu">
-          <span class="dropdown-menu-label">My Accounts</span>
-          <div class="dropdown-menu-divider"></div>
-          <div class="account-content" ref="accountcontent">
-            <div
-              class="dropdown-menu-item"
-              v-for="(account, index) in wallets.accounts"
-              :key="index"
-            >
-              <i
-                v-show="account.address === wallets.active.address && ((selectedIndex=index) || 1)"
-                class="fa fa-check"
-              ></i>
-              <a
-                @click.prevent="() => {selectAccount(account.address)}"
-                :class="account.address === wallets.active.address ? 'active': ''"
-              >{{account.name}}</a>
+          <div v-show="wallets.accounts.length > 0">
+            <span class="dropdown-menu-label">My Accounts</span>
+            <div class="dropdown-menu-divider"></div>
+            <div class="account-content" ref="accountcontent">
+              <div
+                class="dropdown-menu-item"
+                v-for="(account, index) in wallets.accounts"
+                :key="index"
+              >
+                <i
+                  v-show="account.address === wallets.active.address && ((selectedIndex=index) || 1)"
+                  class="fa fa-check"
+                ></i>
+                <a
+                  @click.prevent="() => {selectAccount(account.address)}"
+                  :class="account.address === wallets.active.address ? 'active': ''"
+                >{{account.name}}</a>
+              </div>
             </div>
           </div>
           <div class="dropdown-menu-divider"></div>
@@ -342,12 +344,11 @@ a.network-toggle:hover {
   color: #424242;
 }
 .dropdown-menu {
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.6);
   background: #ffffff;
   position: absolute;
   top: 40px;
   right: 10px;
-  padding: 0.8rem 0;
   border-radius: 3px;
   min-width: 125px;
   width: 250px;
