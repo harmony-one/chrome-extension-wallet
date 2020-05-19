@@ -1,7 +1,7 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import VuexPersistence from "vuex-persist";
-import wallet from "./modules/wallet";
+import wallets from "./modules/wallets";
 import network from "./modules/network";
 import account from "./modules/account";
 import votes from "./modules/votes";
@@ -11,12 +11,12 @@ Vue.use(Vuex);
 
 const vuexLocal = new VuexPersistence({
   storage: window.localStorage,
-  modules: ["wallet", "network"],
+  modules: ["wallets", "network"],
 });
 
 export default new Vuex.Store({
   modules: {
-    wallet,
+    wallets,
     network,
     account,
     votes,

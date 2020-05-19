@@ -2,119 +2,161 @@
   <div>
     <app-header subtitle="Send Payment" @refresh="refreshData" />
     <main class="main page-send">
-      <form
-        @submit.prevent="showConfirmDialog"
-        action
-        method="post"
-        class="auth-form"
-        autocomplete="off"
-      >
-        <div v-show="message.show" class="message" :class="[message.type]" @click="onMessageClick">
-          <span
-            v-if="message.type ==='success'"
-          >Transaction Sucess: Click here to see the transaction</span>
-          <span v-else>{{message.text}}</span>
+      <div v-if="scene === 1">
+        <form
+          @submit.prevent="showConfirmDialog"
+          action
+          method="post"
+          class="auth-form"
+          autocomplete="off"
+        >
+          <div
+            v-show="message.show"
+            class="message"
+            :class="[message.type]"
+            @click="onMessageClick"
+          >
+            <span
+              v-if="message.type ==='success'"
+            >Transaction Sucess: Click here to see the transaction</span>
+            <span v-else>{{message.text}}</span>
+          </div>
+          <div class="row">
+            <label class="input-label receipient">
+              Receipient Address
+              <input
+                class="input-field"
+                type="text"
+                name="address"
+                v-model="receipient"
+              />
+            </label>
+            <label class="input-label shard">
+              To Shard
+              <select class="input-field" v-model="toShard">
+                <option
+                  v-for="shard in account.shardArray"
+                  :key="shard.shardID"
+                  :value="shard.shardID"
+                >{{ shard.shardID }}</option>
+              </select>
+            </label>
+          </div>
+          <div class="row">
+            <label class="input-label amount">
+              Amount
+              <input
+                class="input-field"
+                type="number"
+                name="amount"
+                v-model="amount"
+                step="any"
+              />
+            </label>
+            <label class="input-label token">
+              Token
+              <select class="input-field" v-model="selectedToken">
+                <option
+                  v-for="token in account.tokens"
+                  :key="token.name"
+                  :value="token"
+                >{{ getTokenName(token) }}</option>
+              </select>
+            </label>
+          </div>
+          <div class="row">
+            <label class="input-label gas-price">
+              Gas Price
+              <input
+                class="input-field"
+                type="number"
+                name="gasprice"
+                v-model="gasPrice"
+                step="any"
+              />
+            </label>
+            <label class="input-label gas-limit">
+              Gas Limit
+              <input
+                class="input-field"
+                type="number"
+                name="gaslimit"
+                v-model="gasLimit"
+                placeholder="Gas Limit"
+              />
+            </label>
+            <label class="input-label gas-one">
+              &nbsp;
+              <input
+                class="input-field"
+                type="text"
+                name="gasone"
+                readonly
+                :value="getString(getGasFee, false)"
+              />
+            </label>
+          </div>
+          <label class="input-label">
+            Input Data
+            <textarea
+              class="input-field input-data"
+              type="textarea"
+              name="inputdata"
+              placeholder="Please enter hexadecimal data (optional)"
+              v-model="inputData"
+            />
+          </label>
+          <button class="full-width" type="submit">Send</button>
+        </form>
+      </div>
+      <div v-else>
+        <h2 class="center">Approve Transaction</h2>
+        <span>Sending from</span>
+        <div class="address-content">
+          <div>
+            <b>{{ compressAddress(getFromAddress) }}</b> of
+            <b>{{ fromShard }}</b> Shard
+            to
+          </div>
+          <div>
+            <b>{{ compressAddress(receipient) }}</b> of
+            <b>{{ toShard }}</b> Shard
+          </div>
         </div>
-        <div class="row">
-          <label class="input-label receipient">
-            Receipient Address
-            <input
-              class="input-field"
-              type="text"
-              name="address"
-              v-model="receipient"
-            />
-          </label>
-          <label class="input-label shard">
-            To Shard
-            <select class="input-field" v-model="toShard">
-              <option
-                v-for="shard in account.shardArray"
-                :key="shard.shardID"
-                :value="shard.shardID"
-              >{{ shard.shardID }}</option>
-            </select>
-          </label>
+        <div class="invoice-row">
+          <div>Subtotal</div>
+          <div>{{ getString(amount) }}</div>
         </div>
-        <div class="row">
-          <label class="input-label amount">
-            Amount
-            <input
-              class="input-field"
-              type="number"
-              name="amount"
-              v-model="amount"
-              step="any"
-            />
-          </label>
-          <label class="input-label token">
-            Token
-            <select class="input-field" v-model="selectedToken">
-              <option
-                v-for="token in account.tokens"
-                :key="token.name"
-                :value="token"
-              >{{ getTokenName(token) }}</option>
-            </select>
-          </label>
+        <div class="invoice-row">
+          <div>Gas Fee</div>
+          <div>{{ getString(getGasFee) }}</div>
         </div>
-        <div class="row">
-          <label class="input-label gas-price">
-            Gas Price
+        <div class="invoice-divider"></div>
+        <div class="invoice-row">
+          <div>Total</div>
+          <div>{{ getString(getTotal) }}</div>
+        </div>
+        <div class="password-content">
+          <label class="input-label">
+            Password
             <input
               class="input-field"
-              type="number"
-              name="gasprice"
-              v-model="gasPrice"
-              step="any"
-            />
-          </label>
-          <label class="input-label gas-limit">
-            Gas Limit
-            <input
-              class="input-field"
-              type="number"
-              name="gaslimit"
-              v-model="gasLimit"
-              placeholder="Gas Limit"
-            />
-          </label>
-          <label class="input-label gas-one">
-            &nbsp;
-            <input
-              class="input-field"
-              type="text"
-              name="gasone"
-              readonly
-              :value="getStringFromOnes"
+              type="password"
+              name="password"
+              ref="password"
+              v-model="password"
+              placeholder="Input your password"
+              v-on:keyup.enter="sendPayment"
             />
           </label>
         </div>
-        <label class="input-label">
-          Input Data
-          <textarea
-            class="input-field input-data"
-            type="textarea"
-            name="inputdata"
-            placeholder="Please enter hexadecimal data (optional)"
-            v-model="inputData"
-          />
-        </label>
-        <button class="button brand" type="submit">Send</button>
-      </form>
+        <div class="button-group">
+          <button class="outline" @click="() => {scene = 1}">Back</button>
+          <button @click="sendPayment" :disabled="!password">Approve</button>
+        </div>
+      </div>
+      <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
     </main>
-
-    <approve-dialog
-      :fromAddr="getFromAddress"
-      :toAddr="receipient"
-      :subTotal="amount"
-      :gasFee="getNetworkFee"
-      :fromShard="fromShard"
-      :toShard="toShard"
-      :unitName="getUnitName"
-      ref="approveDialog"
-      @confirmed="sendPayment"
-    />
   </div>
 </template>
 
@@ -137,6 +179,7 @@ export default {
   },
 
   data: () => ({
+    scene: 1,
     amount: 0,
     fromShard: 0,
     toShard: 0,
@@ -145,6 +188,7 @@ export default {
     gasLimit: 21000,
     inputData: "",
     selectedToken: false,
+    password: "",
     message: {
       show: false,
       type: "error",
@@ -153,24 +197,20 @@ export default {
   }),
 
   computed: {
-    ...mapState({
-      wallet: state => state.wallet
-    }),
+    ...mapState(["wallets"]),
     getUnitName() {
-      return this.getTokenName(this.selectedToken);
+      const unitName = this.getTokenName(this.selectedToken);
+      if (!unitName) return "ONE";
+      return unitName;
     },
     getFromAddress() {
-      return this.wallet.address;
+      return this.wallets.active.address;
     },
-    getStringFromOnes() {
-      return (
-        parseFloat((this.gasPrice * this.gasLimit) / Math.pow(10, 9)).toFixed(
-          6
-        ) + "ONE"
-      );
+    getGasFee() {
+      return parseFloat((this.gasPrice * this.gasLimit) / Math.pow(10, 9));
     },
-    getNetworkFee() {
-      return Number(0.000024); //used mockup data, need to be calculated later
+    getTotal() {
+      return Number(this.amount) + Number(this.getGasFee);
     }
   },
 
@@ -188,6 +228,9 @@ export default {
         this.selectedToken = this.account.tokens[0];
       }
     },
+    getString(one, addSpace = true) {
+      return Number(one).toFixed(6) + (addSpace ? " " : "") + this.getUnitName;
+    },
     onMessageClick() {
       if (this.message.type == "success") window.open(this.message.text);
     },
@@ -197,13 +240,26 @@ export default {
       this.$store.commit("loading", false);
     },
 
+    approve() {
+      if (this.password !== this.wallets.active.keypass) {
+        this.$notify({
+          group: "notify",
+          type: "error",
+          text: "Password is not correct"
+        });
+      }
+    },
     async sendPayment() {
-      const wallet = decryptKeyStore(this.wallet.keypass, this.wallet.keystore);
+      const wallet = decryptKeyStore(
+        this.password,
+        this.wallets.active.keystore
+      );
       if (!wallet) {
-        this.message.show = true;
-        this.message.type = "error";
-        this.message.text =
-          "Something went wrong while trying to send the payment";
+        this.$notify({
+          group: "notify",
+          type: "error",
+          text: "Password is not correct"
+        });
         return false;
       }
 
@@ -233,6 +289,7 @@ export default {
         );
 
         this.$store.commit("loading", false);
+        this.scene = 1;
         this.message.show = true;
 
         if (ret.result) {
@@ -303,8 +360,7 @@ export default {
 
         return false;
       }
-
-      this.$refs.approveDialog.showDialog();
+      this.scene = 2;
     },
 
     refreshData() {
@@ -332,34 +388,61 @@ export default {
       return this.$formatNumber(this.getTokenAmount(token.balance, precision), {
         maximumSignificantDigits: precision + 1
       });
+    },
+    compressAddress(address) {
+      return (
+        address.substr(0, 15) +
+        "..." +
+        address.substr(address.length - 5, address.length)
+      );
     }
   }
 };
 </script>
-<style lang="css">
+<style scoped>
 .row {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
 }
-.page-send .receipient,
-.page-send .amount {
+.receipient,
+.amount {
   width: 75%;
   margin-right: 10px;
 }
-.page-send .token,
-.page-send .shard {
+.token,
+.shard {
   width: 25%;
 }
-.page-send .gas-price,
-.page-send .gas-limit {
+.gas-price,
+.gas-limit {
   width: 32%;
   margin-right: 10px;
 }
-.page-send .gas-one {
+.gas-one {
   width: 36%;
 }
-.page-send .input-data {
+.input-data {
   height: 100px;
+}
+.invoice-row {
+  display: flex;
+  justify-content: space-between;
+}
+.invoice-divider {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  width: 100%;
+  border-top: 1px solid #bbb;
+}
+.address-content {
+  margin-bottom: 1rem;
+}
+.password-content {
+  margin-top: 30px;
+  margin-bottom: 10px;
+}
+.center {
+  text-align: center;
 }
 </style>

@@ -106,8 +106,7 @@ export default {
   }),
 
   computed: mapState({
-    address: state => state.wallet.address,
-    keystore: state => state.wallet.keystore,
+    address: state => state.wallets.active.address,
     transfers: state => state.account.transfers
   }),
 
