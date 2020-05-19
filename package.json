@@ -13,7 +13,7 @@
     "build": "webpack --config ./build/webpack.prod.js --progress  --hide-modules --colors"
   },
   "dependencies": {
-    "@harmony-js/core": "^0.1.36",
+    "@harmony-js/core": "^0.1.43",
     "aes-js": "^3.1.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",

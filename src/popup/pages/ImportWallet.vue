@@ -134,6 +134,7 @@ import {
   importPriveKey,
   createAccount,
   decryptKeyStore,
+  RecoverCode,
 } from "../../lib/keystore";
 
 export default {
@@ -189,10 +190,19 @@ export default {
           await new Promise((resolve, reject) => {
             let reader = new window.FileReader();
             reader.onload = function(event) {
-              _this.keyFromFile = event.target.result;
-              resolve();
+              try {
+                _this.keyFromFile =  JSON.parse(event.target.result);
+                resolve();
+              } catch (err) {
+                  this.$notify({
+                    group: "notify",
+                    type: "error",
+                    text: "keystore file error",
+                  });
+                 return false;
+              }
             };
-            reader.readAsBinaryString(this.file);
+            reader.readAsText(this.file);
           });
         }
       }
@@ -207,6 +217,8 @@ export default {
         });
         return false;
       }
+
+      /*
       if (this.password.length < 8) {
         this.$notify({
           group: "notify",
@@ -214,7 +226,8 @@ export default {
           text: "Password must be longer than 8 characters",
         });
         return false;
-      }
+      }*/
+
       if (
         this.selectType !== "keystore" &&
         this.password !== this.password_confirm
@@ -237,6 +250,7 @@ export default {
           name: this.name,
           address,
           keystore,
+          PRIVATE_KEY,
         };
       } else if (this.selectType == "mnemonic") {
         const walletFromMnemonic = createAccount(
@@ -267,8 +281,10 @@ export default {
           name: this.name,
           addres: walletFromFile.address,
           keystore: this.keyFromFile,
+          KEYSTORE,
         };
       }
+
       if (wallet.address) {
         this.$store.commit("wallets/addAccount", wallet);
         this.$router.push("/");

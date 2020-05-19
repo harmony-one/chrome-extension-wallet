@@ -11,6 +11,13 @@ const {
 import { Harmony } from "@harmony-js/core";
 
 var currentNetwork = "";
+
+export const RecoverCode = {
+  MNEMONIC: 1,
+  PRIVATE_KEY: 2,
+  KEYSTORE: 3
+};
+
 var harmony = new Harmony(
   // rpc url
   store.state.network.apiUrl,
@@ -197,33 +204,20 @@ export function encryptKeyStore(password, privateKey, address) {
   return byteArray2hexStr(stringToBytes(JSON.stringify(data)));
 }
 
-export function decryptKeyStore(password, keystore) {
+export async function decryptKeyStore(password, keystore) {
   if (!password) {
     return false;
   }
-  let key, address, salt;
-  try {
-    const keyJson = JSON.parse(bytesToString(hexStr2byteArray(keystore)));
-    key = keyJson.key;
-    address = keyJson.address;
-    salt = keyJson.salt;
-  } catch (e) {
-    return false;
-  }
 
-  console.log("password =", password);
-  console.log("key =", key);
-  console.log("address = ", address);
-  console.log("salt = ", salt);
+  const decryptedAccount = await getHarmony().wallet.addByKeyStore(JSON.stringify(keystore), password);
 
-  const privateKey = decryptString(password, salt, key);
+  const address = decryptedAccount.address
+  const privateKey = decryptedAccount.privateKey
 
-  console.log("privte key = ", privateKey);
-  if (!validatePrivateKey(privateKey)) return false;
-  const oneAddress = importPriveKey(privateKey);
-  console.log("decrypted address = ", oneAddress);
+  console.log("decrypted address = ", address);
+  console.log("private key", privateKey)
 
-  if (isValidAddress(oneAddress) && oneAddress === address) {
+  if (isValidAddress(address)) {
     return {
       address,
       privateKey,
@@ -251,6 +245,7 @@ export function createAccount(name, seed, password) {
     name,
     address,
     keystore,
+    MNEMONIC
   };
 }
 
