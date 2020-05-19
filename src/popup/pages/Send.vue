@@ -16,10 +16,10 @@
             :class="[message.type]"
             @click="onMessageClick"
           >
-            <span
-              v-if="message.type ==='success'"
-            >Transaction Sucess: Click here to see the transaction</span>
-            <span v-else>{{message.text}}</span>
+            <span v-if="message.type === 'success'"
+              >Transaction Sucess: Click here to see the transaction</span
+            >
+            <span v-else>{{ message.text }}</span>
           </div>
           <div class="row">
             <label class="input-label receipient">
@@ -38,7 +38,8 @@
                   v-for="shard in account.shardArray"
                   :key="shard.shardID"
                   :value="shard.shardID"
-                >{{ shard.shardID }}</option>
+                  >{{ shard.shardID }}</option
+                >
               </select>
             </label>
           </div>
@@ -60,7 +61,8 @@
                   v-for="token in account.tokens"
                   :key="token.name"
                   :value="token"
-                >{{ getTokenName(token) }}</option>
+                  >{{ getTokenName(token) }}</option
+                >
               </select>
             </label>
           </div>
@@ -109,33 +111,51 @@
           <button class="full-width" type="submit">Send</button>
         </form>
       </div>
+      <!-- Approve Transaction Dialog -->
       <div v-else>
-        <h2 class="center">Approve Transaction</h2>
-        <span>Sending from</span>
-        <div class="address-content">
-          <div>
-            <b>{{ compressAddress(getFromAddress) }}</b> of
-            <b>{{ fromShard }}</b> Shard
-            to
+        <h3 class="center">Approve Transaction</h3>
+        <p class="addressRow">
+          From
+          <span class="address__name">{{
+            compressAddress(getFromAddress)
+          }}</span>
+          of <b>{{ fromShard }}</b> Shard
+        </p>
+        <div class="transaction column">
+          <div class="row">
+            <img src="https://harmony.one/logo" class="transaction__logo" alt />
+            <div class="transaction__meta">
+              <div class="transaction__caption">
+                Sending
+                <b>{{ getString(amount) }}</b>
+              </div>
+            </div>
           </div>
-          <div>
-            <b>{{ compressAddress(receipient) }}</b> of
-            <b>{{ toShard }}</b> Shard
+          <div class="transaction__information">
+            To
+            <span class="address__name">{{ compressAddress(receipient) }}</span>
+            of <b>{{ toShard }}</b> Shard<br />
+            - (Sent via Harmony)
           </div>
         </div>
-        <div class="invoice-row">
-          <div>Subtotal</div>
-          <div>{{ getString(amount) }}</div>
+        <div class="invoice">
+          <div class="invoice__row">
+            <div class="invoice__rowLeft">Subtotal</div>
+            <div class="invoice__rowRight">{{ getString(amount) }}</div>
+          </div>
+          <div class="invoice__row">
+            <div class="invoice__rowLeft">Network Fee</div>
+            <div class="invoice__rowRight">
+              {{ getString(getGasFee) }}
+            </div>
+          </div>
+          <div class="invoice__divider"></div>
+          <div class="invoice__row">
+            <div class="invoice__rowLeft">Total</div>
+            <div class="invoice__rowRight">{{ getString(getTotal) }}</div>
+          </div>
         </div>
-        <div class="invoice-row">
-          <div>Gas Fee</div>
-          <div>{{ getString(getGasFee) }}</div>
-        </div>
-        <div class="invoice-divider"></div>
-        <div class="invoice-row">
-          <div>Total</div>
-          <div>{{ getString(getTotal) }}</div>
-        </div>
+
         <div class="password-content">
           <label class="input-label">
             Password
@@ -151,11 +171,25 @@
           </label>
         </div>
         <div class="button-group">
-          <button class="outline" @click="() => {scene = 1}">Back</button>
+          <button
+            class="outline"
+            @click="
+              () => {
+                scene = 1;
+              }
+            "
+          >
+            Back
+          </button>
           <button @click="sendPayment" :disabled="!password">Approve</button>
         </div>
       </div>
-      <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="4"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -173,7 +207,7 @@ export default {
   mixins: [account],
 
   components: {
-    AppHeader
+    AppHeader,
   },
 
   data: () => ({
@@ -190,8 +224,8 @@ export default {
     message: {
       show: false,
       type: "error",
-      text: ""
-    }
+      text: "",
+    },
   }),
 
   computed: {
@@ -209,7 +243,7 @@ export default {
     },
     getTotal() {
       return Number(this.amount) + Number(this.getGasFee);
-    }
+    },
   },
 
   mounted() {
@@ -246,7 +280,7 @@ export default {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Password is not correct"
+          text: "Password is not correct",
         });
         return false;
       }
@@ -384,15 +418,13 @@ export default {
         "..." +
         address.substr(address.length - 5, address.length)
       );
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
-.row {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+h3 {
+  margin-top: 0px;
 }
 .receipient,
 .amount {
@@ -414,24 +446,78 @@ export default {
 .input-data {
   height: 100px;
 }
-.invoice-row {
-  display: flex;
-  justify-content: space-between;
-}
-.invoice-divider {
-  margin-top: 5px;
-  margin-bottom: 5px;
-  width: 100%;
-  border-top: 1px solid #bbb;
-}
-.address-content {
-  margin-bottom: 1rem;
-}
 .password-content {
-  margin-top: 30px;
   margin-bottom: 10px;
 }
 .center {
   text-align: center;
+}
+.transaction {
+  display: flex;
+  padding: 12px 12px;
+  background: white;
+}
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+.transaction__logo {
+  max-height: 100%;
+  max-width: 52px;
+  border: 2px solid;
+  border-radius: 50%;
+  display: block;
+  border-color: #ed553b;
+}
+
+.transaction__meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 18px;
+}
+.transaction__caption {
+  color: black;
+  line-height: 18px;
+  font-size: 18px;
+  padding-bottom: 4px;
+}
+
+.transaction__information {
+  max-height: 100px;
+  overflow: auto;
+  font-size: 14px;
+  color: var(--primary-text-color);
+  margin: 10px 0px 5px 0px;
+}
+
+.invoice {
+  margin-top: 18px;
+  font-size: 15px;
+}
+.invoice__row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+}
+
+.invoice__divider {
+  height: 1px;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  background-color: #eee;
+}
+.addressRow {
+  font-size: 14px;
+}
+.address__name {
+  display: inline-block;
+  color: #0987d7;
+  cursor: pointer;
 }
 </style>

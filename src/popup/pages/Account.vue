@@ -4,11 +4,11 @@
 
     <main class="main">
       <div class="main-logo">
-        <img src="images/harmony.png" alt="Harmony" />
+        <img src="images/harmony.png" class="logo-img" alt="Harmony" />
       </div>
       <div class="container">
         <div class="account-box" @click="onClickAccount()">
-          <h2 class="name-label">{{compressName(wallets.active.name)}}</h2>
+          <h1 class="name-label">{{ compressName(wallets.active.name) }}</h1>
           <div class="box-address">{{ compressAddress(address) }}</div>
         </div>
 
@@ -17,9 +17,7 @@
 
         <div class="box-balance">
           {{ $formatNumber(account.balance, { maximumSignificantDigits: 7 }) }}
-          <span
-            class="box-balance-code"
-          >ONE</span>
+          <span class="box-balance-code">ONE</span>
         </div>
 
         <!-- Shard -->
@@ -30,15 +28,23 @@
               v-for="item in account.shardArray"
               :value="item.shardID"
               :key="item.shardID"
-            >{{ item.shardID }}</option>
+              >{{ item.shardID }}</option
+            >
           </select>
         </div>
         <div class="button-group">
-          <button class="outline" @click="$router.push('/receive')">Receive</button>
+          <button class="outline" @click="$router.push('/receive')">
+            Receive
+          </button>
           <button @click="$router.push('/send')">Send</button>
         </div>
       </div>
-      <notifications group="copied" width="180" :max="2" class="notifiaction-container" />
+      <notifications
+        group="copied"
+        width="180"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -54,14 +60,14 @@ export default {
 
   components: {
     AppHeader,
-    MainTab
+    MainTab,
   },
 
   data: () => ({
-    shard: 0
+    shard: 0,
   }),
   computed: {
-    ...mapState(["wallets"])
+    ...mapState(["wallets"]),
   },
   mounted() {
     if (
@@ -83,7 +89,7 @@ export default {
       this.$store.commit("account/shard", newValue);
       this.loadBalance();
       // window.location.reload();
-    }
+    },
   },
 
   methods: {
@@ -92,7 +98,7 @@ export default {
         this.$notify({
           group: "copied",
           type: "info",
-          text: "Copied to Clipboard"
+          text: "Copied to Clipboard",
         });
       });
     },
@@ -109,8 +115,8 @@ export default {
         "..." +
         address.substr(address.length - 5, address.length)
       );
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
@@ -145,5 +151,8 @@ export default {
 .toast-container {
   border-radius: 5px;
   max-width: 200px;
+}
+.logo-img {
+  height: 80px;
 }
 </style>
