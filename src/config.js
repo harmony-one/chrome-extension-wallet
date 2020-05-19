@@ -33,7 +33,7 @@ export default {
     {
       id: 5,
       chainId: ChainID.HmyPangaea,
-      name: "OpensSakingNet",
+      name: "OpenStakingNet",
       apiUrl: "https://api.s0.os.hmny.io",
       type: ChainType.Harmony,
     },
