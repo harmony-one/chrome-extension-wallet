@@ -209,6 +209,7 @@ export default {
       this.$store.commit("wallets/setActive", address);
       this.hideDropdownMenu();
       this.refreshData();
+      this.$router.push("/");
     },
     refreshData() {
       this.$emit("refresh");
