@@ -131,11 +131,11 @@ import AppHeader from "../components/AppHeader.vue";
 import {
   encryptKeyStore,
   validatePrivateKey,
-  importPriveKey,
-  createAccount,
+  getAddressFromPrivateKey,
+  createAccountFromMnemonic,
   decryptKeyStore,
-  RecoverCode,
 } from "../../lib/keystore";
+
 
 export default {
   data: () => ({
@@ -218,16 +218,6 @@ export default {
         return false;
       }
 
-      /*
-      if (this.password.length < 8) {
-        this.$notify({
-          group: "notify",
-          type: "warn",
-          text: "Password must be longer than 8 characters",
-        });
-        return false;
-      }*/
-
       if (
         this.selectType !== "keystore" &&
         this.password !== this.password_confirm
@@ -239,55 +229,72 @@ export default {
         });
         return false;
       }
+
       if (this.selectType === "key") {
-        const address = importPriveKey(this.privateKey);
-        const keystore = encryptKeyStore(
-          this.password,
-          this.privateKey,
-          address
-        );
-        wallet = {
-          name: this.name,
-          address,
-          keystore,
-          PRIVATE_KEY,
-        };
+        const oneAddr = getAddressFromPrivateKey(this.privateKey);
+
+        encryptKeyStore(this.password, this.privateKey).then((result) => {
+          wallet = {
+            name: this.name,
+            address: oneAddr,
+            keystore: result,
+          };
+
+          console.log("added new account through import private key", wallet);
+          if (wallet.address) {
+            this.$store.commit("wallets/addAccount", wallet);
+            this.$router.push("/");
+          }
+        });
       } else if (this.selectType == "mnemonic") {
-        const walletFromMnemonic = createAccount(
+         createAccountFromMnemonic(
           this.name,
           this.mnemonic,
           this.password
-        );
-        if (!walletFromMnemonic) {
-          this.$notify({
-            group: "notify",
-            type: "error",
-            text: "Mnemonic is invalid",
-          });
-          return false;
-        }
-        wallet = walletFromMnemonic;
-      } else {
-        const walletFromFile = decryptKeyStore(this.password, this.keyFromFile);
-        if (!walletFromFile) {
-          this.$notify({
-            group: "notify",
-            type: "error",
-            text: "Password is incorrect or keystore file is invalid",
-          });
-          return false;
-        }
-        wallet = {
-          name: this.name,
-          addres: walletFromFile.address,
-          keystore: this.keyFromFile,
-          KEYSTORE,
-        };
-      }
+        ).then((wallet) => {
 
-      if (wallet.address) {
-        this.$store.commit("wallets/addAccount", wallet);
-        this.$router.push("/");
+          if (!wallet) {
+            this.$notify({
+              group: "notify",
+              type: "error",
+              text: "Mnemonic string is incorrect",
+            })
+            return false;
+          } else {
+
+          console.log("added new account through import mnemonic", wallet);
+          this.$store.commit("wallets/addAccount", wallet);
+          this.$router.push("/");
+          }
+        });
+      } else {
+
+        decryptKeyStore(this.password, this.keyFromFile).then((result) => {
+          if (!result) {
+            this.$notify({
+              group: "notify",
+              type: "error",
+              text: "Password is incorrect or keystore file is invalid",
+            })
+            return false;
+          }
+  
+          console.log("finish decrypting", result)
+
+          encryptKeyStore(this.password, result.privateKey).then((keystore) => {
+            wallet = {
+              name: this.name,
+              address: result.address,
+              keystore: keystore,
+            };
+
+            console.log("added new account through import keystore", wallet);
+            if (wallet.address) {
+              this.$store.commit("wallets/addAccount", wallet);
+              this.$router.push("/");
+            }
+          });
+        })
       }
     },
   },

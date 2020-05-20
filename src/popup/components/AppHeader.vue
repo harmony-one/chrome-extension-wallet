@@ -92,12 +92,12 @@
                 :key="index"
               >
                 <i
-                  v-show="account.address === wallets.active.address && ((selectedIndex=index) || 1)"
+                  v-show="account.name === wallets.active.name && ((selectedIndex=index) || 1)"
                   class="fa fa-check"
                 ></i>
                 <a
-                  @click.prevent="() => {selectAccount(account.address)}"
-                  :class="account.address === wallets.active.address ? 'active': ''"
+                  @click.prevent="() => {selectAccount(account.name)}"
+                  :class="account.name === wallets.active.name ? 'active': ''"
                 >{{account.name}}</a>
               </div>
             </div>
@@ -205,8 +205,8 @@ export default {
       this.$store.commit("network/change", network);
       this.refreshData();
     },
-    selectAccount(address) {
-      this.$store.commit("wallets/setActive", address);
+    selectAccount(name) {
+      this.$store.commit("wallets/setActive", name);
       this.hideDropdownMenu();
       this.refreshData();
       this.$router.push("/");

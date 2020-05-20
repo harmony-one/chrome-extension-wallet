@@ -8,11 +8,10 @@
       </div>
       <div class="container">
         <div class="account-box" @click="onClickAccount()">
-          <h1 class="name-label">{{ compressName(wallets.active.name) }}</h1>
+          <h2 class="name-label">{{ compressName(wallets.active.name) }}</h2>
           <div class="box-address">{{ compressAddress(address) }}</div>
         </div>
 
-        <div class="divider"></div>
         <div class="box-label">Account Balance</div>
 
         <div class="box-balance">
@@ -38,6 +37,7 @@
           </button>
           <button @click="$router.push('/send')">Send</button>
         </div>
+                <div class="divider"></div>
       </div>
       <notifications
         group="copied"
@@ -124,7 +124,7 @@ export default {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  margin-top: 30px;
+  margin-top: 10px;
 }
 .shard-box select {
   margin-left: 20px;
@@ -153,6 +153,7 @@ export default {
   max-width: 200px;
 }
 .logo-img {
-  height: 80px;
+  height: 50px;
+  width: 50px;
 }
 </style>
