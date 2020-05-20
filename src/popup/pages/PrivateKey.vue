@@ -146,18 +146,20 @@ export default {
     submitForm() {
       const keystore = this.wallets.accounts[this.selectedIndex].keystore;
       if (!keystore) return false;
-      const wallet = decryptKeyStore(this.password, keystore);
 
-      if (!wallet) {
-        this.$notify({
-          group: "notify",
-          type: "error",
-          text: "Password is incorrect",
+      decryptKeyStore(this.password, keystore).then((result) => {
+          if (!result) {
+            this.$notify({
+              group: "notify",
+              type: "error",
+              text: "Password is incorrect",
+            })
+            return false;
+          } else {
+            this.wallet  = {privateKey : result};
+          }
         });
-        return false;
-      }
-
-      this.wallet = wallet;
+        
     },
     copyToClipboard() {
       this.$copyText(this.wallet.privateKey).then(() => {

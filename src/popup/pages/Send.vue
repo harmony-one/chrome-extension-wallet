@@ -119,7 +119,7 @@
           <span class="address__name">{{
             compressAddress(getFromAddress)
           }}</span>
-          of <b>{{ fromShard }}</b> Shard
+          of Shard <b>{{ fromShard }}</b> 
         </p>
         <div class="transaction column">
           <div class="row">
@@ -134,8 +134,7 @@
           <div class="transaction__information">
             To
             <span class="address__name">{{ compressAddress(receipient) }}</span>
-            of <b>{{ toShard }}</b> Shard<br />
-            - (Sent via Harmony)
+            of Shard <b>{{ toShard }}</b> 
           </div>
         </div>
         <div class="invoice">

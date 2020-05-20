@@ -156,52 +156,18 @@ export default function getHarmony() {
   return harmony;
 }
 
-export function encryptKey(password, salt) {
-  return pbkdf2.pbkdf2Sync(password, salt, 1, 256 / 8, "sha512");
-}
-
-export function encryptString(password, hexString) {
-  const textBytes = aesjs.utils.utf8.toBytes(hexString);
-  const aesCtr = new aesjs.ModeOfOperation.ctr(password);
-  const encrypted = aesCtr.encrypt(textBytes);
-
-  return {
-    bytes: encrypted,
-    hex: aesjs.utils.hex.fromBytes(encrypted),
-  };
-}
-
-export function decryptString(password, salt, hexString) {
-  const key = encryptKey(password, salt);
-  const encryptedBytes = aesjs.utils.hex.toBytes(hexString);
-  const aesCtr = new aesjs.ModeOfOperation.ctr(key);
-  const decryptedBytes = aesCtr.decrypt(encryptedBytes);
-
-  return aesjs.utils.utf8.fromBytes(decryptedBytes);
-}
-
 export function validatePrivateKey(privateKey) {
   try {
-    const oneAddress = importPriveKey(privateKey);
+    const oneAddress = getAddressFromPrivateKey(privateKey);
     return isValidAddress(oneAddress);
   } catch (e) {
     return false;
   }
 }
 
-export function encryptKeyStore(password, privateKey, address) {
-  const salt = uuidv4();
-  const encryptedKey = encryptKey(password, salt);
-  const { hex } = encryptString(encryptedKey, privateKey);
-
-  const data = {
-    version: 1,
-    key: hex,
-    address: address,
-    salt,
-  };
-
-  return byteArray2hexStr(stringToBytes(JSON.stringify(data)));
+export async function encryptKeyStore(password, privateKey) {
+  const keyStore = await encryptPhrase(privateKey, password);
+  return keyStore
 }
 
 export async function decryptKeyStore(password, keystore) {
@@ -209,51 +175,49 @@ export async function decryptKeyStore(password, keystore) {
     return false;
   }
 
-  const decryptedAccount = await getHarmony().wallet.addByKeyStore(JSON.stringify(keystore), password);
-
-  const address = decryptedAccount.address
-  const privateKey = decryptedAccount.privateKey
-
-  console.log("decrypted address = ", address);
-  console.log("private key", privateKey)
-
-  if (isValidAddress(address)) {
-    return {
-      address,
-      privateKey,
-    };
+  var privateKey
+  try {
+    privateKey = await decryptPhrase(JSON.parse(keystore), password);
+  } catch (e) {
+    console.log(e);
+    return false;
   }
 
-  return false;
+  return privateKey;
 }
 
 export function generatePhrase() {
   return getHarmony().wallet.newMnemonic();
 }
 
-export function createAccount(name, seed, password) {
+export async function createAccountFromMnemonic(name, mnemonic, password) {
   let account;
   try {
-    account = getHarmony().wallet.addByMnemonic(seed);
+    account = getHarmony().wallet.addByMnemonic(mnemonic);
   } catch (e) {
+    console.log("createAccountFromMnemonic error = ", e)
     return false;
   }
+
   let address = getAddress(account.address).bech32;
-  let privateKey = account.privateKey;
-  const keystore = encryptKeyStore(password, privateKey, address);
+  const keystore = await encryptPhrase( account.privateKey, password);
+
   return {
     name,
     address,
     keystore,
-    MNEMONIC
   };
 }
 
-export function importPriveKey(privateKey) {
+export function getAddressFromPrivateKey(privateKey) {
   let account = getHarmony().wallet.addByPrivateKey(privateKey);
   let address = getAddress(account.address).bech32;
   return address;
 }
+
+//disease travel sea cage fiscal midnight arch betray catch keen agree organ
+//one1p6wcwnajxc208uxpdlx9sqktt6t8kk8nw9hshf
+//0x369cbf85b0239b8c830b9f807e2fd2d4eee731a0d58063affa5bf7e152cb42e6
 
 // 0x1b4dc81bc7245c648e846c0d6f4d818425733a988aafa7030001b409bc71f27c
 // one1jcq8d7afnsz4kj8yjt39wnljvj8qkx5ccydgd6

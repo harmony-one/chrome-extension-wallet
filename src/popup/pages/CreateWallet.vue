@@ -79,7 +79,7 @@
 
 <script>
 import account from "../mixins/account";
-import { generatePhrase, createAccount } from "../../lib/keystore";
+import { generatePhrase, createAccountFromMnemonic } from "../../lib/keystore";
 import AppHeader from "../components/AppHeader.vue";
 import { mapState } from "vuex";
 
@@ -117,10 +117,22 @@ export default {
         return;
       }
 
-      let wallet = createAccount(this.name, this.seed_phrase, this.password);
+      createAccountFromMnemonic(this.name, this.seed_phrase, this.password).then((wallet) => {
 
-      this.$store.commit("wallets/addAccount", wallet);
-      this.$router.push("/");
+        if (!wallet) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Password is incorrect or mnemonic is incorrect",
+          })
+          return false;
+        } else {
+
+          console.log("added new account through mnemonic", wallet);
+          this.$store.commit("wallets/addAccount", wallet);
+          this.$router.push("/");
+          }
+        });
     },
     createName() {
       if (this.name === "") {
