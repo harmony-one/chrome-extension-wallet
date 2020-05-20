@@ -16,10 +16,10 @@
             :class="[message.type]"
             @click="onMessageClick"
           >
-            <span
-              v-if="message.type ==='success'"
-            >Transaction Sucess: Click here to see the transaction</span>
-            <span v-else>{{message.text}}</span>
+            <span v-if="message.type === 'success'"
+              >Transaction Sucess: Click here to see the transaction</span
+            >
+            <span v-else>{{ message.text }}</span>
           </div>
           <label class="input-label">
             Receipient Address
@@ -86,32 +86,49 @@
         </form>
       </div>
       <div v-else>
-        <h2 class="center">Approve Transaction</h2>
-        <span>Sending from</span>
-        <div class="address-content">
-          <div>
-            <b>{{ compressAddress(getFromAddress) }}</b> of
-            <b>{{ fromShard }}</b> Shard
-            to
+        <h3 class="center">Approve Transaction</h3>
+        <p class="addressRow">
+          From
+          <span class="address__name">{{
+            compressAddress(getFromAddress)
+          }}</span>
+          of <b>{{ fromShard }}</b> Shard
+        </p>
+        <div class="transaction column">
+          <div class="row">
+            <img src="https://harmony.one/logo" class="transaction__logo" alt />
+            <div class="transaction__meta">
+              <div class="transaction__caption">
+                Sending
+                <b>{{ getString(amount) }}</b>
+              </div>
+            </div>
           </div>
-          <div>
-            <b>{{ compressAddress(receipient) }}</b> of
-            <b>{{ toShard }}</b> Shard
+          <div class="transaction__information">
+            To
+            <span class="address__name">{{ compressAddress(receipient) }}</span>
+            of <b>{{ toShard }}</b> Shard<br />
+            - (Sent via Harmony)
           </div>
         </div>
-        <div class="invoice-row">
-          <div>Subtotal</div>
-          <div>{{ getString(amount) }}</div>
+        <div class="invoice">
+          <div class="invoice__row">
+            <div class="invoice__rowLeft">Subtotal</div>
+            <div class="invoice__rowRight">{{ getString(amount) }}</div>
+          </div>
+          <div class="invoice__row">
+            <div class="invoice__rowLeft">Network Fee</div>
+            <div class="invoice__rowRight">
+              {{ getString(getGasFee) }}
+            </div>
+          </div>
+          <div class="invoice__divider"></div>
+          <div class="invoice__row">
+            <div class="invoice__rowLeft">Total</div>
+            <div class="invoice__rowRight">{{ getString(getTotal) }}</div>
+          </div>
         </div>
-        <div class="invoice-row">
-          <div>Gas Fee</div>
-          <div>{{ getString(getGasFee) }}</div>
-        </div>
-        <div class="invoice-divider"></div>
-        <div class="invoice-row">
-          <div>Total</div>
-          <div>{{ getString(getTotal) }}</div>
-        </div>
+
         <div class="password-content">
           <label class="input-label">
             Password
@@ -127,11 +144,25 @@
           </label>
         </div>
         <div class="button-group">
-          <button class="outline" @click="() => {scene = 1}">Back</button>
+          <button
+            class="outline"
+            @click="
+              () => {
+                scene = 1;
+              }
+            "
+          >
+            Back
+          </button>
           <button @click="sendPayment" :disabled="!password">Approve</button>
         </div>
       </div>
-      <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="4"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -149,7 +180,7 @@ export default {
   mixins: [account],
 
   components: {
-    AppHeader
+    AppHeader,
   },
 
   data: () => ({
@@ -166,16 +197,17 @@ export default {
     message: {
       show: false,
       type: "error",
-      text: ""
-    }
+      text: "",
+    },
   }),
 
   computed: {
     ...mapState(["wallets"]),
     getUnitName() {
-      const unitName = this.getTokenName(this.selectedToken);
-      if (!unitName) return "ONE";
-      return unitName;
+      // const unitName = this.getTokenName(this.selectedToken);
+      // if (!unitName) return "ONE";
+      // return unitName;
+      return "H2O";
     },
     getFromAddress() {
       return this.wallets.active.address;
@@ -185,7 +217,7 @@ export default {
     },
     getTotal() {
       return Number(this.amount) + Number(this.getGasFee);
-    }
+    },
   },
 
   mounted() {
@@ -200,7 +232,7 @@ export default {
     setSelectedToken() {
       if (this.account.tokens.length > 0) {
         this.selectedToken = this.account.tokens.find(
-          elem => elem.name === "H2O"
+          (elem) => elem.name === "H2O"
         );
         if (!this.selectedToken) {
           this.message.show = true;
@@ -229,7 +261,7 @@ export default {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Password is not correct"
+          text: "Password is not correct",
         });
         return false;
       }
@@ -337,16 +369,11 @@ export default {
         "..." +
         address.substr(address.length - 5, address.length)
       );
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
-.row {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
 .gas-price,
 .gas-limit {
   width: 32%;
@@ -358,24 +385,14 @@ export default {
 .input-data {
   height: 100px;
 }
-.invoice-row {
-  display: flex;
-  justify-content: space-between;
-}
-.invoice-divider {
-  margin-top: 5px;
-  margin-bottom: 5px;
-  width: 100%;
-  border-top: 1px solid #bbb;
-}
-.address-content {
-  margin-bottom: 1rem;
-}
 .password-content {
   margin-top: 30px;
   margin-bottom: 10px;
 }
 .center {
   text-align: center;
+}
+h3 {
+  margin-top: 0px;
 }
 </style>
