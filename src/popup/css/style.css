@@ -429,6 +429,69 @@ button:disabled {
   padding: 0;
 }
 
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+.transaction__logo {
+  max-height: 100%;
+  max-width: 52px;
+  border: 2px solid;
+  border-radius: 50%;
+  display: block;
+  border-color: #ed553b;
+}
+
+.transaction__meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 18px;
+}
+.transaction__caption {
+  color: black;
+  line-height: 18px;
+  font-size: 18px;
+  padding-bottom: 4px;
+}
+
+.transaction__information {
+  max-height: 100px;
+  overflow: auto;
+  font-size: 14px;
+  color: var(--primary-text-color);
+  margin: 10px 0px 5px 0px;
+}
+
+.invoice {
+  margin-top: 18px;
+  font-size: 15px;
+}
+.invoice__row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+}
+
+.invoice__divider {
+  height: 1px;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  background-color: #eee;
+}
+.addressRow {
+  font-size: 14px;
+}
+.address__name {
+  display: inline-block;
+  color: #0987d7;
+  cursor: pointer;
+}
 .box-address-label {
   font-size: 0.8rem;
   text-transform: uppercase;
