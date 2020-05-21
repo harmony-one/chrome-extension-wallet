@@ -438,6 +438,11 @@ button:disabled {
   display: flex;
   flex-direction: row;
 }
+.transaction {
+  display: flex;
+  padding: 12px 12px;
+  background: white;
+}
 .transaction__logo {
   max-height: 100%;
   max-width: 52px;
