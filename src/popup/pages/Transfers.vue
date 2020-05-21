@@ -83,7 +83,8 @@ const { Unit } = require("@harmony-js/utils");
 import {
   getTransfers,
   getNetworkLink,
-  getTransactionCount
+  getTransactionCount,
+  removeDups
 } from "../../lib/keystore";
 import API from "../../lib/api";
 import AppHeader from "../components/AppHeader.vue";
@@ -123,7 +124,7 @@ export default {
         this.page,
         this.limit
       );
-      this.$store.commit("account/transfers", transfersData.transactions);
+      this.$store.commit("account/transfers", removeDups(transfersData.transactions));
       this.$store.commit("loading", false);
 
       await this.loadTokenData();
@@ -139,9 +140,9 @@ export default {
         this.page,
         this.limit
       );
-      this.$store.commit("account/pushTransfers", transfersData.transactions);
-      console.log(transfersData);
-      console.log(this.transfers.length);
+
+      this.$store.commit("account/pushTransfers", removeDups(transfersData.transactions));
+
       // BUG: hmy_getTransactionCount does not return correct count, so use this to stop showing "LOAD MORE"
       if (transfersData.transactions.length == 0) {
         this.txCount = this.transfers.length;
@@ -195,12 +196,13 @@ export default {
 
     formatShard(transfer) {
       return (
-        "shard from " +
+        "from shard " +
         transfer.shardID.toString() +
-        " to " +
+        " to shard " +
         transfer.toShardID.toString()
       );
     }
+
   }
 };
 </script>
