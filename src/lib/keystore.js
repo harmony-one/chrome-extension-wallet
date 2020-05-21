@@ -27,118 +27,6 @@ var harmony = new Harmony(
   }
 );
 
-const uuidv4 = require("uuid/v4");
-
-/* Convert a byte to string */
-function byte2hexStr(byte) {
-  var hexByteMap = "0123456789ABCDEF";
-  var str = "";
-  str += hexByteMap.charAt(byte >> 4);
-  str += hexByteMap.charAt(byte & 0x0f);
-  return str;
-}
-
-function byteArray2hexStr(byteArray) {
-  let str = "";
-  for (let i = 0; i < byteArray.length; i++) {
-    str += byte2hexStr(byteArray[i]);
-  }
-  return str;
-}
-
-function stringToBytes(str) {
-  var bytes = new Array();
-  var len, c;
-  len = str.length;
-  for (var i = 0; i < len; i++) {
-    c = str.charCodeAt(i);
-    if (c >= 0x010000 && c <= 0x10ffff) {
-      bytes.push(((c >> 18) & 0x07) | 0xf0);
-      bytes.push(((c >> 12) & 0x3f) | 0x80);
-      bytes.push(((c >> 6) & 0x3f) | 0x80);
-      bytes.push((c & 0x3f) | 0x80);
-    } else if (c >= 0x000800 && c <= 0x00ffff) {
-      bytes.push(((c >> 12) & 0x0f) | 0xe0);
-      bytes.push(((c >> 6) & 0x3f) | 0x80);
-      bytes.push((c & 0x3f) | 0x80);
-    } else if (c >= 0x000080 && c <= 0x0007ff) {
-      bytes.push(((c >> 6) & 0x1f) | 0xc0);
-      bytes.push((c & 0x3f) | 0x80);
-    } else {
-      bytes.push(c & 0xff);
-    }
-  }
-  return bytes;
-}
-
-function bytesToString(arr) {
-  if (typeof arr === "string") {
-    return arr;
-  }
-  let str = "",
-    _arr = arr;
-  for (let i = 0; i < _arr.length; i++) {
-    let one = _arr[i].toString(2),
-      v = one.match(/^1+?(?=0)/);
-    if (v && one.length === 8) {
-      let bytesLength = v[0].length;
-      let store = _arr[i].toString(2).slice(7 - bytesLength);
-      for (let st = 1; st < bytesLength; st++) {
-        store += _arr[st + i].toString(2).slice(2);
-      }
-      str += String.fromCharCode(parseInt(store, 2));
-      i += bytesLength - 1;
-    } else {
-      str += String.fromCharCode(_arr[i]);
-    }
-  }
-  return str;
-}
-
-function isHexChar(c) {
-  if (
-    (c >= "A" && c <= "F") ||
-    (c >= "a" && c <= "f") ||
-    (c >= "0" && c <= "9")
-  ) {
-    return 1;
-  }
-  return 0;
-}
-
-function hexChar2byte(c) {
-  var d = 0;
-  if (c >= "A" && c <= "F") {
-    d = c.charCodeAt(0) - "A".charCodeAt(0) + 10;
-  } else if (c >= "a" && c <= "f") {
-    d = c.charCodeAt(0) - "a".charCodeAt(0) + 10;
-  } else if (c >= "0" && c <= "9") {
-    d = c.charCodeAt(0) - "0".charCodeAt(0);
-  }
-  return d;
-}
-
-function hexStr2byteArray(str) {
-  var byteArray = Array();
-  var d = 0;
-  var j = 0;
-  var k = 0;
-
-  for (let i = 0; i < str.length; i++) {
-    var c = str.charAt(i);
-    if (isHexChar(c)) {
-      d <<= 4;
-      d += hexChar2byte(c);
-      j++;
-      if (0 === j % 2) {
-        byteArray[k++] = d;
-        d = 0;
-      }
-    }
-  }
-  return byteArray;
-}
-
 export default function getHarmony() {
   if (currentNetwork != store.state.network.name) {
     currentNetwork = store.state.network.name;
@@ -373,6 +261,10 @@ export function getNetworkLink(path) {
     }
     case "Localnet": {
       basic = "";
+      break;
+    }
+    case "PartnerNet":{
+      basic = "https://explorer.ps.hmny.io/#";
       break;
     }
     default: {

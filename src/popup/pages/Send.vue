@@ -271,11 +271,12 @@ export default {
       this.$store.commit("loading", false);
     },
     async sendPayment() {
-      const wallet = decryptKeyStore(
+      const privateKey = await decryptKeyStore(
         this.password,
         this.wallets.active.keystore
       );
-      if (!wallet) {
+
+      if (!privateKey) {
         this.$notify({
           group: "notify",
           type: "error",
@@ -304,7 +305,7 @@ export default {
           this.fromShard,
           this.toShard,
           amount,
-          wallet.privateKey,
+          privateKey,
           this.gasLimit,
           this.gasPrice
         );
