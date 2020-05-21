@@ -370,14 +370,6 @@ export default {
         return false;
       }
 
-      if (this.getFromAddress === this.recipient) {
-        this.message.show = true;
-        this.message.type = "error";
-        this.message.text = "Sender and Recipient address is the same";
-
-        return false;
-      }
-
       if (!this.selectedToken) {
         this.message.show = true;
         this.message.type = "error";
