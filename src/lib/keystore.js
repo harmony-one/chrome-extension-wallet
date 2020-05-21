@@ -275,3 +275,16 @@ export function getNetworkLink(path) {
 
   return basic + path;
 }
+
+export function removeDups(myList) {
+  let unique = {};
+  var newList = []
+  myList.forEach(function(i) {
+    if(!unique[i.blockHash]) {
+      unique[i.blockHash] = true;
+      newList.push(i)
+    }
+  });
+
+  return newList
+}
