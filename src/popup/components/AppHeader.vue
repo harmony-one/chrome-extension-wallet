@@ -209,7 +209,7 @@ export default {
       this.$store.commit("wallets/setActive", name);
       this.hideDropdownMenu();
       this.refreshData();
-      this.$router.push("/");
+      if (this.$route.name !== "account") this.$router.push("/");
     },
     refreshData() {
       this.$emit("refresh");
