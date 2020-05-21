@@ -22,13 +22,13 @@
             <span v-else>{{ message.text }}</span>
           </div>
           <div :class="{row: !isToken}">
-            <label class="input-label" :class="{receipient: !isToken}">
-              Receipient Address
+            <label class="input-label" :class="{recipient: !isToken}">
+              Recipient Address
               <input
                 class="input-field"
                 type="text"
                 name="address"
-                v-model="receipient"
+                v-model="recipient"
               />
             </label>
             <label v-if="!isToken" class="input-label shard">
@@ -134,7 +134,7 @@
           </div>
           <div class="transaction__information">
             To
-            <span class="address__name">{{ compressAddress(receipient) }}</span>
+            <span class="address__name">{{ compressAddress(recipient) }}</span>
             of Shard
             <b>{{ toShard }}</b>
           </div>
@@ -217,7 +217,7 @@ export default {
     amount: 0,
     fromShard: 0,
     toShard: 0,
-    receipient: "",
+    recipient: "",
     gasPrice: 1,
     gasLimit: 21000,
     inputData: "",
@@ -254,10 +254,12 @@ export default {
 
   mounted() {
     this.setSelectedToken();
-
     if (this.account.tokens.length === 0) {
       this.loadTokens();
     }
+  },
+  updated() {
+    if (this.scene == 2) this.$refs.password.focus();
   },
 
   methods: {
@@ -318,7 +320,7 @@ export default {
         // use the current selected account in the Account window
         this.fromShard = this.account.shard;
         let ret = await transferToken(
-          this.receipient,
+          this.recipient,
           this.fromShard,
           this.toShard,
           amount,
@@ -344,7 +346,7 @@ export default {
         console.log("this.message.text ", this.message.text);
 
         this.loadTokens();
-        this.receipient = "";
+        this.recipient = "";
         this.amount = 0;
       } catch (e) {
         this.$store.commit("loading", false);
@@ -360,10 +362,18 @@ export default {
     showConfirmDialog() {
       this.message.show = false;
 
-      if (!isValidAddress(this.receipient)) {
+      if (!isValidAddress(this.recipient)) {
         this.message.show = true;
         this.message.type = "error";
         this.message.text = "Invalid recipient address";
+
+        return false;
+      }
+
+      if (this.getFromAddress === this.recipient) {
+        this.message.show = true;
+        this.message.type = "error";
+        this.message.text = "Sender and Recipient address is the same";
 
         return false;
       }
@@ -443,7 +453,7 @@ export default {
 h3 {
   margin-top: 0px;
 }
-.receipient,
+.recipient,
 .amount {
   width: 75%;
   margin-right: 10px;
