@@ -14,9 +14,9 @@ const env = getClientEnvironment();
 
 const config = {
   entry: {
-    background: ["./src/background.js"],
-    popup: "./src/popup/index.js",
-    "content-script": "./src/content-scripts/content-script.js",
+    background: ["./src/background/"],
+    popup: "./src/popup/",
+    "content-script": "./src/content/",
   },
   output: {
     path: path.resolve(__dirname, "./dist"),
@@ -106,10 +106,23 @@ const config = {
     extensions: ["*", ".js", ".vue", ".json"],
   },
   plugins: getPlugins(isProduction),
+  performance: getPerformance(isProduction),
 };
+
+function getPerformance(isProd) {
+  if (isProduction) {
+    return {
+      hints: false,
+      maxEntrypointSize: 512000,
+      maxAssetSize: 512000,
+    };
+  }
+  return {};
+}
 
 function getPlugins(isProd) {
   const plugins = [
+    new CleanWebpackPlugin(),
     new VueLoaderPlugin(),
     new CopyWebpackPlugin([{ from: "./static", to: "./" }], {}),
     new GenerateJsonPlugin("manifest.json", manifest, null, 2),
@@ -118,7 +131,6 @@ function getPlugins(isProd) {
   ];
   if (isProd) {
     plugins.push(
-      new CleanWebpackPlugin(),
       new webpack.LoaderOptionsPlugin({
         minimize: true,
       }),
