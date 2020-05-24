@@ -17,11 +17,8 @@ module.exports = {
    */
   permissions: [
     "storage",
-    "tabs",
-    "<all_urls>",
-    "webNavigation",
-    "webRequest",
-    "webRequestBlocking",
+    "https://staking.harmony.one/",
+    "https://staking-explorer.firebaseapp.com/",
   ],
   browser_action: {
     default_title: "Harmony Wallet",
@@ -32,11 +29,14 @@ module.exports = {
   },
   content_scripts: [
     {
-      matches: ["*://*/*"],
+      matches: [
+        "https://*.harmony.one/*",
+        "https://staking-explorer.firebaseapp.com/*",
+      ],
       js: ["content-script.js"],
     },
   ],
   manifest_version: 2,
-  content_security_policy: "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  content_security_policy: "script-src 'self'; object-src 'self'",
   web_accessible_resources: ["popup.html"],
 };
