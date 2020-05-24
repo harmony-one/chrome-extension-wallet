@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "NODE_ENV=development webpack --progress --watch",
-    "build": "webpack --config ./build/webpack.prod.js --progress  --hide-modules --colors"
+    "build": "NODE_ENV=production webpack --progress"
   },
   "dependencies": {
     "@harmony-js/core": "^0.1.43",
