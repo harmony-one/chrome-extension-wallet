@@ -1,4 +1,4 @@
-const HARMONY_EXTENSION_MESSAGE = "FROM_HARMON_IO";
+const HARMONY_EXTENSION_MESSAGE = "TO_ONEWALLET_EXTENSION";
 
 window.onerror = function(message, source, line, column, error) {
   console.log("ONE ERROR HANDLER TO RULE THEM ALL:", message);
@@ -7,7 +7,6 @@ window.onerror = function(message, source, line, column, error) {
 window.addEventListener(
   "message",
   (event) => {
-    console.log("onewallet---->", event);
     if (event.source !== window) {
       return;
     }
@@ -36,7 +35,6 @@ window.addEventListener(
 
 // Listen message from extension background page/popup and re-send to current window (dashboard page)
 chrome.runtime.onMessage.addListener(async (message) => {
-  console.log(message);
   if (
     !message ||
     !message.type ||

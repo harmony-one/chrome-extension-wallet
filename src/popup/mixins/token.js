@@ -1,4 +1,3 @@
-import API from "../../lib/api";
 import { mapState } from "vuex";
 import { getTokenAmount } from "../../lib/utils";
 

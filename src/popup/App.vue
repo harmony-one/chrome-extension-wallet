@@ -18,11 +18,23 @@
 
 <script>
 import { mapState } from "vuex";
-
+import extensionService from "../services/index";
 export default {
   computed: mapState({
     loading: (state) => state.loading,
   }),
+  mounted() {
+    chrome.runtime.sendMessage(
+      { action: "GET_EXTENSION_STATE" },
+      ({ state } = {}) => {
+        if (!state) return false;
+        if (state.status == "LOGIN") {
+          this.$router.push("/login");
+          chrome.runtime.sendMessage({ action: "RESET_STATE" });
+        }
+      }
+    );
+  },
 };
 </script>
 

@@ -46,6 +46,7 @@ const config = {
           {
             loader: "css-loader",
             options: {
+              url: false,
               sourceMap: true,
             },
           },
@@ -122,7 +123,6 @@ function getPerformance(isProd) {
 
 function getPlugins(isProd) {
   const plugins = [
-    new CleanWebpackPlugin(),
     new VueLoaderPlugin(),
     new CopyWebpackPlugin([{ from: "./static", to: "./" }], {}),
     new GenerateJsonPlugin("manifest.json", manifest, null, 2),
@@ -131,6 +131,7 @@ function getPlugins(isProd) {
   ];
   if (isProd) {
     plugins.push(
+      new CleanWebpackPlugin(),
       new webpack.LoaderOptionsPlugin({
         minimize: true,
       }),

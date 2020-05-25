@@ -35,8 +35,8 @@ body {
     Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
   background: #f7f7ff;
   color: #424242;
-  width: 370px;
-  height: 600px;
+  min-width: 370px;
+  height: 580px;
   font-size: 1rem;
   line-height: 1.5;
   overflow: hidden;
@@ -87,12 +87,17 @@ a:hover {
 }
 
 #app {
-  height: 600px;
+  height: 580px;
   overflow: auto;
 }
 
 .main {
+  width: 370px;
   padding: 6rem 1rem 1rem;
+}
+.prompt {
+  width: 400px;
+  padding: 1.5rem 2rem;
 }
 
 .auth {

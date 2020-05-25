@@ -1,13 +1,6 @@
-import pbkdf2 from "pbkdf2";
-import aesjs from "aes-js";
 import store from "../popup/store";
 import { encryptPhrase, getAddress, decryptPhrase } from "@harmony-js/crypto";
-const {
-  ChainID,
-  ChainType,
-  isValidAddress,
-  Unit,
-} = require("@harmony-js/utils");
+const { isValidAddress } = require("@harmony-js/utils");
 import { Harmony } from "@harmony-js/core";
 
 var currentNetwork = "";
@@ -15,7 +8,7 @@ var currentNetwork = "";
 export const RecoverCode = {
   MNEMONIC: 1,
   PRIVATE_KEY: 2,
-  KEYSTORE: 3
+  KEYSTORE: 3,
 };
 
 var harmony = new Harmony(
@@ -55,7 +48,7 @@ export function validatePrivateKey(privateKey) {
 
 export async function encryptKeyStore(password, privateKey) {
   const keyStore = await encryptPhrase(privateKey, password);
-  return keyStore
+  return keyStore;
 }
 
 export async function decryptKeyStore(password, keystore) {
@@ -63,7 +56,7 @@ export async function decryptKeyStore(password, keystore) {
     return false;
   }
 
-  var privateKey
+  var privateKey;
   try {
     privateKey = await decryptPhrase(JSON.parse(keystore), password);
   } catch (e) {
@@ -83,12 +76,12 @@ export async function createAccountFromMnemonic(name, mnemonic, password) {
   try {
     account = getHarmony().wallet.addByMnemonic(mnemonic);
   } catch (e) {
-    console.log("createAccountFromMnemonic error = ", e)
+    console.log("createAccountFromMnemonic error = ", e);
     return false;
   }
 
   let address = getAddress(account.address).bech32;
-  const keystore = await encryptPhrase( account.privateKey, password);
+  const keystore = await encryptPhrase(account.privateKey, password);
 
   return {
     name,
@@ -221,7 +214,7 @@ export async function getTransfers(
         pageSize: pageSize,
         fullTx: true,
         txType: "ALL",
-        order: "DESC",
+        order,
       },
     ],
     harmony.messenger.chainPrefix,
@@ -263,7 +256,7 @@ export function getNetworkLink(path) {
       basic = "";
       break;
     }
-    case "PartnerNet":{
+    case "PartnerNet": {
       basic = "https://explorer.ps.hmny.io/#";
       break;
     }
@@ -278,13 +271,13 @@ export function getNetworkLink(path) {
 
 export function removeDups(myList) {
   let unique = {};
-  var newList = []
+  var newList = [];
   myList.forEach(function(i) {
-    if(!unique[i.blockHash]) {
+    if (!unique[i.blockHash]) {
       unique[i.blockHash] = true;
-      newList.push(i)
+      newList.push(i);
     }
   });
 
-  return newList
+  return newList;
 }
