@@ -25,3 +25,15 @@ new Vue({
   router,
   render: (h) => h(App),
 }).$mount("#app");
+
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+  const { type, action, payload } = message;
+  if (!type || type !== "FROM_BACK_TO_POPUP") {
+    return false;
+  }
+
+  if (payload.status == "CLOSE") {
+    window.close();
+  }
+  return true;
+});

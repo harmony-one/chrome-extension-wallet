@@ -77,7 +77,7 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 480px;
+  min-height: 450px;
   font-size: 0.875rem;
 }
 .about-content p {

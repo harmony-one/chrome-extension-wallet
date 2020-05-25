@@ -3,6 +3,7 @@ import Router from "vue-router";
 // import SignIn from "./pages/SignIn.vue";
 import CreateWallet from "./pages/CreateWallet.vue";
 import ImportWallet from "./pages/ImportWallet.vue";
+import LogIn from "./pages/LogIn.vue";
 import ConnectHardwareWallet from "./pages/ConnectHardwareWallet.vue";
 import Account from "./pages/Account.vue";
 import Tokens from "./pages/Tokens.vue";
@@ -18,6 +19,11 @@ Vue.use(Router);
 
 const router = new Router({
   routes: [
+    {
+      path: "/login",
+      name: "login",
+      component: LogIn,
+    },
     {
       path: "/",
       name: "account",

@@ -16,13 +16,13 @@
             :class="[message.type]"
             @click="onMessageClick"
           >
-            <span
-              v-if="message.type === 'success'"
-            >Transaction Sucess: Click here to see the transaction</span>
+            <span v-if="message.type === 'success'"
+              >Transaction Sucess: Click here to see the transaction</span
+            >
             <span v-else>{{ message.text }}</span>
           </div>
-          <div :class="{row: !isToken}">
-            <label class="input-label" :class="{recipient: !isToken}">
+          <div :class="{ row: !isToken }">
+            <label class="input-label" :class="{ recipient: !isToken }">
               Recipient Address
               <input
                 class="input-field"
@@ -38,12 +38,13 @@
                   v-for="shard in account.shardArray"
                   :key="shard.shardID"
                   :value="shard.shardID"
-                >{{ shard.shardID }}</option>
+                  >{{ shard.shardID }}</option
+                >
               </select>
             </label>
           </div>
-          <div :class="{row: !isToken}">
-            <label class="input-label" :class="{amount: !isToken}">
+          <div :class="{ row: !isToken }">
+            <label class="input-label" :class="{ amount: !isToken }">
               Amount
               <input
                 class="input-field"
@@ -60,7 +61,8 @@
                   v-for="token in account.tokens"
                   :key="token.name"
                   :value="token"
-                >{{ getTokenName(token) }}</option>
+                  >{{ getTokenName(token) }}</option
+                >
               </select>
             </label>
           </div>
@@ -115,9 +117,7 @@
         <p class="addressRow">
           From
           <span class="address__name">
-            {{
-            compressAddress(getFromAddress)
-            }}
+            {{ compressAddress(getFromAddress) }}
           </span>
           of Shard
           <b>{{ fromShard }}</b>
@@ -177,11 +177,18 @@
                 scene = 1;
               }
             "
-          >Back</button>
+          >
+            Back
+          </button>
           <button @click="sendPayment" :disabled="!password">Approve</button>
         </div>
       </div>
-      <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="4"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -191,7 +198,6 @@ import { mapState } from "vuex";
 import { decryptKeyStore, transferToken } from "../../lib/keystore";
 import { getTokenAmount, getTokenRawAmount } from "../../lib/utils";
 import { isValidAddress } from "@harmony-js/utils";
-import API from "../../lib/api";
 import account from "../mixins/account";
 import AppHeader from "../components/AppHeader.vue";
 
@@ -200,17 +206,17 @@ export default {
   mixins: [account],
 
   components: {
-    AppHeader
+    AppHeader,
   },
   props: {
     isToken: {
       type: Boolean,
-      default: false
+      default: false,
     },
     token: {
       type: String,
-      default: "H2O"
-    }
+      default: "H2O",
+    },
   },
   data: () => ({
     scene: 1,
@@ -226,8 +232,8 @@ export default {
     message: {
       show: false,
       type: "error",
-      text: ""
-    }
+      text: "",
+    },
   }),
 
   computed: {
@@ -249,7 +255,7 @@ export default {
     getHeaderName() {
       if (this.isToken) return "Send Token";
       return "Send Payment";
-    }
+    },
   },
 
   mounted() {
@@ -268,7 +274,7 @@ export default {
         if (!this.isToken) this.selectedToken = this.account.tokens[0];
         else {
           this.selectedToken = this.account.tokens.find(
-            elem => elem.name === this.token
+            (elem) => elem.name === this.token
           );
           if (!this.selectedToken) {
             this.message.show = true;
@@ -299,7 +305,7 @@ export default {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Password is not correct"
+          text: "Password is not correct",
         });
         return false;
       }
@@ -319,6 +325,15 @@ export default {
       try {
         // use the current selected account in the Account window
         this.fromShard = this.account.shard;
+        console.log("request", [
+          this.recipient,
+          this.fromShard,
+          this.toShard,
+          amount,
+          privateKey,
+          this.gasLimit,
+          this.gasPrice,
+        ]);
         let ret = await transferToken(
           this.recipient,
           this.fromShard,
@@ -328,6 +343,7 @@ export default {
           this.gasLimit,
           this.gasPrice
         );
+        console.log("response", ret);
 
         this.$store.commit("loading", false);
         this.password = "";
@@ -437,8 +453,8 @@ export default {
         "..." +
         address.substr(address.length - 5, address.length)
       );
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
