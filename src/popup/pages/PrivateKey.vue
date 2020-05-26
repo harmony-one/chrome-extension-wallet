@@ -115,7 +115,7 @@
 
 <script>
 import { mapState } from "vuex";
-import { decryptKeyStore } from "../../lib/keystore";
+import { decryptKeyStore } from "../../lib/txnService";
 import AppHeader from "../components/AppHeader.vue";
 
 export default {
@@ -148,18 +148,17 @@ export default {
       if (!keystore) return false;
 
       decryptKeyStore(this.password, keystore).then((result) => {
-          if (!result) {
-            this.$notify({
-              group: "notify",
-              type: "error",
-              text: "Password is incorrect",
-            })
-            return false;
-          } else {
-            this.wallet  = {privateKey : result};
-          }
-        });
-        
+        if (!result) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Password is incorrect",
+          });
+          return false;
+        } else {
+          this.wallet = { privateKey: result };
+        }
+      });
     },
     copyToClipboard() {
       this.$copyText(this.wallet.privateKey).then(() => {

@@ -51,8 +51,15 @@
             v-show="wallets.accounts.length > 0"
             class="outline"
             @click="$router.push('/')"
-          >Cancel</button>
-          <button @click="importKey" :class="!wallets.accounts.length ? 'full-width' : ''">Import</button>
+          >
+            Cancel
+          </button>
+          <button
+            @click="importKey"
+            :class="!wallets.accounts.length ? 'full-width' : ''"
+          >
+            Import
+          </button>
         </div>
       </div>
       <div v-else>
@@ -102,11 +109,18 @@
                 scene = 1;
               }
             "
-          >Back</button>
+          >
+            Back
+          </button>
           <button @click="importAcc" :disabled="!name">Import Account</button>
         </div>
       </div>
-      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -119,8 +133,8 @@ import {
   validatePrivateKey,
   getAddressFromPrivateKey,
   createAccountFromMnemonic,
-  decryptKeyStore
-} from "../../lib/keystore";
+  decryptKeyStore,
+} from "../../lib/txnService";
 
 export default {
   data: () => ({
@@ -132,13 +146,13 @@ export default {
     mnemonic: "",
     scene: 1,
     selectType: "key",
-    file: null
+    file: null,
   }),
   components: {
-    AppHeader
+    AppHeader,
   },
   computed: {
-    ...mapState(["wallets"])
+    ...mapState(["wallets"]),
   },
 
   methods: {
@@ -150,7 +164,7 @@ export default {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Please enter a valid private key"
+          text: "Please enter a valid private key",
         });
         return false;
       }
@@ -158,7 +172,7 @@ export default {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Please enter a valid mnemonic"
+          text: "Please enter a valid mnemonic",
         });
         return false;
       }
@@ -167,7 +181,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Please select a file"
+            text: "Please select a file",
           });
           return false;
         } else {
@@ -182,7 +196,7 @@ export default {
                 _this.$notify({
                   group: "notify",
                   type: "error",
-                  text: "Keystore file invalid"
+                  text: "Keystore file invalid",
                 });
                 return false;
               }
@@ -198,7 +212,7 @@ export default {
       if (this.name === "") {
         this.$notify({
           group: "notify",
-          text: "Invalid account name"
+          text: "Invalid account name",
         });
         return false;
       }
@@ -210,7 +224,7 @@ export default {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Password doesn't match"
+          text: "Password doesn't match",
         });
         return false;
       }
@@ -218,11 +232,11 @@ export default {
       if (this.selectType === "key") {
         const oneAddr = getAddressFromPrivateKey(this.privateKey);
 
-        encryptKeyStore(this.password, this.privateKey).then(result => {
+        encryptKeyStore(this.password, this.privateKey).then((result) => {
           wallet = {
             name: this.name,
             address: oneAddr,
-            keystore: result
+            keystore: result,
           };
 
           console.log("added new account through import private key", wallet);
@@ -233,12 +247,12 @@ export default {
         });
       } else if (this.selectType == "mnemonic") {
         createAccountFromMnemonic(this.name, this.mnemonic, this.password).then(
-          wallet => {
+          (wallet) => {
             if (!wallet) {
               this.$notify({
                 group: "notify",
                 type: "error",
-                text: "Mnemonic string is incorrect"
+                text: "Mnemonic string is incorrect",
               });
               return false;
             } else {
@@ -249,23 +263,23 @@ export default {
           }
         );
       } else {
-        decryptKeyStore(this.password, this.keyFromFile).then(result => {
+        decryptKeyStore(this.password, this.keyFromFile).then((result) => {
           if (!result) {
             this.$notify({
               group: "notify",
               type: "error",
-              text: "Password is incorrect or keystore file is invalid"
+              text: "Password is incorrect or keystore file is invalid",
             });
             return false;
           }
 
           console.log("finish decrypting", result);
 
-          encryptKeyStore(this.password, result.privateKey).then(keystore => {
+          encryptKeyStore(this.password, result.privateKey).then((keystore) => {
             wallet = {
               name: this.name,
               address: result.address,
-              keystore: keystore
+              keystore: keystore,
             };
 
             console.log("added new account through import keystore", wallet);
@@ -276,8 +290,8 @@ export default {
           });
         });
       }
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>

@@ -90,7 +90,7 @@ import {
   getNetworkLink,
   getTransactionCount,
   removeDups,
-} from "../../lib/keystore";
+} from "../../lib/txnService";
 import AppHeader from "../components/AppHeader.vue";
 import ExternalLink from "../components/ExternalLink.vue";
 import token from "../mixins/token";

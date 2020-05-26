@@ -36,7 +36,7 @@ body {
   background: #f7f7ff;
   color: #424242;
   min-width: 370px;
-  height: 580px;
+  height: 600px;
   font-size: 1rem;
   line-height: 1.5;
   overflow: hidden;
@@ -87,7 +87,7 @@ a:hover {
 }
 
 #app {
-  height: 580px;
+  height: 600px;
   overflow: auto;
 }
 
@@ -99,7 +99,10 @@ a:hover {
   width: 400px;
   padding: 1.5rem 2rem;
 }
-
+.sign-page {
+  width: 400px;
+  padding: 2rem 1rem;
+}
 .auth {
   clear: both;
   padding: 1.5rem;
