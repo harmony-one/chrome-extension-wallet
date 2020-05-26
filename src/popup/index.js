@@ -6,6 +6,7 @@ import { sync } from "vuex-router-sync";
 import VueIntl from "vue-intl";
 import vClickOutside from "v-click-outside";
 import VueClipboard from "vue-clipboard2";
+import "./css/icons.less";
 // import VModal from "vue-js-modal";
 import Notifications from "vue-notification";
 Vue.config.productionTip = false;

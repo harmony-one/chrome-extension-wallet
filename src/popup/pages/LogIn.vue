@@ -7,15 +7,20 @@
       </div>
       <h3>Staking Dashboard Sign in Request</h3>
       <div class="account-container">
-        <div
-          v-for="(account, index) in wallets.accounts"
-          :key="index"
-          class="card"
-          @click="selectAccount(index)"
-        >
-          <div class="account-box" :class="{ active: selected === index }">
-            <div>{{ account.name }}</div>
-            <div class="account-address">{{ account.address }}</div>
+        <div v-if="!wallets.accounts.length">
+          <p>No Accounts. You should create the account first</p>
+        </div>
+        <div v-else>
+          <div
+            v-for="(account, index) in wallets.accounts"
+            :key="index"
+            class="card"
+            @click="selectAccount(index)"
+          >
+            <div class="account-box" :class="{ active: selected === index }">
+              <div>{{ account.name }}</div>
+              <div class="account-address">{{ account.address }}</div>
+            </div>
           </div>
         </div>
       </div>
