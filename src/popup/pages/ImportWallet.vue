@@ -237,6 +237,7 @@ export default {
             name: this.name,
             address: oneAddr,
             keystore: result,
+            isLedger: false,
           };
 
           console.log("added new account through import private key", wallet);
@@ -256,8 +257,11 @@ export default {
               });
               return false;
             } else {
-              console.log("added new account through import mnemonic", wallet);
-              this.$store.commit("wallets/addAccount", wallet);
+              //console.log("added new account through import mnemonic", wallet);
+              this.$store.commit("wallets/addAccount", {
+                ...wallet,
+                isLedger: false,
+              });
               this.$router.push("/");
             }
           }
@@ -280,6 +284,7 @@ export default {
               name: this.name,
               address: result.address,
               keystore: keystore,
+              isLedger: false,
             };
 
             console.log("added new account through import keystore", wallet);

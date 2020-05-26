@@ -1,6 +1,8 @@
 <template>
   <main class="sign-page">
-    <h3 class="center">Approve Transaction</h3>
+    <h3 class="center">
+      {{ "Approve Transaction" + (wallet.isLedger ? " on Ledger" : "") }}
+    </h3>
     <p class="addressRow">
       From
       <span class="address__name">{{ senderAddress }}</span>
@@ -43,7 +45,7 @@
         </div>
       </div>
     </div>
-    <div class="password-content">
+    <div v-if="!wallet.isLedger" class="password-content">
       <label class="input-label">
         Password
         <input
@@ -56,6 +58,9 @@
           v-on:keyup.enter="approve"
         />
       </label>
+    </div>
+    <div class="ledger-content" v-else>
+      <b>Please unlock your ledger and confirm the transaction</b>
     </div>
     <div class="button-group">
       <button class="outline" @click="reject">Reject</button>
@@ -83,40 +88,45 @@ export default {
     targetAddress: "",
     password: "",
     type: "Send",
+    wallet: {
+      isLedger: false,
+    },
   }),
   methods: {
     getDisplayedAmount(num) {
       return Number(num / 1000000).toFixed(6);
     },
     async approve() {
-      if (!this.password) return;
-      const account = this.wallets.accounts.find(
-        (account) => account.address === this.senderAddress
-      );
-      if (!account) {
-        this.$notify({
-          group: "notify",
-          type: "error",
-          text: "Account is not found",
-        });
-        return false;
-      }
-      const privateKey = await decryptKeyStore(this.password, account.keystore);
+      let privateKey;
+      if (!this.wallet.isLedger) {
+        if (!this.password) return;
+        if (!this.wallet) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Account is not found",
+          });
+          return false;
+        }
+        privateKey = await decryptKeyStore(this.password, this.wallet.keystore);
 
-      if (!privateKey) {
-        this.$notify({
-          group: "notify",
-          type: "error",
-          text: "Password is not correct",
-        });
-        return false;
+        if (!privateKey) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Password is not correct",
+          });
+          return false;
+        }
+      } else {
+        //todo approve via ledger, Howard, it's your turn
       }
       chrome.runtime.sendMessage({
         action: "SIGN_TRANSACTION",
         payload: {
-          keystore: account.keystore,
-          password: this.password
-        }
+          keystore: this.wallet.keystore, //send keystore and password to the internal message handler of background.js
+          password: this.password,
+        },
       });
     },
 
@@ -143,8 +153,10 @@ export default {
       return this.type === "WithdrawDelegationReward";
     },
   },
+  updated() {
+    if (this.$refs.password) this.$refs.password.focus();
+  },
   mounted() {
-    this.$refs.password.focus();
     chrome.runtime.sendMessage(
       { action: "GET_EXTENSION_STATE" },
       ({ state } = {}) => {
@@ -160,6 +172,9 @@ export default {
           this.gas = state.transactionDetails.gas / 1000;
           this.type = state.transactionDetails.type;
         }
+        this.wallet = this.wallets.accounts.find(
+          (account) => account.address === this.senderAddress
+        );
       }
     );
   },
@@ -174,5 +189,9 @@ h3 {
 }
 .center {
   text-align: center;
+}
+.ledger-content {
+  font-style: italic;
+  margin-top: 20px;
 }
 </style>
