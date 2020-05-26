@@ -113,7 +113,9 @@
       </div>
       <!-- Approve Transaction Dialog -->
       <div v-else>
-        <h3 class="center">Approve Transaction</h3>
+        <h3 class="center">
+          {{ "Approve Transaction" + (wallet.isLedger ? " on Ledger" : "") }}
+        </h3>
         <p class="addressRow">
           From
           <span class="address__name">
@@ -155,7 +157,7 @@
           </div>
         </div>
 
-        <div class="password-content">
+        <div v-if="!wallet.isLedger" class="password-content">
           <label class="input-label">
             Password
             <input
@@ -168,6 +170,9 @@
               v-on:keyup.enter="sendPayment"
             />
           </label>
+        </div>
+        <div class="ledger-content" v-else>
+          <b>Please unlock your ledger and confirm the transaction</b>
         </div>
         <div class="button-group">
           <button
@@ -237,14 +242,16 @@ export default {
   }),
 
   computed: {
-    ...mapState(["wallets"]),
+    ...mapState({
+      wallet: (state) => state.wallets.active,
+    }),
     getUnitName() {
       const unitName = this.getTokenName(this.selectedToken);
       if (!unitName) return "ONE";
       return unitName;
     },
     getFromAddress() {
-      return this.wallets.active.address;
+      return this.wallet.address;
     },
     getGasFee() {
       return parseFloat((this.gasPrice * this.gasLimit) / Math.pow(10, 9));
@@ -296,19 +303,22 @@ export default {
       this.$store.commit("loading", false);
     },
     async sendPayment() {
-      if (!this.password) return;
-      const privateKey = await decryptKeyStore(
-        this.password,
-        this.wallets.active.keystore
-      );
+      let privateKey;
+      if (!this.wallet.isLedger) {
+        if (!this.password) return;
+        privateKey = await decryptKeyStore(this.password, this.wallet.keystore);
 
-      if (!privateKey) {
-        this.$notify({
-          group: "notify",
-          type: "error",
-          text: "Password is not correct",
-        });
-        return false;
+        if (!privateKey) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Password is not correct",
+          });
+          return false;
+        }
+      } else {
+        //not sure how to get private key from ledger, Howard, it's your turn
+        //todo send payment on ledger
       }
 
       this.$store.commit("loading", true);
@@ -477,5 +487,9 @@ h3 {
 }
 .center {
   text-align: center;
+}
+.ledger-content {
+  font-style: italic;
+  margin-top: 20px;
 }
 </style>

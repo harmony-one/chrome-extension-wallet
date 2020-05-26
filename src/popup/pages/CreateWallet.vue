@@ -153,8 +153,10 @@ export default {
           });
           return false;
         } else {
-          console.log("added new account through mnemonic", wallet);
-          this.$store.commit("wallets/addAccount", wallet);
+          this.$store.commit("wallets/addAccount", {
+            ...wallet,
+            isLedger: false,
+          });
           this.$router.push("/");
         }
       });
