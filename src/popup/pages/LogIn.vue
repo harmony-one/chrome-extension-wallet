@@ -36,7 +36,6 @@ export default {
   computed: {
     ...mapState(["wallets"]),
   },
-  mounted() {},
   methods: {
     selectAccount(index) {
       this.selected = index;
@@ -86,6 +85,7 @@ export default {
   font-size: 1rem;
   font-weight: 600;
   color: #424242;
+  margin-bottom: 20px;
 }
 .header-logo img,
 .header-logo span {

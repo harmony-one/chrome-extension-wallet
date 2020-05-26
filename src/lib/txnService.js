@@ -132,6 +132,7 @@ export async function transferToken(
 ) {
   let harmony = getHarmony();
 
+  console.log("txnService", harmony);
   //1e18
   const txn = harmony.transactions.newTx({
     //  token send to
@@ -163,6 +164,7 @@ export async function transferToken(
 
   // sign the transaction use wallet;
   const account = harmony.wallet.addByPrivateKey(privateKey);
+
   const signedTxn = await account.signTransaction(txn);
 
   signedTxn

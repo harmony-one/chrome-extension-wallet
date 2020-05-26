@@ -195,7 +195,7 @@
 
 <script>
 import { mapState } from "vuex";
-import { decryptKeyStore, transferToken } from "../../lib/keystore";
+import { decryptKeyStore, transferToken } from "../../lib/txnService";
 import { getTokenAmount, getTokenRawAmount } from "../../lib/utils";
 import { isValidAddress } from "@harmony-js/utils";
 import account from "../mixins/account";
@@ -296,6 +296,7 @@ export default {
       this.$store.commit("loading", false);
     },
     async sendPayment() {
+      if (!this.password) return;
       const privateKey = await decryptKeyStore(
         this.password,
         this.wallets.active.keystore
@@ -325,15 +326,6 @@ export default {
       try {
         // use the current selected account in the Account window
         this.fromShard = this.account.shard;
-        console.log("request", [
-          this.recipient,
-          this.fromShard,
-          this.toShard,
-          amount,
-          privateKey,
-          this.gasLimit,
-          this.gasPrice,
-        ]);
         let ret = await transferToken(
           this.recipient,
           this.fromShard,
@@ -343,7 +335,6 @@ export default {
           this.gasLimit,
           this.gasPrice
         );
-        console.log("response", ret);
 
         this.$store.commit("loading", false);
         this.password = "";

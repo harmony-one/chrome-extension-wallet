@@ -28,10 +28,12 @@ export default {
       { action: "GET_EXTENSION_STATE" },
       ({ state } = {}) => {
         if (!state) return false;
-        if (state.status == "LOGIN") {
+        if (state.status === "LOGIN") {
           this.$router.push("/login");
-          chrome.runtime.sendMessage({ action: "RESET_STATE" });
+        } else if (state.status === "SIGN") {
+          this.$router.push("/sign");
         }
+        chrome.runtime.sendMessage({ action: "RESET_WINDOW_STATE" });
       }
     );
   },

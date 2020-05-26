@@ -31,9 +31,14 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (!type || type !== "FROM_BACK_TO_POPUP") {
     return false;
   }
-
-  if (payload.status == "CLOSE") {
-    window.close();
+  if (action === "STATE_CHANGE") {
+    if (payload.status === "LOGIN") {
+      router.push("/login");
+    } else if (payload.status === "SIGN") {
+      router.push("/sign");
+    } else if (payload.status === "CLOSE") {
+      window.close();
+    }
   }
   return true;
 });

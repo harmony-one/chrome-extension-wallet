@@ -23,10 +23,10 @@ function externalMessageListener(message, sender, sendResponse) {
         },
       });
       break;
-    case "CLOSE_SESSION":
-      extensionService.closeSession();
-      break;
     case "ONEWALLET_SIGN_REQUEST":
+      extensionService.prepareSignTransaction(payload.payload, sender.tab.id);
+      break;
+    case "ONEWALLET_LOGIN_REQUEST":
       extensionService.startLogIn(sender.tab.id);
       break;
     default:
@@ -48,10 +48,14 @@ function internalMessageListener(message, sender, sendResponse) {
       sendResponse({ state });
       break;
     }
-    case "RESET_STATE":
-      {
-        extensionService.resetState();
-      }
+    case "REJECT_TRANSACTION":
+      extensionService.resetState();
+      break;
+    case "SIGN_TRANSACTION":
+      extensionService.signTransaction(payload);
+      break;
+    case "RESET_WINDOW_STATE":
+      extensionService.resetWindowState();
       break;
     case "LOGGED_IN": {
       extensionService.loginWithExtension(payload);
