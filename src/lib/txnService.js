@@ -132,7 +132,6 @@ export async function transferToken(
 ) {
   let harmony = getHarmony();
 
-  console.log("txnService", harmony);
   //1e18
   const txn = harmony.transactions.newTx({
     //  token send to
