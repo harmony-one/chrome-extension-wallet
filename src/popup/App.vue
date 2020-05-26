@@ -43,5 +43,4 @@ export default {
 <style>
 @import url("css/normalize.css");
 @import url("css/style.css");
-@import url("css/font-awesome/css/font-awesome.min.css");
 </style>
