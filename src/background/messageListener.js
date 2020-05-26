@@ -49,7 +49,7 @@ function internalMessageListener(message, sender, sendResponse) {
       break;
     }
     case "REJECT_TRANSACTION":
-      extensionService.resetState();
+      extensionService.closeSession();
       break;
     case "SIGN_TRANSACTION":
       extensionService.signTransaction(payload);

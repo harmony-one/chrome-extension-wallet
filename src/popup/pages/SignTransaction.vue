@@ -130,7 +130,7 @@ export default {
       });
     },
 
-    reject() {
+    async reject() {
       chrome.runtime.sendMessage({ action: "REJECT_TRANSACTION" });
       window.close();
     },
@@ -175,6 +175,7 @@ export default {
         this.wallet = this.wallets.accounts.find(
           (account) => account.address === this.senderAddress
         );
+        console.log(this.wallets);
       }
     );
   },
