@@ -1,6 +1,5 @@
-import API from "../../lib/api";
 import { mapState } from "vuex";
-import { getBalance, getShardInfo } from "../../lib/keystore";
+import { getBalance, getShardInfo } from "../../lib/txnService";
 import { Unit } from "@harmony-js/utils";
 import token from "./token";
 

@@ -3,6 +3,7 @@ export default {
 
   state: {
     id: 1,
+    chainId: 1,
     name: "Mainnet",
     apiUrl: "https://api.s0.t.hmny.io",
     type: "mainnet",
@@ -10,7 +11,7 @@ export default {
 
   mutations: {
     change(state, network) {
-      console.log("saving network", network.name);
+      console.log("saving network", network);
       state.id = network.id;
       state.chainId = network.chainId;
       state.name = network.name;

@@ -18,16 +18,29 @@
 
 <script>
 import { mapState } from "vuex";
-
+import extensionService from "../services/index";
 export default {
   computed: mapState({
     loading: (state) => state.loading,
   }),
+  mounted() {
+    chrome.runtime.sendMessage(
+      { action: "GET_EXTENSION_STATE" },
+      ({ state } = {}) => {
+        if (!state) return false;
+        if (state.status === "LOGIN") {
+          this.$router.push("/login");
+        } else if (state.status === "SIGN") {
+          this.$router.push("/sign");
+        }
+        chrome.runtime.sendMessage({ action: "RESET_WINDOW_STATE" });
+      }
+    );
+  },
 };
 </script>
 
 <style>
 @import url("css/normalize.css");
 @import url("css/style.css");
-@import url("css/font-awesome/css/font-awesome.min.css");
 </style>

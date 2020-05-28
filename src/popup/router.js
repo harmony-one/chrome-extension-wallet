@@ -3,10 +3,12 @@ import Router from "vue-router";
 // import SignIn from "./pages/SignIn.vue";
 import CreateWallet from "./pages/CreateWallet.vue";
 import ImportWallet from "./pages/ImportWallet.vue";
+import LogIn from "./pages/LogIn.vue";
 import ConnectHardwareWallet from "./pages/ConnectHardwareWallet.vue";
 import Account from "./pages/Account.vue";
 import Tokens from "./pages/Tokens.vue";
 import Transfers from "./pages/Transfers.vue";
+import SignTransaction from "./pages/SignTransaction.vue";
 import Send from "./pages/Send.vue";
 import SendToken from "./pages/SendToken.vue";
 import Receive from "./pages/Receive.vue";
@@ -18,6 +20,11 @@ Vue.use(Router);
 
 const router = new Router({
   routes: [
+    {
+      path: "/login",
+      name: "login",
+      component: LogIn,
+    },
     {
       path: "/",
       name: "account",
@@ -46,6 +53,14 @@ const router = new Router({
       path: "/send",
       name: "send",
       component: Send,
+      meta: {
+        requiredAccount: true,
+      },
+    },
+    {
+      path: "/sign",
+      name: "signtransaction",
+      component: SignTransaction,
       meta: {
         requiredAccount: true,
       },
