@@ -16,13 +16,13 @@
             :class="[message.type]"
             @click="onMessageClick"
           >
-            <span
-              v-if="message.type === 'success'"
-            >Transaction Sucess: Click here to see the transaction</span>
+            <span v-if="message.type === 'success'"
+              >Transaction Sucess: Click here to see the transaction</span
+            >
             <span v-else>{{ message.text }}</span>
           </div>
-          <div :class="{row: !isToken}">
-            <label class="input-label" :class="{recipient: !isToken}">
+          <div :class="{ row: !isToken }">
+            <label class="input-label" :class="{ recipient: !isToken }">
               Recipient Address
               <input
                 class="input-field"
@@ -38,12 +38,13 @@
                   v-for="shard in account.shardArray"
                   :key="shard.shardID"
                   :value="shard.shardID"
-                >{{ shard.shardID }}</option>
+                  >{{ shard.shardID }}</option
+                >
               </select>
             </label>
           </div>
-          <div :class="{row: !isToken}">
-            <label class="input-label" :class="{amount: !isToken}">
+          <div :class="{ row: !isToken }">
+            <label class="input-label" :class="{ amount: !isToken }">
               Amount
               <input
                 class="input-field"
@@ -60,7 +61,8 @@
                   v-for="token in account.tokens"
                   :key="token.name"
                   :value="token"
-                >{{ getTokenName(token) }}</option>
+                  >{{ getTokenName(token) }}</option
+                >
               </select>
             </label>
           </div>
@@ -111,13 +113,13 @@
       </div>
       <!-- Approve Transaction Dialog -->
       <div v-else>
-        <h3 class="center">Approve Transaction</h3>
+        <h3 class="center">
+          {{ "Approve Transaction" + (wallet.isLedger ? " on Ledger" : "") }}
+        </h3>
         <p class="addressRow">
           From
           <span class="address__name">
-            {{
-            compressAddress(getFromAddress)
-            }}
+            {{ compressAddress(getFromAddress) }}
           </span>
           of Shard
           <b>{{ fromShard }}</b>
@@ -155,7 +157,7 @@
           </div>
         </div>
 
-        <div class="password-content">
+        <div v-if="!wallet.isLedger" class="password-content">
           <label class="input-label">
             Password
             <input
@@ -169,6 +171,9 @@
             />
           </label>
         </div>
+        <div class="ledger-content" v-else>
+          <b>Please unlock your ledger and confirm the transaction</b>
+        </div>
         <div class="button-group">
           <button
             class="outline"
@@ -177,21 +182,27 @@
                 scene = 1;
               }
             "
-          >Back</button>
+          >
+            Back
+          </button>
           <button @click="sendPayment" :disabled="!password">Approve</button>
         </div>
       </div>
-      <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="4"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
-import { decryptKeyStore, transferToken } from "../../lib/keystore";
+import { decryptKeyStore, transferToken } from "../../lib/txnService";
 import { getTokenAmount, getTokenRawAmount } from "../../lib/utils";
 import { isValidAddress } from "@harmony-js/utils";
-import API from "../../lib/api";
 import account from "../mixins/account";
 import AppHeader from "../components/AppHeader.vue";
 
@@ -200,17 +211,17 @@ export default {
   mixins: [account],
 
   components: {
-    AppHeader
+    AppHeader,
   },
   props: {
     isToken: {
       type: Boolean,
-      default: false
+      default: false,
     },
     token: {
       type: String,
-      default: "H2O"
-    }
+      default: "H2O",
+    },
   },
   data: () => ({
     scene: 1,
@@ -226,19 +237,21 @@ export default {
     message: {
       show: false,
       type: "error",
-      text: ""
-    }
+      text: "",
+    },
   }),
 
   computed: {
-    ...mapState(["wallets"]),
+    ...mapState({
+      wallet: (state) => state.wallets.active,
+    }),
     getUnitName() {
       const unitName = this.getTokenName(this.selectedToken);
       if (!unitName) return "ONE";
       return unitName;
     },
     getFromAddress() {
-      return this.wallets.active.address;
+      return this.wallet.address;
     },
     getGasFee() {
       return parseFloat((this.gasPrice * this.gasLimit) / Math.pow(10, 9));
@@ -249,7 +262,7 @@ export default {
     getHeaderName() {
       if (this.isToken) return "Send Token";
       return "Send Payment";
-    }
+    },
   },
 
   mounted() {
@@ -268,7 +281,7 @@ export default {
         if (!this.isToken) this.selectedToken = this.account.tokens[0];
         else {
           this.selectedToken = this.account.tokens.find(
-            elem => elem.name === this.token
+            (elem) => elem.name === this.token
           );
           if (!this.selectedToken) {
             this.message.show = true;
@@ -290,18 +303,22 @@ export default {
       this.$store.commit("loading", false);
     },
     async sendPayment() {
-      const privateKey = await decryptKeyStore(
-        this.password,
-        this.wallets.active.keystore
-      );
+      let privateKey;
+      if (!this.wallet.isLedger) {
+        if (!this.password) return;
+        privateKey = await decryptKeyStore(this.password, this.wallet.keystore);
 
-      if (!privateKey) {
-        this.$notify({
-          group: "notify",
-          type: "error",
-          text: "Password is not correct"
-        });
-        return false;
+        if (!privateKey) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Password is not correct",
+          });
+          return false;
+        }
+      } else {
+        //not sure how to get private key from ledger, Howard, it's your turn
+        //todo send payment on ledger
       }
 
       this.$store.commit("loading", true);
@@ -437,8 +454,8 @@ export default {
         "..." +
         address.substr(address.length - 5, address.length)
       );
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
@@ -470,5 +487,9 @@ h3 {
 }
 .center {
   text-align: center;
+}
+.ledger-content {
+  font-style: italic;
+  margin-top: 20px;
 }
 </style>
