@@ -143,7 +143,7 @@
             <router-link to="/create-wallet">Create Account</router-link>
           </div>
           <div class="dropdown-menu-item">
-            <i class="material-icons">save_alt</i>
+            <i class="material-icons">save</i>
             <router-link to="/import-wallet">Import Account</router-link>
           </div>
           <div class="dropdown-menu-item">
