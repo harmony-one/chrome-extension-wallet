@@ -3,10 +3,6 @@ export default {
 
   state: {
     balance: 0,
-    bandwidth: 0,
-    freeBandwidth: 0,
-    frozen: 0,
-    frozenExpires: 0,
     tokens: [],
     transfers: [],
     transactions: [],
@@ -19,11 +15,6 @@ export default {
       state.balance = account.balance;
       state.shardArray = account.shardArray;
       state.shard = account.shard;
-
-      state.bandwidth = account.bandwidth;
-      state.freeBandwidth = account.freeBandwidth;
-      state.frozen = account.frozen;
-      state.frozenExpires = account.frozenExpires;
     },
 
     shard(state, shard) {
@@ -36,10 +27,6 @@ export default {
 
     balance(state, balance) {
       state.balance = balance;
-    },
-
-    frozen(state, frozen) {
-      state.frozen = frozen;
     },
 
     tokens(state, tokens) {
