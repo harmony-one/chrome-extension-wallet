@@ -16,6 +16,8 @@
     "@babel/core": "^7.9.6",
     "@babel/preset-env": "^7.9.6",
     "@harmony-js/core": "^0.1.43",
+    "@ledgerhq/hw-transport-webhid": "^5.7.0",
+    "@ledgerhq/hw-transport-webusb": "4.74.1",
     "@vue/babel-preset-app": "^4.3.1",
     "aes-js": "^3.1.1",
     "babel-loader": "^8.1.0",
