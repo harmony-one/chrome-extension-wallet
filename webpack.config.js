@@ -124,7 +124,7 @@ function getPerformance(isProd) {
 function getPlugins(isProd) {
   const plugins = [
     new VueLoaderPlugin(),
-    new CopyWebpackPlugin([{ from: "./static", to: "./" }], {}),
+    new CopyWebpackPlugin({ patterns: [{ from: "./static", to: "./" }] }),
     new GenerateJsonPlugin("manifest.json", manifest, null, 2),
     new webpack.DefinePlugin(env.stringified),
     // new HardSourceWebpackPlugin()

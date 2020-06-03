@@ -20,6 +20,7 @@
         >Cancel</button>
         <button :class="!wallets.accounts.length? 'full-width' : ''" @click="connect">Connect</button>
       </div>
+      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
     </main>
   </div>
 </template>
@@ -27,9 +28,7 @@
 <script>
 import { mapState } from "vuex";
 import AppHeader from "../components/AppHeader.vue";
-import {
-  connectLedgerApp
-} from "../../lib/ledger";
+import { connectLedgerApp } from "../../lib/ledger";
 
 export default {
   data: () => ({
@@ -46,31 +45,39 @@ export default {
   },
   methods: {
     connect() {
-      console.log("start connecting ledger")
+      console.log("start connecting ledger");
 
-      connectLedgerApp().then((address) => {
-
-        const wallet = {
-          isLedger: true,
-          name: "Ledger",
-          address: address,
-          keystore: "",
+      connectLedgerApp()
+        .then(address => {
+          const wallet = {
+            isLedger: true,
+            name: "Ledger",
+            address: address,
+            keystore: ""
           };
 
           this.$store.commit("wallets/addAccount", wallet);
 
           // this.$router.push("/");
-          alert("Your ledger account is loaded. To continue, close this tab and use the extension");
+          alert(
+            "Your ledger account is loaded. To continue, close this tab and use the extension"
+          );
           chrome.tabs.getCurrent(function(tab) {
-            chrome.tabs.remove(tab.id, function() { });
+            chrome.tabs.remove(tab.id, function() {});
           });
-          }
-        );
+        })
+        .catch(err => {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text:
+              "You did not select a Ledger device. Check if the Ledger is plugged in and unlocked."
+          });
+          console.log(err);
+        });
     }
   }
 };
-
-
 </script>
 <style scoped>
 .connect-wallet {
