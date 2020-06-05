@@ -11,12 +11,6 @@ export default {
   },
 
   mutations: {
-    change(state, account) {
-      state.balance = account.balance;
-      state.shardArray = account.shardArray;
-      state.shard = account.shard;
-    },
-
     shard(state, shard) {
       state.shard = shard;
     },

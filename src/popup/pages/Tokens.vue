@@ -12,20 +12,10 @@
           :key="token.name"
           v-show="token.name !== '_'"
         >
-          <span class="token-name">{{ getHRC20Details(token.name)[1] }}</span>
-          <span class="token-balance">
-            {{
-            $formatNumber(
-            getTokenAmount(token.balance, getHRC20Details(token.name)[2]),
-            {
-            maximumSignificantDigits:
-            parseInt(getHRC20Details(token.name)[2]) + 1,
-            }
-            )
-            }}
-          </span>
+          <span class="token-name">{{ token.name }}</span>
+          <span class="token-balance">{{token.balance}}</span>
           <button
-            v-show="token.name === 'H2O'"
+            v-show="token.name === 'H20'"
             class="but-token"
             @click="$router.push('/send-token')"
           >Send</button>
