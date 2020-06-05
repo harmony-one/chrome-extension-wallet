@@ -1,11 +1,8 @@
 import { mapState } from "vuex";
-import { getBalance, getShardInfo } from "../../lib/txnService";
+import { getBalance, getShardInfo, getH20Balance } from "../../lib/txnService";
 import { Unit } from "@harmony-js/utils";
-import token from "./token";
 
 export default {
-  mixins: [token],
-
   computed: mapState({
     account: (state) => state.account,
     address: (state) => state.wallets.active.address,
@@ -20,9 +17,9 @@ export default {
 
     async loadBalance() {
       let result = await getBalance(this.address, this.account.shard);
+      let h20Balance = await getH20Balance(this.address);
       let balance = Unit.Wei(result).toEther();
       this.$store.commit("account/balance", balance);
-
       //TODO: update this fake token balances
       var tokens = [
         {
@@ -30,13 +27,11 @@ export default {
           name: "_",
         },
         {
-          balance: 100000000,
-          name: "H2O",
+          balance: h20Balance,
+          name: "H20",
         },
       ];
-
       this.$store.commit("account/tokens", tokens);
-      await this.loadTokenData();
     },
 
     async refreshAccount() {

@@ -5,7 +5,6 @@ import wallets from "./modules/wallets";
 import network from "./modules/network";
 import account from "./modules/account";
 import votes from "./modules/votes";
-import hrc20 from "./modules/hrc20";
 
 Vue.use(Vuex);
 
@@ -20,7 +19,6 @@ export default new Vuex.Store({
     network,
     account,
     votes,
-    hrc20,
   },
 
   state: {

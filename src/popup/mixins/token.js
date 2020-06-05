@@ -19,6 +19,8 @@ export default {
     },
 
     getHRC20Details(name) {
+      console.log(this.hrc20);
+      console.log(name);
       if (this.hrc20[name] == undefined) {
         return ["HRC", "HRC", "0"];
       }
