@@ -1,6 +1,6 @@
 import store from "../popup/store";
 import { encryptPhrase, getAddress, decryptPhrase } from "@harmony-js/crypto";
-const { isValidAddress } = require("@harmony-js/utils");
+const { isValidAddress, ChainType } = require("@harmony-js/utils");
 import { Harmony } from "@harmony-js/core";
 import BigNumber from "bignumber.js";
 const H20 = require("./contracts/HarmonyERC20.json");
@@ -18,7 +18,7 @@ var harmony = new Harmony(
   // rpc url
   store.state.network.apiUrl,
   {
-    chainType: store.state.network.type, //ChainType.Harmony,
+    chainType: ChainType.Harmony,
     chainId: store.state.network.chainId, //ChainID.HmyMainnet,
   }
 );
@@ -30,7 +30,7 @@ export default function getHarmony() {
       // rpc url
       store.state.network.apiUrl,
       {
-        chainType: store.state.network.type, //ChainType.Harmony,
+        chainType: ChainType.Harmony,
         chainId: store.state.network.chainId, //ChainID.HmyMainnet,
       }
     );
