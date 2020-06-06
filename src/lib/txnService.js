@@ -1,10 +1,13 @@
 import store from "../popup/store";
 import { encryptPhrase, getAddress, decryptPhrase } from "@harmony-js/crypto";
-const { isValidAddress } = require("@harmony-js/utils");
+const { isValidAddress, ChainType } = require("@harmony-js/utils");
 import { Harmony } from "@harmony-js/core";
-
+import BigNumber from "bignumber.js";
+const H20 = require("./contracts/HarmonyERC20.json");
+const DEFAULT_CONTRACT_ADDRESS = "0xf4Be4Bad17Ff4be93384C9d04f7bebDcfb227dBb";
 var currentNetwork = "";
-
+const DECIMAL = 18;
+BigNumber.config({ ROUNDING_MODE: 3 });
 export const RecoverCode = {
   MNEMONIC: 1,
   PRIVATE_KEY: 2,
@@ -15,11 +18,10 @@ var harmony = new Harmony(
   // rpc url
   store.state.network.apiUrl,
   {
-    chainType: store.state.network.type, //ChainType.Harmony,
+    chainType: ChainType.Harmony,
     chainId: store.state.network.chainId, //ChainID.HmyMainnet,
   }
 );
-
 export default function getHarmony() {
   if (currentNetwork != store.state.network.name) {
     currentNetwork = store.state.network.name;
@@ -28,7 +30,7 @@ export default function getHarmony() {
       // rpc url
       store.state.network.apiUrl,
       {
-        chainType: store.state.network.type, //ChainType.Harmony,
+        chainType: ChainType.Harmony,
         chainId: store.state.network.chainId, //ChainID.HmyMainnet,
       }
     );
@@ -36,6 +38,18 @@ export default function getHarmony() {
 
   return harmony;
 }
+
+export const getH20ContractInstance = () => {
+  const netid = store.state.network.chainId;
+  const contract = getHarmony().contracts.createContract(
+    H20.abi,
+    H20.networks[netid] ? H20.networks[netid].address : DEFAULT_CONTRACT_ADDRESS
+  );
+  return contract;
+};
+
+export const oneToHexAddress = (address) =>
+  getHarmony().crypto.getAddress(address).basicHex;
 
 export function validatePrivateKey(privateKey) {
   try {
@@ -107,6 +121,17 @@ export async function getBalance(address, shardId) {
   let ret = await getHarmony().blockchain.getBalance({ address });
 
   return ret.result;
+}
+export async function getH20Balance(address) {
+  const instance = getH20ContractInstance();
+  const hexAddress = oneToHexAddress(address);
+  let decimal = await instance.methods.decimals().call();
+  console.log(decimal);
+  let bigbalance = await instance.methods.balanceOf(hexAddress).call();
+  let balance = BigNumber(bigbalance)
+    .dividedBy(Math.pow(10, DECIMAL))
+    .toFixed(2);
+  return balance;
 }
 
 export async function getShardInfo() {
