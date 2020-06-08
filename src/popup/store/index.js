@@ -3,6 +3,7 @@ import Vuex from "vuex";
 import VuexPersistence from "vuex-persist";
 import wallets from "./modules/wallets";
 import network from "./modules/network";
+import hrc20 from "./modules/hrc20";
 import account from "./modules/account";
 import votes from "./modules/votes";
 
@@ -18,6 +19,7 @@ export default new Vuex.Store({
     wallets,
     network,
     account,
+    hrc20,
     votes,
   },
 

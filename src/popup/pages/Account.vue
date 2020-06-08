@@ -16,9 +16,7 @@
 
         <div class="box-balance">
           {{ $formatNumber(account.balance, { maximumSignificantDigits: 7 }) }}
-          <span
-            class="box-balance-code"
-          >ONE</span>
+          <span class="box-balance-code">ONE</span>
         </div>
 
         <!-- Shard -->
@@ -29,16 +27,24 @@
               v-for="item in account.shardArray"
               :value="item.shardID"
               :key="item.shardID"
-            >{{ item.shardID }}</option>
+              >{{ item.shardID }}</option
+            >
           </select>
         </div>
         <div class="button-group">
-          <button class="outline" @click="$router.push('/receive')">Receive</button>
+          <button class="outline" @click="$router.push('/receive')">
+            Receive
+          </button>
           <button @click="$router.push('/send')">Send</button>
         </div>
         <div class="divider"></div>
       </div>
-      <notifications group="copied" width="180" :max="2" class="notifiaction-container" />
+      <notifications
+        group="copied"
+        width="180"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -54,15 +60,17 @@ export default {
 
   components: {
     AppHeader,
-    MainTab
+    MainTab,
   },
 
   data: () => ({
-    shard: 0
+    shard: 0,
   }),
+
   computed: {
-    ...mapState(["wallets"])
+    ...mapState(["wallets"]),
   },
+
   mounted() {
     if (
       typeof this.account.shard !== "undefined" ||
@@ -83,7 +91,7 @@ export default {
       this.$store.commit("account/shard", newValue);
       this.loadBalance();
       // window.location.reload();
-    }
+    },
   },
 
   methods: {
@@ -92,7 +100,7 @@ export default {
         this.$notify({
           group: "copied",
           type: "info",
-          text: "Copied to Clipboard"
+          text: "Copied to Clipboard",
         });
       });
     },
@@ -109,8 +117,8 @@ export default {
         "..." +
         address.substr(address.length - 5, address.length)
       );
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>

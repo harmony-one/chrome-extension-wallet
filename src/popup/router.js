@@ -66,7 +66,7 @@ const router = new Router({
       },
     },
     {
-      path: "/send-token",
+      path: "/send-token/:symbol",
       name: "send-token",
       component: SendToken,
       meta: {
