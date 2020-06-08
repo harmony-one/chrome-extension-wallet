@@ -2,11 +2,12 @@ export default {
   namespaced: true,
 
   state: {
-    id: 1,
-    chainId: 1,
-    name: "Mainnet",
-    apiUrl: "https://api.s0.t.hmny.io",
-    type: "mainnet",
+    id: 0,
+    chainId: 0,
+    name: "",
+    apiUrl: "",
+    type: "",
+    tokens: [],
   },
 
   mutations: {
@@ -17,6 +18,7 @@ export default {
       state.name = network.name;
       state.apiUrl = network.apiUrl;
       state.type = network.type;
+      state.tokens = network.tokens;
     },
   },
 };

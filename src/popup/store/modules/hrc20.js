@@ -1,15 +1,16 @@
-import tokens from "../../../tokens";
+import tokens from "../../../lib/contracts/config";
 
 export default {
   namespaced: true,
-
   state: {
     tokens: tokens,
   },
-
   mutations: {
-    tokens(state, tokens) {
-      state.tokens = tokens;
+    loadBalance(state, payload) {
+      state.tokens[payload.token] = {
+        ...state.tokens[payload.token],
+        balance: payload.balance,
+      };
     },
   },
 };
