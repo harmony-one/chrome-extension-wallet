@@ -1,5 +1,5 @@
 import store from "../../popup/store";
-
+import { getNetworkLink } from "../txnService";
 import { Harmony } from "@harmony-js/core";
 import BigNumber from "bignumber.js";
 
@@ -20,7 +20,6 @@ export const oneToHexAddress = (address) =>
 export default function getHarmony() {
   if (currentNetwork != store.state.network.name) {
     currentNetwork = store.state.network.name;
-    console.log("current network changed to", currentNetwork);
     harmony = new Harmony(
       // rpc url
       store.state.network.apiUrl,
@@ -47,53 +46,53 @@ export async function getTokenBalance(address, artifact) {
   const instance = getContractInstance(artifact);
   const hexAddress = oneToHexAddress(address);
   let balance = await instance.methods.balanceOf(hexAddress).call();
-  return BigNumber(balance);
+  return balance;
 }
 
 export async function sendToken(
   from,
   to,
   amount,
-  gasLimit = "21000",
+  privateKey,
+  gasLimit = "6721900",
   gasPrice = 1,
   artifact
 ) {
+  let txHash, receipt;
+  let harmony = getHarmony();
   const instance = getContractInstance(artifact);
-  console.log("from Address", from);
-  console.log("to Address", to);
-  console.log("amount", amount);
   const toHex = oneToHexAddress(to);
-  const fromHex = oneToHexAddress(from);
-  const tx = instance.methods.transfer(toHex, 10000); //10000 is a place holder
-
-  getHarmony().wallet.setSigner(from);
-  const sendTxn = tx //send transaction not working
+  harmony.wallet.addByPrivateKey(privateKey);
+  await instance.methods
+    .transfer(toHex, new harmony.utils.Unit(amount).asEther().toWei())
     .send({
-      from: fromHex,
+      from,
       gasLimit,
-      gasPrice: new harmony.utils.Unit(gasPrice)
-        .asGwei()
-        .toWei()
-        .toString(),
+      gasPrice: new harmony.utils.Unit(gasPrice).asGwei().toWei(),
     })
     .on("transactionHash", (_hash) => {
-      console.log(_hash);
+      txHash = _hash;
     })
     .on("receipt", (_receipt) => {
-      console.log(_receipt);
+      receipt = _receipt;
     })
-    .on("confirmation", (confirmationNumber, receipt) => {
-      console.log(confirmationNumber);
-      console.log(receipt);
+    .on("confirmation", (_confirmation) => {
+      if (_confirmation === "REJECTED") {
+        return {
+          result: false,
+          mesg: "Can not confirm transaction " + txHash,
+        };
+      }
     })
     .on("error", (_error) => {
       return {
         result: false,
-        mesg: _error,
+        mesg: "Failed to send transaction",
       };
     });
+
   return {
     result: true,
-    mesg: "Token Transfer Success",
+    mesg: getNetworkLink(currentNetwork, "/tx/" + txHash),
   };
 }

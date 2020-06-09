@@ -1,9 +1,6 @@
 <template>
   <div>
-    <send-transaction
-      :isToken="true"
-      :token="$route.params.symbol"
-    ></send-transaction>
+    <send-transaction :isToken="true" :token="$route.params.symbol"></send-transaction>
   </div>
 </template>
 
@@ -14,7 +11,7 @@ export default {
   name: "send-token",
   props: ["symbol"],
   components: {
-    SendTransaction,
-  },
+    SendTransaction
+  }
 };
 </script>

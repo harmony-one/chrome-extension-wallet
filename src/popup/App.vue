@@ -18,7 +18,8 @@ import Config from "../config";
 import extensionService from "../services/index";
 export default {
   computed: mapState({
-    loading: state => state.loading
+    loading: state => state.loading,
+    network: state => state.network
   }),
   mounted() {
     chrome.runtime.sendMessage(
@@ -33,7 +34,8 @@ export default {
         chrome.runtime.sendMessage({ action: "RESET_WINDOW_STATE" });
       }
     );
-    this.$store.commit("network/change", Config.networks[0]);
+    if (this.network.name === "")
+      this.$store.commit("network/change", Config.networks[0]);
   }
 };
 </script>

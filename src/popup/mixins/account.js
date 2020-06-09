@@ -16,7 +16,7 @@ export default {
       return shardArray;
     },
 
-    async loadBalance() {
+    async loadOneBalance() {
       let result = await getBalance(this.address, this.account.shard);
       let balance = Unit.Wei(result).toEther();
       this.$store.commit("account/balance", balance);
@@ -25,7 +25,7 @@ export default {
     async refreshAccount() {
       this.$store.commit("loading", true);
       await this.loadShardingInfo();
-      await this.loadBalance();
+      await this.loadOneBalance();
       this.$store.commit("loading", false);
     },
   },

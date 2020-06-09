@@ -21,7 +21,7 @@ var harmony = new Harmony(
 export default function getHarmony() {
   if (currentNetwork != store.state.network.name) {
     currentNetwork = store.state.network.name;
-    console.log("current network changed to", currentNetwork);
+    console.log("current network changed to", store.state.network.name);
     harmony = new Harmony(
       // rpc url
       store.state.network.apiUrl,
@@ -180,8 +180,7 @@ export async function transferToken(
 
   var explorerLink;
   if (confiremdTxn.isConfirmed()) {
-    explorerLink = getNetworkLink("/tx/" + txnHash);
-    console.log(explorerLink);
+    explorerLink = getNetworkLink(currentNetwork, "/tx/" + txnHash);
   } else {
     return {
       result: false,
@@ -230,9 +229,9 @@ export async function getTransactionCount(addr) {
   return parseInt(ret.result);
 }
 
-export function getNetworkLink(path) {
+export function getNetworkLink(network, path) {
   var basic;
-  switch (currentNetwork) {
+  switch (network) {
     case "Mainnet": {
       basic = "https://explorer.harmony.one/#";
       break;
