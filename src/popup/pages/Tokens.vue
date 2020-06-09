@@ -1,34 +1,28 @@
 <template>
   <div>
-    <app-header @refresh="refreshAccount" headerTab="main-tab" />
+    <app-header @refresh="refreshTokens" headerTab="main-tab" />
 
     <main class="main page-token">
-      <div v-if="account.tokens.length === 0" class="message-empty">No tokens found</div>
+      <div v-if="!tokens" class="message-empty">
+        No tokens found
+      </div>
 
       <div v-else>
-        <div
-          class="token"
-          v-for="token in account.tokens"
-          :key="token.name"
-          v-show="token.name !== '_'"
-        >
-          <span class="token-name">{{ getHRC20Details(token.name)[1] }}</span>
-          <span class="token-balance">
-            {{
-            $formatNumber(
-            getTokenAmount(token.balance, getHRC20Details(token.name)[2]),
-            {
-            maximumSignificantDigits:
-            parseInt(getHRC20Details(token.name)[2]) + 1,
-            }
-            )
-            }}
-          </span>
-          <button
-            v-show="token.name === 'H2O'"
-            class="but-token"
-            @click="$router.push('/send-token')"
-          >Send</button>
+        <div class="token-row" v-for="token in network.tokens" :key="token">
+          <span class="token-name">{{ token }}</span>
+          <div class="token-box">
+            <span class="token-balance">{{ tokens[token].balance }}</span>
+            <button
+              class="but-token"
+              :disabled="
+                tokens[token].balance <= 0 ||
+                  tokens[token].balance === undefined
+              "
+              @click="sendToken(token)"
+            >
+              Send
+            </button>
+          </div>
         </div>
       </div>
     </main>
@@ -36,26 +30,31 @@
 </template>
 
 <script>
-import account from "../mixins/account";
+import token from "../mixins/token";
 import AppHeader from "../components/AppHeader.vue";
-
+import { mapState } from "vuex";
 export default {
-  mixins: [account],
-
+  mixins: [token],
+  computed: {
+    ...mapState(["network"]),
+  },
   components: {
-    AppHeader
+    AppHeader,
   },
 
   mounted() {
-    if (this.account.tokens.length === 0) {
-      this.loadBalance();
-    }
-  }
+    this.loadTokenBalance();
+  },
+  methods: {
+    sendToken(symbol) {
+      this.$router.push({ path: `/send-token/${symbol}` });
+    },
+  },
 };
 </script>
 
 <style scoped>
-.token {
+.token-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -64,6 +63,11 @@ export default {
   border-radius: 5px;
   padding: 1rem;
   margin-bottom: 0.75rem;
+}
+.token-box {
+  justify-content: space-between;
+  display: flex;
+  align-items: center;
 }
 .token span {
   display: block;
@@ -75,6 +79,7 @@ export default {
 .token-balance {
   font-size: 1rem;
   font-weight: 600;
+  margin-right: 10px;
   text-align: right;
   word-break: break-all;
   padding-left: 1rem;
@@ -84,13 +89,18 @@ export default {
   color: black;
   width: 60px;
   background: white;
-  border: 1px solid #eee;
+  border: 1px solid #aaa;
 }
-.but-token:hover {
+.but-token:hover:enabled {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   cursor: pointer;
 }
-.but-token:active {
+.but-token:active:enabled {
   background: #f0f0f0;
+}
+.but-token:disabled {
+  cursor: default;
+  color: #ddd;
+  border: 1px solid #ddd;
 }
 </style>

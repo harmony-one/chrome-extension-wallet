@@ -1,29 +1,29 @@
 import { mapState } from "vuex";
-import { getTokenAmount } from "../../lib/utils";
+import { getTokenBalance } from "../../lib/contracts/token-api";
+import { Unit } from "@harmony-js/utils";
 
 export default {
   computed: mapState({
-    hrc20: (state) => state.hrc20.tokens,
+    tokens: (state) => state.hrc20.tokens,
+    network: (state) => state.network,
+    address: (state) => state.wallets.active.address,
   }),
 
   methods: {
-    getTokenAmount,
-
-    async loadTokenData() {
-      let tokens = {};
-
-      // tokens[data.tokens[i].id] = data.tokens[i].name + ';' + data.tokens[i].abbr + ';' + data.tokens[i].precision
-      tokens["H2O"] = "H2O" + ";" + "H2O" + ";" + "6";
-
-      this.$store.commit("hrc20/tokens", tokens);
-    },
-
-    getHRC20Details(name) {
-      if (this.hrc20[name] == undefined) {
-        return ["HRC", "HRC", "0"];
+    async loadTokenBalance() {
+      for (var token of this.network.tokens) {
+        let bigbalance = await getTokenBalance(
+          this.address,
+          this.tokens[token].artifacts
+        );
+        let balance = Number(Unit.Wei(bigbalance).toEther()).toFixed(6);
+        this.$store.commit("hrc20/loadTokenBalance", { token, balance });
       }
-
-      return this.hrc20[name].split(";");
+    },
+    async refreshTokens() {
+      this.$store.commit("loading", true);
+      await this.loadTokenBalance();
+      this.$store.commit("loading", false);
     },
   },
 };
