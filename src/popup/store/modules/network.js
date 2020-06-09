@@ -12,7 +12,6 @@ export default {
 
   mutations: {
     change(state, network) {
-      console.log("saving network", network);
       state.id = network.id;
       state.chainId = network.chainId;
       state.name = network.name;

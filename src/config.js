@@ -8,7 +8,7 @@ export default {
       name: "Mainnet",
       apiUrl: "https://api.s0.t.hmny.io",
       type: ChainType.Harmony,
-      tokens: ["H20", "USDC"],
+      tokens: ["H20"],
     },
     {
       id: 2,

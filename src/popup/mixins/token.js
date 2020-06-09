@@ -1,7 +1,6 @@
 import { mapState } from "vuex";
 import { getTokenBalance } from "../../lib/contracts/token-api";
-import BigNumber from "bignumber.js";
-BigNumber.config({ ROUNDING_MODE: 3 });
+import { Unit } from "@harmony-js/utils";
 
 export default {
   computed: mapState({
@@ -17,12 +16,8 @@ export default {
           this.address,
           this.tokens[token].artifacts
         );
-        const balance = Number(
-          BigNumber(bigbalance)
-            .dividedBy(Math.pow(10, this.tokens[token].decimal))
-            .toFixed(6)
-        );
-        this.$store.commit("hrc20/loadBalance", { token, balance });
+        let balance = Number(Unit.Wei(bigbalance).toEther()).toFixed(6);
+        this.$store.commit("hrc20/loadTokenBalance", { token, balance });
       }
     },
     async refreshTokens() {

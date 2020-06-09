@@ -6,7 +6,7 @@ export default {
     tokens: tokens,
   },
   mutations: {
-    loadBalance(state, payload) {
+    loadTokenBalance(state, payload) {
       state.tokens[payload.token] = {
         ...state.tokens[payload.token],
         balance: payload.balance,

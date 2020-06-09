@@ -31,17 +31,9 @@
                 v-model="recipient"
               />
             </label>
-            <label
-              v-if="!isToken"
-              :class="{ gray: selectedToken !== 'ONE' }"
-              class="input-label shard"
-            >
+            <label v-if="!isToken" class="input-label shard">
               To Shard
-              <select
-                class="input-field"
-                v-model="toShard"
-                :disabled="selectedToken !== 'ONE'"
-              >
+              <select class="input-field" v-model="toShard">
                 <option
                   v-for="shard in account.shardArray"
                   :key="shard.shardID"
@@ -60,11 +52,11 @@
                 v-model="amount"
                 step="any"
               />
-              <div class="maximum-label">Maximum: {{ getCurrentBalance }}</div>
+              <div class="maximum-label">Maximum: {{ getMaxBalance }}</div>
             </label>
             <label v-if="!isToken" class="input-label token">
               Token
-              <select class="input-field" v-model="selectedToken">
+              <select class="input-field" v-model="selectedToken" @change="tokenChanged()">
                 <option v-for="symbol in tokenList" :key="symbol" :value="symbol">{{ symbol }}</option>
               </select>
             </label>
@@ -97,7 +89,7 @@
                 type="text"
                 name="gasone"
                 readonly
-                :value="getString(getGasFee)"
+                :value="`${getGasFee} ONE`"
               />
             </label>
           </div>
@@ -151,7 +143,7 @@
           </div>
           <div class="invoice__row">
             <div class="invoice__rowLeft">Network Fee</div>
-            <div class="invoice__rowRight">{{ getString(getGasFee) }}</div>
+            <div class="invoice__rowRight">{{ getGasFee + " ONE" }}</div>
           </div>
           <div class="invoice__divider"></div>
           <div class="invoice__row">
@@ -245,13 +237,23 @@ export default {
     getFromAddress() {
       return this.wallet.address;
     },
+    getGasLimit() {
+      if (this.selectedToken === "ONE") this.gasLimit = 21000;
+      else this.gasLimit = 6721900; //this is from the truffle-config.js
+      return this.gasLimit;
+    },
     getGasFee() {
       return parseFloat((this.gasPrice * this.gasLimit) / Math.pow(10, 9));
     },
     getTotal() {
-      return Number(this.amount) + Number(this.getGasFee);
+      if (this.selectedToken === "ONE")
+        return Number(this.amount) + Number(this.getGasFee);
+      else return Number(this.amount);
     },
-    getCurrentBalance() {
+    getOneBalance() {
+      return Number(this.account.balance).toFixed(9);
+    },
+    getMaxBalance() {
       if (this.selectedToken === "ONE")
         return Number(this.account.balance).toFixed(9);
       return this.tokens[this.selectedToken].balance;
@@ -271,8 +273,8 @@ export default {
   },
 
   methods: {
-    getTokenRawAmount(amount, decimal) {
-      return amount * Math.pow(10, decimal);
+    tokenChanged() {
+      this.gasLimit = this.getGasLimit;
     },
     setSelectedToken() {
       if (!this.isToken) {
@@ -281,6 +283,7 @@ export default {
       } else {
         this.selectedToken = this.token;
       }
+      this.gasLimit = this.getGasLimit;
     },
     getString(amount) {
       return Number(amount).toFixed(6) + " " + this.selectedToken;
@@ -290,12 +293,11 @@ export default {
     },
     async loadBalance() {
       if (this.selectedToken !== "ONE") await this.loadTokenBalance();
-      else await this.loadBalance();
+      else await this.loadOneBalance();
     },
     async loadTokens() {
-      await loadBalance();
+      await this.loadBalance();
       this.setSelectedToken();
-      this.$store.commit("loading", false);
     },
     async sendPayment() {
       let privateKey;
@@ -317,12 +319,6 @@ export default {
       }
 
       this.$store.commit("loading", true);
-      let amount = this.amount;
-      if (this.selectedToken !== "ONE")
-        amount = this.getTokenRawAmount(
-          this.amount,
-          this.tokens[this.selectedToken].decimal
-        );
       try {
         // use the current selected account in the Account window
         let ret;
@@ -332,7 +328,7 @@ export default {
             this.recipient,
             this.fromShard,
             this.toShard,
-            amount,
+            this.amount,
             privateKey,
             this.gasLimit,
             this.gasPrice
@@ -342,7 +338,8 @@ export default {
           ret = await sendToken(
             this.address,
             this.recipient,
-            amount,
+            this.amount,
+            privateKey,
             this.gasLimit,
             this.gasPrice,
             this.tokens[this.selectedToken].artifacts
@@ -352,18 +349,12 @@ export default {
         this.$store.commit("loading", false);
         this.password = "";
         this.scene = 1;
-        this.message.show = true;
 
         if (ret.result) {
-          this.message.type = "success";
-          this.message.text = ret.mesg;
+          this.showSuccessMsg(ret.mesg);
         } else {
-          this.message.type = "error";
-          this.message.text = ret.mesg;
+          this.showErrMessage(ret.mesg);
         }
-
-        console.log("this.message.type ", this.message.type);
-        console.log("this.message.text ", this.message.text);
 
         this.loadBalance();
         this.recipient = "";
@@ -372,45 +363,53 @@ export default {
         this.$store.commit("loading", false);
 
         console.log("transfer error =", e);
-        this.message.show = true;
-        this.message.type = "error";
-        this.message.text =
-          "Something went wrong while trying to send the payment";
+        this.showErrMessage(
+          "Something went wrong while trying to send the payment"
+        );
       }
     },
-
+    showSuccessMsg(msg) {
+      this.message.show = true;
+      this.message.type = "success";
+      this.message.text = msg;
+    },
+    showErrMessage(err) {
+      this.message.show = true;
+      this.message.type = "error";
+      this.message.text = err;
+    },
     showConfirmDialog() {
       this.message.show = false;
 
       if (!isValidAddress(this.recipient)) {
-        this.message.show = true;
-        this.message.type = "error";
-        this.message.text = "Invalid recipient address";
-
+        this.showErrMessage("Invalid recipient address");
         return false;
       }
 
       if (!this.selectedToken) {
-        this.message.show = true;
-        this.message.type = "error";
-        this.message.text = "Please select token that you want to send";
-
-        return false;
-      }
-      if (this.getTotal > this.getCurrentBalance) {
-        this.message.show = true;
-        this.message.type = "error";
-        this.message.text = "Insufficient funds";
-
+        this.showErrMessage("Please select token that you want to send");
         return false;
       }
 
       if (this.amount <= 0) {
-        this.message.show = true;
-        this.message.type = "error";
-        this.message.text = "Invalid token amount";
-
+        this.showErrMessage("Invalid token amount");
         return false;
+      }
+
+      if (this.selectedToken === "ONE") {
+        if (this.getTotal > this.getOneBalance) {
+          this.showErrMessage("Your balance is not enough");
+          return false;
+        }
+      } else {
+        if (this.getOneBalance < this.getGasFee) {
+          this.showErrMessage("Your ONE balance is not enough");
+          return false;
+        }
+        if (this.getTotal > this.getMaxBalance) {
+          this.showErrMessage("Your token balance is not enough");
+          return false;
+        }
       }
       this.scene = 2;
     },
@@ -422,13 +421,7 @@ export default {
       await this.loadTokens();
       this.$store.commit("loading", false);
     },
-    getTokenName(token) {
-      if (token.name === "_") {
-        return "ONE";
-      }
 
-      return token.name;
-    },
     compressAddress(address) {
       return (
         address.substr(0, 15) +
