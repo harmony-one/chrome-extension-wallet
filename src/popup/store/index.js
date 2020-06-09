@@ -3,9 +3,9 @@ import Vuex from "vuex";
 import VuexPersistence from "vuex-persist";
 import wallets from "./modules/wallets";
 import network from "./modules/network";
+import hrc20 from "./modules/hrc20";
 import account from "./modules/account";
 import votes from "./modules/votes";
-import hrc20 from "./modules/hrc20";
 
 Vue.use(Vuex);
 
@@ -19,8 +19,8 @@ export default new Vuex.Store({
     wallets,
     network,
     account,
-    votes,
     hrc20,
+    votes,
   },
 
   state: {

@@ -3,20 +3,13 @@ export default {
 
   state: {
     balance: 0,
-    tokens: [],
     transfers: [],
-    transactions: [],
+    // transactions: [],
     shardArray: [],
     shard: 0,
   },
 
   mutations: {
-    change(state, account) {
-      state.balance = account.balance;
-      state.shardArray = account.shardArray;
-      state.shard = account.shard;
-    },
-
     shard(state, shard) {
       state.shard = shard;
     },
@@ -29,10 +22,6 @@ export default {
       state.balance = balance;
     },
 
-    tokens(state, tokens) {
-      state.tokens = tokens;
-    },
-
     transfers(state, transfers) {
       state.transfers = transfers;
     },
@@ -41,12 +30,12 @@ export default {
       state.transfers.push(...transfers);
     },
 
-    transactions(state, transactions) {
-      state.transactions = transactions;
-    },
+    // transactions(state, transactions) {
+    //   state.transactions = transactions;
+    // },
 
-    pushTransactions(state, transactions) {
-      state.transactions.push(...transactions);
-    },
+    // pushTransactions(state, transactions) {
+    //   state.transactions.push(...transactions);
+    // },
   },
 };
