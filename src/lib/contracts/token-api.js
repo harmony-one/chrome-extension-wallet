@@ -1,5 +1,5 @@
 import store from "../../popup/store";
-import { getNetworkLink } from "../txnService";
+import { getNetworkLink, getHarmony } from "../txnService";
 const {ChainType } = require("@harmony-js/utils");
 import { Harmony } from "@harmony-js/core";
 import BigNumber from "bignumber.js";
@@ -17,22 +17,6 @@ var harmony = new Harmony(
 
 export const oneToHexAddress = (address) =>
   getHarmony().crypto.getAddress(address).basicHex;
-
-export default function getHarmony() {
-  if (currentNetwork != store.state.network.name) {
-    currentNetwork = store.state.network.name;
-    harmony = new Harmony(
-      // rpc url
-      store.state.network.apiUrl,
-      {
-        chainType: ChainType.Harmony,
-        chainId: store.state.network.chainId, //ChainID.HmyMainnet,
-      }
-    );
-  }
-
-  return harmony;
-}
 
 export const getContractInstance = (artifact) => {
   const hmy = getHarmony();
