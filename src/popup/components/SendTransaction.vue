@@ -52,15 +52,12 @@
                 v-model="amount"
                 step="any"
               />
+              <div class="maximum-label">Maximum: {{ getMaxBalance }}</div>
             </label>
             <label v-if="!isToken" class="input-label token">
               Token
-              <select class="input-field" v-model="selectedToken">
-                <option
-                  v-for="token in account.tokens"
-                  :key="token.name"
-                  :value="token"
-                >{{ getTokenName(token) }}</option>
+              <select class="input-field" v-model="selectedToken" @change="tokenChanged()">
+                <option v-for="symbol in tokenList" :key="symbol" :value="symbol">{{ symbol }}</option>
               </select>
             </label>
           </div>
@@ -92,7 +89,7 @@
                 type="text"
                 name="gasone"
                 readonly
-                :value="getString(getGasFee, false)"
+                :value="`${getGasFee} ONE`"
               />
             </label>
           </div>
@@ -114,7 +111,11 @@
         <h3 class="center">{{ "Approve Transaction" + (wallet.isLedger ? " on Ledger" : "") }}</h3>
         <p class="addressRow">
           From
-          <span class="address__name">{{ compressAddress(getFromAddress) }}</span>
+          <span class="address__name">
+            {{
+            compressAddress(getFromAddress)
+            }}
+          </span>
           of Shard
           <b>{{ fromShard }}</b>
         </p>
@@ -142,7 +143,7 @@
           </div>
           <div class="invoice__row">
             <div class="invoice__rowLeft">Network Fee</div>
-            <div class="invoice__rowRight">{{ getString(getGasFee) }}</div>
+            <div class="invoice__rowRight">{{ getGasFee + " ONE" }}</div>
           </div>
           <div class="invoice__divider"></div>
           <div class="invoice__row">
@@ -188,7 +189,7 @@
 <script>
 import { mapState } from "vuex";
 import { decryptKeyStore, transferToken } from "../../lib/txnService";
-import { getTokenAmount, getTokenRawAmount } from "../../lib/utils";
+import { sendToken } from "../../lib/contracts/token-api";
 import { isValidAddress } from "@harmony-js/utils";
 import account from "../mixins/account";
 import AppHeader from "../components/AppHeader.vue";
@@ -207,7 +208,7 @@ export default {
     },
     token: {
       type: String,
-      default: "H20"
+      default: "ONE"
     }
   },
   data: () => ({
@@ -215,11 +216,12 @@ export default {
     amount: 0,
     fromShard: 0,
     toShard: 0,
+    tokenList: [],
     recipient: "",
     gasPrice: 1,
     gasLimit: 21000,
     inputData: "",
-    selectedToken: false,
+    selectedToken: "ONE",
     password: "",
     message: {
       show: false,
@@ -232,19 +234,29 @@ export default {
     ...mapState({
       wallet: state => state.wallets.active
     }),
-    getUnitName() {
-      const unitName = this.getTokenName(this.selectedToken);
-      if (!unitName) return "ONE";
-      return unitName;
-    },
     getFromAddress() {
       return this.wallet.address;
+    },
+    getGasLimit() {
+      if (this.selectedToken === "ONE") this.gasLimit = 21000;
+      else this.gasLimit = 6721900; //this is from the truffle-config.js
+      return this.gasLimit;
     },
     getGasFee() {
       return parseFloat((this.gasPrice * this.gasLimit) / Math.pow(10, 9));
     },
     getTotal() {
-      return Number(this.amount) + Number(this.getGasFee);
+      if (this.selectedToken === "ONE")
+        return Number(this.amount) + Number(this.getGasFee);
+      else return Number(this.amount);
+    },
+    getOneBalance() {
+      return Number(this.account.balance).toFixed(9);
+    },
+    getMaxBalance() {
+      if (this.selectedToken === "ONE")
+        return Number(this.account.balance).toFixed(9);
+      return this.tokens[this.selectedToken].balance;
     },
     getHeaderName() {
       if (this.isToken) return "Send Token";
@@ -252,42 +264,40 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
     this.setSelectedToken();
-    if (this.account.tokens.length === 0) {
-      this.loadTokens();
-    }
+    await this.loadTokenBalance();
   },
   updated() {
     if (this.scene == 2) this.$refs.password.focus();
   },
 
   methods: {
-    setSelectedToken() {
-      if (this.account.tokens.length > 0) {
-        if (!this.isToken) this.selectedToken = this.account.tokens[0];
-        else {
-          this.selectedToken = this.account.tokens.find(
-            elem => elem.name === this.token
-          );
-          if (!this.selectedToken) {
-            this.message.show = true;
-            this.message.type = "error";
-            this.message.text = this.token + " Token not found";
-          }
-        }
-      }
+    tokenChanged() {
+      this.gasLimit = this.getGasLimit;
     },
-    getString(one, addSpace = true) {
-      return Number(one).toFixed(6) + (addSpace ? " " : "") + this.getUnitName;
+    setSelectedToken() {
+      if (!this.isToken) {
+        this.tokenList = ["ONE", ...this.network.tokens];
+        this.selectedToken = "ONE";
+      } else {
+        this.selectedToken = this.token;
+      }
+      this.gasLimit = this.getGasLimit;
+    },
+    getString(amount) {
+      return Number(amount).toFixed(6) + " " + this.selectedToken;
     },
     onMessageClick() {
       if (this.message.type == "success") window.open(this.message.text);
     },
+    async loadBalance() {
+      if (this.selectedToken !== "ONE") await this.loadTokenBalance();
+      else await this.loadOneBalance();
+    },
     async loadTokens() {
       await this.loadBalance();
       this.setSelectedToken();
-      this.$store.commit("loading", false);
     },
     async sendPayment() {
       let privateKey;
@@ -309,132 +319,109 @@ export default {
       }
 
       this.$store.commit("loading", true);
-      let amount = this.amount;
-
-      if (this.selectedToken.name === "_") {
-        amount = getTokenAmount(this.amount);
-      } else {
-        amount = getTokenRawAmount(
-          this.amount,
-          this.getHRC20Details(this.selectedToken.name)[2]
-        );
-      }
-
       try {
         // use the current selected account in the Account window
-        this.fromShard = this.account.shard;
-        let ret = await transferToken(
-          this.recipient,
-          this.fromShard,
-          this.toShard,
-          amount,
-          privateKey,
-          this.gasLimit,
-          this.gasPrice
-        );
+        let ret;
+        if (this.selectedToken === "ONE") {
+          this.fromShard = this.account.shard;
+          ret = await transferToken(
+            this.recipient,
+            this.fromShard,
+            this.toShard,
+            this.amount,
+            privateKey,
+            this.gasLimit,
+            this.gasPrice
+          );
+        } else {
+          //token transfer part
+          ret = await sendToken(
+            this.address,
+            this.recipient,
+            this.amount,
+            privateKey,
+            this.gasLimit,
+            this.gasPrice,
+            this.tokens[this.selectedToken].artifacts
+          );
+        }
 
         this.$store.commit("loading", false);
         this.password = "";
         this.scene = 1;
-        this.message.show = true;
 
         if (ret.result) {
-          this.message.type = "success";
-          this.message.text = ret.mesg;
+          this.showSuccessMsg(ret.mesg);
         } else {
-          this.message.type = "error";
-          this.message.text = ret.mesg;
+          this.showErrMessage(ret.mesg);
         }
 
-        console.log("this.message.type ", this.message.type);
-        console.log("this.message.text ", this.message.text);
-
-        this.loadTokens();
+        this.loadBalance();
         this.recipient = "";
         this.amount = 0;
       } catch (e) {
         this.$store.commit("loading", false);
 
         console.log("transfer error =", e);
-        this.message.show = true;
-        this.message.type = "error";
-        this.message.text =
-          "Something went wrong while trying to send the payment";
+        this.showErrMessage(
+          "Something went wrong while trying to send the payment"
+        );
       }
     },
-
+    showSuccessMsg(msg) {
+      this.message.show = true;
+      this.message.type = "success";
+      this.message.text = msg;
+    },
+    showErrMessage(err) {
+      this.message.show = true;
+      this.message.type = "error";
+      this.message.text = err;
+    },
     showConfirmDialog() {
       this.message.show = false;
 
       if (!isValidAddress(this.recipient)) {
-        this.message.show = true;
-        this.message.type = "error";
-        this.message.text = "Invalid recipient address";
-
+        this.showErrMessage("Invalid recipient address");
         return false;
       }
 
       if (!this.selectedToken) {
-        this.message.show = true;
-        this.message.type = "error";
-        this.message.text = "Please select token that you want to send";
-
-        return false;
-      }
-
-      let precision = 6;
-
-      if (this.selectedToken.name !== "_") {
-        precision = parseInt(this.getHRC20Details(this.selectedToken.name)[2]);
-      }
-
-      if (
-        this.amount >
-        parseFloat(this.getTokenAmount(this.selectedToken.balance, precision))
-      ) {
-        this.message.show = true;
-        this.message.type = "error";
-        this.message.text = "Insufficient funds";
-
+        this.showErrMessage("Please select token that you want to send");
         return false;
       }
 
       if (this.amount <= 0) {
-        this.message.show = true;
-        this.message.type = "error";
-        this.message.text = "Invalid token amount";
-
+        this.showErrMessage("Invalid token amount");
         return false;
+      }
+
+      if (this.selectedToken === "ONE") {
+        if (this.getTotal > this.getOneBalance) {
+          this.showErrMessage("Your balance is not enough");
+          return false;
+        }
+      } else {
+        if (this.getOneBalance < this.getGasFee) {
+          this.showErrMessage("Your ONE balance is not enough");
+          return false;
+        }
+        if (this.getTotal > this.getMaxBalance) {
+          this.showErrMessage("Your token balance is not enough");
+          return false;
+        }
       }
       this.scene = 2;
     },
 
-    refreshData() {
+    async refreshData() {
       this.message.show = false;
       this.$store.commit("loading", true);
-      this.loadTokens();
-      this.loadShardingInfo();
+      await this.loadShardingInfo();
+      await this.loadTokens();
+      this.$store.commit("loading", false);
     },
 
-    getTokenName(token) {
-      if (token.name === "_") {
-        return "ONE";
-      }
-
-      return token.name;
-    },
-    /* defined but not used
-    getTokenBalance(token) {
-      let precision = 6;
-
-      if (token.name !== "ONE") {
-        precision = parseInt(this.getHRC20Details(token.name)[2]);
-      }
-
-      return this.$formatNumber(this.getTokenAmount(token.balance, precision), {
-        maximumSignificantDigits: precision + 1
-      });
-    },*/
     compressAddress(address) {
       return (
         address.substr(0, 15) +
@@ -478,5 +465,15 @@ h3 {
 .ledger-content {
   font-style: italic;
   margin-top: 20px;
+}
+.maximum-label {
+  color: red;
+  font-size: 12px;
+  font-style: italic;
+  margin-top: 3px;
+  margin-left: 5px;
+}
+.gray {
+  color: #bbb;
 }
 </style>
