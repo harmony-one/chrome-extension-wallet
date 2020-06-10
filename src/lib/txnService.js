@@ -14,11 +14,11 @@ var harmony = new Harmony(
   // rpc url
   store.state.network.apiUrl,
   {
-    chainType: store.state.network.type, //ChainType.Harmony,
+    chainType: store.state.network.type,
     chainId: store.state.network.chainId, //ChainID.HmyMainnet,
   }
 );
-export default function getHarmony() {
+export function getHarmony() {
   if (currentNetwork != store.state.network.name) {
     currentNetwork = store.state.network.name;
     console.log("current network changed to", store.state.network.name);
@@ -26,7 +26,7 @@ export default function getHarmony() {
       // rpc url
       store.state.network.apiUrl,
       {
-        chainType: store.state.network.type, //ChainType.Harmony,
+        chainType: store.state.network.type,
         chainId: store.state.network.chainId, //ChainID.HmyMainnet,
       }
     );
@@ -180,7 +180,7 @@ export async function transferToken(
 
   var explorerLink;
   if (confiremdTxn.isConfirmed()) {
-    explorerLink = getNetworkLink(currentNetwork, "/tx/" + txnHash);
+    explorerLink = getNetworkLink("/tx/" + txnHash);
   } else {
     return {
       result: false,
@@ -229,9 +229,9 @@ export async function getTransactionCount(addr) {
   return parseInt(ret.result);
 }
 
-export function getNetworkLink(network, path) {
+export function getNetworkLink(path) {
   var basic;
-  switch (network) {
+  switch (currentNetwork) {
     case "Mainnet": {
       basic = "https://explorer.harmony.one/#";
       break;
