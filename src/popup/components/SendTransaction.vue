@@ -232,7 +232,8 @@ export default {
 
   computed: {
     ...mapState({
-      wallet: state => state.wallets.active
+      wallet: state => state.wallets.active,
+      validTokens: state => state.hrc20.validTokens
     }),
     getFromAddress() {
       return this.wallet.address;
@@ -278,7 +279,7 @@ export default {
     },
     setSelectedToken() {
       if (!this.isToken) {
-        this.tokenList = ["ONE", ...this.network.tokens];
+        this.tokenList = ["ONE", ...this.validTokens[this.network.name]];
         this.selectedToken = "ONE";
       } else {
         this.selectedToken = this.token;

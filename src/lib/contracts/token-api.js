@@ -1,19 +1,5 @@
 import store from "../../popup/store";
 import { getNetworkLink, getHarmony } from "../txnService";
-const {ChainType } = require("@harmony-js/utils");
-import { Harmony } from "@harmony-js/core";
-import BigNumber from "bignumber.js";
-
-var currentNetwork = "";
-
-var harmony = new Harmony(
-  // rpc url
-  store.state.network.apiUrl,
-  {
-    chainType: store.state.network.type,
-    chainId: store.state.network.chainId,
-  }
-);
 
 export const oneToHexAddress = (address) =>
   getHarmony().crypto.getAddress(address).basicHex;
@@ -78,6 +64,6 @@ export async function sendToken(
 
   return {
     result: true,
-    mesg: getNetworkLink(currentNetwork, "/tx/" + txHash),
+    mesg: getNetworkLink("/tx/" + txHash),
   };
 }
