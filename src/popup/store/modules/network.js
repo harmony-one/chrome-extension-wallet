@@ -7,7 +7,6 @@ export default {
     name: "",
     apiUrl: "",
     type: "",
-    tokens: [],
   },
 
   mutations: {
@@ -17,7 +16,6 @@ export default {
       state.name = network.name;
       state.apiUrl = network.apiUrl;
       state.type = network.type;
-      state.tokens = network.tokens;
     },
   },
 };
