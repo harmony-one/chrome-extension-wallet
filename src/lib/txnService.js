@@ -2,12 +2,8 @@ import store from "../popup/store";
 import { encryptPhrase, getAddress, decryptPhrase } from "@harmony-js/crypto";
 const { isValidAddress, ChainType } = require("@harmony-js/utils");
 import { Harmony } from "@harmony-js/core";
-import BigNumber from "bignumber.js";
-const H20 = require("./contracts/HarmonyERC20.json");
-const DEFAULT_CONTRACT_ADDRESS = "0xf4Be4Bad17Ff4be93384C9d04f7bebDcfb227dBb";
 var currentNetwork = "";
-const DECIMAL = 18;
-BigNumber.config({ ROUNDING_MODE: 3 });
+
 export const RecoverCode = {
   MNEMONIC: 1,
   PRIVATE_KEY: 2,
@@ -25,7 +21,7 @@ var harmony = new Harmony(
 export default function getHarmony() {
   if (currentNetwork != store.state.network.name) {
     currentNetwork = store.state.network.name;
-    console.log("current network changed to", currentNetwork);
+    console.log("current network changed to", store.state.network.name);
     harmony = new Harmony(
       // rpc url
       store.state.network.apiUrl,
@@ -38,18 +34,6 @@ export default function getHarmony() {
 
   return harmony;
 }
-
-export const getH20ContractInstance = () => {
-  const netid = store.state.network.chainId;
-  const contract = getHarmony().contracts.createContract(
-    H20.abi,
-    H20.networks[netid] ? H20.networks[netid].address : DEFAULT_CONTRACT_ADDRESS
-  );
-  return contract;
-};
-
-export const oneToHexAddress = (address) =>
-  getHarmony().crypto.getAddress(address).basicHex;
 
 export function validatePrivateKey(privateKey) {
   try {
@@ -122,17 +106,6 @@ export async function getBalance(address, shardId) {
 
   return ret.result;
 }
-export async function getH20Balance(address) {
-  const instance = getH20ContractInstance();
-  const hexAddress = oneToHexAddress(address);
-  let decimal = await instance.methods.decimals().call();
-  console.log(decimal);
-  let bigbalance = await instance.methods.balanceOf(hexAddress).call();
-  let balance = BigNumber(bigbalance)
-    .dividedBy(Math.pow(10, DECIMAL))
-    .toFixed(2);
-  return balance;
-}
 
 export async function getShardInfo() {
   //set sharding
@@ -182,13 +155,11 @@ export async function transferToken(
       .toWei()
       .toString(),
   });
-
   // update the shard information
   await getShardInfo();
 
   // sign the transaction use wallet;
   const account = harmony.wallet.addByPrivateKey(privateKey);
-
   const signedTxn = await account.signTransaction(txn);
 
   signedTxn
@@ -200,7 +171,7 @@ export async function transferToken(
     .on("error", (error) => {
       return {
         result: false,
-        mesg: "failed to sign transaction",
+        mesg: "Failed to sign transaction",
       };
     });
 
@@ -209,12 +180,11 @@ export async function transferToken(
 
   var explorerLink;
   if (confiremdTxn.isConfirmed()) {
-    explorerLink = getNetworkLink("/tx/" + txnHash);
-    console.log(explorerLink);
+    explorerLink = getNetworkLink(currentNetwork, "/tx/" + txnHash);
   } else {
     return {
       result: false,
-      mesg: "can not confirm transaction " + txnHash,
+      mesg: "Can not confirm transaction " + txnHash,
     };
   }
 
@@ -259,9 +229,9 @@ export async function getTransactionCount(addr) {
   return parseInt(ret.result);
 }
 
-export function getNetworkLink(path) {
+export function getNetworkLink(network, path) {
   var basic;
-  switch (currentNetwork) {
+  switch (network) {
     case "Mainnet": {
       basic = "https://explorer.harmony.one/#";
       break;

@@ -60,9 +60,11 @@ export default {
   data: () => ({
     shard: 0
   }),
+
   computed: {
     ...mapState(["wallets"])
   },
+
   mounted() {
     if (
       typeof this.account.shard !== "undefined" ||
@@ -75,13 +77,13 @@ export default {
     }
 
     this.loadShardingInfo();
-    this.loadBalance();
+    this.loadOneBalance();
   },
 
   watch: {
     shard(newValue, oldValue) {
       this.$store.commit("account/shard", newValue);
-      this.loadBalance();
+      this.loadOneBalance();
       // window.location.reload();
     }
   },
