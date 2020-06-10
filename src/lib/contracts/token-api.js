@@ -1,37 +1,8 @@
 import store from "../../popup/store";
-import { getNetworkLink } from "../txnService";
-import { Harmony } from "@harmony-js/core";
-import BigNumber from "bignumber.js";
-
-var currentNetwork = "";
-
-var harmony = new Harmony(
-  // rpc url
-  store.state.network.apiUrl,
-  {
-    chainType: store.state.network.type,
-    chainId: store.state.network.chainId,
-  }
-);
+import { getNetworkLink, getHarmony } from "../txnService";
 
 export const oneToHexAddress = (address) =>
   getHarmony().crypto.getAddress(address).basicHex;
-
-export default function getHarmony() {
-  if (currentNetwork != store.state.network.name) {
-    currentNetwork = store.state.network.name;
-    harmony = new Harmony(
-      // rpc url
-      store.state.network.apiUrl,
-      {
-        chainType: store.state.network.type, //ChainType.Harmony,
-        chainId: store.state.network.chainId, //ChainID.HmyMainnet,
-      }
-    );
-  }
-
-  return harmony;
-}
 
 export const getContractInstance = (artifact) => {
   const hmy = getHarmony();
@@ -93,6 +64,6 @@ export async function sendToken(
 
   return {
     result: true,
-    mesg: getNetworkLink(currentNetwork, "/tx/" + txHash),
+    mesg: getNetworkLink("/tx/" + txHash),
   };
 }
