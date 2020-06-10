@@ -7,8 +7,10 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 // const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 // const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const ZipPlugin = require("zip-webpack-plugin");
 const isProduction = process.env.NODE_ENV === "production";
-const manifest = require("./src/manifest");
+const manifest_dev = require("./src/manifest-dev");
+const manifest_prod = require("./src/manifest-prod");
 
 const env = getClientEnvironment();
 
@@ -122,23 +124,28 @@ function getPerformance(isProd) {
 }
 
 function getPlugins(isProd) {
-  const plugins = [
+  let plugins = [
     new VueLoaderPlugin(),
     new CopyWebpackPlugin({ patterns: [{ from: "./static", to: "./" }] }),
-    new GenerateJsonPlugin("manifest.json", manifest, null, 2),
     new webpack.DefinePlugin(env.stringified),
-    // new HardSourceWebpackPlugin()
   ];
-  if (isProd) {
+  if (!isProd) {
     plugins.push(
+      new GenerateJsonPlugin("manifest.json", manifest_dev, null, 2)
+    );
+  } else {
+    plugins.push(
+      new GenerateJsonPlugin("manifest.json", manifest_prod, null, 2),
       new CleanWebpackPlugin(),
+      new webpack.NoEmitOnErrorsPlugin(),
       new webpack.LoaderOptionsPlugin({
         minimize: true,
       }),
-      // new UglifyJSPlugin({
-      //   sourceMap: true
-      // }),
-      new webpack.SourceMapDevToolPlugin({})
+      new webpack.SourceMapDevToolPlugin({}),
+      new ZipPlugin({
+        path: "..",
+        filename: "onewallet.zip",
+      })
     );
   }
   return plugins;
