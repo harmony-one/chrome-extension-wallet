@@ -1,5 +1,6 @@
 import store from "../../popup/store";
 import { getNetworkLink } from "../txnService";
+const {ChainType } = require("@harmony-js/utils");
 import { Harmony } from "@harmony-js/core";
 import BigNumber from "bignumber.js";
 
@@ -24,7 +25,7 @@ export default function getHarmony() {
       // rpc url
       store.state.network.apiUrl,
       {
-        chainType: store.state.network.type, //ChainType.Harmony,
+        chainType: ChainType.Harmony,
         chainId: store.state.network.chainId, //ChainID.HmyMainnet,
       }
     );
