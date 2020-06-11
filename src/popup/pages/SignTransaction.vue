@@ -119,7 +119,7 @@ export default {
           return false;
         }
       } else {
-        //todo approve via ledger, Howard, it's your turn
+        //todo approve via ledger
       }
       chrome.runtime.sendMessage({
         action: "SIGN_TRANSACTION",
