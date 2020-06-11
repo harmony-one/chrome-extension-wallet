@@ -1,7 +1,10 @@
 import { mapState } from "vuex";
-import { getTokenBalance } from "../../lib/contracts/token-api";
+import {
+  getTokenBalance,
+  increaseTotalSupply,
+} from "../../lib/contracts/token-api";
 import { Unit } from "@harmony-js/utils";
-import BigNumber from 'BigNumber.js'
+import BigNumber from "bignumber.js";
 
 export default {
   computed: mapState({
@@ -14,17 +17,23 @@ export default {
   methods: {
     async loadTokenBalance() {
       for (var symbol of this.validTokens[this.network.name]) {
-        console.log("getting balance for token", symbol, "on address", this.address);
         let bigbalance = await getTokenBalance(
           this.address,
           this.tokens[symbol].artifacts
         );
-
-        console.log("bigbalance = ", BigNumber(bigbalance).toString());
+        console.log("bigbalance = ", BigNumber(bigbalance).toNumber());
         let balance = Number(Unit.Wei(bigbalance).toEther()).toFixed(6);
-        console.log("converted balance =",balance );
+        console.log("converted balance =", balance);
         this.$store.commit("hrc20/loadTokenBalance", { symbol, balance });
       }
+    },
+    async increaseSupply(amount, symbol) {
+      ////increase supply
+      let ret = await increaseTotalSupply(
+        amount,
+        this.tokens[symbol].artifacts
+      );
+      console.log("increase Supply result -----> ", ret);
     },
     async refreshTokens() {
       this.$store.commit("loading", true);

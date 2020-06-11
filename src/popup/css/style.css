@@ -282,6 +282,7 @@ button:disabled {
   color: #757575;
   padding: 0.5rem;
   font-size: 0.75rem;
+  word-break: break-all;
 }
 .message.error {
   background: #ffcdd2;

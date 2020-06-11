@@ -52,7 +52,7 @@
                 v-model="amount"
                 step="any"
               />
-              <div class="maximum-label">Maximum: {{ getMaxBalance }}</div>
+              <div class="maximum-label">Maximum: {{ getMaxBalance + " " + selectedToken }}</div>
             </label>
             <label v-if="!isToken" class="input-label token">
               Token
@@ -255,9 +255,12 @@ export default {
       return Number(this.account.balance).toFixed(9);
     },
     getMaxBalance() {
+      let max;
       if (this.selectedToken === "ONE")
-        return Number(this.account.balance).toFixed(9);
-      return this.tokens[this.selectedToken].balance;
+        max = Number(this.account.balance).toFixed(9);
+      else max = this.tokens[this.selectedToken].balance;
+      if (max === undefined) return Number(0).toFixed(6);
+      return max;
     },
     getHeaderName() {
       if (this.isToken) return "Send Token";
