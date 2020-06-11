@@ -4,3 +4,4 @@
 .postcssrc.js
 dist/
 node_modules/
+.zip
