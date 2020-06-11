@@ -16,10 +16,27 @@ export const getContractInstance = (artifact) => {
 export async function getTokenBalance(address, artifact) {
   const instance = getContractInstance(artifact);
   const hexAddress = oneToHexAddress(address);
-  console.log("hex address = ", hexAddress)
+  console.log("hex address = ", hexAddress);
   let balance = await instance.methods.balanceOf(hexAddress).call();
-  console.log("balance = ", balance);
+  console.log("------->balance = ", balance);
+  let decimals = await instance.methods.decimals().call();
+  console.log("------->decimals = ", decimals);
+  let totalSupply = await instance.methods.totalSupply().call();
+  console.log("------->totalSupply = ", totalSupply);
+
   return balance;
+}
+
+export async function increaseTotalSupply(amount, artifact) {
+  const instance = getContractInstance(artifact);
+  let ret = await instance.methods
+    .increaseSupply(
+      Unit(amount)
+        .asEther()
+        .toWei()
+    )
+    .call();
+  return ret;
 }
 
 export async function sendToken(
@@ -31,10 +48,11 @@ export async function sendToken(
   gasPrice = 1,
   artifact
 ) {
-  let txHash, receipt;
+  let txHash, receipt, confirmation, error;
   let harmony = getHarmony();
   const instance = getContractInstance(artifact);
   const toHex = oneToHexAddress(to);
+  console.log(amount);
   harmony.wallet.addByPrivateKey(privateKey);
   await instance.methods
     .transfer(toHex, new harmony.utils.Unit(amount).asEther().toWei())
@@ -45,25 +63,32 @@ export async function sendToken(
     })
     .on("transactionHash", (_hash) => {
       txHash = _hash;
+      console.log(_hash);
     })
     .on("receipt", (_receipt) => {
       receipt = _receipt;
+      console.log(_receipt);
     })
     .on("confirmation", (_confirmation) => {
-      if (_confirmation === "REJECTED") {
-        return {
-          result: false,
-          mesg: "Can not confirm transaction " + txHash,
-        };
-      }
+      confirmation = _confirmation;
+      console.log(_confirmation);
     })
     .on("error", (_error) => {
-      return {
-        result: false,
-        mesg: "Failed to send transaction",
-      };
+      error = _error;
+      console.log(_error);
     });
-
+  if (error) {
+    return {
+      result: false,
+      mesg: "Failed to send transaction",
+    };
+  }
+  if (confirmation !== "CONFIRMED") {
+    return {
+      result: false,
+      mesg: "Can not confirm transaction " + txHash,
+    };
+  }
   return {
     result: true,
     mesg: getNetworkLink("/tx/" + txHash),

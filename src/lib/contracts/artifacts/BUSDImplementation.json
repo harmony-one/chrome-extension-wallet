@@ -43419,12 +43419,12 @@
         }
       },
       "links": {},
-      "address": "0x276FB69C890974121FC0f49772AC965266814499",
-      "transactionHash": "0x625561cd3006cf19bc65670473b4b7ba44f98ad7ea2b0aee6b2c08703b1c8467"
+      "address": "0xBe553DcF0aEeF09611072136fC21d47027CDf48F",
+      "transactionHash": "0x97e8e215d80c5bc097ab015d1c2f5321de898679b886d165d2305f4c633a030b"
     }
   },
   "schemaVersion": "3.0.16",
-  "updatedAt": "2020-06-01T22:28:02.228Z",
+  "updatedAt": "2020-06-11T03:12:02.198Z",
   "devdoc": {
     "methods": {
       "allowance(address,address)": {
