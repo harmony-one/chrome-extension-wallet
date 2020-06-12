@@ -13,7 +13,7 @@ export const TOKENS = {
 export const VALIDTOKENS = {
   Mainnet: ["H20"],
   Pangaea: [],
-  Testnet: ["BUSD"],
+  Testnet: ["BUSD", "H20"],
   Localnet: [],
   OpenStakingNet: [],
   PartnerNet: [],
