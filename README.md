@@ -9,16 +9,17 @@
 - [x] View HRC20 token (BUSD, H2O) balances.
 - [x] Transfer HRC20 tokens (BUSD, H2O)
 - [x] View recent transfers .
-
-* Switch the network to Mainnet, Pangaea, Testnet or Localnet.
+- [x] Switch the network to Mainnet, Pangaea, Testnet or Localnet.
+- [x] Ledger Login
+- [ ] Ledger transfer
 
 ## Install from release zip
 
 Onewallet is a chrome extension wallet. You can install the chrome extension manually following the instructions [here](https://www.cnet.com/how-to/how-to-install-chrome-extensions-manually/). 
 
-| Version        | Description |
-| -------------- | --- |
-| Version 0.1 | [Alpha Release Candidate 0.1 ] (https://github.com/harmony-one/onewallet/raw/master/release/)onewallet_alpha0.1.zip)|
+| Version        | Link |
+| -------------- | ------------- |
+| Version 0.1 | [Alpha Release Candidate 0.1 ](https://github.com/harmony-one/onewallet/raw/master/release/onewallet_alpha0.1.zip)|
  
 
 ## Development 
