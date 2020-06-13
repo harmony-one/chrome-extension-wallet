@@ -94,12 +94,6 @@ export function getAddressFromPrivateKey(privateKey) {
   return address;
 }
 
-//disease travel sea cage fiscal midnight arch betray catch keen agree organ
-//one1p6wcwnajxc208uxpdlx9sqktt6t8kk8nw9hshf
-//0x369cbf85b0239b8c830b9f807e2fd2d4eee731a0d58063affa5bf7e152cb42e6
-
-// 0x1b4dc81bc7245c648e846c0d6f4d818425733a988aafa7030001b409bc71f27c
-// one1jcq8d7afnsz4kj8yjt39wnljvj8qkx5ccydgd6
 export async function getBalance(address, shardId) {
   getHarmony().blockchain.messenger.setDefaultShardID(shardId);
   let ret = await getHarmony().blockchain.getBalance({ address });

@@ -318,7 +318,6 @@ export default {
           return false;
         }
       } else {
-        //not sure how to get private key from ledger, Howard, it's your turn
         //todo send payment on ledger
       }
 
