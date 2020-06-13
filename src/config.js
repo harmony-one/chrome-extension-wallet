@@ -30,19 +30,5 @@ export default {
       apiUrl: "http://127.0.0.1:9500",
       type: ChainType.Harmony,
     },
-    {
-      id: 5,
-      chainId: ChainID.HmyPangaea,
-      name: "OpenStakingNet",
-      apiUrl: "https://api.s0.os.hmny.io",
-      type: ChainType.Harmony,
-    },
-    {
-      id: 6,
-      chainId: 4,
-      name: "PartnerNet",
-      apiUrl: "https://api.s0.ps.hmny.io",
-      type: ChainType.Harmony,
-    },
   ],
 };
