@@ -21,9 +21,7 @@ export default {
           this.address,
           this.tokens[symbol].artifacts
         );
-        console.log("bigbalance = ", BigNumber(bigbalance).toNumber());
         let balance = Number(Unit.Wei(bigbalance).toEther()).toFixed(6);
-        console.log("converted balance =", balance);
         this.$store.commit("hrc20/loadTokenBalance", { symbol, balance });
       }
     },
@@ -33,7 +31,6 @@ export default {
         amount,
         this.tokens[symbol].artifacts
       );
-      console.log("increase Supply result -----> ", ret);
     },
     async refreshTokens() {
       this.$store.commit("loading", true);
