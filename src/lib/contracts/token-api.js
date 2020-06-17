@@ -16,14 +16,7 @@ export const getContractInstance = (artifact) => {
 export async function getTokenBalance(address, artifact) {
   const instance = getContractInstance(artifact);
   const hexAddress = oneToHexAddress(address);
-  console.log("hex address = ", hexAddress);
   let balance = await instance.methods.balanceOf(hexAddress).call();
-  console.log("------->balance = ", balance);
-  let decimals = await instance.methods.decimals().call();
-  console.log("------->decimals = ", decimals);
-  let totalSupply = await instance.methods.totalSupply().call();
-  console.log("------->totalSupply = ", totalSupply);
-
   return balance;
 }
 
@@ -52,7 +45,6 @@ export async function sendToken(
   let harmony = getHarmony();
   const instance = getContractInstance(artifact);
   const toHex = oneToHexAddress(to);
-  console.log(amount);
   harmony.wallet.addByPrivateKey(privateKey);
   await instance.methods
     .transfer(toHex, new harmony.utils.Unit(amount).asEther().toWei())
@@ -63,19 +55,15 @@ export async function sendToken(
     })
     .on("transactionHash", (_hash) => {
       txHash = _hash;
-      console.log(_hash);
     })
     .on("receipt", (_receipt) => {
       receipt = _receipt;
-      console.log(_receipt);
     })
     .on("confirmation", (_confirmation) => {
       confirmation = _confirmation;
-      console.log(_confirmation);
     })
     .on("error", (_error) => {
       error = _error;
-      console.log(_error);
     });
   if (error) {
     return {
