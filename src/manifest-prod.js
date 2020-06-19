@@ -38,5 +38,5 @@ module.exports = {
   ],
   manifest_version: 2,
   content_security_policy: "script-src 'self'; object-src 'self'",
-  web_accessible_resources: ["popup.html"],
+  web_accessible_resources: ["popup.html", "inject-script.js"],
 };

@@ -19,10 +19,14 @@ const config = {
     background: ["./src/background/"],
     popup: "./src/popup/",
     "content-script": "./src/content/",
+    "inject-script": "./src/content/injectScript.js",
   },
   output: {
     path: path.resolve(__dirname, "./dist"),
     filename: "./[name].js",
+  },
+  node: {
+    fs: "empty",
   },
   mode: process.env.NODE_ENV,
   module: {
