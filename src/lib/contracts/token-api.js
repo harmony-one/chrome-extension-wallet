@@ -6,6 +6,7 @@ export const oneToHexAddress = (address) =>
 
 export const getContractInstance = (artifact) => {
   const hmy = getHarmony();
+  //console.log(artifact.contractName, artifact.networks[store.state.network.chainId].address);
   const contract = hmy.contracts.createContract(
     artifact.abi,
     artifact.networks[store.state.network.chainId].address
