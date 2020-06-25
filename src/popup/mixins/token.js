@@ -2,9 +2,10 @@ import { mapState } from "vuex";
 import {
   getTokenBalance,
   increaseTotalSupply,
+  getDecimals,
 } from "../../lib/contracts/token-api";
 import { Unit } from "@harmony-js/utils";
-import BigNumber from "bignumber.js";
+import {BN} from 'bn.js';
 
 export default {
   computed: mapState({
@@ -21,7 +22,13 @@ export default {
           this.address,
           this.tokens[symbol].artifacts
         );
-        let balance = Number(Unit.Wei(bigbalance).toEther()).toFixed(6);
+
+        let decimals = await getDecimals(
+          this.tokens[symbol].artifacts
+        );
+
+        const bigNumber = new BN(Math.pow(10, 12-decimals));
+        let balance = Number(Unit.Wei(bigNumber.mul(bigbalance)).toEther()).toFixed(6);
         this.$store.commit("hrc20/loadTokenBalance", { symbol, balance });
       }
     },

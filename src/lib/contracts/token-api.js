@@ -21,6 +21,18 @@ export async function getTokenBalance(address, artifact) {
   return balance;
 }
 
+export async function getDecimals(artifact) {
+  const instance = getContractInstance(artifact);
+
+  // hard coded for SEED
+  if (artifact.contractName == "SEED") {
+    return 0;
+  }
+
+  let decimals = await instance.methods.decimals().call();
+  return decimals;
+}
+
 export async function increaseTotalSupply(amount, artifact) {
   const instance = getContractInstance(artifact);
   let ret = await instance.methods
@@ -38,7 +50,7 @@ export async function sendToken(
   to,
   amount,
   privateKey,
-  gasLimit = "6721900",
+  gasLimit = "250000",
   gasPrice = 1,
   artifact
 ) {
