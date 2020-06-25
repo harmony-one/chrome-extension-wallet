@@ -240,7 +240,7 @@ export default {
     },
     getGasLimit() {
       if (this.selectedToken === "ONE") this.gasLimit = 21000;
-      else this.gasLimit = 6721900; //this is from the truffle-config.js
+      else this.gasLimit = 250000; //this is from the truffle-config.js
       return this.gasLimit;
     },
     getGasFee() {
