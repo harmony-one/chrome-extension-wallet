@@ -13,6 +13,8 @@
 - [x] Ledger Login
 - [ ] Ledger transfer
 - [ ] SEED token transfer
+- [ ] Javascript API for calling onewallet for signing 
+- [ ] Support staking.harmony.one 
 
 ## Install from release zip
 
