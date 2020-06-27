@@ -6,12 +6,13 @@
 - [x] Export private key  
 - [x] Send & receive ONE tokens.
 - [x] View ONE balance .
-- [x] View HRC20 token (BUSD, H2O) balances.
+- [x] View HRC20 token (BUSD, H2O, SEED) balances.
 - [x] Transfer HRC20 tokens (BUSD, H2O)
 - [x] View recent transfers .
 - [x] Switch the network to Mainnet, Pangaea, Testnet or Localnet.
 - [x] Ledger Login
 - [ ] Ledger transfer
+- [ ] SEED token transfer
 
 ## Install from release zip
 
