@@ -1,11 +1,15 @@
 <template>
   <div>
     <main class="prompt">
-      <div class="header-logo">
-        <img src="images/harmony-small.png" alt="Harmony" />
+      <div class="header-row">
+        <img src="images/harmony.png" alt="Harmony" />
         <span>Harmony</span>
       </div>
-      <h3>Staking Dashboard Sign in Request</h3>
+      <h3>Sign in Request</h3>
+      <div class="hostrow">
+        from
+        <span class="host_label">{{host}}</span>
+      </div>
       <div class="account-container">
         <div v-if="!wallets.accounts.length">
           <p>No Accounts. You should create the account first</p>
@@ -24,7 +28,7 @@
           </div>
         </div>
       </div>
-      <div class="button-group">
+      <div class="button-group" v-if="wallets.accounts.length">
         <button class="outline" @click="deny">Deny</button>
         <button :disabled="selected < 0" @click="accept">Accept</button>
       </div>
@@ -34,15 +38,32 @@
 
 <script>
 import { mapState } from "vuex";
+import {
+  THIRDPARTY_GET_ACCOUNT_CONNECT,
+  GET_WALLET_SERVICE_STATE,
+  THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE
+} from "../../types";
 export default {
   data: () => ({
-    selected: -1
+    selected: -1,
+    host: ""
   }),
   computed: {
     ...mapState(["wallets"])
   },
   mounted() {
-    chrome.runtime.connect({ name: "THIRDPARTY_GET_ACCOUNT" });
+    chrome.runtime.sendMessage(
+      { action: GET_WALLET_SERVICE_STATE },
+      ({ state } = {}) => {
+        console.log(state);
+        if (state && state.host) {
+          this.host = state.host;
+        } else {
+          window.close();
+        }
+      }
+    );
+    chrome.runtime.connect({ name: THIRDPARTY_GET_ACCOUNT_CONNECT });
   },
   methods: {
     selectAccount(index) {
@@ -54,7 +75,7 @@ export default {
     accept() {
       const account = this.wallets.accounts[this.selected];
       chrome.runtime.sendMessage({
-        action: "THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE",
+        action: THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
         payload: {
           name: account.name,
           address: account.address
@@ -65,6 +86,11 @@ export default {
 };
 </script>
 <style scoped>
+h3 {
+  text-align: center;
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
 .account-container {
   padding-right: 5px;
   height: 370px;
@@ -89,20 +115,30 @@ export default {
 .account-address {
   font-size: 11px;
 }
-.header-logo {
+.hostrow {
+  margin-bottom: 10px;
+  text-align: center;
+  font-size: 13px;
+}
+.host_label {
+  color: #0987d7;
+}
+.header-row {
   display: flex;
-  align-items: center;
+  justify-content: center;
   flex: 1;
   font-size: 1rem;
   font-weight: 600;
   color: #424242;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
-.header-logo img,
-.header-logo span {
+.header-row img,
+.header-row span {
   display: block;
 }
-.header-logo img {
+.header-row img {
   margin-right: 5px;
+  width: 26px;
+  height: 25px;
 }
 </style>
