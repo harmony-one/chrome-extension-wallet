@@ -36,10 +36,13 @@
 import { mapState } from "vuex";
 export default {
   data: () => ({
-    selected: -1,
+    selected: -1
   }),
   computed: {
-    ...mapState(["wallets"]),
+    ...mapState(["wallets"])
+  },
+  mounted() {
+    chrome.runtime.connect({ name: "THIRDPARTY_GET_ACCOUNT" });
   },
   methods: {
     selectAccount(index) {
@@ -49,13 +52,16 @@ export default {
       window.close();
     },
     accept() {
-      const address = this.wallets.accounts[this.selected].address;
+      const account = this.wallets.accounts[this.selected];
       chrome.runtime.sendMessage({
-        action: "LOGGED_IN",
-        payload: address,
+        action: "THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE",
+        payload: {
+          name: account.name,
+          address: account.address
+        }
       });
-    },
-  },
+    }
+  }
 };
 </script>
 <style scoped>
