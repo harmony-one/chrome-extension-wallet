@@ -7,6 +7,7 @@ import VueIntl from "vue-intl";
 import vClickOutside from "v-click-outside";
 import VueClipboard from "vue-clipboard2";
 import "./css/icons.less";
+import { WINDOWSTATE } from "../services/types";
 // import VModal from "vue-js-modal";
 import Notifications from "vue-notification";
 Vue.config.productionTip = false;
@@ -33,11 +34,11 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     return false;
   }
   if (action === "STATE_CHANGE") {
-    if (payload.status === "LOGIN") {
+    if (payload.status === WINDOWSTATE.LOGIN) {
       router.push("/login");
-    } else if (payload.status === "SIGN") {
-      router.push("/sign");
-    } else if (payload.status === "CLOSE") {
+    } else if (payload.status === WINDOWSTATE.APPROVE) {
+      router.push("/approve");
+    } else if (payload.status === WINDOWSTATE.CLOSE) {
       window.close();
     }
   }
