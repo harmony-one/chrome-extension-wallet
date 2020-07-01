@@ -1,8 +1,8 @@
 <template>
   <div>
-    <app-header @refresh="refreshAccount" headerTab="main-tab" />
-
     <main class="main">
+      <app-header @refresh="refreshAccount" headerTab="main-tab" />
+
       <div class="main-logo">
         <img src="images/harmony.png" class="logo-img" alt="Harmony" />
       </div>
