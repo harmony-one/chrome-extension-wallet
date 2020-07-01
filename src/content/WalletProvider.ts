@@ -3,6 +3,10 @@ import { Transaction } from "@harmony-js/transaction";
 import { Account } from "@harmony-js/account";
 import { decryptKeyStore } from "../lib/txnService";
 import { StakingTransaction } from "@harmony-js/staking";
+import {
+  THIRDPARTY_FORGET_IDENTITY_REQUEST,
+  THIRDPARTY_GET_ACCOUNT_REQUEST,
+} from "../types";
 import { sendAsyncMessageToContentScript, getTxnInfo } from "./messageHandler";
 
 class WalletProvider {
@@ -16,7 +20,7 @@ class WalletProvider {
     return new Promise(async (resolve) => {
       await sendAsyncMessageToContentScript({
         hostname: window.location.hostname,
-        type: "THIRDPARTY_FORGET_IDENTITY_REQUEST",
+        type: THIRDPARTY_FORGET_IDENTITY_REQUEST,
       });
       resolve();
     });
@@ -24,15 +28,15 @@ class WalletProvider {
   async getAccount() {
     return new Promise(async (resolve, reject) => {
       try {
-        const acc = await sendAsyncMessageToContentScript({
+        const res = await sendAsyncMessageToContentScript({
           hostname: window.location.hostname,
-          type: "THIRDPARTY_GET_ACCOUNT_REQUEST",
+          type: THIRDPARTY_GET_ACCOUNT_REQUEST,
         });
-        console.log("acc", acc);
-        if (acc.rejected) {
+        if (res.rejected) {
+          if (res.message) return reject(res.message);
           return reject("User rejected login request");
         }
-        resolve(acc);
+        resolve(res);
       } catch (err) {
         reject(err);
       }
@@ -47,9 +51,7 @@ class WalletProvider {
   ) {
     return new Promise(async (resolve, reject) => {
       try {
-        console.log("Passed txn ====>", transaction);
         const parsedTxn: any = await getTxnInfo(transaction);
-        console.log("getTxnInfo ====>", parsedTxn);
         const res = await sendAsyncMessageToContentScript({
           hostname: window.location.hostname,
           type: "THIRDPARTY_SIGN_REQUEST",

@@ -1,10 +1,9 @@
-import { WINDOWSTATE } from "./types";
+import { WINDOWSTATE } from "../types";
 import * as frontMessages from "./frontMessages";
 import { parseMessageObject } from "./msg-parser";
 import { Harmony } from "@harmony-js/core";
 import { Unit } from "@harmony-js/utils";
 import { decryptKeyStore } from "../lib/txnService.js";
-
 const { ChainID, ChainType } = require("@harmony-js/utils");
 const GAS_PRICE = new Unit("1").asGwei().toHex();
 const GAS_LIMIT = new Unit("25000").asWei().toHex();

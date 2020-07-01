@@ -1,14 +1,19 @@
 <template>
   <main class="prompt">
     <h3 class="center">{{ "Approve Transaction" + (wallet.isLedger ? " with Ledger" : "") }}</h3>
+    <div class="hostrow">
+      from
+      <span class="host_label">{{host}}</span>
+    </div>
     <p class="action_caption">
       <b>Signing with</b>
       <span class="sign__name">{{wallet.name}}</span>
       <b>:</b>
       <span class="sign__address">{{ wallet.address }}</span>
     </p>
-    <p class="txRow">
+    <p class="txRow flexrow">
       <span class="action_caption">{{displayAction}}:</span>
+      <span v-if="type === 'SEND'">{{fromShard}} Shard -> {{toShard}} Shard</span>
     </p>
     <p class="txRow">
       From
@@ -62,7 +67,12 @@
 import { decryptKeyStore } from "../../lib/txnService";
 import { mapState } from "vuex";
 import { Unit } from "@harmony-js/utils";
-import { TRANSACTIONTYPE } from "../../services/types";
+import {
+  TRANSACTIONTYPE,
+  GET_WALLET_SERVICE_STATE,
+  THIRDPARTY_SIGN_CONNECT,
+  THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE
+} from "../../types";
 
 export default {
   data: () => ({
@@ -72,12 +82,18 @@ export default {
     senderAddress: "",
     targetAddress: "",
     password: "",
-    type: "Send"
+    type: "Send",
+    host: "",
+    fromShard: false,
+    toShard: false,
+    wallet: {
+      isLedger: false,
+      name: "",
+      address: ""
+    }
   }),
   computed: {
-    ...mapState({
-      wallet: state => state.wallets.active
-    }),
+    ...mapState(["wallets"]),
     getGasFee() {
       return Unit.Wei(this.gasPrice * this.gasLimit).toGwei();
     },
@@ -127,7 +143,7 @@ export default {
         //todo approve via ledger
       }
       chrome.runtime.sendMessage({
-        action: "THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE",
+        action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
         payload: {
           keystore: this.wallet.keystore, //send keystore and password to the internal message handler of background.js
           password: this.password
@@ -145,25 +161,37 @@ export default {
   },
   mounted() {
     chrome.runtime.sendMessage(
-      { action: "GET_WALLET_SERVICE_STATE" },
+      { action: GET_WALLET_SERVICE_STATE },
       ({ state } = {}) => {
-        if (state && state.type && state.txnInfo) {
+        if (state && state.type && state.txnInfo && state.session) {
           this.type = state.type;
           this.senderAddress = state.txnInfo.from;
           this.targetAddress = state.txnInfo.to;
           this.gasLimit = state.txnInfo.gasLimit;
           this.gasPrice = state.txnInfo.gasPrice;
           this.amount = state.txnInfo.amount;
+          if (state.type === TRANSACTIONTYPE.SEND) {
+            this.fromShard = state.txnInfo.fromShard;
+            this.toShard = state.txnInfo.toShard;
+          }
+          this.host = state.session.host;
+          this.wallet = this.wallets.accounts.find(
+            acc => acc.address === state.session.account.address
+          );
+          console.log(this.wallet);
+        } else {
+          window.close();
         }
       }
     );
-    chrome.runtime.connect({ name: "THIRDPARTY_SIGN" });
+    chrome.runtime.connect({ name: THIRDPARTY_SIGN_CONNECT });
   }
 };
 </script>
 <style scoped>
 h3 {
   margin-top: 0px;
+  margin-bottom: 0px;
 }
 .password-content {
   margin-bottom: 10px;
@@ -184,6 +212,10 @@ h3 {
   font-style: italic;
   color: black;
 }
+.flexrow {
+  justify-content: space-between;
+  display: flex;
+}
 .txRow {
   font-size: 14px;
 }
@@ -195,5 +227,13 @@ h3 {
 .action_caption {
   font-size: 16px;
   font-weight: 700;
+}
+.hostrow {
+  margin-bottom: 10px;
+  text-align: center;
+  font-size: 13px;
+}
+.host_label {
+  color: #0987d7;
 }
 </style>

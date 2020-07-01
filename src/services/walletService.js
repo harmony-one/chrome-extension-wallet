@@ -1,4 +1,5 @@
-import { WINDOWSTATE } from "./types";
+import { WINDOWSTATE } from "../types";
+import store from "../popup/store";
 import * as storage from "./storage";
 import { msgToContentScript } from "./frontMessages";
 class WalletService {
@@ -10,9 +11,13 @@ class WalletService {
   getState = () => {
     return {
       type: this.type,
+      host: this.host,
       txnInfo: this.txnInfo,
-      session: activeSession,
+      session: this.activeSession,
     };
+  };
+  sendMessageToInjectScript = (type, payload) => {
+    chrome.tabs.sendMessage(this.sender, msgToContentScript(type, payload));
   };
   openPopup = (route, width, height) => {
     chrome.windows.create({
@@ -36,9 +41,8 @@ class WalletService {
         session: sessionList,
       });
     }
-    chrome.tabs.sendMessage(
-      this.sender,
-      msgToContentScript("THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE")
+    this.sendMessageToInjectScript(
+      "THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE"
     );
   };
   getAccount = async (tabid, hostname) => {
@@ -46,12 +50,23 @@ class WalletService {
     this.host = hostname;
     const session = await this.getSession(hostname);
     if (session.exist) {
-      chrome.tabs.sendMessage(
-        this.sender,
-        msgToContentScript(
+      const findAcc = store.state.wallets.accounts.find(
+        (account) => account.address === session.account.address
+      );
+      if (!findAcc) {
+        this.sendMessageToInjectScript(
           "THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE",
-          session.account
-        )
+          {
+            rejected: true,
+            message:
+              "Account is not found from the Extension. Please use forgetIdentity first to sign out",
+          }
+        );
+        return;
+      }
+      this.sendMessageToInjectScript(
+        "THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE",
+        session.account
       );
     } else this.openPopup("login", 380, 600);
   };
@@ -63,26 +78,32 @@ class WalletService {
       this.txnInfo = payload.txnInfo;
       const session = await this.getSession(hostname);
       if (session.exist) {
+        const findAcc = store.state.wallets.accounts.find(
+          (account) => account.address === session.account.address
+        );
+        if (!findAcc) {
+          this.sendMessageToInjectScript("THIRDPARTY_SIGN_REQUEST_RESPONSE", {
+            rejected: true,
+            message:
+              "Account is not found from the Extension. Please use forgetIdentity first to sign out",
+          });
+          return;
+        }
         this.activeSession = session;
         this.openPopup("sign", 400, 560);
       } else {
-        chrome.tabs.sendMessage(
-          this.sender,
-          msgToContentScript("THIRDPARTY_SIGN_REQUEST_RESPONSE", {
-            rejected: true,
-            message: "Account is not selected",
-          })
-        );
+        this.sendMessageToInjectScript("THIRDPARTY_SIGN_REQUEST_RESPONSE", {
+          rejected: true,
+          message:
+            "Account is not selected. Please use getAccount first to sign the transaction",
+        });
       }
     } catch (err) {
       console.error(err);
     }
   };
   onGetSignatureKeySuccess = (payload) => {
-    chrome.tabs.sendMessage(
-      this.sender,
-      msgToContentScript("THIRDPARTY_SIGN_REQUEST_RESPONSE", payload)
-    );
+    this.sendMessageToInjectScript("THIRDPARTY_SIGN_REQUEST_RESPONSE", payload);
     this.closeWindow();
   };
   closeWindow = () => {
@@ -125,9 +146,9 @@ class WalletService {
     await storage.saveValue({
       session: sessionList,
     });
-    chrome.tabs.sendMessage(
-      this.sender,
-      msgToContentScript("THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE", payload)
+    this.sendMessageToInjectScript(
+      "THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE",
+      payload
     );
     this.closeWindow();
   };

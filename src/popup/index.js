@@ -7,7 +7,7 @@ import VueIntl from "vue-intl";
 import vClickOutside from "v-click-outside";
 import VueClipboard from "vue-clipboard2";
 import "./css/icons.less";
-import { WINDOWSTATE } from "../services/types";
+import { WINDOWSTATE } from "../types";
 // import VModal from "vue-js-modal";
 import Notifications from "vue-notification";
 Vue.config.productionTip = false;
