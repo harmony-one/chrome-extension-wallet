@@ -119,8 +119,8 @@ export async function transferToken(
   toShard,
   amount,
   privateKey,
-  gasLimit = "210000",
-  gasPrice = 2
+  gasLimit = "21000",
+  gasPrice = 1
 ) {
   let harmony = getHarmony();
 
