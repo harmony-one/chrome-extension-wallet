@@ -4,9 +4,9 @@ const path = require("path");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
 const GenerateJsonPlugin = require("generate-json-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 // const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
-// const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const ZipPlugin = require("zip-webpack-plugin");
 const isProduction = process.env.NODE_ENV === "production";
 const manifest_dev = require("./src/manifest-dev");
@@ -89,6 +89,10 @@ const config = {
         enforce: "pre",
       },
       {
+        test: /\.ts?$/,
+        use: ["ts-loader"],
+      },
+      {
         test: /\.scss$/,
         loader: "style-loader!css-loader!sass-loader",
       },
@@ -110,7 +114,7 @@ const config = {
     alias: {
       vue$: "vue/dist/vue.esm.js",
     },
-    extensions: ["*", ".js", ".vue", ".json"],
+    extensions: ["*", ".js", ".ts", ".tsx", ".vue", ".json"],
   },
   plugins: getPlugins(isProduction),
   performance: getPerformance(isProduction),
@@ -145,6 +149,7 @@ function getPlugins(isProd) {
       new webpack.LoaderOptionsPlugin({
         minimize: true,
       }),
+      new UglifyJSPlugin({}),
       new webpack.SourceMapDevToolPlugin({}),
       new ZipPlugin({
         path: "..",
