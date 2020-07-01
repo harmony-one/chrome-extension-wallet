@@ -86,8 +86,8 @@ class ExtensionService {
       this.transactionDetails = parseMessageObject(transaction.signMessage);
       this.transactionType = this.transactionDetails.type;
       this.networkConfig = this.transactionDetails.network;
-      this.status = WINDOWSTATE.SIGN;
-      this.setPopupStatus(WINDOWSTATE.SIGN);
+      this.status = WINDOWSTATE.APPROVE;
+      this.setPopupStatus(WINDOWSTATE.APPROVE);
     } catch (err) {
       this.resetState();
     }
