@@ -1,7 +1,7 @@
 <template>
   <div>
-    <app-header headerTab="create-tab" />
-    <main class="main import-wallet">
+    <main class="main">
+      <app-header headerTab="create-tab" />
       <div class="main-logo">
         <img src="images/harmony.png" alt="Harmony" />
       </div>
@@ -313,7 +313,7 @@ input[type="file"] {
   border-radius: 3px;
   padding: 0.5rem 1rem;
 }
-.import-wallet .big-label {
+.big-label {
   font-size: 1rem;
   color: black;
 }
