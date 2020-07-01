@@ -1,8 +1,8 @@
 <template>
   <div>
-    <app-header @refresh="refreshTransfers" headerTab="main-tab" />
-
     <main class="main">
+      <app-header @refresh="refreshTransfers" headerTab="main-tab" />
+
       <div v-if="transfers.length === 0" class="message-empty">No transfers yet</div>
 
       <div v-else>
