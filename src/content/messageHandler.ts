@@ -1,5 +1,10 @@
-import { HARMONY_REQUEST_TYPE, HARMONY_RESPONSE_TYPE } from "../services/types";
-import { TRANSACTIONTYPE, STAKINGTYPE } from "../services/types";
+import { HARMONY_REQUEST_TYPE, HARMONY_RESPONSE_TYPE } from "../types";
+import {
+  TRANSACTIONTYPE,
+  STAKINGTYPE,
+  ONEWALLET_SERVICE_EVENT_REQUEST,
+  ONEWALLET_SERVICE_EVENT_RESPONSE,
+} from "../types";
 import { StakingTransaction } from "@harmony-js/staking";
 import { HarmonyAddress } from "@harmony-js/crypto";
 import { Unit } from "@harmony-js/utils";
@@ -24,15 +29,15 @@ const waitForResponse = (type: any) => {
       }
 
       // cleanup
-      window.removeEventListener("ONEWALLET_SERVICE_EVENT_RESPONSE", handler);
+      window.removeEventListener(ONEWALLET_SERVICE_EVENT_RESPONSE, handler);
     });
-    window.addEventListener("ONEWALLET_SERVICE_EVENT_RESPONSE", handler);
+    window.addEventListener(ONEWALLET_SERVICE_EVENT_RESPONSE, handler);
   });
 };
 
 const sendMessageToContentScript = (payload: any) => {
   window.dispatchEvent(
-    new CustomEvent("ONEWALLET_SERVICE_EVENT_REQUEST", {
+    new CustomEvent(ONEWALLET_SERVICE_EVENT_REQUEST, {
       detail: {
         type: HARMONY_REQUEST_TYPE,
         payload,

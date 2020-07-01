@@ -1,7 +1,18 @@
 import extensionService from "../services/extensionService";
 import walletService from "../services/walletService";
+
 import { msgToContentScript } from "../services/frontMessages";
-import { HARMONY_REQUEST_TYPE, HARMONY_RESPONSE_TYPE } from "../services/types";
+import {
+  HARMONY_REQUEST_TYPE,
+  HARMONY_RESPONSE_TYPE,
+  THIRDPARTY_FORGET_IDENTITY_REQUEST,
+  THIRDPARTY_GET_ACCOUNT_REQUEST,
+  THIRDPARTY_SIGN_REQUEST,
+  THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
+  GET_WALLET_SERVICE_STATE,
+  THIRDPARTY_SIGN_CONNECT,
+  THIRDPARTY_GET_ACCOUNT_CONNECT,
+} from "../types";
 function externalMessageListener(message, sender, sendResponse) {
   const { messageSource, payload } = message;
 
@@ -28,17 +39,17 @@ function externalMessageListener(message, sender, sendResponse) {
     case "ONEWALLET_LOGIN_REQUEST":
       extensionService.startLogIn(sender.tab.id);
       break;
-    case "THIRDPARTY_SIGN_REQUEST":
+    case THIRDPARTY_SIGN_REQUEST:
       walletService.prepareSignTransaction(
         sender.tab.id,
         payload.hostname,
         payload.payload
       );
       break;
-    case "THIRDPARTY_GET_ACCOUNT_REQUEST":
+    case THIRDPARTY_GET_ACCOUNT_REQUEST:
       walletService.getAccount(sender.tab.id, payload.hostname);
       break;
-    case "THIRDPARTY_FORGET_IDENTITY_REQUEST":
+    case THIRDPARTY_FORGET_IDENTITY_REQUEST:
       walletService.forgetIdentity(sender.tab.id, payload.hostname);
       break;
     default:
@@ -56,15 +67,15 @@ function internalMessageListener(message, sender, sendResponse) {
   }
   switch (action) {
     //start onewallet provider message
-    case "GET_WALLET_SERVICE_STATE": {
+    case GET_WALLET_SERVICE_STATE: {
       const state = walletService.getState();
       sendResponse({ state });
       break;
     }
-    case "THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE":
+    case THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE:
       walletService.onGetSignatureKeySuccess(payload);
       break;
-    case "THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE":
+    case THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE:
       walletService.onGetAccountSuccess(payload);
       break;
     //end onewallet provider message
@@ -101,7 +112,7 @@ function onConnectListener(externalPort) {
     chrome.tabs.query({}, (tabs) => {
       tabs.forEach((tab) => {
         switch (name) {
-          case "THIRDPARTY_SIGN": {
+          case THIRDPARTY_SIGN_CONNECT: {
             chrome.tabs.sendMessage(
               tab.id,
               msgToContentScript("THIRDPARTY_SIGN_REQUEST_RESPONSE", {
@@ -110,7 +121,7 @@ function onConnectListener(externalPort) {
             );
             break;
           }
-          case "THIRDPARTY_GET_ACCOUNT": {
+          case THIRDPARTY_GET_ACCOUNT_CONNECT: {
             chrome.tabs.sendMessage(
               tab.id,
               msgToContentScript("THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE", {

@@ -1,7 +1,7 @@
-import { HARMONY_REQUEST_TYPE, HARMONY_RESPONSE_TYPE } from "../services/types";
+import { HARMONY_REQUEST_TYPE, HARMONY_RESPONSE_TYPE } from "../types";
 
 window.onerror = function(message, source, line, column, error) {
-  console.log(
+  console.error(
     "ONE ERROR HANDLER TO RULE THEM ALL:",
     message,
     ", source: ",
