@@ -1,4 +1,6 @@
-import extensionService from "../services/index";
+import extensionService from "../services/extensionService";
+import walletService from "../services/walletService";
+import { msgToContentScript } from "../services/frontMessages";
 function externalMessageListener(message, sender, sendResponse) {
   const { messageSource, payload } = message;
 
@@ -29,9 +31,20 @@ function externalMessageListener(message, sender, sendResponse) {
     case "ONEWALLET_LOGIN_REQUEST":
       extensionService.startLogIn(sender.tab.id);
       break;
+    case "THIRDPARTY_SIGN_REQUEST":
+      walletService.prepareSignTransaction(
+        sender.tab.id,
+        payload.hostname,
+        payload.payload
+      );
+      break;
+    case "THIRDPARTY_GET_ACCOUNT_REQUEST":
+      walletService.getAccount(sender.tab.id, payload.hostname);
+      break;
     default:
       console.warn("Unk message received from content script - ", message);
   }
+  sendResponse();
   return true;
 }
 
@@ -41,8 +54,21 @@ function internalMessageListener(message, sender, sendResponse) {
   if (messageSource && messageSource !== "FROM_ONEWALLET_EXTENSION") {
     return false;
   }
-
   switch (action) {
+    //start onewallet provider message
+    case "GET_WALLET_SERVICE_STATE": {
+      const state = walletService.getState();
+      sendResponse({ state });
+      break;
+    }
+    case "THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE":
+      walletService.onGetSignatureKeySuccess(payload);
+      break;
+    case "THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE":
+      walletService.onGetAccountSuccess(payload);
+      break;
+    //end onewallet provider message
+    //start staking dashboard message handler
     case "GET_EXTENSION_STATE": {
       const state = extensionService.getState();
       sendResponse({ state });
@@ -60,13 +86,46 @@ function internalMessageListener(message, sender, sendResponse) {
     case "LOGGED_IN": {
       extensionService.loginWithExtension(payload);
       break;
+      //end staking dashboard message handler
     }
     default:
       console.log("Unk internal action received - ", action);
   }
+  sendResponse();
   return true;
+}
+//disconnect listener when the popup is close
+function onConnectListener(externalPort) {
+  const name = externalPort.name;
+  externalPort.onDisconnect.addListener(function() {
+    chrome.tabs.query({}, (tabs) => {
+      tabs.forEach((tab) => {
+        switch (name) {
+          case "THIRDPARTY_SIGN": {
+            chrome.tabs.sendMessage(
+              tab.id,
+              msgToContentScript("THIRDPARTY_SIGN_REQUEST_RESPONSE", {
+                rejected: true,
+              })
+            );
+            break;
+          }
+          case "THIRDPARTY_GET_ACCOUNT": {
+            chrome.tabs.sendMessage(
+              tab.id,
+              msgToContentScript("THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE", {
+                rejected: true,
+              })
+            );
+            break;
+          }
+        }
+      });
+    });
+  });
 }
 export function setupExtensionMessageListeners() {
   chrome.runtime.onMessage.addListener(externalMessageListener);
   chrome.runtime.onMessage.addListener(internalMessageListener);
+  chrome.runtime.onConnect.addListener(onConnectListener);
 }
