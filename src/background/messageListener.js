@@ -1,14 +1,11 @@
 import extensionService from "../services/extensionService";
 import walletService from "../services/walletService";
 import { msgToContentScript } from "../services/frontMessages";
+import { HARMONY_REQUEST_TYPE, HARMONY_RESPONSE_TYPE } from "../services/types";
 function externalMessageListener(message, sender, sendResponse) {
   const { messageSource, payload } = message;
 
-  if (
-    !messageSource ||
-    !payload ||
-    messageSource !== "TO_ONEWALLET_EXTENSION"
-  ) {
+  if (!messageSource || !payload || messageSource !== HARMONY_REQUEST_TYPE) {
     return false;
   }
 
@@ -16,7 +13,7 @@ function externalMessageListener(message, sender, sendResponse) {
   switch (type) {
     case "GET_SESSION":
       sendResponse({
-        type: "FROM_ONEWALLET_EXTENSION",
+        type: HARMONY_RESPONSE_TYPE,
         message: {
           type: "GET_SESSION_RESPONSE",
           payload: {
@@ -41,6 +38,9 @@ function externalMessageListener(message, sender, sendResponse) {
     case "THIRDPARTY_GET_ACCOUNT_REQUEST":
       walletService.getAccount(sender.tab.id, payload.hostname);
       break;
+    case "THIRDPARTY_FORGET_IDENTITY_REQUEST":
+      walletService.forgetIdentity(sender.tab.id, payload.hostname);
+      break;
     default:
       console.warn("Unk message received from content script - ", message);
   }
@@ -51,7 +51,7 @@ function externalMessageListener(message, sender, sendResponse) {
 // Listen messages from extension (e.g popup)
 function internalMessageListener(message, sender, sendResponse) {
   const { messageSource, action, payload } = message;
-  if (messageSource && messageSource !== "FROM_ONEWALLET_EXTENSION") {
+  if (messageSource && messageSource !== HARMONY_RESPONSE_TYPE) {
     return false;
   }
   switch (action) {
