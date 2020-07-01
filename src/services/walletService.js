@@ -1,7 +1,6 @@
 import { WINDOWSTATE } from "./types";
 import * as storage from "./storage";
 import { msgToContentScript } from "./frontMessages";
-import account from "../popup/store/modules/account";
 class WalletService {
   txnInfo = null;
   type = null;
@@ -24,6 +23,23 @@ class WalletService {
       width: width,
       height: height,
     });
+  };
+  forgetIdentity = async (tabid, hostname) => {
+    this.sender = tabid;
+    this.host = hostname;
+
+    let sessionList = await this.getHostSessions();
+    const existIndex = sessionList.findIndex((elem) => elem.host === hostname);
+    if (existIndex >= 0) {
+      sessionList.splice(existIndex, 1);
+      await storage.saveValue({
+        session: sessionList,
+      });
+    }
+    chrome.tabs.sendMessage(
+      this.sender,
+      msgToContentScript("THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE")
+    );
   };
   getAccount = async (tabid, hostname) => {
     this.sender = tabid;
@@ -48,8 +64,16 @@ class WalletService {
       const session = await this.getSession(hostname);
       if (session.exist) {
         this.activeSession = session;
+        this.openPopup("sign", 400, 560);
+      } else {
+        chrome.tabs.sendMessage(
+          this.sender,
+          msgToContentScript("THIRDPARTY_SIGN_REQUEST_RESPONSE", {
+            rejected: true,
+            message: "Account is not selected",
+          })
+        );
       }
-      this.openPopup("sign", 400, 560);
     } catch (err) {
       console.error(err);
     }
@@ -79,7 +103,6 @@ class WalletService {
   };
   getSession = async (hostname) => {
     let sessionList = await this.getHostSessions();
-    console.log("sessionList", sessionList);
     const existIndex = sessionList.findIndex((elem) => elem.host === hostname);
     if (existIndex >= 0) {
       return {
@@ -91,6 +114,7 @@ class WalletService {
       exist: false,
     };
   };
+
   onGetAccountSuccess = async (payload) => {
     let sessionList = await this.getHostSessions();
     const newHost = {
