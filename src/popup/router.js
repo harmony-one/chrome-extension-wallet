@@ -8,6 +8,7 @@ import ConnectHardwareWallet from "./pages/ConnectHardwareWallet.vue";
 import Account from "./pages/Account.vue";
 import Tokens from "./pages/Tokens.vue";
 import Transfers from "./pages/Transfers.vue";
+import ApproveTransaction from "./pages/ApproveTransaction.vue";
 import SignTransaction from "./pages/SignTransaction.vue";
 import Send from "./pages/Send.vue";
 import SendToken from "./pages/SendToken.vue";
@@ -61,6 +62,14 @@ const router = new Router({
       path: "/sign",
       name: "signtransaction",
       component: SignTransaction,
+      meta: {
+        requiredAccount: true,
+      },
+    },
+    {
+      path: "/approve",
+      name: "approvetransaction",
+      component: ApproveTransaction,
       meta: {
         requiredAccount: true,
       },

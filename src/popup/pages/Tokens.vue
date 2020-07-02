@@ -1,8 +1,8 @@
 <template>
   <div>
-    <app-header @refresh="refreshTokens" headerTab="main-tab" />
+    <main class="main">
+      <app-header @refresh="refreshTokens" headerTab="main-tab" />
 
-    <main class="main page-token">
       <div v-if="!validTokens[network.name]" class="message-empty">No tokens found</div>
 
       <div v-else>

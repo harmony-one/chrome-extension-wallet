@@ -1,8 +1,8 @@
 <template>
   <div>
-    <app-header subtitle="Receive Payment" />
-
     <main class="main">
+      <app-header subtitle="Receive Payment" />
+
       <div class="receive-payment">
         <div class>Send to the following address</div>
 

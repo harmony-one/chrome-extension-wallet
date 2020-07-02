@@ -1,7 +1,7 @@
 <template>
   <div>
-    <app-header :subtitle="getHeaderName" @refresh="refreshData" />
-    <main class="main page-transaction">
+    <main class="main">
+      <app-header :subtitle="getHeaderName" @refresh="refreshData" />
       <div v-if="scene === 1">
         <form
           @submit.prevent="showConfirmDialog"

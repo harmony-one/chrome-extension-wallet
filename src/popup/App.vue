@@ -15,7 +15,7 @@
 <script>
 import { mapState } from "vuex";
 import Config from "../config";
-import extensionService from "../services/index";
+import { WINDOWSTATE } from "../types";
 export default {
   computed: mapState({
     loading: state => state.loading,
@@ -26,10 +26,10 @@ export default {
       { action: "GET_EXTENSION_STATE" },
       ({ state } = {}) => {
         if (!state) return false;
-        if (state.status === "LOGIN") {
+        if (state.status === WINDOWSTATE.LOGIN) {
           this.$router.push("/login");
-        } else if (state.status === "SIGN") {
-          this.$router.push("/sign");
+        } else if (state.status === WINDOWSTATE.APPROVE) {
+          this.$router.push("/approve");
         }
         chrome.runtime.sendMessage({ action: "RESET_WINDOW_STATE" });
       }

@@ -1,7 +1,7 @@
 <template>
   <div>
-    <app-header headerTab="create-tab" />
     <main class="main connect-wallet">
+      <app-header headerTab="create-tab" />
       <div class="main-logo">
         <img src="images/harmony.png" alt="Harmony" />
       </div>
