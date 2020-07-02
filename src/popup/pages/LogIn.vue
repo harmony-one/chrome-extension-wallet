@@ -7,7 +7,6 @@
       </div>
       <h3>Sign in Request</h3>
       <div class="hostrow">
-        from
         <span class="host_label">{{host}}</span>
       </div>
       <div class="account-container">
@@ -55,7 +54,6 @@ export default {
     chrome.runtime.sendMessage(
       { action: GET_WALLET_SERVICE_STATE },
       ({ state } = {}) => {
-        console.log(state);
         if (state && state.host) {
           this.host = state.host;
         } else {

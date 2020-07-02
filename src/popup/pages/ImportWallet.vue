@@ -272,7 +272,7 @@ export default {
               isLedger: false
             };
 
-            console.log("added new account through import keystore", wallet);
+            console.log("added new account through import keystore");
             if (wallet.address) {
               this.$store.commit("wallets/addAccount", wallet);
               this.$router.push("/");

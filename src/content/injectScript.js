@@ -2,7 +2,7 @@ import walletProvider from "./WalletProvider";
 
 Object.defineProperty(window, "onewallet", {
   enumerable: true,
-  writable: false,
-  configurable: false,
+  writable: true,
+  configurable: true,
   value: walletProvider,
 });

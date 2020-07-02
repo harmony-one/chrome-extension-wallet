@@ -1,4 +1,9 @@
-import { WINDOWSTATE } from "../types";
+import {
+  WINDOWSTATE,
+  THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE,
+  THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
+  THIRDPARTY_SIGN_REQUEST_RESPONSE,
+} from "../types";
 import store from "../popup/store";
 import * as storage from "./storage";
 import { msgToContentScript } from "./frontMessages";
@@ -19,14 +24,16 @@ class WalletService {
   sendMessageToInjectScript = (type, payload) => {
     chrome.tabs.sendMessage(this.sender, msgToContentScript(type, payload));
   };
-  openPopup = (route, width, height) => {
-    chrome.windows.create({
-      url: `chrome-extension://${chrome.runtime.id}/popup.html#/${route}`,
-      type: "panel",
-      left: (screen.width - width) / 2,
-      top: (screen.height - height) / 2,
-      width: width,
-      height: height,
+  openPopup = async (route, width, height) => {
+    chrome.windows.getCurrent({ windowTypes: ["normal"] }, function(window) {
+      chrome.windows.create({
+        url: `chrome-extension://${chrome.runtime.id}/popup.html#/${route}`,
+        type: "popup",
+        left: screen.width / 2 - width / 2 + window.left,
+        top: screen.height / 2 - height / 2 + window.top,
+        width: width,
+        height: height,
+      });
     });
   };
   forgetIdentity = async (tabid, hostname) => {
@@ -41,9 +48,7 @@ class WalletService {
         session: sessionList,
       });
     }
-    this.sendMessageToInjectScript(
-      "THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE"
-    );
+    this.sendMessageToInjectScript(THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE);
   };
   getAccount = async (tabid, hostname) => {
     this.sender = tabid;
@@ -55,7 +60,7 @@ class WalletService {
       );
       if (!findAcc) {
         this.sendMessageToInjectScript(
-          "THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE",
+          THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
           {
             rejected: true,
             message:
@@ -65,10 +70,10 @@ class WalletService {
         return;
       }
       this.sendMessageToInjectScript(
-        "THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE",
+        THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
         session.account
       );
-    } else this.openPopup("login", 380, 600);
+    } else this.openPopup("login", 420, 600);
   };
   prepareSignTransaction = async (tabid, hostname, payload) => {
     try {
@@ -82,7 +87,7 @@ class WalletService {
           (account) => account.address === session.account.address
         );
         if (!findAcc) {
-          this.sendMessageToInjectScript("THIRDPARTY_SIGN_REQUEST_RESPONSE", {
+          this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
             rejected: true,
             message:
               "Account is not found from the Extension. Please use forgetIdentity first to sign out",
@@ -90,9 +95,11 @@ class WalletService {
           return;
         }
         this.activeSession = session;
-        this.openPopup("sign", 400, 560);
+        if (this.txnInfo.data && this.txnInfo.data !== "0x")
+          this.openPopup("sign", 400, 620);
+        else this.openPopup("sign", 400, 560);
       } else {
-        this.sendMessageToInjectScript("THIRDPARTY_SIGN_REQUEST_RESPONSE", {
+        this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
           rejected: true,
           message:
             "Account is not selected. Please use getAccount first to sign the transaction",
@@ -103,7 +110,7 @@ class WalletService {
     }
   };
   onGetSignatureKeySuccess = (payload) => {
-    this.sendMessageToInjectScript("THIRDPARTY_SIGN_REQUEST_RESPONSE", payload);
+    this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, payload);
     this.closeWindow();
   };
   closeWindow = () => {
@@ -147,17 +154,10 @@ class WalletService {
       session: sessionList,
     });
     this.sendMessageToInjectScript(
-      "THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE",
+      THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
       payload
     );
     this.closeWindow();
-  };
-  resetState = () => {
-    this.txnInfo = null;
-    this.type = null;
-    this.sender = null;
-    this.host = "";
-    this.activeSession = null;
   };
 }
 const walletService = new WalletService();

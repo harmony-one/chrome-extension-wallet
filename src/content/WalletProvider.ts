@@ -6,15 +6,30 @@ import { StakingTransaction } from "@harmony-js/staking";
 import {
   THIRDPARTY_FORGET_IDENTITY_REQUEST,
   THIRDPARTY_GET_ACCOUNT_REQUEST,
+  THIRDPARTY_SIGN_REQUEST,
+  FACTORYTYPE,
 } from "../types";
-import { sendAsyncMessageToContentScript, getTxnInfo } from "./messageHandler";
+import networkConfig from "../config";
+import {
+  sendAsyncMessageToContentScript,
+  getTxnInfo,
+  checkTransactionType,
+} from "./messageHandler";
 
 class WalletProvider {
   isOneWallet: Boolean;
   version: any;
+  network: any;
   constructor() {
-    this.version = "1.0.0";
+    const mainnet = networkConfig.networks[0];
+    this.version = "1.0.1";
     this.isOneWallet = true;
+    this.network = {
+      blockchain: "harmony",
+      chain_url: mainnet.apiUrl,
+      chain_id: mainnet.chainId,
+      net_version: 1,
+    };
   }
   async forgetIdentity() {
     return new Promise(async (resolve) => {
@@ -22,7 +37,7 @@ class WalletProvider {
         hostname: window.location.hostname,
         type: THIRDPARTY_FORGET_IDENTITY_REQUEST,
       });
-      resolve();
+      resolve("Successfully signed out");
     });
   }
   async getAccount() {
@@ -52,9 +67,10 @@ class WalletProvider {
     return new Promise(async (resolve, reject) => {
       try {
         const parsedTxn: any = await getTxnInfo(transaction);
+        const txnType = checkTransactionType(transaction);
         const res = await sendAsyncMessageToContentScript({
           hostname: window.location.hostname,
-          type: "THIRDPARTY_SIGN_REQUEST",
+          type: THIRDPARTY_SIGN_REQUEST,
           payload: parsedTxn,
         });
         if (res.rejected) {
@@ -68,14 +84,14 @@ class WalletProvider {
         );
         const signer: Account = new Account(privateKey, transaction.messenger);
         let signedTransaction: any;
-        if (transaction.constructor.name === Transaction.name) {
+        if (txnType == FACTORYTYPE.TRANSACTION) {
           signedTransaction = await signer.signTransaction(
             transaction as Transaction,
             updateNonce,
             encodeMode,
             blockNumber
           );
-        } else if (transaction.constructor.name === StakingTransaction.name) {
+        } else if (txnType == FACTORYTYPE.STAKINGTRANSACTION) {
           signedTransaction = await signer.signStaking(
             transaction as StakingTransaction,
             updateNonce,
