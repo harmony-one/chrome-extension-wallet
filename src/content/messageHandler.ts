@@ -2,6 +2,7 @@ import { HARMONY_REQUEST_TYPE, HARMONY_RESPONSE_TYPE } from "../types";
 import {
   TRANSACTIONTYPE,
   STAKINGTYPE,
+  FACTORYTYPE,
   ONEWALLET_SERVICE_EVENT_REQUEST,
   ONEWALLET_SERVICE_EVENT_RESPONSE,
 } from "../types";
@@ -27,8 +28,6 @@ const waitForResponse = (type: any) => {
       if (message.type === type) {
         resolve(message.payload);
       }
-
-      // cleanup
       window.removeEventListener(ONEWALLET_SERVICE_EVENT_RESPONSE, handler);
     });
     window.addEventListener(ONEWALLET_SERVICE_EVENT_RESPONSE, handler);
@@ -52,11 +51,18 @@ export const sendAsyncMessageToContentScript = async (payload: any) => {
   return response;
 };
 
-export const getTxnInfo = (transaction: Transaction | StakingTransaction) =>
+export const checkTransactionType = (transaction: any) => {
+  if (transaction.stakeMsg && transaction.directive !== undefined)
+    return FACTORYTYPE.STAKINGTRANSACTION;
+  return FACTORYTYPE.TRANSACTION;
+};
+
+export const getTxnInfo = (transaction: any) =>
   new Promise((resolve, reject) => {
     let response: any;
+    const txnType = checkTransactionType(transaction);
     try {
-      if (transaction.constructor.name === Transaction.name) {
+      if (txnType === FACTORYTYPE.TRANSACTION) {
         const txnParams = (transaction as Transaction).txParams;
         response = {
           type: TRANSACTIONTYPE.SEND,
@@ -68,9 +74,10 @@ export const getTxnInfo = (transaction: Transaction | StakingTransaction) =>
             gasPrice: Unit.Wei(txnParams.gasPrice).toGwei(),
             fromShard: txnParams.shardID,
             toShard: txnParams.toShardID,
+            data: txnParams.data,
           },
         };
-      } else if (transaction.constructor.name === StakingTransaction.name) {
+      } else if (txnType === FACTORYTYPE.STAKINGTRANSACTION) {
         const stakeTransaction: any = JSON.parse(JSON.stringify(transaction));
         const stakeMsg: any = stakeTransaction.stakeMsg;
         const delegatorAddress = new HarmonyAddress(stakeMsg.delegatorAddress)

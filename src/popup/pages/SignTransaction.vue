@@ -1,16 +1,14 @@
 <template>
   <main class="prompt">
-    <h3 class="center">{{ "Approve Transaction" + (wallet.isLedger ? " with Ledger" : "") }}</h3>
+    <h3 class="center">Approve Transaction</h3>
     <div class="hostrow">
-      from
       <span class="host_label">{{host}}</span>
     </div>
     <p class="action_caption">
       <b>Signing with</b>
       <span class="sign__name">{{wallet.name}}</span>
-      <b>:</b>
-      <span class="sign__address">{{ wallet.address }}</span>
     </p>
+    <div class="sign__address">{{wallet.address}}</div>
     <p class="txRow flexrow">
       <span class="action_caption">{{displayAction}}:</span>
       <span v-if="type === 'SEND'">{{fromShard}} Shard -> {{toShard}} Shard</span>
@@ -25,18 +23,34 @@
     </p>
     <p class="addressRow" v-else>{{ displayAction }}</p>
     <div class="invoice" v-if="!isWithdrawal">
-      <div class="invoice__row">
-        <div class="invoice__rowLeft">Amount</div>
-        <div class="invoice__rowRight">{{ amount }} ONE</div>
+      <div v-if="data && data !== '0x'">
+        <div class="invoice">
+          <div class="invoice__row">
+            <div class="invoice__rowLeft">Gas Price</div>
+            <div class="invoice__rowRight">{{ gasPrice }} Gwei</div>
+          </div>
+          <div class="invoice__row">
+            <div class="invoice__rowLeft">Gas Limit</div>
+            <div class="invoice__rowRight">{{ gasLimit }} Gwei</div>
+          </div>
+          <p class="data_caption">Data:</p>
+          <div class="data_content">{{data}}</div>
+        </div>
       </div>
-      <div class="invoice__row">
-        <div class="invoice__rowLeft">Network Fee</div>
-        <div class="invoice__rowRight">{{ getGasFee }} ONE</div>
-      </div>
-      <div class="invoice__divider"></div>
-      <div class="invoice__row">
-        <div class="invoice__rowLeft">Total</div>
-        <div class="invoice__rowRight">{{ getTotal }} ONE</div>
+      <div v-else>
+        <div class="invoice__row">
+          <div class="invoice__rowLeft">Amount</div>
+          <div class="invoice__rowRight">{{ amount }} ONE</div>
+        </div>
+        <div class="invoice__row">
+          <div class="invoice__rowLeft">Network Fee</div>
+          <div class="invoice__rowRight">{{ getGasFee }} ONE</div>
+        </div>
+        <div class="invoice__divider"></div>
+        <div class="invoice__row">
+          <div class="invoice__rowLeft">Total</div>
+          <div class="invoice__rowRight">{{ getTotal }} ONE</div>
+        </div>
       </div>
     </div>
     <div v-if="!wallet.isLedger" class="password-content">
@@ -86,6 +100,7 @@ export default {
     host: "",
     fromShard: false,
     toShard: false,
+    data: false,
     wallet: {
       isLedger: false,
       name: "",
@@ -95,7 +110,7 @@ export default {
   computed: {
     ...mapState(["wallets"]),
     getGasFee() {
-      return Unit.Wei(this.gasPrice * this.gasLimit).toGwei();
+      return Unit.Gwei(this.gasPrice * this.gasLimit).toOne();
     },
     getTotal() {
       return Number(this.amount) + Number(this.getGasFee);
@@ -173,12 +188,12 @@ export default {
           if (state.type === TRANSACTIONTYPE.SEND) {
             this.fromShard = state.txnInfo.fromShard;
             this.toShard = state.txnInfo.toShard;
+            this.data = state.txnInfo.data;
           }
           this.host = state.session.host;
           this.wallet = this.wallets.accounts.find(
             acc => acc.address === state.session.account.address
           );
-          console.log(this.wallet);
         } else {
           window.close();
         }
@@ -210,7 +225,7 @@ h3 {
 .sign__address {
   font-size: 12px;
   font-style: italic;
-  color: black;
+  color: #666;
 }
 .flexrow {
   justify-content: space-between;
@@ -224,9 +239,23 @@ h3 {
   cursor: pointer;
   font-weight: 700;
 }
+.data_caption {
+  font-size: 15px;
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+.data_content {
+  word-break: break-word;
+  font-size: 12px;
+  font-style: italic;
+  height: 80px;
+  overflow: auto;
+  border: 1px solid #ddd;
+}
 .action_caption {
   font-size: 16px;
   font-weight: 700;
+  margin-bottom: 0px;
 }
 .hostrow {
   margin-bottom: 10px;
