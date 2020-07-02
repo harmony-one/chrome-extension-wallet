@@ -1,7 +1,7 @@
 <template>
   <div>
+    <app-header headerTab="create-tab" />
     <main class="main connect-wallet">
-      <app-header headerTab="create-tab" />
       <div class="main-logo">
         <img src="images/harmony.png" alt="Harmony" />
       </div>
@@ -17,10 +17,22 @@
           v-show="wallets.accounts.length > 0"
           class="outline"
           @click="$router.push('/')"
-        >Cancel</button>
-        <button :class="!wallets.accounts.length? 'full-width' : ''" @click="connect">Connect</button>
+        >
+          Cancel
+        </button>
+        <button
+          :class="!wallets.accounts.length ? 'full-width' : ''"
+          @click="connect"
+        >
+          Connect
+        </button>
       </div>
-      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -34,26 +46,26 @@ export default {
   data: () => ({
     error: {
       show: false,
-      message: ""
-    }
+      message: "",
+    },
   }),
   computed: {
-    ...mapState(["wallets"])
+    ...mapState(["wallets"]),
   },
   components: {
-    AppHeader
+    AppHeader,
   },
   methods: {
     connect() {
       console.log("start connecting ledger");
 
       connectLedgerApp()
-        .then(address => {
+        .then((address) => {
           const wallet = {
             isLedger: true,
             name: "Ledger",
             address: address,
-            keystore: ""
+            keystore: "",
           };
 
           this.$store.commit("wallets/addAccount", wallet);
@@ -66,17 +78,17 @@ export default {
             chrome.tabs.remove(tab.id, function() {});
           });
         })
-        .catch(err => {
+        .catch((err) => {
           this.$notify({
             group: "notify",
             type: "error",
             text:
-              "You did not select a Ledger device. Check if the Ledger is plugged in and unlocked."
+              "You did not select a Ledger device. Check if the Ledger is plugged in and unlocked.",
           });
           console.log(err);
         });
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>

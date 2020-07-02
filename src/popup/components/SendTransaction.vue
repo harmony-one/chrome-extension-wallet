@@ -1,7 +1,7 @@
 <template>
   <div>
+    <app-header :subtitle="getHeaderName" @refresh="refreshData" />
     <main class="main">
-      <app-header :subtitle="getHeaderName" @refresh="refreshData" />
       <div v-if="scene === 1">
         <form
           @submit.prevent="showConfirmDialog"
@@ -16,9 +16,9 @@
             :class="[message.type]"
             @click="onMessageClick"
           >
-            <span
-              v-if="message.type === 'success'"
-            >Transaction Sucess: Click here to see the transaction</span>
+            <span v-if="message.type === 'success'"
+              >Transaction Sucess: Click here to see the transaction</span
+            >
             <span v-else>{{ message.text }}</span>
           </div>
           <div :class="{ row: !isToken }">
@@ -38,7 +38,8 @@
                   v-for="shard in account.shardArray"
                   :key="shard.shardID"
                   :value="shard.shardID"
-                >{{ shard.shardID }}</option>
+                  >{{ shard.shardID }}</option
+                >
               </select>
             </label>
           </div>
@@ -52,12 +53,23 @@
                 v-model="amount"
                 step="any"
               />
-              <div class="maximum-label">Maximum: {{ getMaxBalance + " " + selectedToken }}</div>
+              <div class="maximum-label">
+                Maximum: {{ getMaxBalance + " " + selectedToken }}
+              </div>
             </label>
             <label v-if="!isToken" class="input-label token">
               Token
-              <select class="input-field" v-model="selectedToken" @change="tokenChanged()">
-                <option v-for="symbol in tokenList" :key="symbol" :value="symbol">{{ symbol }}</option>
+              <select
+                class="input-field"
+                v-model="selectedToken"
+                @change="tokenChanged()"
+              >
+                <option
+                  v-for="symbol in tokenList"
+                  :key="symbol"
+                  :value="symbol"
+                  >{{ symbol }}</option
+                >
               </select>
             </label>
           </div>
@@ -108,13 +120,13 @@
       </div>
       <!-- Approve Transaction Dialog -->
       <div v-else>
-        <h3 class="center">{{ "Approve Transaction" + (wallet.isLedger ? " on Ledger" : "") }}</h3>
+        <h3 class="center">
+          {{ "Approve Transaction" + (wallet.isLedger ? " on Ledger" : "") }}
+        </h3>
         <p class="addressRow">
           From
           <span class="address__name">
-            {{
-            compressAddress(getFromAddress)
-            }}
+            {{ compressAddress(getFromAddress) }}
           </span>
           of Shard
           <b>{{ fromShard }}</b>
@@ -177,11 +189,18 @@
                 scene = 1;
               }
             "
-          >Back</button>
+          >
+            Back
+          </button>
           <button @click="sendPayment" :disabled="!password">Approve</button>
         </div>
       </div>
-      <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="4"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -199,17 +218,17 @@ export default {
   mixins: [account],
 
   components: {
-    AppHeader
+    AppHeader,
   },
   props: {
     isToken: {
       type: Boolean,
-      default: false
+      default: false,
     },
     token: {
       type: String,
-      default: "ONE"
-    }
+      default: "ONE",
+    },
   },
   data: () => ({
     scene: 1,
@@ -226,14 +245,14 @@ export default {
     message: {
       show: false,
       type: "error",
-      text: ""
-    }
+      text: "",
+    },
   }),
 
   computed: {
     ...mapState({
-      wallet: state => state.wallets.active,
-      validTokens: state => state.hrc20.validTokens
+      wallet: (state) => state.wallets.active,
+      validTokens: (state) => state.hrc20.validTokens,
     }),
     getFromAddress() {
       return this.wallet.address;
@@ -265,7 +284,7 @@ export default {
     getHeaderName() {
       if (this.isToken) return "Send Token";
       return "Send Payment";
-    }
+    },
   },
 
   async mounted() {
@@ -313,7 +332,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Password is not correct"
+            text: "Password is not correct",
           });
           return false;
         }
@@ -431,8 +450,8 @@ export default {
         "..." +
         address.substr(address.length - 5, address.length)
       );
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
