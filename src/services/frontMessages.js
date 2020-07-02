@@ -59,3 +59,10 @@ export const confirmTransactionError = (txhash, message) => ({
     },
   },
 });
+export const msgToContentScript = (type, payload) => ({
+  type: RESPONSE_TYPE,
+  message: {
+    type,
+    payload,
+  },
+});
