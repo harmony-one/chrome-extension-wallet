@@ -1,12 +1,17 @@
 <template>
   <div>
+    <app-header @refresh="refreshTokens" headerTab="main-tab" />
     <main class="main">
-      <app-header @refresh="refreshTokens" headerTab="main-tab" />
-
-      <div v-if="!validTokens[network.name]" class="message-empty">No tokens found</div>
+      <div v-if="!validTokens[network.name]" class="message-empty">
+        No tokens found
+      </div>
 
       <div v-else>
-        <div class="token-row" v-for="token in validTokens[network.name]" :key="token">
+        <div
+          class="token-row"
+          v-for="token in validTokens[network.name]"
+          :key="token"
+        >
           <span class="token-name">{{ token }}</span>
           <div class="token-box">
             <span class="token-balance">{{ tokens[token].balance }}</span>
@@ -17,7 +22,9 @@
                   tokens[token].balance === undefined
               "
               @click="sendToken(token)"
-            >Send</button>
+            >
+              Send
+            </button>
           </div>
         </div>
       </div>
@@ -32,11 +39,11 @@ import { mapState } from "vuex";
 export default {
   mixins: [token],
   computed: mapState({
-    network: state => state.network,
-    validTokens: state => state.hrc20.validTokens
+    network: (state) => state.network,
+    validTokens: (state) => state.hrc20.validTokens,
   }),
   components: {
-    AppHeader
+    AppHeader,
   },
 
   mounted() {
@@ -45,8 +52,8 @@ export default {
   methods: {
     sendToken(symbol) {
       this.$router.push({ path: `/send-token/${symbol}` });
-    }
-  }
+    },
+  },
 };
 </script>
 

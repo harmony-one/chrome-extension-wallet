@@ -1,7 +1,7 @@
 <template>
   <div>
+    <app-header headerTab="create-tab" />
     <main class="main">
-      <app-header headerTab="create-tab" />
       <div v-if="scene === 1">
         <div class="main-logo">
           <img src="images/harmony.png" alt="Harmony" />
@@ -24,12 +24,16 @@
             v-show="wallets.accounts.length > 0"
             class="outline"
             @click="$router.push('/')"
-          >Cancel</button>
+          >
+            Cancel
+          </button>
           <button
             @click="createName"
             :class="!wallets.accounts.length ? 'full-width' : ''"
             :disabled="!name"
-          >Create</button>
+          >
+            Create
+          </button>
         </div>
       </div>
       <div v-else>
@@ -66,7 +70,9 @@
           />
         </label>
         <input type="checkbox" id="seedcheck" :value="agree" v-model="agree" />
-        <label class="check-label" for="seedcheck">I understand that lost seeds cannot be recovered.</label>
+        <label class="check-label" for="seedcheck"
+          >I understand that lost seeds cannot be recovered.</label
+        >
         <div class="button-group">
           <button
             class="outline"
@@ -75,11 +81,18 @@
                 scene = 1;
               }
             "
-          >Back</button>
+          >
+            Back
+          </button>
           <button @click="createAcc" :disabled="!agree">Create Account</button>
         </div>
       </div>
-      <notifications group="error" width="250" :max="2" class="notifiaction-container" />
+      <notifications
+        group="error"
+        width="250"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -88,7 +101,7 @@
 import account from "../mixins/account";
 import {
   generatePhrase,
-  createAccountFromMnemonic
+  createAccountFromMnemonic,
 } from "../../lib/txnService";
 import AppHeader from "../components/AppHeader.vue";
 import { mapState } from "vuex";
@@ -101,13 +114,13 @@ export default {
     agree: false,
     password_confirm: "",
     seed_phrase: "",
-    scene: 1
+    scene: 1,
   }),
   computed: {
-    ...mapState(["wallets"])
+    ...mapState(["wallets"]),
   },
   components: {
-    AppHeader
+    AppHeader,
   },
   methods: {
     createAcc() {
@@ -115,14 +128,14 @@ export default {
         this.$notify({
           group: "error",
           type: "warn",
-          text: "Password must be longer than 8 characters"
+          text: "Password must be longer than 8 characters",
         });
         return;
       } else if (this.password !== this.password_confirm) {
         this.$notify({
           group: "error",
           type: "error",
-          text: "Password doesn't match"
+          text: "Password doesn't match",
         });
         return;
       }
@@ -131,18 +144,18 @@ export default {
         this.name,
         this.seed_phrase,
         this.password
-      ).then(wallet => {
+      ).then((wallet) => {
         if (!wallet) {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Password is incorrect or mnemonic is incorrect"
+            text: "Password is incorrect or mnemonic is incorrect",
           });
           return false;
         } else {
           this.$store.commit("wallets/addAccount", {
             ...wallet,
-            isLedger: false
+            isLedger: false,
           });
           this.$router.push("/");
         }
@@ -152,14 +165,14 @@ export default {
       if (this.name === "") {
         this.$notify({
           group: "error",
-          text: "Invalid name"
+          text: "Invalid name",
         });
         return;
       }
       this.seed_phrase = generatePhrase();
       this.scene = 2;
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -96,9 +96,10 @@ a:hover {
 
 .main {
   width: 370px;
-  height: 600px;
+  height: 516px;
   overflow: auto;
-  padding: 6rem 1rem 1rem;
+  margin-top: 5rem;
+  padding: 1rem 1rem 1rem;
 }
 .prompt {
   padding: 1.5rem 1rem;
