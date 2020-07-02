@@ -22,7 +22,7 @@ class WalletProvider {
   network: any;
   constructor() {
     const mainnet = networkConfig.networks[0];
-    this.version = "1.0.1";
+    this.version = "1.0.2";
     this.isOneWallet = true;
     this.network = {
       blockchain: "harmony",

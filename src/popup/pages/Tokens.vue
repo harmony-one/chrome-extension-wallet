@@ -77,7 +77,7 @@ export default {
   display: block;
 }
 .token-name {
-  color: #9e9e9e;
+  color: black;
   font-size: 0.875rem;
 }
 .token-balance {
