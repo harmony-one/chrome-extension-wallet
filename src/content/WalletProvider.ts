@@ -16,10 +16,17 @@ import {
   checkTransactionType,
 } from "./messageHandler";
 
+interface Network {
+  chain_url: string;
+  net_version: number;
+  blockchain: string;
+  chain_id: number;
+}
+
 class WalletProvider {
   isOneWallet: Boolean;
-  version: any;
-  network: any;
+  version: string;
+  network: Network;
   constructor() {
     const mainnet = networkConfig.networks[0];
     this.version = "1.0.2";
@@ -40,7 +47,7 @@ class WalletProvider {
       resolve("Successfully signed out");
     });
   }
-  async getAccount() {
+  getAccount() {
     return new Promise(async (resolve, reject) => {
       try {
         const res = await sendAsyncMessageToContentScript({
@@ -57,7 +64,7 @@ class WalletProvider {
       }
     });
   }
-  async signTransaction(
+  signTransaction(
     transaction: Transaction | StakingTransaction,
     updateNonce?: boolean,
     encodeMode?: string,
