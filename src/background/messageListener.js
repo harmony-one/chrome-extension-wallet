@@ -11,6 +11,7 @@ import {
   THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_SIGN_CONNECT,
+  THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_CONNECT,
 } from "../types";
 function externalMessageListener(message, sender, sendResponse) {
@@ -111,26 +112,28 @@ function onConnectListener(externalPort) {
   externalPort.onDisconnect.addListener(function() {
     chrome.tabs.query({}, (tabs) => {
       tabs.forEach((tab) => {
-        switch (name) {
-          case THIRDPARTY_SIGN_CONNECT: {
-            chrome.tabs.sendMessage(
-              tab.id,
-              msgToContentScript("THIRDPARTY_SIGN_REQUEST_RESPONSE", {
-                rejected: true,
-              })
-            );
-            break;
+        setTimeout(() => {
+          switch (name) {
+            case THIRDPARTY_SIGN_CONNECT: {
+              chrome.tabs.sendMessage(
+                tab.id,
+                msgToContentScript("THIRDPARTY_SIGN_REQUEST_RESPONSE", {
+                  rejected: true,
+                })
+              );
+              break;
+            }
+            case THIRDPARTY_GET_ACCOUNT_CONNECT: {
+              chrome.tabs.sendMessage(
+                tab.id,
+                msgToContentScript("THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE", {
+                  rejected: true,
+                })
+              );
+              break;
+            }
           }
-          case THIRDPARTY_GET_ACCOUNT_CONNECT: {
-            chrome.tabs.sendMessage(
-              tab.id,
-              msgToContentScript("THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE", {
-                rejected: true,
-              })
-            );
-            break;
-          }
-        }
+        }, 200);
       });
     });
   });
