@@ -2,10 +2,10 @@
  * @see {@link https://developer.chrome.com/extensions/manifest}
  */
 module.exports = {
-  name: "Harmony Wallet",
-  description: "Harmony Browser Extension Wallet",
+  name: "Harmony One Wallet",
+  description: "Harmony One Browser Extension Wallet",
   author: "Harmony",
-  version: "1.0.1",
+  version: "1.0.2",
   icons: {
     "16": "icons/16.png",
     "32": "icons/32.png",
@@ -15,13 +15,9 @@ module.exports = {
   /**
    * @see {@link https://developer.chrome.com/extensions/declare_permissions}
    */
-  permissions: [
-    "storage",
-    "https://staking.harmony.one/",
-    "https://staking-explorer.firebaseapp.com/",
-  ],
+  permissions: ["storage", "tabs"],
   browser_action: {
-    default_title: "Harmony Wallet",
+    default_title: "Harmony One Wallet",
     default_popup: "popup.html",
   },
   background: {
@@ -29,10 +25,7 @@ module.exports = {
   },
   content_scripts: [
     {
-      matches: [
-        "https://*.harmony.one/*",
-        "https://staking-explorer.firebaseapp.com/*",
-      ],
+      matches: ["*://*/*"],
       js: ["content-script.js"],
     },
   ],

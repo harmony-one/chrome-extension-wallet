@@ -1,18 +1,14 @@
 const webpack = require("webpack");
-const getClientEnvironment = require("./env");
 const path = require("path");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
 const GenerateJsonPlugin = require("generate-json-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 // const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const ZipPlugin = require("zip-webpack-plugin");
 const isProduction = process.env.NODE_ENV === "production";
 const manifest_dev = require("./src/manifest-dev");
 const manifest_prod = require("./src/manifest-prod");
-
-const env = getClientEnvironment();
 
 const config = {
   entry: {
@@ -135,7 +131,6 @@ function getPlugins(isProd) {
   let plugins = [
     new VueLoaderPlugin(),
     new CopyWebpackPlugin({ patterns: [{ from: "./static", to: "./" }] }),
-    new webpack.DefinePlugin(env.stringified),
   ];
   if (!isProd) {
     plugins.push(
@@ -149,7 +144,6 @@ function getPlugins(isProd) {
       new webpack.LoaderOptionsPlugin({
         minimize: true,
       }),
-      new UglifyJSPlugin({}),
       new webpack.SourceMapDevToolPlugin({}),
       new ZipPlugin({
         path: "..",
