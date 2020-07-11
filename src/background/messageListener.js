@@ -1,7 +1,6 @@
-import extensionService from "../services/extensionService";
 import walletService from "../services/walletService";
+import { msgToContentScript } from "../services/walletService";
 
-import { msgToContentScript } from "../services/frontMessages";
 import {
   HARMONY_REQUEST_TYPE,
   HARMONY_RESPONSE_TYPE,
@@ -13,7 +12,10 @@ import {
   THIRDPARTY_SIGN_CONNECT,
   THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_CONNECT,
+  THIRDPARTY_SIGN_REQUEST_RESPONSE,
+  THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
 } from "../types";
+
 function externalMessageListener(message, sender, sendResponse) {
   const { messageSource, payload } = message;
 
@@ -23,23 +25,6 @@ function externalMessageListener(message, sender, sendResponse) {
 
   const { type } = payload;
   switch (type) {
-    case "GET_SESSION":
-      sendResponse({
-        type: HARMONY_RESPONSE_TYPE,
-        message: {
-          type: "GET_SESSION_RESPONSE",
-          payload: {
-            extensionId: chrome.runtime.id,
-          },
-        },
-      });
-      break;
-    case "ONEWALLET_SIGN_REQUEST":
-      extensionService.prepareSignTransaction(payload.payload, sender.tab.id);
-      break;
-    case "ONEWALLET_LOGIN_REQUEST":
-      extensionService.startLogIn(sender.tab.id);
-      break;
     case THIRDPARTY_SIGN_REQUEST:
       walletService.prepareSignTransaction(
         sender.tab.id,
@@ -54,7 +39,7 @@ function externalMessageListener(message, sender, sendResponse) {
       walletService.forgetIdentity(sender.tab.id, payload.hostname);
       break;
     default:
-      console.warn("Unk message received from content script - ", message);
+      console.warn("Unknown message from content script - ", message);
   }
   sendResponse();
   return true;
@@ -67,7 +52,6 @@ function internalMessageListener(message, sender, sendResponse) {
     return false;
   }
   switch (action) {
-    //start onewallet provider message
     case GET_WALLET_SERVICE_STATE: {
       const state = walletService.getState();
       sendResponse({ state });
@@ -79,29 +63,8 @@ function internalMessageListener(message, sender, sendResponse) {
     case THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE:
       walletService.onGetAccountSuccess(payload);
       break;
-    //end onewallet provider message
-    //start staking dashboard message handler
-    case "GET_EXTENSION_STATE": {
-      const state = extensionService.getState();
-      sendResponse({ state });
-      break;
-    }
-    case "REJECT_TRANSACTION":
-      extensionService.closeSession();
-      break;
-    case "SIGN_TRANSACTION":
-      extensionService.signTransaction(payload);
-      break;
-    case "RESET_WINDOW_STATE":
-      extensionService.resetWindowState();
-      break;
-    case "LOGGED_IN": {
-      extensionService.loginWithExtension(payload);
-      break;
-      //end staking dashboard message handler
-    }
     default:
-      console.log("Unk internal action received - ", action);
+      console.log("Unknown internal action received - ", action);
   }
   sendResponse();
   return true;
@@ -117,7 +80,7 @@ function onConnectListener(externalPort) {
             case THIRDPARTY_SIGN_CONNECT: {
               chrome.tabs.sendMessage(
                 tab.id,
-                msgToContentScript("THIRDPARTY_SIGN_REQUEST_RESPONSE", {
+                msgToContentScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
                   rejected: true,
                 })
               );
@@ -126,7 +89,7 @@ function onConnectListener(externalPort) {
             case THIRDPARTY_GET_ACCOUNT_CONNECT: {
               chrome.tabs.sendMessage(
                 tab.id,
-                msgToContentScript("THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE", {
+                msgToContentScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
                   rejected: true,
                 })
               );

@@ -15,9 +15,12 @@ export const getContractInstance = (artifact) => {
 };
 
 export async function getTokenBalance(address, artifact) {
+  console.log("address, artifact", address, artifact);
   const instance = getContractInstance(artifact);
   const hexAddress = oneToHexAddress(address);
+  console.log("instance, hexAddress", instance, hexAddress);
   let balance = await instance.methods.balanceOf(hexAddress).call();
+  console.log("balance", balance);
   return balance;
 }
 

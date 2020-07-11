@@ -10,10 +10,8 @@
     </p>
     <div class="sign__address">{{ wallet.address }}</div>
     <p class="txRow flexrow">
-      <span class="action_caption">{{ displayAction }}:</span>
-      <span v-if="type === 'SEND'"
-        >{{ fromShard }} Shard -> {{ toShard }} Shard</span
-      >
+      <span class="action_caption">{{ displayAction }}</span>
+      <span v-if="type === 'SEND'">{{ fromShard }} Shard -> {{ toShard }} Shard</span>
     </p>
     <p class="txRow">
       From
@@ -76,12 +74,7 @@
       <button class="outline" @click="reject">Reject</button>
       <button @click="approve" :disabled="!password">Approve</button>
     </div>
-    <notifications
-      group="notify"
-      width="250"
-      :max="4"
-      class="notifiaction-container"
-    />
+    <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
   </main>
 </template>
 <script>
@@ -92,7 +85,7 @@ import {
   TRANSACTIONTYPE,
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_SIGN_CONNECT,
-  THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
+  THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE
 } from "../../types";
 
 export default {
@@ -111,8 +104,8 @@ export default {
     wallet: {
       isLedger: false,
       name: "",
-      address: "",
-    },
+      address: ""
+    }
   }),
   computed: {
     ...mapState(["wallets"]),
@@ -136,7 +129,7 @@ export default {
     },
     isWithdrawal() {
       return this.type === TRANSACTIONTYPE.WITHDRAWREWARD;
-    },
+    }
   },
   methods: {
     async approve() {
@@ -147,7 +140,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Account is invalid",
+            text: "Account is invalid"
           });
           return false;
         }
@@ -157,7 +150,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Password is not correct",
+            text: "Password is not correct"
           });
           return false;
         }
@@ -168,15 +161,15 @@ export default {
         action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
         payload: {
           keystore: this.wallet.keystore, //send keystore and password to the internal message handler of background.js
-          password: this.password,
-        },
+          password: this.password
+        }
       });
       window.close();
     },
 
     async reject() {
       window.close();
-    },
+    }
   },
   updated() {
     if (this.$refs.password) this.$refs.password.focus();
@@ -199,7 +192,7 @@ export default {
           }
           this.host = state.session.host;
           this.wallet = this.wallets.accounts.find(
-            (acc) => acc.address === state.session.account.address
+            acc => acc.address === state.session.account.address
           );
         } else {
           window.close();
@@ -207,7 +200,7 @@ export default {
       }
     );
     chrome.runtime.connect({ name: THIRDPARTY_SIGN_CONNECT });
-  },
+  }
 };
 </script>
 <style scoped>

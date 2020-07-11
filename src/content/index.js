@@ -1,15 +1,9 @@
 import { HARMONY_REQUEST_TYPE, HARMONY_RESPONSE_TYPE } from "../types";
 
-window.onerror = function(message, source, line, column, error) {
+window.onerror = function(message, error) {
   console.error(
     "ONE ERROR HANDLER TO RULE THEM ALL:",
     message,
-    ", source: ",
-    source,
-    ", line: ",
-    line,
-    ", column: ",
-    column,
     ", error: ",
     error
   );
@@ -35,38 +29,7 @@ window.addEventListener(
   },
   false
 );
-/*
-window.addEventListener(
-  "message",
-  (event) => {
-    console.log("event---->", event);
-    if (event.source !== window) {
-      return;
-    }
 
-    if (
-      !event.data ||
-      !event.data.type ||
-      event.data.type !== HARMONY_REQUEST_TYPE
-    ) {
-      return;
-    }
-
-    const { payload } = event.data;
-    chrome.runtime.sendMessage(
-      {
-        payload,
-        messageSource: HARMONY_REQUEST_TYPE,
-      },
-      (response) => {
-        console.log("response ", response);
-        window.postMessage(response);
-      }
-    );
-  },
-  false
-);
-*/
 // Listen message from extension background page/popup and re-send to current window (dashboard page)
 chrome.runtime.onMessage.addListener(async (message) => {
   if (!message || !message.type || message.type !== HARMONY_RESPONSE_TYPE) {
@@ -81,11 +44,6 @@ chrome.runtime.onMessage.addListener(async (message) => {
   return true;
 });
 
-// Tell website that lunie(harmony) extension is available
-window.postMessage({
-  type: HARMONY_RESPONSE_TYPE,
-  message: { type: "INIT_EXTENSION" },
-});
 try {
   const node = document.getElementsByTagName("body")[0];
   const script = document.createElement("script");

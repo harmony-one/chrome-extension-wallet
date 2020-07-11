@@ -5,7 +5,7 @@ import {
   getDecimals,
 } from "../../lib/contracts/token-api";
 import { Unit } from "@harmony-js/utils";
-import {BN} from 'bn.js';
+import { BN } from "bn.js";
 
 export default {
   computed: mapState({
@@ -17,18 +17,22 @@ export default {
 
   methods: {
     async loadTokenBalance() {
+      console.log(
+        "this.validTokens[this.network.name]",
+        this.validTokens[this.network.name]
+      );
       for (var symbol of this.validTokens[this.network.name]) {
         let bigbalance = await getTokenBalance(
           this.address,
           this.tokens[symbol].artifacts
         );
 
-        let decimals = await getDecimals(
-          this.tokens[symbol].artifacts
-        );
+        let decimals = await getDecimals(this.tokens[symbol].artifacts);
 
-        const bigNumber = new BN(Math.pow(10, 12-decimals));
-        let balance = Number(Unit.Wei(bigNumber.mul(bigbalance)).toEther()).toFixed(6);
+        const bigNumber = new BN(Math.pow(10, 12 - decimals));
+        let balance = Number(
+          Unit.Wei(bigNumber.mul(bigbalance)).toEther()
+        ).toFixed(6);
         this.$store.commit("hrc20/loadTokenBalance", { symbol, balance });
       }
     },
