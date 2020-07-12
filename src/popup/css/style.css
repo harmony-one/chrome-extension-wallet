@@ -179,6 +179,11 @@ textarea.input-field:read-only,
   color: black;
   cursor: pointer;
 }
+
+.input-label.disabled {
+  color: #bbb;
+}
+
 .input-label .input-field {
   margin: 0.25rem 0 0;
 }

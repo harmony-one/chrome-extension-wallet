@@ -32,9 +32,17 @@
                 v-model="recipient"
               />
             </label>
-            <label v-if="!isToken" class="input-label shard">
+            <label
+              v-if="!isToken"
+              class="input-label shard"
+              :class="{disabled: selectedToken !== 'ONE'}"
+            >
               To Shard
-              <select class="input-field" v-model="toShard">
+              <select
+                class="input-field"
+                v-model="toShard"
+                :disabled="selectedToken !== 'ONE'"
+              >
                 <option
                   v-for="shard in account.shardArray"
                   :key="shard.shardID"
@@ -274,7 +282,11 @@ export default {
   updated() {
     if (this.scene == 2) this.$refs.password.focus();
   },
-
+  watch: {
+    selectedToken() {
+      this.toShard = 0;
+    }
+  },
   methods: {
     tokenChanged() {
       this.gasLimit = this.getGasLimit;
