@@ -46,3 +46,12 @@ export const THIRDPARTY_SIGN_REQUEST_RESPONSE =
 export const GET_WALLET_SERVICE_STATE = "GET_WALLET_SERVICE_STATE";
 export const THIRDPARTY_SIGN_CONNECT = "THIRDPARTY_SIGN_CONNECT";
 export const THIRDPARTY_GET_ACCOUNT_CONNECT = "THIRDPARTY_GET_ACCOUNT_CONNECT";
+
+//window state
+export const FROM_BACK_TO_POPUP = "FROM_BACK_TO_POPUP";
+export const CLOSE_WINDOW = "CLOSE_WINDOW";
+
+//wallet provider messages
+export const LOGIN_REJECT = "User rejected login request";
+export const SIGN_REJECT = "User rejected sign transaction request";
+export const SIGNOUT_SUCCEED = "Successfully signed out";

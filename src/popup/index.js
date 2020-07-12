@@ -9,6 +9,7 @@ import VueClipboard from "vue-clipboard2";
 import "./css/icons.less";
 // import VModal from "vue-js-modal";
 import Notifications from "vue-notification";
+import { CLOSE_WINDOW, FROM_BACK_TO_POPUP } from "../types";
 Vue.config.productionTip = false;
 
 sync(store, router);
@@ -26,3 +27,15 @@ new Vue({
   router,
   render: (h) => h(App),
 }).$mount("#app");
+
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+  const { type, action, payload } = message;
+  if (!type || type !== FROM_BACK_TO_POPUP) {
+    return false;
+  }
+  if (action === CLOSE_WINDOW) {
+    window.close();
+  }
+  sendResponse();
+  return true;
+});

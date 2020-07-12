@@ -2,9 +2,7 @@
   <div>
     <app-header @refresh="refreshTransfers" headerTab="main-tab" />
     <main class="main">
-      <div v-if="transfers.length === 0" class="message-empty">
-        No transfers yet
-      </div>
+      <div v-if="transfers.length === 0" class="message-empty">No transfers yet</div>
 
       <div v-else>
         <div>
@@ -47,24 +45,22 @@
               <span
                 v-if="isOutgoingTransfer(transfer)"
                 class="transfer-address"
-                >{{ compressAddress(transfer.to) }}</span
-              >
-              <span v-else class="transfer-address">
-                {{ compressAddress(transfer.from) }}
-              </span>
+              >{{ compressAddress(transfer.to) }}</span>
+              <span v-else class="transfer-address">{{ compressAddress(transfer.from) }}</span>
 
               <span class="transfer-address">{{ formatShard(transfer) }}</span>
-              <span class="transfer-date">{{
+              <span class="transfer-date">
+                {{
                 formatTimestamp(Number(transfer.timestamp) * 1000)
-              }}</span>
+                }}
+              </span>
             </span>
 
-            <span v-if="isOutgoingTransfer(transfer)" class="transfer-amount"
-              >- {{ formatTokenAmount(transfer) }}</span
-            >
-            <span v-else class="transfer-amount incoming"
-              >+ {{ formatTokenAmount(transfer) }}</span
-            >
+            <span
+              v-if="isOutgoingTransfer(transfer)"
+              class="transfer-amount"
+            >- {{ formatTokenAmount(transfer) }}</span>
+            <span v-else class="transfer-amount incoming">+ {{ formatTokenAmount(transfer) }}</span>
           </external-link>
         </div>
 
@@ -73,8 +69,7 @@
           v-show="transfers.length < txCount && !loadMoreLoading"
           href="#"
           @click="loadMore"
-          >Load More</a
-        >
+        >Load More</a>
       </div>
     </main>
   </div>
@@ -88,7 +83,7 @@ import {
   getTransfers,
   getNetworkLink,
   getTransactionCount,
-  removeDups,
+  removeDups
 } from "../../lib/txnService";
 import AppHeader from "../components/AppHeader.vue";
 import ExternalLink from "../components/ExternalLink.vue";
@@ -96,19 +91,19 @@ import ExternalLink from "../components/ExternalLink.vue";
 export default {
   components: {
     AppHeader,
-    ExternalLink,
+    ExternalLink
   },
 
   data: () => ({
     limit: 100,
     txCount: 1,
     page: 0,
-    loadMoreLoading: false,
+    loadMoreLoading: false
   }),
 
   computed: mapState({
-    address: (state) => state.wallets.active.address,
-    transfers: (state) => state.account.transfers,
+    address: state => state.wallets.active.address,
+    transfers: state => state.account.transfers
   }),
 
   mounted() {
@@ -150,7 +145,7 @@ export default {
       // BUG: hmy_getTransactionCount does not return correct count, so use this to stop showing "LOAD MORE"
       if (transfersData.transactions.length == 0) {
         this.txCount = this.transfers.length;
-        console.log(this.txCount, this.transfers.length);
+        //console.log(this.txCount, this.transfers.length);
       }
 
       this.loadMoreLoading = false;
@@ -205,8 +200,8 @@ export default {
         " to shard " +
         transfer.toShardID.toString()
       );
-    },
-  },
+    }
+  }
 };
 </script>
 

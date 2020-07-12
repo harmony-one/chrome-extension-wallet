@@ -3,6 +3,8 @@ import {
   THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
   THIRDPARTY_SIGN_REQUEST_RESPONSE,
   HARMONY_RESPONSE_TYPE,
+  FROM_BACK_TO_POPUP,
+  CLOSE_WINDOW,
 } from "../types";
 import store from "../popup/store";
 import * as storage from "./storage";
@@ -107,7 +109,7 @@ class WalletService {
         this.activeSession = session;
         if (this.txnInfo.data && this.txnInfo.data !== "0x")
           this.openPopup("sign", 400, 620);
-        else this.openPopup("sign", 400, 560);
+        else this.openPopup("sign", 400, 550);
       } else {
         this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
           rejected: true,
@@ -121,7 +123,7 @@ class WalletService {
   };
   onGetSignatureKeySuccess = (payload) => {
     this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, payload);
-    window.close();
+    this.closeWindow();
   };
   getHostSessions = async () => {
     let currentSession = await storage.getValue("session");
@@ -158,7 +160,13 @@ class WalletService {
       THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
       payload
     );
-    window.close();
+    this.closeWindow();
+  };
+  closeWindow = () => {
+    chrome.runtime.sendMessage({
+      type: FROM_BACK_TO_POPUP,
+      action: CLOSE_WINDOW,
+    });
   };
 }
 const walletService = new WalletService();

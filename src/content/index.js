@@ -1,18 +1,18 @@
-import { HARMONY_REQUEST_TYPE, HARMONY_RESPONSE_TYPE } from "../types";
+import {
+  HARMONY_REQUEST_TYPE,
+  HARMONY_RESPONSE_TYPE,
+  ONEWALLET_SERVICE_EVENT_REQUEST,
+  ONEWALLET_SERVICE_EVENT_RESPONSE,
+} from "../types";
 
 window.onerror = function(message, error) {
-  console.error(
-    "ONE ERROR HANDLER TO RULE THEM ALL:",
-    message,
-    ", error: ",
-    error
-  );
+  console.error("One Wallet service call failed,", message, ", error: ", error);
 };
 
 // Content script
 
 window.addEventListener(
-  "ONEWALLET_SERVICE_EVENT_REQUEST",
+  ONEWALLET_SERVICE_EVENT_REQUEST,
   function(event) {
     if (
       !event.detail ||
@@ -37,7 +37,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
   }
   // window.postMessage(message);
   window.dispatchEvent(
-    new CustomEvent("ONEWALLET_SERVICE_EVENT_RESPONSE", {
+    new CustomEvent(ONEWALLET_SERVICE_EVENT_RESPONSE, {
       detail: message,
     })
   );
@@ -50,7 +50,7 @@ try {
   script.setAttribute("type", "text/javascript");
   script.setAttribute("src", chrome.extension.getURL("inject-script.js"));
   node.appendChild(script);
-  console.log("Onewallet provider injected");
+  console.info("Onewallet provider injected");
 } catch (e) {
-  console.error("Onewallet provider injection failed.", e);
+  console.error("Onewallet provider injection failed", e);
 }

@@ -15,12 +15,9 @@ export const getContractInstance = (artifact) => {
 };
 
 export async function getTokenBalance(address, artifact) {
-  console.log("address, artifact", address, artifact);
   const instance = getContractInstance(artifact);
   const hexAddress = oneToHexAddress(address);
-  console.log("instance, hexAddress", instance, hexAddress);
   let balance = await instance.methods.balanceOf(hexAddress).call();
-  console.log("balance", balance);
   return balance;
 }
 
@@ -35,7 +32,7 @@ export async function getDecimals(artifact) {
   let decimals = await instance.methods.decimals().call();
   return decimals;
 }
-
+/*
 export async function increaseTotalSupply(amount, artifact) {
   const instance = getContractInstance(artifact);
   let ret = await instance.methods
@@ -46,7 +43,7 @@ export async function increaseTotalSupply(amount, artifact) {
     )
     .call();
   return ret;
-}
+}*/
 
 export async function sendToken(
   from,

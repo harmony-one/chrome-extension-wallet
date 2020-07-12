@@ -1,20 +1,17 @@
-/**
- * @see {@link https://developer.chrome.com/extensions/manifest}
- */
+const AppInfo = require("./app.json");
+
 module.exports = {
   name: "Harmony One Wallet",
-  description: "Harmony One Browser Extension Wallet",
+  description: "Harmony One Extension Wallet",
   author: "Harmony",
-  version: "1.0.2",
+  version: AppInfo.version,
   icons: {
     "16": "icons/16.png",
     "32": "icons/32.png",
     "48": "icons/48.png",
     "128": "icons/128.png",
   },
-  /**
-   * @see {@link https://developer.chrome.com/extensions/declare_permissions}
-   */
+
   permissions: ["storage", "tabs"],
   browser_action: {
     default_title: "Harmony One Wallet",
