@@ -15,9 +15,9 @@ export const TOKENS = {
 };
 
 export const VALIDTOKENS = {
-  Mainnet: ["H20",'SEED'],
+  Mainnet: ["H20", "SEED"],
   Pangaea: [],
-  Testnet: ["BUSD", "H20"],
+  Testnet: ["H20", "BUSD"],
   Localnet: [],
   OpenStakingNet: [],
   PartnerNet: [],

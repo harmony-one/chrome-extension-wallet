@@ -15,25 +15,12 @@
 <script>
 import { mapState } from "vuex";
 import Config from "../config";
-import { WINDOWSTATE } from "../types";
 export default {
   computed: mapState({
     loading: state => state.loading,
     network: state => state.network
   }),
   mounted() {
-    chrome.runtime.sendMessage(
-      { action: "GET_EXTENSION_STATE" },
-      ({ state } = {}) => {
-        if (!state) return false;
-        if (state.status === WINDOWSTATE.LOGIN) {
-          this.$router.push("/login");
-        } else if (state.status === WINDOWSTATE.APPROVE) {
-          this.$router.push("/approve");
-        }
-        chrome.runtime.sendMessage({ action: "RESET_WINDOW_STATE" });
-      }
-    );
     if (this.network.name === "")
       this.$store.commit("network/change", Config.networks[0]);
   }

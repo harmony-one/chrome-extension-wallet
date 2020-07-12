@@ -6,10 +6,8 @@ import {
   ONEWALLET_SERVICE_EVENT_REQUEST,
   ONEWALLET_SERVICE_EVENT_RESPONSE,
 } from "../types";
-import { StakingTransaction } from "@harmony-js/staking";
 import { HarmonyAddress } from "@harmony-js/crypto";
 import { Unit } from "@harmony-js/utils";
-import { Transaction } from "@harmony-js/transaction";
 
 const unWrapMessageFromContentScript = (data: any) => data.message;
 const filterExtensionMessage = (callback: any) => (message: any) => {
@@ -63,7 +61,7 @@ export const getTxnInfo = (transaction: any) =>
     const txnType = checkTransactionType(transaction);
     try {
       if (txnType === FACTORYTYPE.TRANSACTION) {
-        const txnParams = (transaction as Transaction).txParams;
+        const txnParams = transaction.txParams;
         response = {
           type: TRANSACTIONTYPE.SEND,
           txnInfo: {

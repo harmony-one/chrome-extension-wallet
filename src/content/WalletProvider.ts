@@ -1,13 +1,16 @@
 "use strict";
 import { Transaction } from "@harmony-js/transaction";
+import { StakingTransaction } from "@harmony-js/staking";
 import { Account } from "@harmony-js/account";
 import { decryptKeyStore } from "../lib/txnService";
-import { StakingTransaction } from "@harmony-js/staking";
 import {
   THIRDPARTY_FORGET_IDENTITY_REQUEST,
   THIRDPARTY_GET_ACCOUNT_REQUEST,
   THIRDPARTY_SIGN_REQUEST,
   FACTORYTYPE,
+  LOGIN_REJECT,
+  SIGN_REJECT,
+  SIGNOUT_SUCCEED,
 } from "../types";
 import networkConfig from "../config";
 import {
@@ -15,6 +18,7 @@ import {
   getTxnInfo,
   checkTransactionType,
 } from "./messageHandler";
+const AppInfo = require("../app.json");
 
 interface Network {
   chain_url: string;
@@ -29,7 +33,7 @@ class WalletProvider {
   network: Network;
   constructor() {
     const mainnet = networkConfig.networks[0];
-    this.version = "1.0.2";
+    this.version = AppInfo.version;
     this.isOneWallet = true;
     this.network = {
       blockchain: "harmony",
@@ -44,7 +48,7 @@ class WalletProvider {
         hostname: window.location.hostname,
         type: THIRDPARTY_FORGET_IDENTITY_REQUEST,
       });
-      resolve("Successfully signed out");
+      resolve(SIGNOUT_SUCCEED);
     });
   }
   getAccount() {
@@ -56,7 +60,7 @@ class WalletProvider {
         });
         if (res.rejected) {
           if (res.message) return reject(res.message);
-          return reject("User rejected login request");
+          return reject(LOGIN_REJECT);
         }
         resolve(res);
       } catch (err) {
@@ -82,7 +86,7 @@ class WalletProvider {
         });
         if (res.rejected) {
           if (res.message) return reject(res.message);
-          return reject("User rejected sign transaction request");
+          return reject(SIGN_REJECT);
         }
 
         const privateKey: any = await decryptKeyStore(

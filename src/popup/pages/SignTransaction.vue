@@ -1,31 +1,31 @@
 <template>
   <main class="prompt">
+    <div class="prompt-back"></div>
     <h3 class="center">Approve Transaction</h3>
     <div class="hostrow">
       <span class="host_label">{{ host }}</span>
     </div>
-    <p class="action_caption">
-      <b>Signing with</b>
+    <div>
+      <span class="action_caption">Signing with</span>
       <span class="sign__name">{{ wallet.name }}</span>
-    </p>
+    </div>
     <div class="sign__address">{{ wallet.address }}</div>
-    <p class="txRow flexrow">
-      <span class="action_caption">{{ displayAction }}:</span>
-      <span v-if="type === 'SEND'"
-        >{{ fromShard }} Shard -> {{ toShard }} Shard</span
-      >
+    <p class="txRow">
+      <span class="action_caption">{{ displayAction }}</span>
+      <span v-if="type === 'SEND'">{{ fromShard }} Shard -> {{ toShard }} Shard</span>
     </p>
     <p class="txRow">
-      From
+      <span>From</span>
       <span class="address__name">{{ senderAddress }}</span>
     </p>
     <p class="txRow" v-if="!isWithdrawal">
-      To
+      <span>To</span>
       <span class="address__name">{{ targetAddress }}</span>
     </p>
     <p class="addressRow" v-else>{{ displayAction }}</p>
-    <div class="invoice" v-if="!isWithdrawal">
+    <div v-if="!isWithdrawal">
       <div v-if="data && data !== '0x'">
+        <span class="action_caption">Transaction Details</span>
         <div class="invoice">
           <div class="invoice__row">
             <div class="invoice__rowLeft">Gas Price</div>
@@ -76,12 +76,7 @@
       <button class="outline" @click="reject">Reject</button>
       <button @click="approve" :disabled="!password">Approve</button>
     </div>
-    <notifications
-      group="notify"
-      width="250"
-      :max="4"
-      class="notifiaction-container"
-    />
+    <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
   </main>
 </template>
 <script>
@@ -92,7 +87,7 @@ import {
   TRANSACTIONTYPE,
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_SIGN_CONNECT,
-  THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
+  THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE
 } from "../../types";
 
 export default {
@@ -111,8 +106,8 @@ export default {
     wallet: {
       isLedger: false,
       name: "",
-      address: "",
-    },
+      address: ""
+    }
   }),
   computed: {
     ...mapState(["wallets"]),
@@ -136,7 +131,7 @@ export default {
     },
     isWithdrawal() {
       return this.type === TRANSACTIONTYPE.WITHDRAWREWARD;
-    },
+    }
   },
   methods: {
     async approve() {
@@ -147,7 +142,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Account is invalid",
+            text: "Account is invalid"
           });
           return false;
         }
@@ -157,7 +152,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Password is not correct",
+            text: "Password is not correct"
           });
           return false;
         }
@@ -168,15 +163,15 @@ export default {
         action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
         payload: {
           keystore: this.wallet.keystore, //send keystore and password to the internal message handler of background.js
-          password: this.password,
-        },
+          password: this.password
+        }
       });
       window.close();
     },
 
     async reject() {
       window.close();
-    },
+    }
   },
   updated() {
     if (this.$refs.password) this.$refs.password.focus();
@@ -199,7 +194,7 @@ export default {
           }
           this.host = state.session.host;
           this.wallet = this.wallets.accounts.find(
-            (acc) => acc.address === state.session.account.address
+            acc => acc.address === state.session.account.address
           );
         } else {
           window.close();
@@ -207,7 +202,7 @@ export default {
       }
     );
     chrome.runtime.connect({ name: THIRDPARTY_SIGN_CONNECT });
-  },
+  }
 };
 </script>
 <style scoped>
@@ -226,7 +221,7 @@ h3 {
   margin-top: 20px;
 }
 .sign__name {
-  font-weight: 800;
+  font-weight: 700;
   color: #0987d7;
 }
 .sign__address {
@@ -234,12 +229,10 @@ h3 {
   font-style: italic;
   color: #666;
 }
-.flexrow {
-  justify-content: space-between;
-  display: flex;
-}
 .txRow {
   font-size: 14px;
+  display: flex;
+  justify-content: space-between;
 }
 .amount {
   color: #0987d7;
@@ -248,14 +241,14 @@ h3 {
 }
 .data_caption {
   font-size: 15px;
-  margin-top: 0px;
+  margin-top: 5px;
   margin-bottom: 5px;
 }
 .data_content {
   word-break: break-word;
   font-size: 12px;
   font-style: italic;
-  height: 80px;
+  height: 50px;
   overflow: auto;
   border: 1px solid #ddd;
 }
@@ -271,5 +264,17 @@ h3 {
 }
 .host_label {
   color: #0987d7;
+}
+.prompt-back {
+  position: absolute;
+  z-index: -1;
+  background-image: url("./images/harmony-big.png");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: 100%;
+  opacity: 0.12;
+  width: 100%;
+  height: 100%;
 }
 </style>

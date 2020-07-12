@@ -103,6 +103,7 @@ a:hover {
 }
 .prompt {
   padding: 1.5rem 1rem;
+  position: relative;
 }
 .auth {
   clear: both;
@@ -175,7 +176,7 @@ textarea.input-field:read-only,
   display: block;
   font-size: 0.75rem;
   margin: 0.75rem 0 1rem;
-  color: #757575;
+  color: black;
   cursor: pointer;
 }
 .input-label .input-field {
@@ -484,8 +485,9 @@ button:disabled {
 }
 
 .invoice {
-  margin-top: 18px;
+  margin-top: 0rem;
   font-size: 15px;
+  margin-bottom: 1.5rem;
 }
 .invoice__row {
   display: flex;
@@ -497,7 +499,7 @@ button:disabled {
   height: 1px;
   margin-top: 6px;
   margin-bottom: 6px;
-  background-color: #eee;
+  background-color: #aaa;
 }
 .addressRow {
   font-size: 14px;

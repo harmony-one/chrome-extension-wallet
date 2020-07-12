@@ -32,7 +32,7 @@ export async function getDecimals(artifact) {
   let decimals = await instance.methods.decimals().call();
   return decimals;
 }
-
+/*
 export async function increaseTotalSupply(amount, artifact) {
   const instance = getContractInstance(artifact);
   let ret = await instance.methods
@@ -43,7 +43,7 @@ export async function increaseTotalSupply(amount, artifact) {
     )
     .call();
   return ret;
-}
+}*/
 
 export async function sendToken(
   from,
