@@ -11,10 +11,11 @@
 - [x] View recent transfers .
 - [x] Switch the network to Mainnet, Pangaea, Testnet or Localnet.
 - [x] Ledger Login
+- [x] Javascript API for calling onewallet for signing 
+- [x] Support staking.harmony.one  
+- [ ] View the amount of HRC20 token transfers
 - [ ] Ledger transfer
 - [ ] SEED token transfer
-- [ ] Javascript API for calling onewallet for signing 
-- [ ] Support staking.harmony.one 
 
 ## Install from release zip
 
@@ -92,6 +93,10 @@ const account = await harmonyExt.login().then((acc) => {
                   .catch((err) => {
                     console.error(err);
                   });
+```
+* You can sign out from the harmony extension if you want to switch the account
+```
+await harmonyExt.logout(); //or await window.onewallet.forgetIdentity();
 ```
 * You can also modify the harmony extension object
 ```
