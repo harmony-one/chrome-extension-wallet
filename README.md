@@ -121,39 +121,39 @@ const harmony = await new Harmony(rpc_url, {
 ### How to Create the transaction manually and sign with the harmony extension
 * Sign Normal Transaction for transfer funds
 ```
-      const txn = harmony.transactions.newTx({
-        from: new HarmonyAddress(from).checksum,
-        to: new HarmonyAddress(toAddress).checksum,
-        value: Unit.Szabo(amounts[0].amount).toWei(),
-        shardID: 0,
-        toShardID: 0,
-        gasLimit: gasEstimate,
-        gasPrice: Unit.One(gasPrice).toHex()
-      });
+const txn = harmony.transactions.newTx({
+  from: new HarmonyAddress(from).checksum,
+  to: new HarmonyAddress(toAddress).checksum,
+  value: Unit.Szabo(amounts[0].amount).toWei(),
+  shardID: 0,
+  toShardID: 0,
+  gasLimit: gasEstimate,
+  gasPrice: Unit.One(gasPrice).toHex()
+});
 
-      signedTxn = await harmonyExt.wallet.signTransaction(txn); //or you can call window.onewallet.signTransaction(txn) directly
-      const [sentTxn, txnHash] = await signedTxn.sendTransaction();
-      ...
+signedTxn = await harmonyExt.wallet.signTransaction(txn); //or you can call window.onewallet.signTransaction(txn) directly
+const [sentTxn, txnHash] = await signedTxn.sendTransaction();
+...
 ```
 * Sign Staking Transaction
 ```
-      const stakingTxn = new StakingFactory(harmony.messenger)
-        .delegate({
-          delegatorAddress: new HarmonyAddress(delegatorAddress).checksum,
-          validatorAddress: new HarmonyAddress(validatorAddress).checksum,
-          amount: Unit.Szabo(amount).toHex()
-        })
-        .setTxParams({
-          gasPrice: Unit.One(gasPrice).toHex(),
-          gasLimit: Unit.Wei(new BN(gasEstimate).add(new BN("20000"))).toHex(),
-          chainId: harmony.chainId
-        })
-        .build()
-      stakingTxn.setFromAddress(new HarmonyAddress(from).checksum)
+const stakingTxn = new StakingFactory(harmony.messenger)
+  .delegate({
+    delegatorAddress: new HarmonyAddress(delegatorAddress).checksum,
+    validatorAddress: new HarmonyAddress(validatorAddress).checksum,
+    amount: Unit.Szabo(amount).toHex()
+  })
+  .setTxParams({
+    gasPrice: Unit.One(gasPrice).toHex(),
+    gasLimit: Unit.Wei(new BN(gasEstimate).add(new BN("20000"))).toHex(),
+    chainId: harmony.chainId
+  })
+  .build()
+stakingTxn.setFromAddress(new HarmonyAddress(from).checksum)
 
-      signedTxn = await harmonyExt.wallet.signTransaction(txn); //or you can call window.onewallet.signTransaction(txn) directly
-      const [sentTxn, txnHash] = await signedTxn.sendTransaction();
-      ...
+signedTxn = await harmonyExt.wallet.signTransaction(txn); //or you can call window.onewallet.signTransaction(txn) directly
+const [sentTxn, txnHash] = await signedTxn.sendTransaction();
+...
 ```
 
 ## Footnotes
