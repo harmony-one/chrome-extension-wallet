@@ -162,4 +162,4 @@ const [sentTxn, txnHash] = await signedTxn.sendTransaction();
 ```
 
 ## Footnotes
-The API interface of the Harmony-One Wallet is totally same as the Mathwallet. It's for the users who are already familiar with the mathwallet extension. You can just use the `window.onewallet` instead of `window.harmony`. Since this project is open-source, we can update the api interface anytime so if you have a suggestion, feel free to create the issues on the github or contact me directly (derekleesoft@gmail.com). Any Harmonauts' suggestion is welcome.
+The API interface of the Harmony-One Wallet is totally same as the Mathwallet. It's for the users who are already familiar with the mathwallet extension. You can just use the `window.onewallet` instead of `window.harmony`. Since this project is open-source, we can update the api interface anytime so if you have a suggestion, feel free to create the issues on the github or contact me directly (raptor@meridiosolutions.com). Any Harmonauts' suggestion is welcome.
