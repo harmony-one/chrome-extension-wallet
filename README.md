@@ -98,7 +98,7 @@ const account = await harmonyExt.login().then((acc) => {
 ```
 await harmonyExt.logout(); //or await window.onewallet.forgetIdentity();
 ```
-* You can also modify the harmony extension object
+* You can also customize the harmony extension object
 ```
 function getExtension(endpoint, shard, chaindID) {
   let ext;
