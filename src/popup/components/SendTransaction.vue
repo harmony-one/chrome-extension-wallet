@@ -276,6 +276,7 @@ export default {
   },
 
   async mounted() {
+    if (this.wallet.isLedger) this.refreshData();
     this.setSelectedToken();
     await this.loadTokenBalance();
   },
