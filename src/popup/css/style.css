@@ -490,10 +490,9 @@ button:disabled {
 }
 
 .invoice {
-  margin-top: 0rem;
-  font-size: 15px;
-  margin-bottom: 1.5rem;
+  font-size: 14px;
 }
+
 .invoice__row {
   display: flex;
   justify-content: space-between;

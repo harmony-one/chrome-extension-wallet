@@ -143,19 +143,21 @@
             <b>{{ toShard }}</b>
           </div>
         </div>
-        <div class="invoice">
-          <div class="invoice__row">
-            <div class="invoice__rowLeft">Subtotal</div>
-            <div class="invoice__rowRight">{{ getString(amount) }}</div>
-          </div>
-          <div class="invoice__row">
-            <div class="invoice__rowLeft">Network Fee</div>
-            <div class="invoice__rowRight">{{ getGasFee + " ONE" }}</div>
-          </div>
-          <div class="invoice__divider"></div>
-          <div class="invoice__row">
-            <div class="invoice__rowLeft">Total</div>
-            <div class="invoice__rowRight">{{ getString(getTotal) }}</div>
+        <div class="invoice-content">
+          <div class="invoice">
+            <div class="invoice__row">
+              <div class="invoice__rowLeft">Subtotal</div>
+              <div class="invoice__rowRight">{{ getString(amount) }}</div>
+            </div>
+            <div class="invoice__row">
+              <div class="invoice__rowLeft">Network Fee</div>
+              <div class="invoice__rowRight">{{ getGasFee + " ONE" }}</div>
+            </div>
+            <div class="invoice__divider"></div>
+            <div class="invoice__row">
+              <div class="invoice__rowLeft">Total</div>
+              <div class="invoice__rowRight">{{ getString(getTotal) }}</div>
+            </div>
           </div>
         </div>
 
@@ -490,5 +492,11 @@ h3 {
 }
 .gray {
   color: #bbb;
+}
+
+.invoice-content {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 14px;
 }
 </style>

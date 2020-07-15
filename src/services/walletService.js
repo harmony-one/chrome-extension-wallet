@@ -87,6 +87,9 @@ class WalletService {
       );
     } else this.openPopup("login", 420, 600);
   };
+  isTokenTransfer = (data) => {
+    return data && data !== "0x";
+  };
   prepareSignTransaction = async (tabid, hostname, payload) => {
     try {
       this.sender = tabid;
@@ -107,8 +110,8 @@ class WalletService {
           return;
         }
         this.activeSession = session;
-        if (this.txnInfo.data && this.txnInfo.data !== "0x")
-          this.openPopup("sign", 400, 620);
+        if (this.isTokenTransfer(this.txnInfo.data))
+          this.openPopup("sign", 400, 600);
         else this.openPopup("sign", 400, 550);
       } else {
         this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {

@@ -6,7 +6,7 @@
       <span class="host_label">{{ host }}</span>
     </div>
     <div>
-      <span class="action_caption">Signing with</span>
+      <span class="action_caption">Signing by</span>
       <span class="sign__name">{{ wallet.name }}</span>
     </div>
     <div class="sign__address">{{ wallet.address }}</div>
@@ -22,37 +22,23 @@
       <span>To</span>
       <span class="address__name">{{ targetAddress }}</span>
     </p>
-    <p class="addressRow" v-else>{{ displayAction }}</p>
-    <div v-if="!isWithdrawal">
-      <div v-if="data && data !== '0x'">
-        <span class="action_caption">Transaction Details</span>
-        <div class="invoice">
-          <div class="invoice__row">
-            <div class="invoice__rowLeft">Gas Price</div>
-            <div class="invoice__rowRight">{{ gasPrice }} Gwei</div>
-          </div>
-          <div class="invoice__row">
-            <div class="invoice__rowLeft">Gas Limit</div>
-            <div class="invoice__rowRight">{{ gasLimit }} Gwei</div>
-          </div>
-          <p class="data_caption">Data</p>
-          <div class="data_content">{{ data }}</div>
-        </div>
+    <span class="action_caption">Transaction Details</span>
+    <div class="invoice" :class="{'withdraw-section': isWithdrawal}">
+      <div class="invoice__row" v-if="!isWithdrawal && !isTokenTransfer">
+        <div class="invoice__rowLeft">Amount</div>
+        <div class="invoice__rowRight">{{ amount }} ONE</div>
       </div>
-      <div v-else>
-        <div class="invoice__row">
-          <div class="invoice__rowLeft">Amount</div>
-          <div class="invoice__rowRight">{{ amount }} ONE</div>
-        </div>
-        <div class="invoice__row">
-          <div class="invoice__rowLeft">Network Fee</div>
-          <div class="invoice__rowRight">{{ getGasFee }} ONE</div>
-        </div>
-        <div class="invoice__divider"></div>
-        <div class="invoice__row">
-          <div class="invoice__rowLeft">Total</div>
-          <div class="invoice__rowRight">{{ getTotal }} ONE</div>
-        </div>
+      <div class="invoice__row">
+        <div class="invoice__rowLeft">Gas Price</div>
+        <div class="invoice__rowRight">{{ gasPrice }} Gwei</div>
+      </div>
+      <div class="invoice__row">
+        <div class="invoice__rowLeft">Gas Limit</div>
+        <div class="invoice__rowRight">{{ gasLimit }} Gwei</div>
+      </div>
+      <div v-if="isTokenTransfer">
+        <p class="data_caption">Data</p>
+        <div class="data_content">{{ data }}</div>
       </div>
     </div>
     <div v-if="!wallet.isLedger" class="password-content">
@@ -116,6 +102,9 @@ export default {
     },
     getTotal() {
       return Number(this.amount) + Number(this.getGasFee);
+    },
+    isTokenTransfer() {
+      return this.data && this.data !== "0x";
     },
     displayAction() {
       switch (this.type) {
@@ -240,7 +229,6 @@ h3 {
   font-weight: 700;
 }
 .data_caption {
-  font-size: 15px;
   margin-top: 5px;
   margin-bottom: 5px;
 }
@@ -276,5 +264,9 @@ h3 {
   opacity: 0.12;
   width: 100%;
   height: 100%;
+}
+
+.withdraw-section {
+  margin-bottom: 70px;
 }
 </style>
