@@ -61,7 +61,6 @@ export async function decryptKeyStore(password, keystore) {
     console.log(e);
     return false;
   }
-
   return privateKey;
 }
 

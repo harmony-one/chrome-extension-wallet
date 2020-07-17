@@ -2,18 +2,18 @@
   <div>
     <app-header @refresh="refreshTokens" headerTab="main-tab" />
     <main class="main">
-      <div v-if="!validTokens[network.name]" class="message-empty">No tokens found</div>
+      <div v-if="!tokenArray" class="message-empty">No tokens found</div>
 
       <div v-else>
-        <div class="token-row" v-for="token in validTokens[network.name]" :key="token">
+        <div class="token-row" v-for="token in tokenArray" :key="token">
           <span class="token-name">{{ token }}</span>
           <div class="token-box">
-            <span class="token-balance">{{ tokens[token].balance }}</span>
+            <span class="token-balance">{{ getTokenBalance(token) }}</span>
             <button
               class="but-token"
               :disabled="
-                tokens[token].balance <= 0 ||
-                  tokens[token].balance === undefined
+                getTokenBalance(token) <= 0 ||
+                  getTokenBalance(token) === undefined
               "
               @click="sendToken(token)"
             >Send</button>
@@ -31,16 +31,17 @@ import AppHeader from "../components/AppHeader.vue";
 import { mapState } from "vuex";
 export default {
   mixins: [token],
-  computed: mapState({
-    network: state => state.network,
-    validTokens: state => state.hrc20.validTokens
-  }),
+  computed: {
+    ...mapState({
+      network: state => state.network
+    })
+  },
   components: {
     AppHeader
   },
 
   mounted() {
-    this.loadTokenBalance();
+    this.loadAllTokenBalance();
   },
   methods: {
     sendToken(symbol) {

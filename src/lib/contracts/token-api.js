@@ -1,66 +1,44 @@
-import store from "../../popup/store";
+import artifact from "./artifacts/artifact.json";
 import { getNetworkLink, getHarmony } from "../txnService";
+import BN from "bn.js";
 
 export const oneToHexAddress = (address) =>
   getHarmony().crypto.getAddress(address).basicHex;
 
-export const getContractInstance = (artifact) => {
+export const getContractInstance = (contractAddress) => {
   const hmy = getHarmony();
-  //console.log(artifact.contractName, artifact.networks[store.state.network.chainId].address);
-  const contract = hmy.contracts.createContract(
-    artifact.abi,
-    artifact.networks[store.state.network.chainId].address
-  );
+  const contract = hmy.contracts.createContract(artifact.abi, contractAddress);
   return contract;
 };
 
-export async function getTokenBalance(address, artifact) {
-  const instance = getContractInstance(artifact);
+export async function getTokenBalance(address, contractAddress) {
+  const instance = getContractInstance(contractAddress);
   const hexAddress = oneToHexAddress(address);
   let balance = await instance.methods.balanceOf(hexAddress).call();
   return balance;
 }
 
-export async function getDecimals(artifact) {
-  const instance = getContractInstance(artifact);
-
-  // hard coded for SEED
-  if (artifact.contractName == "SEED") {
-    return 0;
-  }
-
-  let decimals = await instance.methods.decimals().call();
-  return decimals;
-}
-/*
-export async function increaseTotalSupply(amount, artifact) {
-  const instance = getContractInstance(artifact);
-  let ret = await instance.methods
-    .increaseSupply(
-      Unit(amount)
-        .asEther()
-        .toWei()
-    )
-    .call();
-  return ret;
-}*/
-
 export async function sendToken(
   from,
   to,
   amount,
+  decimals,
   privateKey,
   gasLimit = "250000",
   gasPrice = 1,
-  artifact
+  contractAddress
 ) {
   let txHash, receipt, confirmation, error;
   let harmony = getHarmony();
-  const instance = getContractInstance(artifact);
+  const instance = getContractInstance(contractAddress);
   const toHex = oneToHexAddress(to);
   harmony.wallet.addByPrivateKey(privateKey);
+
   await instance.methods
-    .transfer(toHex, new harmony.utils.Unit(amount).asEther().toWei())
+    .transfer(
+      toHex,
+      new BN(new BN(amount).mul(new BN(10).pow(new BN(decimals))))
+    )
     .send({
       from,
       gasLimit,
@@ -68,12 +46,15 @@ export async function sendToken(
     })
     .on("transactionHash", (_hash) => {
       txHash = _hash;
+      console.log(_hash);
     })
     .on("receipt", (_receipt) => {
       receipt = _receipt;
+      console.log(_receipt);
     })
     .on("confirmation", (_confirmation) => {
       confirmation = _confirmation;
+      console.log(_confirmation);
     })
     .on("error", (_error) => {
       error = _error;
