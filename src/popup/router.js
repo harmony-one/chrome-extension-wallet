@@ -14,6 +14,7 @@ import SendToken from "./pages/SendToken.vue";
 import Receive from "./pages/Receive.vue";
 import PrivateKey from "./pages/PrivateKey.vue";
 import About from "./pages/About.vue";
+import AddToken from "./pages/AddToken.vue";
 import store from "./store";
 
 Vue.use(Router);
@@ -37,6 +38,14 @@ const router = new Router({
       path: "/tokens",
       name: "tokens",
       component: Tokens,
+      meta: {
+        requiredAccount: true,
+      },
+    },
+    {
+      path: "/addtoken",
+      name: "addtoken",
+      component: AddToken,
       meta: {
         requiredAccount: true,
       },

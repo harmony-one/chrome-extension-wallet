@@ -62,7 +62,10 @@
                 v-model="amount"
                 step="any"
               />
-              <div class="maximum-label">Maximum: {{ getMaxBalance + " " + selectedToken }}</div>
+              <div
+                class="maximum-label"
+                v-show="!loading"
+              >Maximum: {{ getMaxBalance + " " + selectedToken }}</div>
             </label>
             <label v-if="!isToken" class="input-label token">
               Token
@@ -128,7 +131,7 @@
         </p>
         <div class="transaction column">
           <div class="row">
-            <img src="https://harmony.one/logo" class="transaction__logo" alt />
+            <img src="images/harmony-big.png" class="transaction__logo" alt />
             <div class="transaction__meta">
               <div class="transaction__caption">
                 Sending
@@ -242,22 +245,19 @@ export default {
   computed: {
     ...mapState({
       wallet: state => state.wallets.active,
-      validTokens: state => state.hrc20.validTokens
+      loading: state => state.loading
     }),
     getFromAddress() {
       return this.wallet.address;
     },
-    getGasLimit() {
-      if (this.selectedToken === "ONE") this.gasLimit = 21000;
-      else this.gasLimit = 250000; //this is from the truffle-config.js
-      return this.gasLimit;
+    isHRCToken() {
+      return this.selectedToken && this.selectedToken !== "ONE";
     },
     getGasFee() {
       return parseFloat((this.gasPrice * this.gasLimit) / Math.pow(10, 9));
     },
     getTotal() {
-      if (this.selectedToken === "ONE")
-        return Number(this.amount) + Number(this.getGasFee);
+      if (!this.isHRCToken) return Number(this.amount) + Number(this.getGasFee);
       else return Number(this.amount);
     },
     getOneBalance() {
@@ -265,14 +265,15 @@ export default {
     },
     getMaxBalance() {
       let max;
-      if (this.selectedToken === "ONE")
-        max = Number(this.account.balance).toFixed(9);
-      else max = this.tokens[this.selectedToken].balance;
+      if (!this.isHRCToken) max = Number(this.account.balance).toFixed(9);
+      else {
+        max = this.getTokenBalance(this.selectedToken);
+      }
       if (max === undefined) return Number(0).toFixed(6);
       return max;
     },
     getHeaderName() {
-      if (this.isToken) return "Send Token";
+      if (this.isHRCToken) return `Send ${this.selectedToken} Token`;
       return "Send Payment";
     }
   },
@@ -280,28 +281,29 @@ export default {
   async mounted() {
     if (this.wallet.isLedger) this.refreshData();
     this.setSelectedToken();
-    await this.loadTokenBalance();
+    await this.loadBalance();
   },
   updated() {
     if (this.scene == 2) this.$refs.password.focus();
   },
-  watch: {
-    selectedToken() {
-      this.toShard = 0;
-    }
-  },
   methods: {
-    tokenChanged() {
-      this.gasLimit = this.getGasLimit;
+    setGasLimit() {
+      if (!this.isHRCToken) this.gasLimit = 21000;
+      else this.gasLimit = 250000; //this is from the truffle-config.js
+    },
+    async tokenChanged() {
+      this.toShard = 0;
+      this.setGasLimit();
+      await this.loadBalance();
     },
     setSelectedToken() {
       if (!this.isToken) {
-        this.tokenList = ["ONE", ...this.validTokens[this.network.name]];
+        this.tokenList = ["ONE", ...this.tokenArray];
         this.selectedToken = "ONE";
       } else {
         this.selectedToken = this.token;
       }
-      this.gasLimit = this.getGasLimit;
+      this.setGasLimit();
     },
     getString(amount) {
       return Number(amount).toFixed(6) + " " + this.selectedToken;
@@ -310,12 +312,12 @@ export default {
       if (this.message.type == "success") window.open(this.message.text);
     },
     async loadBalance() {
-      if (this.selectedToken !== "ONE") await this.loadTokenBalance();
+      if (this.isHRCToken) await this.loadTokenBalance(this.selectedToken);
       else await this.loadOneBalance();
     },
-    async loadTokens() {
+    async refreshToken() {
+      await this.setSelectedToken();
       await this.loadBalance();
-      this.setSelectedToken();
     },
     async sendPayment() {
       let privateKey;
@@ -339,7 +341,7 @@ export default {
       try {
         // use the current selected account in the Account window
         let ret;
-        if (this.selectedToken === "ONE") {
+        if (!this.isHRCToken) {
           this.fromShard = this.account.shard;
           ret = await transferToken(
             this.recipient,
@@ -356,10 +358,11 @@ export default {
             this.address,
             this.recipient,
             this.amount,
+            this.getTokenDecimals(this.selectedToken),
             privateKey,
             this.gasLimit,
             this.gasPrice,
-            this.tokens[this.selectedToken].artifacts
+            this.getContractAddress(this.selectedToken)
           );
         }
 
@@ -413,7 +416,7 @@ export default {
         return false;
       }
 
-      if (this.selectedToken === "ONE") {
+      if (!this.isHRCToken) {
         if (this.getTotal > this.getOneBalance) {
           this.showErrMessage("Your balance is not enough");
           return false;
@@ -435,7 +438,7 @@ export default {
       this.message.show = false;
       this.$store.commit("loading", true);
       await this.loadShardingInfo();
-      await this.loadTokens();
+      await this.refreshToken();
       this.$store.commit("loading", false);
     },
 

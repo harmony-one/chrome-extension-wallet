@@ -1,46 +1,68 @@
 import { mapState } from "vuex";
-import {
-  getTokenBalance,
-  //increaseTotalSupply,
-  getDecimals,
-} from "../../lib/contracts/token-api";
-import { Unit } from "@harmony-js/utils";
-import { BN } from "bn.js";
+import { getTokenBalance } from "../../lib/contracts/token-api";
+import BigNumber from "bignumber.js";
 
 export default {
-  computed: mapState({
-    tokens: (state) => state.hrc20.tokens,
-    validTokens: (state) => state.hrc20.validTokens,
-    network: (state) => state.network,
-    address: (state) => state.wallets.active.address,
-  }),
-
+  computed: {
+    ...mapState({
+      tokens: (state) => state.hrc20.tokens,
+      network: (state) => state.network,
+      address: (state) => state.wallets.active.address,
+    }),
+    tokenArray() {
+      return Object.keys(this.tokens[this.network.chainId]);
+    },
+    getContractAddressList() {
+      const networkList = Object.keys(this.tokens);
+      let addressList = [];
+      networkList.forEach((network) => {
+        const tokenList = Object.keys(this.tokens[network]);
+        tokenList.forEach((token) => {
+          addressList.push(this.tokens[network][token].address);
+        });
+      });
+      return addressList;
+    },
+  },
   methods: {
-    async loadTokenBalance() {
-      for (var symbol of this.validTokens[this.network.name]) {
-        let bigbalance = await getTokenBalance(
-          this.address,
-          this.tokens[symbol].artifacts
-        );
-
-        let decimals = await getDecimals(this.tokens[symbol].artifacts);
-        const bigNumber = new BN(Math.pow(10, 12 - decimals));
-        let balance = Number(
-          Unit.Wei(bigNumber.mul(bigbalance)).toEther()
-        ).toFixed(6);
-        this.$store.commit("hrc20/loadTokenBalance", { symbol, balance });
+    async loadAllTokenBalance() {
+      for (var symbol of this.tokenArray) {
+        await this.loadTokenBalance(symbol);
       }
-    } /*
-    async increaseSupply(amount, symbol) {
-      ////increase supply
-      let ret = await increaseTotalSupply(
-        amount,
-        this.tokens[symbol].artifacts
+    },
+    getTokenBalance(symbol) {
+      const artifact = this.getTokenArtifact(symbol);
+      if (!artifact) return 0;
+      return artifact.balance;
+    },
+    getTokenArtifact(symbol) {
+      return this.tokens[this.network.chainId][symbol];
+    },
+    getContractAddress(symbol) {
+      return this.getTokenArtifact(symbol).address;
+    },
+    getTokenDecimals(symbol) {
+      return this.getTokenArtifact(symbol).decimals;
+    },
+    async loadTokenBalance(symbol) {
+      const findIndex = this.tokenArray.find((token) => token === symbol);
+      if (!findIndex) return;
+      let weiBalance = await getTokenBalance(
+        this.address,
+        this.getContractAddress(symbol)
       );
-    },*/,
+      let balance = BigNumber(weiBalance)
+        .dividedBy(Math.pow(10, this.getTokenDecimals(symbol)))
+        .toFixed(6);
+      this.$store.commit("hrc20/loadTokenBalance", {
+        network: this.network.chainId,
+        symbol,
+        balance,
+      });
+    },
     async refreshTokens() {
       this.$store.commit("loading", true);
-      await this.loadTokenBalance();
+      await this.loadAllTokenBalance();
       this.$store.commit("loading", false);
     },
   },
