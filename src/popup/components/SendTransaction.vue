@@ -354,19 +354,15 @@ export default {
           );
         } else {
           //token transfer part
-          const contractAddress = await this.getContractAddress(
-            this.selectedToken
-          );
-          const decimals = await this.getTokenDecimals(this.selectedToken);
           ret = await sendToken(
             this.address,
             this.recipient,
             this.amount,
-            decimals,
+            this.getTokenDecimals(this.selectedToken),
             privateKey,
             this.gasLimit,
             this.gasPrice,
-            contractAddress
+            this.getContractAddress(this.selectedToken)
           );
         }
 
