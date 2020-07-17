@@ -39,9 +39,9 @@ export default {
   components: {
     AppHeader
   },
-
-  mounted() {
-    this.loadAllTokenBalance();
+  async mounted() {
+    await this.loadAllTokenBalance();
+    this.$forceUpdate();
   },
   methods: {
     sendToken(symbol) {

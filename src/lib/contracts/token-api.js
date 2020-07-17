@@ -33,7 +33,6 @@ export async function sendToken(
   const instance = getContractInstance(contractAddress);
   const toHex = oneToHexAddress(to);
   harmony.wallet.addByPrivateKey(privateKey);
-
   await instance.methods
     .transfer(
       toHex,
@@ -46,15 +45,12 @@ export async function sendToken(
     })
     .on("transactionHash", (_hash) => {
       txHash = _hash;
-      console.log(_hash);
     })
     .on("receipt", (_receipt) => {
       receipt = _receipt;
-      console.log(_receipt);
     })
     .on("confirmation", (_confirmation) => {
       confirmation = _confirmation;
-      console.log(_confirmation);
     })
     .on("error", (_error) => {
       error = _error;

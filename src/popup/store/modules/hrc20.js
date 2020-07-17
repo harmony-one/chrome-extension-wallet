@@ -12,5 +12,13 @@ export default {
         balance: payload.balance,
       };
     },
+    addToken(state, payload) {
+      const { address, symbol, network, decimals } = payload;
+      state.tokens[network][symbol] = {};
+      state.tokens[network][symbol] = {
+        address,
+        decimals,
+      };
+    },
   },
 };

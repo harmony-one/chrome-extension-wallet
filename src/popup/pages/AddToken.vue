@@ -31,7 +31,11 @@
         <label class="input-label network-field">
           Network
           <select class="input-field" v-model="selectedNetwork">
-            <option v-for="network in networkList" :key="network" :value="network">{{ network }}</option>
+            <option
+              v-for="network in networkList"
+              :key="network.chainId"
+              :value="network.chainId"
+            >{{ network.name }}</option>
           </select>
         </label>
       </div>
@@ -42,8 +46,6 @@
           type="number"
           name="precision"
           ref="precision"
-          min="1"
-          max="18"
           v-model="precision"
           placeholder="Input the decimals of precision"
         />
@@ -69,7 +71,16 @@ export default {
     contractAddress: "",
     precision: 0,
     selectedNetwork: null,
-    networkList: ["Mainnet", "Testnet"]
+    networkList: [
+      {
+        chainId: 1,
+        name: "Mainnet"
+      },
+      {
+        chainId: 2,
+        name: "Testnet"
+      }
+    ]
   }),
   mixins: [token],
   components: {
@@ -77,11 +88,11 @@ export default {
   },
 
   mounted() {
-    this.selectedNetwork = this.networkList[0];
+    this.selectedNetwork = this.networkList[0].chainId;
   },
   watch: {
     symbol() {
-      this.symbol = this.symbol.replace(" ", "");
+      this.symbol = this.symbol.replace(" ", "").toUpperCase();
     }
   },
   methods: {
@@ -103,7 +114,18 @@ export default {
           });
           return;
         }
-        if (this.tokenArray.includes(this.symbol)) {
+        if (this.getContractAddressList.includes(this.contractAddress)) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Contract address already exists"
+          });
+          return;
+        }
+        const tokenList = Object.keys(
+          this.tokens[this.selectedNetwork]
+        ).map(elem => elem.toUpperCase());
+        if (tokenList.includes(this.symbol.toUpperCase())) {
           this.$notify({
             group: "notify",
             type: "error",
@@ -111,15 +133,13 @@ export default {
           });
           return;
         }
-        const tokenList = this.tokenArray.map(elem => elem.toLowerCase());
-        if (tokenList.includes(this.symbol.toLowerCase())) {
-          this.$notify({
-            group: "notify",
-            type: "error",
-            text: "Token symbol already exists"
-          });
-          return;
-        }
+        this.$store.commit("hrc20/addToken", {
+          address: this.contractAddress,
+          symbol: this.symbol,
+          network: this.selectedNetwork,
+          decimals: this.precision
+        });
+        this.$router.push("/tokens");
       } catch (err) {
         console.error(err);
       }

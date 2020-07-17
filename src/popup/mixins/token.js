@@ -12,6 +12,17 @@ export default {
     tokenArray() {
       return Object.keys(this.tokens[this.network.chainId]);
     },
+    getContractAddressList() {
+      const networkList = Object.keys(this.tokens);
+      let addressList = [];
+      networkList.forEach((network) => {
+        const tokenList = Object.keys(this.tokens[network]);
+        tokenList.forEach((token) => {
+          addressList.push(this.tokens[network][token].address);
+        });
+      });
+      return addressList;
+    },
   },
   methods: {
     async loadAllTokenBalance() {
