@@ -13,7 +13,6 @@
 - [x] Ledger Login
 - [x] Javascript API for calling onewallet for signing 
 - [x] Support staking.harmony.one  
-- [ ] View the amount of HRC20 token transfers
 - [ ] Ledger transfer
 - [ ] SEED token transfer
 
