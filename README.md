@@ -18,11 +18,9 @@
 
 Onewallet is a chrome extension wallet. You can install the chrome extension manually following the instructions [here](https://www.cnet.com/how-to/how-to-install-chrome-extensions-manually/). 
 
-| Version        | Link | Note | 
-| -------------- | ------------- | ------------- |
-| Version 0.1 | [Alpha Release Candidate 0.1 ](https://github.com/harmony-one/onewallet/raw/master/release/onewallet_alpha0.1.zip)| HRC20 token H2O/BUSD | 
-| Version 0.2 | [Alpha Release Candidate 0.2 ](https://github.com/harmony-one/onewallet/raw/master/release/onewallet_alpha0.2.zip)| HRC20 token SEED |
-| Version 1.0 | [Beta Release Candidate 1.0 ](https://github.com/harmony-one/onewallet/releases/download/v1.0.0/Harmony-One_Wallet_v1.0.0.zip)| Add custom HRC20 token feature |
+| Version        | Link |
+| -------------- | ------------- |
+| Version 1.0 | [Beta Release v1.0 ](https://github.com/harmony-one/onewallet/releases/download/v1.0.0/Harmony_Wallet_v1.0.0.zip)|
 
 ## Development 
 
