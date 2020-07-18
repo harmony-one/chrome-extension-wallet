@@ -146,25 +146,28 @@ export default {
       this.file = event.target.files[0];
     },
     async importKey() {
-      if (this.selectType === "key" && !validatePrivateKey(this.privateKey)) {
-        this.$notify({
-          group: "notify",
-          type: "error",
-          text: "Please enter a valid private key"
-        });
-        return false;
-      }
-      const oneAddress = getAddressFromPrivateKey(this.privateKey);
-      const acc = this.wallets.accounts.find(
-        account => account.address === oneAddress
-      );
-      if (acc) {
-        this.$notify({
-          group: "notify",
-          type: "error",
-          text: "Account already exists"
-        });
-        return false;
+      if (this.selectType === "key") {
+        if (!validatePrivateKey(this.privateKey)) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Please enter a valid private key"
+          });
+          return false;
+        } else {
+          const oneAddress = getAddressFromPrivateKey(this.privateKey);
+          const acc = this.wallets.accounts.find(
+            account => account.address === oneAddress
+          );
+          if (acc) {
+            this.$notify({
+              group: "notify",
+              type: "error",
+              text: "Account already exists"
+            });
+            return false;
+          }
+        }
       }
       if (this.selectType === "mnemonic" && this.mnemonic === "") {
         this.$notify({
