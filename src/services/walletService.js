@@ -6,7 +6,6 @@ import {
   FROM_BACK_TO_POPUP,
   CLOSE_WINDOW,
 } from "../types";
-import store from "../popup/store";
 import * as storage from "./storage";
 
 export const msgToContentScript = (type, payload) => ({
@@ -63,11 +62,12 @@ class WalletService {
     this.sendMessageToInjectScript(THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE);
   };
   getAccount = async (tabid, hostname) => {
+    const store = this.getVuexStore();
     this.sender = tabid;
     this.host = hostname;
     const session = await this.getSession(hostname);
     if (session.exist) {
-      const findAcc = store.state.wallets.accounts.find(
+      const findAcc = store.wallets.accounts.find(
         (account) => account.address === session.account.address
       );
       if (!findAcc) {
@@ -90,15 +90,19 @@ class WalletService {
   isTokenTransfer = (data) => {
     return data && data !== "0x";
   };
+  getVuexStore = () => {
+    return JSON.parse(window.localStorage.vuex);
+  };
   prepareSignTransaction = async (tabid, hostname, payload) => {
     try {
+      const store = this.getVuexStore();
       this.sender = tabid;
       this.host = hostname;
       this.type = payload.type;
       this.txnInfo = payload.txnInfo;
       const session = await this.getSession(hostname);
       if (session.exist) {
-        const findAcc = store.state.wallets.accounts.find(
+        const findAcc = store.wallets.accounts.find(
           (account) => account.address === session.account.address
         );
         if (!findAcc) {
