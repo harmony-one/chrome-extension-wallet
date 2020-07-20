@@ -73,7 +73,6 @@ export default {
             text:
               "You did not select a Ledger device. Check if the Ledger is plugged in and unlocked."
           });
-          console.log(err);
         });
     }
   }
