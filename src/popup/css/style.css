@@ -216,6 +216,7 @@ a.button {
   white-space: nowrap;
   outline: none;
   border: none;
+  border: 2px solid #0a93eb;
 }
 button:hover {
   background-color: #0987d7;
@@ -237,7 +238,7 @@ button.outline:active {
 button.outline:disabled,
 button:disabled {
   background: #e0e0e0;
-  border: none;
+  border: 2px solid #e0e0e0;
   color: #888;
 }
 

@@ -2,10 +2,10 @@
   <nav class="header-tabs">
     <router-link :class="{ active: myroute.name == 'create-wallet' }" to="/create-wallet">Create</router-link>
     <router-link :class="{ active: myroute.name == 'import-wallet' }" to="/import-wallet">Import</router-link>
-    <a
+    <router-link
       :class="{ active: myroute.name == 'connect-hardware-wallet' }"
-      @click.prevent="() => { connectHardware();}"
-    >Connect</a>
+      to="/connect-hardware-wallet"
+    >Connect</router-link>
   </nav>
 </template>
 
