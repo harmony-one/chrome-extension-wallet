@@ -243,7 +243,6 @@ export default {
 
           if (wallet.address) {
             this.$store.commit("wallets/addAccount", wallet);
-            this.$router.push("/");
           }
         });
       } else if (this.selectType == "mnemonic") {
@@ -262,7 +261,6 @@ export default {
                 ...wallet,
                 isLedger: false
               });
-              this.$router.push("/");
             }
           }
         );
@@ -287,11 +285,16 @@ export default {
 
             if (wallet.address) {
               this.$store.commit("wallets/addAccount", wallet);
-              this.$router.push("/");
             }
           });
         });
       }
+      alert(
+        "Your account is imported successfully. To continue, close this tab and use the extension."
+      );
+      chrome.tabs.getCurrent(function(tab) {
+        chrome.tabs.remove(tab.id, function() {});
+      });
     }
   }
 };

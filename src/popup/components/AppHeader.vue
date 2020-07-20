@@ -112,12 +112,11 @@
           <div class="dropdown-menu-divider"></div>
           <div class="dropdown-menu-item">
             <i class="material-icons">add</i>
-            <router-link to="/create-wallet">Create Account</router-link>
+            <a @click.prevent="() => { createAccount();}">Create Account</a>
           </div>
           <div class="dropdown-menu-item">
             <i class="material-icons">vertical_align_bottom</i>
-
-            <router-link to="/import-wallet">Import Account</router-link>
+            <a @click.prevent="() => { importAccount();}">Import Account</a>
           </div>
           <div class="dropdown-menu-item">
             <i class="material-icons">settings_input_component</i>
@@ -220,6 +219,16 @@ export default {
       this.hideDropdownMenu();
       this.refreshData();
       if (this.$route.name !== "account") this.$router.push("/");
+    },
+    createAccount() {
+      chrome.tabs.create({
+        url: "popup.html#/create-wallet"
+      });
+    },
+    importAccount() {
+      chrome.tabs.create({
+        url: "popup.html#/import-wallet"
+      });
     },
     connectHardware() {
       chrome.tabs.create({

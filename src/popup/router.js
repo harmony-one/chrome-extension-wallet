@@ -124,7 +124,9 @@ const router = new Router({
 router.beforeEach((to, from, next) => {
   if (to.matched.some((record) => record.meta.requiredAccount)) {
     if (!store.state.wallets.accounts.length) {
-      next({ path: "/create-wallet" });
+      chrome.tabs.create({
+        url: "popup.html#/create-wallet",
+      });
     } else {
       next();
     }
