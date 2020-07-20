@@ -20,14 +20,7 @@ export default {
   },
   computed: mapState({
     myroute: state => state.route
-  }),
-  methods: {
-    connectHardware() {
-      chrome.tabs.create({
-        url: "popup.html#/connect-hardware-wallet"
-      });
-    }
-  }
+  })
 };
 </script>
 
