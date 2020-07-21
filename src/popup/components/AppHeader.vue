@@ -231,9 +231,9 @@ export default {
       });
     },
     connectHardware() {
-      chrome.tabs.create({
-        url: "popup.html#/connect-hardware-wallet"
-      });
+      // chrome.tabs.create({
+      //   url: "popup.html#/connect-hardware-wallet"
+      // });
     },
     refreshData() {
       if (this.loading) return;
