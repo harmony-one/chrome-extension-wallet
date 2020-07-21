@@ -113,11 +113,11 @@ const router = new Router({
       name: "import-wallet",
       component: ImportWallet,
     },
-    {
-      path: "/connect-hardware-wallet",
-      name: "connect-hardware-wallet",
-      component: ConnectHardwareWallet,
-    },
+    // {
+    //   path: "/connect-hardware-wallet",
+    //   name: "connect-hardware-wallet",
+    //   component: ConnectHardwareWallet,
+    // },
   ],
 });
 

@@ -118,7 +118,7 @@
             <i class="material-icons">vertical_align_bottom</i>
             <a @click.prevent="() => { importAccount();}">Import Account</a>
           </div>
-          <div class="dropdown-menu-item">
+          <div class="dropdown-menu-item disabled">
             <i class="material-icons">settings_input_component</i>
             <a @click.prevent="() => { connectHardware();}">Connect Hardware Wallet</a>
           </div>
@@ -244,7 +244,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 .header {
   width: 370px;
   position: fixed;
@@ -267,6 +267,13 @@ i {
   display: flex;
   flex-direction: row;
   position: relative;
+  &.disabled {
+    pointer-events: none;
+    a,
+    i {
+      color: #ccc;
+    }
+  }
 }
 .header-top {
   display: flex;
@@ -282,20 +289,20 @@ i {
   font-size: 1rem;
   font-weight: 600;
   color: #424242;
-}
-.header-logo img,
-.header-logo span {
-  display: block;
-}
-.header-logo img {
-  margin-right: 5px;
+  img,
+  span {
+    display: block;
+  }
+  img {
+    margin-right: 5px;
+  }
 }
 .network {
   margin: -0.2rem 0.75rem 0;
   position: relative;
-}
-.network span {
-  display: block;
+  span {
+    display: block;
+  }
 }
 a.network-toggle {
   max-width: 150px;
