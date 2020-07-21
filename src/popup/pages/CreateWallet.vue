@@ -57,7 +57,7 @@
         </label>
         <label class="input-label">
           Seed Phrase
-          <a class="copy-tag" @click="copyToClipboard">(Click here to copy)</a>
+          <a class="copy-tag" @click.prevent="copyToClipboard">(Click here to copy)</a>
           <textarea
             class="input-field"
             name="seed_phrase"

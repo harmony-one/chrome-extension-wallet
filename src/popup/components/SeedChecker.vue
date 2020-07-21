@@ -1,8 +1,13 @@
 <template>
   <div>
     <div class="caption-header">
-      <h4>Please select the seeds in sequence order</h4>
-      <button class="clear-but" @click="clearPhrase">Clear</button>
+      <div v-if="isMatched">
+        <h4>You've matched the Seed Phrase successfully</h4>
+      </div>
+      <div v-else>
+        <h4>Please select the seeds in Sequence Order</h4>
+      </div>
+      <button class="clear-but" v-if="!isMatched" @click="clearPhrase">Clear</button>
     </div>
     <div class="confirm-seed-box">
       <div

@@ -220,9 +220,11 @@ a.button {
 }
 button:hover {
   background-color: #0987d7;
+  border: 2px solid #0987d7;
 }
 button:active {
   background-color: #1f6bb7;
+  border: 2px solid #1f6bb7;
 }
 button.outline {
   background: rgba(10, 147, 235, 0.05);

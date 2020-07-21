@@ -6,10 +6,10 @@ module.exports = {
   author: "Harmony",
   version: AppInfo.version,
   icons: {
-    "16": "icons/16.png",
-    "32": "icons/32.png",
-    "48": "icons/48.png",
-    "128": "icons/128.png",
+    "16": "icons/16.ico",
+    "32": "icons/32.ico",
+    "48": "icons/48.ico",
+    "128": "icons/128.ico",
   },
 
   permissions: ["storage", "tabs"],

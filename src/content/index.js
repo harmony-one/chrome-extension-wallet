@@ -35,7 +35,6 @@ chrome.runtime.onMessage.addListener(async (message) => {
   if (!message || !message.type || message.type !== HARMONY_RESPONSE_TYPE) {
     return true;
   }
-  // window.postMessage(message);
   window.dispatchEvent(
     new CustomEvent(ONEWALLET_SERVICE_EVENT_RESPONSE, {
       detail: message,
