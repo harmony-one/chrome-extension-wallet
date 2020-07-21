@@ -119,7 +119,8 @@ import {
   validatePrivateKey,
   getAddressFromPrivateKey,
   createAccountFromMnemonic,
-  decryptKeyStore
+  decryptKeyStore,
+  validateMnemonic
 } from "../../lib/txnService";
 
 export default {
@@ -169,13 +170,15 @@ export default {
           }
         }
       }
-      if (this.selectType === "mnemonic" && this.mnemonic === "") {
-        this.$notify({
-          group: "notify",
-          type: "error",
-          text: "Please enter a valid mnemonic"
-        });
-        return false;
+      if (this.selectType === "mnemonic") {
+        if (!validateMnemonic(this.mnemonic)) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Please enter a valid mnemonic"
+          });
+          return false;
+        }
       }
       if (this.selectType === "keystore") {
         if (!this.file) {
@@ -208,7 +211,7 @@ export default {
       }
       this.scene = 2;
     },
-    importAcc() {
+    async importAcc() {
       let wallet;
       if (this.name === "") {
         this.$notify({
@@ -233,48 +236,28 @@ export default {
       if (this.selectType === "key") {
         const oneAddr = getAddressFromPrivateKey(this.privateKey);
 
-        encryptKeyStore(this.password, this.privateKey).then(result => {
-          wallet = {
-            name: this.name,
-            address: oneAddr,
-            keystore: result,
-            isLedger: false
-          };
-
-          if (wallet.address) {
-            this.$store.commit("wallets/addAccount", wallet);
-          }
-        });
+        const keystore = await encryptKeyStore(this.password, this.privateKey);
+        wallet = {
+          name: this.name,
+          address: oneAddr,
+          keystore,
+          isLedger: false
+        };
+        if (wallet.address) {
+          this.$store.commit("wallets/addAccount", wallet);
+        }
       } else if (this.selectType == "mnemonic") {
-        createAccountFromMnemonic(this.name, this.mnemonic, this.password).then(
-          wallet => {
-            if (!wallet) {
-              this.$notify({
-                group: "notify",
-                type: "error",
-                text: "Mnemonic string is incorrect"
-              });
-              return false;
-            } else {
-              //console.log("added new account through import mnemonic", wallet);
-              this.$store.commit("wallets/addAccount", {
-                ...wallet,
-                isLedger: false
-              });
-            }
-          }
+        wallet = await createAccountFromMnemonic(
+          this.name,
+          this.mnemonic,
+          this.password
         );
+        this.$store.commit("wallets/addAccount", {
+          ...wallet,
+          isLedger: false
+        });
       } else {
         decryptKeyStore(this.password, this.keyFromFile).then(result => {
-          if (!result) {
-            this.$notify({
-              group: "notify",
-              type: "error",
-              text: "Password is incorrect or keystore file is invalid"
-            });
-            return false;
-          }
-
           encryptKeyStore(this.password, result.privateKey).then(keystore => {
             wallet = {
               name: this.name,

@@ -68,6 +68,16 @@ export function generatePhrase() {
   return getHarmony().wallet.newMnemonic();
 }
 
+export function validateMnemonic(mnemonic) {
+  let account;
+  try {
+    account = getHarmony().wallet.addByMnemonic(mnemonic);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
 export async function createAccountFromMnemonic(name, mnemonic, password) {
   let account;
   try {
