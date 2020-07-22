@@ -7,8 +7,10 @@ export default {
   },
   mutations: {
     loadTokenBalance(state, payload) {
+      const token = state.tokens[payload.network][payload.symbol];
+      if (!token) return;
       state.tokens[payload.network][payload.symbol] = {
-        ...state.tokens[payload.network][payload.symbol],
+        ...token,
         balance: payload.balance,
       };
     },

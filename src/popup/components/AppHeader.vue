@@ -178,7 +178,6 @@ export default {
   computed: mapState({
     wallets: state => state.wallets,
     myroute: state => state.route,
-    loading: state => state.loading,
     currentNetwork: state => state.network
   }),
 
@@ -201,7 +200,6 @@ export default {
     },
 
     toggleNetworkDropdown() {
-      if (this.loading) return;
       this.showNetworkDropdown = this.showNetworkDropdown ? false : true;
     },
 
@@ -236,7 +234,6 @@ export default {
       // });
     },
     refreshData() {
-      if (this.loading) return;
       this.$emit("refresh");
       this.showDropdownMenu = false;
     }

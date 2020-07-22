@@ -44,15 +44,19 @@ export default {
     getTokenDecimals(symbol) {
       return this.getTokenArtifact(symbol).decimals;
     },
-    async loadTokenBalance(symbol) {
-      const findIndex = this.tokenArray.find((token) => token === symbol);
-      if (!findIndex) return;
-      let weiBalance = await getTokenBalance(
-        this.address,
-        this.getContractAddress(symbol)
-      );
+    async loadTokenBalance(tokenSymbol) {
+      const symbol = tokenSymbol;
+      const findSymbol = this.tokenArray.find((token) => token === symbol);
+      if (!findSymbol) return;
+      const artifact = this.getTokenArtifact(symbol);
+      if (artifact === undefined) return;
+
+      const contractAddress = this.getContractAddress(symbol);
+      const decimals = this.getTokenDecimals(symbol);
+
+      let weiBalance = await getTokenBalance(this.address, contractAddress);
       let balance = BigNumber(weiBalance)
-        .dividedBy(Math.pow(10, this.getTokenDecimals(symbol)))
+        .dividedBy(Math.pow(10, decimals))
         .toFixed(6);
       this.$store.commit("hrc20/loadTokenBalance", {
         network: this.network.chainId,
