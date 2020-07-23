@@ -257,20 +257,27 @@ export default {
           isLedger: false
         });
       } else {
-        decryptKeyStore(this.password, this.keyFromFile).then(result => {
-          encryptKeyStore(this.password, result.privateKey).then(keystore => {
-            wallet = {
-              name: this.name,
-              address: result.address,
-              keystore: keystore,
-              isLedger: false
-            };
+        console.log("this.keyFromFile", this.keyFromFile);
+        const decryptResult = await decryptKeyStore(
+          this.password,
+          this.keyFromFile
+        );
+        console.log("decryptResult", decryptResult);
+        const encryptedKeyStore = await encryptKeyStore(
+          this.password,
+          decryptResult.privateKey
+        );
 
-            if (wallet.address) {
-              this.$store.commit("wallets/addAccount", wallet);
-            }
-          });
-        });
+        wallet = {
+          name: this.name,
+          address: decryptResult.address,
+          keystore: encryptedKeyStore,
+          isLedger: false
+        };
+
+        if (wallet.address) {
+          this.$store.commit("wallets/addAccount", wallet);
+        }
       }
       alert(
         "Your account is imported successfully. To continue, close this tab and use the extension."
