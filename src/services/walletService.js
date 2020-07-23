@@ -62,35 +62,43 @@ class WalletService {
     this.sendMessageToInjectScript(THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE);
   };
   getAccount = async (tabid, hostname) => {
-    const store = this.getVuexStore();
-    this.sender = tabid;
-    this.host = hostname;
-    const session = await this.getSession(hostname);
-    if (session.exist) {
-      const findAcc = store.wallets.accounts.find(
-        (account) => account.address === session.account.address
-      );
-      if (!findAcc) {
+    try {
+      const store = this.getVuexStore();
+      this.sender = tabid;
+      this.host = hostname;
+      const session = await this.getSession(hostname);
+      if (session.exist) {
+        const findAcc = store.wallets.accounts.find(
+          (account) => account.address === session.account.address
+        );
+        if (!findAcc) {
+          this.sendMessageToInjectScript(
+            THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
+            {
+              rejected: true,
+              message:
+                "Account is not found from the extension. Please use forgetIdentity first to sign out",
+            }
+          );
+          return;
+        }
         this.sendMessageToInjectScript(
           THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
-          {
-            rejected: true,
-            message:
-              "Account is not found from the Extension. Please use forgetIdentity first to sign out",
-          }
+          session.account
         );
-        return;
-      }
-      this.sendMessageToInjectScript(
-        THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
-        session.account
-      );
-    } else this.openPopup("login", 420, 600);
+      } else this.openPopup("login", 420, 600);
+    } catch (err) {
+      this.sendMessageToInjectScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
+        rejected: true,
+        message: JSON.stringify(err),
+      });
+    }
   };
   isTokenTransfer = (data) => {
     return data && data !== "0x";
   };
   getVuexStore = () => {
+    if (window.localStorage.vuex === undefined) return {};
     return JSON.parse(window.localStorage.vuex);
   };
   prepareSignTransaction = async (tabid, hostname, payload) => {
@@ -109,7 +117,7 @@ class WalletService {
           this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
             rejected: true,
             message:
-              "Account is not found from the Extension. Please use forgetIdentity first to sign out",
+              "Account is not found from the extension. Please use forgetIdentity first to sign out",
           });
           return;
         }
@@ -125,7 +133,10 @@ class WalletService {
         });
       }
     } catch (err) {
-      console.error(err);
+      this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
+        rejected: true,
+        message: JSON.stringify(err),
+      });
     }
   };
   onGetSignatureKeySuccess = (payload) => {

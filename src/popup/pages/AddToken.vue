@@ -35,7 +35,8 @@
               v-for="network in networkList"
               :key="network.chainId"
               :value="network.chainId"
-            >{{ network.name }}</option>
+              >{{ network.name }}</option
+            >
           </select>
         </label>
       </div>
@@ -48,13 +49,24 @@
           ref="precision"
           v-model="precision"
           placeholder="Input the decimals of precision"
+          v-on:keyup.enter="createToken"
         />
       </label>
       <div class="button-group">
         <button class="outline" @click="$router.go(-1)">Back</button>
-        <button @click="createToken" :disabled="!precision || !symbol || !contractAddress">Create</button>
+        <button
+          @click="createToken"
+          :disabled="!precision || !symbol || !contractAddress"
+        >
+          Create
+        </button>
       </div>
-      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -65,6 +77,7 @@ import AppHeader from "../components/AppHeader.vue";
 import QrcodeVue from "qrcode.vue";
 import { HarmonyAddress } from "@harmony-js/crypto";
 import token from "../mixins/token";
+import Config from "../../config";
 export default {
   data: () => ({
     symbol: "",
@@ -74,17 +87,17 @@ export default {
     networkList: [
       {
         chainId: 1,
-        name: "Mainnet"
+        name: "Mainnet",
       },
       {
         chainId: 2,
-        name: "Testnet"
-      }
-    ]
+        name: "Testnet",
+      },
+    ],
   }),
   mixins: [token],
   components: {
-    AppHeader
+    AppHeader,
   },
 
   mounted() {
@@ -93,24 +106,22 @@ export default {
   watch: {
     symbol() {
       this.symbol = this.symbol.replace(" ", "").toUpperCase();
-    }
+    },
   },
   methods: {
     isValidAddress(address) {
-      try {
-        if (HarmonyAddress.isValidChecksum(address) === true) return true;
-        return false;
-      } catch (err) {
-        return false;
-      }
+      if (!address) return false;
+      if (String(address).substr(0, 2) !== "0x") return false;
+      if (String(address).length !== 42) return false;
+      return true;
     },
-    createToken() {
+    async createToken() {
       try {
         if (!this.isValidAddress(this.contractAddress)) {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Contract address is invalid"
+            text: "Contract address is invalid",
           });
           return;
         }
@@ -118,18 +129,18 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Contract address already exists"
+            text: "Contract address already exists",
           });
           return;
         }
         const tokenList = Object.keys(
           this.tokens[this.selectedNetwork]
-        ).map(elem => elem.toUpperCase());
+        ).map((elem) => elem.toUpperCase());
         if (tokenList.includes(this.symbol.toUpperCase())) {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Token symbol already exists"
+            text: "Token symbol already exists",
           });
           return;
         }
@@ -137,14 +148,19 @@ export default {
           address: this.contractAddress,
           symbol: this.symbol,
           network: this.selectedNetwork,
-          decimals: this.precision
+          decimals: this.precision,
         });
+        const networks = Config.networks;
+        const networkIndex = networks.findIndex(
+          (network) => network.chainId === this.selectedNetwork
+        );
+        this.$store.commit("network/change", Config.networks[networkIndex]);
         this.$router.push("/tokens");
       } catch (err) {
         console.error(err);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
