@@ -20,9 +20,9 @@ export default {
 
         //replace the existing account
         if (acc != undefined) {
-          acc.address = payload.address
+          acc.address = payload.address;
           state.active = acc;
-          return
+          return;
         }
       }
 
@@ -33,7 +33,7 @@ export default {
 
     setActive(state, payload) {
       //set active account when you select the account in the menu
-      const acc = state.accounts.find((acc) => acc.name === payload);
+      const acc = state.accounts.find((acc) => acc.address === payload);
       state.active = acc;
     },
   },
