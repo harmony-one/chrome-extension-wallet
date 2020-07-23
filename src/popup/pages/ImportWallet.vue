@@ -3,7 +3,11 @@
     <app-header headerTab="create-tab" />
     <main class="main">
       <div class="main-logo">
-        <img src="images/harmony.png" alt="Harmony" />
+        <img
+          src="images/harmony.png"
+          alt="Harmony"
+          :class="{ 'logo-md': selectType === 'keystore' && scene === 2 }"
+        />
       </div>
       <div v-if="scene === 1">
         <div class="type-row">
@@ -51,8 +55,15 @@
             v-show="wallets.accounts.length > 0"
             class="outline"
             @click="$router.push('/')"
-          >Cancel</button>
-          <button @click="importKey" :class="!wallets.accounts.length ? 'full-width' : ''">Import</button>
+          >
+            Cancel
+          </button>
+          <button
+            @click="importKey"
+            :class="!wallets.accounts.length ? 'full-width' : ''"
+          >
+            Import
+          </button>
         </div>
       </div>
       <div v-else>
@@ -67,20 +78,36 @@
             placeholder="Input the account name"
           />
         </label>
-
+        <div v-if="selectType === 'keystore'">
+          <label class="input-label">
+            Enter the keystore file password
+            <input
+              class="input-field"
+              type="password"
+              name="keystorepass"
+              ref="keystorepass"
+              v-model="keystorepass"
+              placeholder="Enter the keystore file password"
+            />
+          </label>
+        </div>
         <label class="input-label">
           <span v-if="selectType !== 'keystore'">Password</span>
-          <span v-else>Enter your keystore Password</span>
+          <span v-else>Enter your account password</span>
           <input
             class="input-field"
             type="password"
             name="password"
             ref="password"
             v-model="password"
-            placeholder="Input the password"
+            :placeholder="
+              selectType !== 'keystore'
+                ? 'Input the password'
+                : 'Enter your account password'
+            "
           />
         </label>
-        <div v-if="selectType !== 'keystore'">
+        <div>
           <label class="input-label">
             Confirm Password
             <input
@@ -102,11 +129,20 @@
                 scene = 1;
               }
             "
-          >Back</button>
-          <button @click="importAcc" :disabled="!name">Import Account</button>
+          >
+            Back
+          </button>
+          <button @click="importAcc" :disabled="!name || !password">
+            Import Account
+          </button>
         </div>
       </div>
-      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -119,27 +155,28 @@ import {
   validatePrivateKey,
   getAddressFromPrivateKey,
   createAccountFromMnemonic,
-  decryptKeyStore,
-  validateMnemonic
+  decryptKeyStoreFromFile,
+  validateMnemonic,
 } from "../../lib/txnService";
 
 export default {
   data: () => ({
     name: "",
     password: "",
+    keystorepass: "",
     password_confirm: "",
     privateKey: "",
     keyFromFile: "",
     mnemonic: "",
     scene: 1,
     selectType: "key",
-    file: null
+    file: null,
   }),
   components: {
-    AppHeader
+    AppHeader,
   },
   computed: {
-    ...mapState(["wallets"])
+    ...mapState(["wallets"]),
   },
 
   methods: {
@@ -152,22 +189,9 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Please enter a valid private key"
+            text: "Please enter a valid private key",
           });
           return false;
-        } else {
-          const oneAddress = getAddressFromPrivateKey(this.privateKey);
-          const acc = this.wallets.accounts.find(
-            account => account.address === oneAddress
-          );
-          if (acc) {
-            this.$notify({
-              group: "notify",
-              type: "error",
-              text: "Account already exists"
-            });
-            return false;
-          }
         }
       }
       if (this.selectType === "mnemonic") {
@@ -175,7 +199,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Please enter a valid mnemonic"
+            text: "Please enter a valid mnemonic",
           });
           return false;
         }
@@ -185,7 +209,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Please select a file"
+            text: "Please select a file",
           });
           return false;
         } else {
@@ -200,7 +224,7 @@ export default {
                 _this.$notify({
                   group: "notify",
                   type: "error",
-                  text: "Keystore file invalid"
+                  text: "Keystore file invalid",
                 });
                 return false;
               }
@@ -213,22 +237,33 @@ export default {
     },
     async importAcc() {
       let wallet;
-      if (this.name === "") {
+
+      if (!this.password) {
         this.$notify({
           group: "notify",
-          text: "Invalid account name"
+          text: "Password is required",
         });
         return false;
       }
-
-      if (
-        this.selectType !== "keystore" &&
-        this.password !== this.password_confirm
-      ) {
+      if (!this.name) {
+        this.$notify({
+          group: "notify",
+          text: "Account name is required",
+        });
+        return false;
+      }
+      if (this.password.length < 8) {
+        this.$notify({
+          group: "notify",
+          type: "warn",
+          text: "Password must be longer than 8 characters",
+        });
+        return false;
+      } else if (this.password !== this.password_confirm) {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Password doesn't match"
+          text: "Password doesn't match",
         });
         return false;
       }
@@ -241,28 +276,28 @@ export default {
           name: this.name,
           address: oneAddr,
           keystore,
-          isLedger: false
+          isLedger: false,
         };
-        if (wallet.address) {
-          this.$store.commit("wallets/addAccount", wallet);
-        }
       } else if (this.selectType == "mnemonic") {
         wallet = await createAccountFromMnemonic(
           this.name,
           this.mnemonic,
           this.password
         );
-        this.$store.commit("wallets/addAccount", {
-          ...wallet,
-          isLedger: false
-        });
+        wallet = { ...wallet, isLedger: false };
       } else {
-        console.log("this.keyFromFile", this.keyFromFile);
-        const decryptResult = await decryptKeyStore(
-          this.password,
+        const decryptResult = await decryptKeyStoreFromFile(
+          this.keystorepass,
           this.keyFromFile
         );
-        console.log("decryptResult", decryptResult);
+        if (!decryptResult) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Keystore password is incorrect or file is invalid",
+          });
+          return false;
+        }
         const encryptedKeyStore = await encryptKeyStore(
           this.password,
           decryptResult.privateKey
@@ -272,21 +307,29 @@ export default {
           name: this.name,
           address: decryptResult.address,
           keystore: encryptedKeyStore,
-          isLedger: false
+          isLedger: false,
         };
-
-        if (wallet.address) {
-          this.$store.commit("wallets/addAccount", wallet);
-        }
       }
+      const acc = this.wallets.accounts.find(
+        (account) => account.address === wallet.address
+      );
+      if (acc) {
+        this.$notify({
+          group: "notify",
+          type: "error",
+          text: "Account already exists",
+        });
+        return false;
+      }
+      this.$store.commit("wallets/addAccount", wallet);
       alert(
         "Your account is imported successfully. To continue, close this tab and use the extension."
       );
       chrome.tabs.getCurrent(function(tab) {
         chrome.tabs.remove(tab.id, function() {});
       });
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
@@ -321,5 +364,9 @@ input[type="file"] {
 .big-label {
   font-size: 1rem;
   color: black;
+}
+.logo-md {
+  width: 100px;
+  height: 100px;
 }
 </style>

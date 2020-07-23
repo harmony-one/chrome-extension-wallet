@@ -49,6 +49,7 @@
           ref="precision"
           v-model="precision"
           placeholder="Input the decimals of precision"
+          v-on:keyup.enter="createToken"
         />
       </label>
       <div class="button-group">

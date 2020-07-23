@@ -1,5 +1,10 @@
 import store from "../popup/store";
-import { encryptPhrase, getAddress, decryptPhrase } from "@harmony-js/crypto";
+import {
+  encryptPhrase,
+  getAddress,
+  decryptPhrase,
+  HarmonyAddress,
+} from "@harmony-js/crypto";
 const { isValidAddress } = require("@harmony-js/utils");
 import { Harmony } from "@harmony-js/core";
 var currentNetwork = "";
@@ -49,6 +54,29 @@ export async function encryptKeyStore(password, privateKey) {
   return keyStore;
 }
 
+export async function decryptKeyStoreFromFile(password, keystore) {
+  try {
+    const decryptedAccount = await getHarmony().wallet.addByKeyStore(
+      JSON.stringify(keystore),
+      password
+    );
+
+    const address = decryptedAccount.address;
+    const privateKey = decryptedAccount.privateKey;
+
+    if (isValidAddress(address)) {
+      return {
+        address: new HarmonyAddress(address).bech32,
+        privateKey,
+      };
+    }
+    return false;
+  } catch (err) {
+    console.error("decryptKeyStoreFromFile--->", err);
+    return false;
+  }
+}
+
 export async function decryptKeyStore(password, keystore) {
   if (!password) {
     return false;
@@ -58,7 +86,7 @@ export async function decryptKeyStore(password, keystore) {
   try {
     privateKey = await decryptPhrase(JSON.parse(keystore), password);
   } catch (e) {
-    console.log(e);
+    console.error("decryptKeyStore-->", e);
     return false;
   }
   return privateKey;
