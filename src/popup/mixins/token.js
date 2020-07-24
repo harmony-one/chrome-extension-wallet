@@ -55,6 +55,7 @@ export default {
       const decimals = this.getTokenDecimals(symbol);
 
       let weiBalance = await getTokenBalance(this.address, contractAddress);
+      if (weiBalance === null) return;
       let balance = BigNumber(weiBalance)
         .dividedBy(Math.pow(10, decimals))
         .toFixed(6);

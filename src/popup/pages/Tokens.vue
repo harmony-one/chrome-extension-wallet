@@ -1,8 +1,10 @@
 <template>
   <div>
-    <app-header @refresh="refreshTokens" headerTab="main-tab" />
+    <app-header @refresh="refreshData" headerTab="main-tab" />
     <main class="main">
-      <div v-if="!tokenArray" class="message-empty">No tokens found</div>
+      <div v-if="!tokenArray || account.shard" class="message-empty">
+        No tokens found
+      </div>
 
       <div v-else>
         <div class="token-row" v-for="token in tokenArray" :key="token">
@@ -16,7 +18,9 @@
                   getTokenBalance(token) === undefined
               "
               @click="sendToken(token)"
-            >Send</button>
+            >
+              Send
+            </button>
           </div>
         </div>
       </div>
@@ -26,28 +30,33 @@
 </template>
 
 <script>
-import token from "../mixins/token";
+import account from "../mixins/account";
 import AppHeader from "../components/AppHeader.vue";
 import { mapState } from "vuex";
 export default {
-  mixins: [token],
+  mixins: [account],
   computed: {
     ...mapState({
-      network: state => state.network
-    })
+      account: (state) => state.account,
+      network: (state) => state.network,
+    }),
   },
   components: {
-    AppHeader
+    AppHeader,
   },
   async mounted() {
     await this.loadAllTokenBalance();
     this.$forceUpdate();
   },
   methods: {
+    async refreshData() {
+      await this.refreshTokens();
+      await this.loadOneBalance();
+    },
     sendToken(symbol) {
       this.$router.push({ path: `/send-token/${symbol}` });
-    }
-  }
+    },
+  },
 };
 </script>
 
