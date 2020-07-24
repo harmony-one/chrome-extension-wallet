@@ -360,6 +360,9 @@ input[type="file"] {
   border: 1px solid #0a93eb;
   border-radius: 3px;
   padding: 0.5rem 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .big-label {
   font-size: 1rem;

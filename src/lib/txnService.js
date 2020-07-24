@@ -9,12 +9,6 @@ const { isValidAddress } = require("@harmony-js/utils");
 import { Harmony } from "@harmony-js/core";
 var currentNetwork = "";
 
-export const RecoverCode = {
-  MNEMONIC: 1,
-  PRIVATE_KEY: 2,
-  KEYSTORE: 3,
-};
-
 var harmony = new Harmony(
   // rpc url
   store.state.network.apiUrl,
@@ -132,8 +126,9 @@ export function getAddressFromPrivateKey(privateKey) {
 }
 
 export async function getBalance(address, shardId) {
-  getHarmony().blockchain.messenger.setDefaultShardID(shardId);
-  let ret = await getHarmony().blockchain.getBalance({ address });
+  const hmy = getHarmony();
+  hmy.setShardID(shardId);
+  let ret = await hmy.blockchain.getBalance({ address });
 
   return ret.result;
 }

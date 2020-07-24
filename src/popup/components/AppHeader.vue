@@ -268,6 +268,7 @@ export default {
 
     changeNetwork(network) {
       this.showNetworkDropdown = false;
+      this.$store.commit("account/shard", 0);
       this.$store.commit("network/change", network);
       this.refreshData();
     },
