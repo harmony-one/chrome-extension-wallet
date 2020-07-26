@@ -33,6 +33,7 @@ export default {
     getTokenBalance(symbol) {
       const artifact = this.getTokenArtifact(symbol);
       if (!artifact) return 0;
+      if (!artifact.balance) return 0;
       return artifact.balance;
     },
     getTokenArtifact(symbol) {
