@@ -12,7 +12,7 @@ module.exports = {
     "128": "icons/128.ico",
   },
 
-  permissions: ["storage", "tabs"],
+  permissions: ["storage", "activeTab"],
   browser_action: {
     default_title: "Harmony One Wallet",
     default_popup: "popup.html",
@@ -22,7 +22,7 @@ module.exports = {
   },
   content_scripts: [
     {
-      matches: ["*://*/*"],
+      matches: ["file://*/*", "http://*/*", "https://*/*"],
       js: ["content-script.js"],
     },
   ],

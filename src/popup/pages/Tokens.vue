@@ -2,15 +2,15 @@
   <div>
     <app-header @refresh="refreshData" headerTab="main-tab" />
     <main class="main">
-      <div v-if="!tokenArray || account.shard" class="message-empty">
-        No tokens found
-      </div>
+      <div v-if="!tokenArray || account.shard" class="message-empty">No tokens found</div>
 
       <div v-else>
         <div class="token-row" v-for="token in tokenArray" :key="token">
-          <span class="token-name">{{ token }}</span>
+          <span class="token-name">{{ compressSymbol(token) }}</span>
           <div class="token-box">
-            <span class="token-balance">{{ getTokenBalance(token) }}</span>
+            <span
+              class="token-balance"
+            >{{ $formatNumber(getTokenBalance(token), {maximumSignificantDigits: 6}) }}</span>
             <button
               class="but-token"
               :disabled="
@@ -18,9 +18,7 @@
                   getTokenBalance(token) === undefined
               "
               @click="sendToken(token)"
-            >
-              Send
-            </button>
+            >Send</button>
           </div>
         </div>
       </div>
@@ -37,26 +35,33 @@ export default {
   mixins: [account],
   computed: {
     ...mapState({
-      account: (state) => state.account,
-      network: (state) => state.network,
-    }),
+      account: state => state.account,
+      network: state => state.network
+    })
   },
   components: {
-    AppHeader,
+    AppHeader
   },
   async mounted() {
     await this.loadAllTokenBalance();
     this.$forceUpdate();
   },
   methods: {
+    compressSymbol(str) {
+      if (str.length > 14)
+        return (
+          str.substr(0, 5) + "..." + str.substr(str.length - 5, str.length)
+        );
+      return str;
+    },
     async refreshData() {
       await this.refreshTokens();
       await this.loadOneBalance();
     },
     sendToken(symbol) {
       this.$router.push({ path: `/send-token/${symbol}` });
-    },
-  },
+    }
+  }
 };
 </script>
 
