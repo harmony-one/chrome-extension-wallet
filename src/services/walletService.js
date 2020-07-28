@@ -77,7 +77,7 @@ class WalletService {
             {
               rejected: true,
               message:
-                "Account is not found from the extension. Please use forgetIdentity first to sign out",
+                "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out",
             }
           );
           return;
@@ -98,8 +98,16 @@ class WalletService {
     return data && data !== "0x";
   };
   getVuexStore = () => {
-    if (window.localStorage.vuex === undefined) return {};
-    return JSON.parse(window.localStorage.vuex);
+    try {
+      console.log(window.localStorage);
+      if (!window.localStorage.vuex) throw new Error("Vuex Store is not found");
+      const vuex = JSON.parse(window.localStorage.vuex);
+      if (!vuex || !vuex.wallets)
+        throw new Error("Wallet is not defined in the vuex store");
+      return vuex;
+    } catch (err) {
+      console.error(err);
+    }
   };
   prepareSignTransaction = async (tabid, hostname, payload) => {
     try {
@@ -117,7 +125,7 @@ class WalletService {
           this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
             rejected: true,
             message:
-              "Account is not found from the extension. Please use forgetIdentity first to sign out",
+              "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out",
           });
           return;
         }
@@ -129,7 +137,7 @@ class WalletService {
         this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
           rejected: true,
           message:
-            "Account is not selected. Please use getAccount first to sign the transaction",
+            "The account is not selected. Please use getAccount first to sign the transaction",
         });
       }
     } catch (err) {

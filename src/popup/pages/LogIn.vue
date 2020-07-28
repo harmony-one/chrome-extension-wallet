@@ -11,7 +11,7 @@
       </div>
       <div class="account-container">
         <div v-if="!wallets.accounts.length">
-          <p>No Accounts. You should create the account first</p>
+          <p>No Accounts. You should create the account first in the extension.</p>
         </div>
         <div v-else>
           <div
