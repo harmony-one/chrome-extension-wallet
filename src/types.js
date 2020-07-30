@@ -55,3 +55,10 @@ export const CLOSE_WINDOW = "CLOSE_WINDOW";
 export const LOGIN_REJECT = "User rejected login request";
 export const SIGN_REJECT = "User rejected sign transaction request";
 export const SIGNOUT_SUCCEED = "Successfully signed out";
+
+export const LEDGER_CONFIRM_PREPARE =
+  "Please confirm the transaction on the Ledger";
+export const LEDGER_CONFIRM_SUCCESS = "Sign transaction approved by the ledger";
+export const LEDGER_CONFIRM_REJECT = "Sign transaction rejected by the ledger";
+export const LEDGER_LOCKED =
+  "Ledger wallet is locked or request is rejected. Please unlock it first.";

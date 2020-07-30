@@ -2,13 +2,16 @@
   <div>
     <app-header @refresh="refreshAccount" headerTab="main-tab" />
     <main class="main">
-      <div class="main-logo">
-        <img src="images/harmony.png" class="logo-img" alt="Harmony" />
+      <div class="relative">
+        <div class="main-logo">
+          <img src="images/harmony.png" class="logo-img" alt="Harmony" />
+        </div>
+        <span v-if="wallets.active.isLedger" class="ledger-badge big account-badge">Ledger</span>
       </div>
       <div class="container">
         <div class="account-box" @click="onClickAccount()">
           <h2 class="name-label">{{ compressName(wallets.active.name) }}</h2>
-          <div class="box-address">{{ compressAddress(address) }}</div>
+          <div class="box-address">{{ compressAddress(address, 20, 5) }}</div>
         </div>
 
         <div class="box-label">Account Balance</div>
@@ -43,13 +46,14 @@
 </template>
 
 <script>
+import helper from "../mixins/helper";
 import account from "../mixins/account";
 import AppHeader from "../components/AppHeader.vue";
 import MainTab from "../components/MainTab.vue";
 import { mapState } from "vuex";
 
 export default {
-  mixins: [account],
+  mixins: [account, helper],
 
   components: {
     AppHeader,
@@ -89,12 +93,11 @@ export default {
 
   methods: {
     async onSendClick() {
-      if (!this.wallets.active.isLedger) this.$router.push("/send");
-      else {
+      if (this.wallets.active.isLedger && !this.isExtendedView)
         chrome.tabs.create({
           url: "popup.html#/send"
         });
-      }
+      else this.$router.push("/send");
     },
     onClickAccount() {
       this.$copyText(this.address).then(() => {
@@ -111,13 +114,6 @@ export default {
           str.substr(0, 10) + "..." + str.substr(str.length - 5, str.length)
         );
       return str;
-    },
-    compressAddress(address) {
-      return (
-        address.substr(0, 20) +
-        "..." +
-        address.substr(address.length - 5, address.length)
-      );
     }
   }
 };
@@ -158,5 +154,14 @@ export default {
 .logo-img {
   height: 50px;
   width: 50px;
+}
+.account-badge {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+}
+.relative {
+  position: relative;
+  z-index: -1;
 }
 </style>

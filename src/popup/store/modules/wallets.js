@@ -19,7 +19,8 @@ export default {
         const acc = state.accounts.find((acc) => acc.isLedger === true);
 
         //replace the existing account
-        if (acc != undefined) {
+        if (acc !== undefined) {
+          acc.name = payload.name;
           acc.address = payload.address;
           state.active = acc;
           return;

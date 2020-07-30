@@ -1,5 +1,5 @@
-import walletService from "../services/walletService";
-import { msgToContentScript } from "../services/walletService";
+import apiService from "../services/APIService";
+import { msgToContentScript } from "../services/APIService";
 
 import {
   HARMONY_REQUEST_TYPE,
@@ -26,17 +26,17 @@ function externalMessageListener(message, sender, sendResponse) {
   const { type } = payload;
   switch (type) {
     case THIRDPARTY_SIGN_REQUEST:
-      walletService.prepareSignTransaction(
+      apiService.prepareSignTransaction(
         sender.tab.id,
         payload.hostname,
         payload.payload
       );
       break;
     case THIRDPARTY_GET_ACCOUNT_REQUEST:
-      walletService.getAccount(sender.tab.id, payload.hostname);
+      apiService.getAccount(sender.tab.id, payload.hostname);
       break;
     case THIRDPARTY_FORGET_IDENTITY_REQUEST:
-      walletService.forgetIdentity(sender.tab.id, payload.hostname);
+      apiService.forgetIdentity(sender.tab.id, payload.hostname);
       break;
     default:
       console.warn("Unknown message from content script - ", message);
@@ -53,15 +53,15 @@ function internalMessageListener(message, sender, sendResponse) {
   }
   switch (action) {
     case GET_WALLET_SERVICE_STATE: {
-      const state = walletService.getState();
+      const state = apiService.getState();
       sendResponse({ state });
       break;
     }
     case THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE:
-      walletService.onGetSignatureKeySuccess(payload);
+      apiService.onGetSignatureKeySuccess(payload);
       break;
     case THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE:
-      walletService.onGetAccountSuccess(payload);
+      apiService.onGetAccountSuccess(payload);
       break;
     default:
       console.log("Unknown internal action received - ", action);

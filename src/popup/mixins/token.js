@@ -1,5 +1,5 @@
 import { mapState } from "vuex";
-import { getTokenBalance } from "../../lib/contracts/token-api";
+import { getTokenBalance } from "../../services/Hrc20Service";
 import BigNumber from "bignumber.js";
 
 export default {

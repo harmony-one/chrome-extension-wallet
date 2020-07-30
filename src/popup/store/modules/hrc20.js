@@ -1,4 +1,4 @@
-import { HRCTokens } from "../../../lib/contracts/config";
+import { HRCTokens } from "../../../services/hrc20/config";
 
 export default {
   namespaced: true,

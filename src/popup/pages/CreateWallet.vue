@@ -93,7 +93,7 @@ import account from "../mixins/account";
 import {
   generatePhrase,
   createAccountFromMnemonic
-} from "../../lib/txnService";
+} from "../../services/AccountService";
 import AppHeader from "../components/AppHeader.vue";
 import { mapState } from "vuex";
 import SeedChecker from "../components/SeedChecker";

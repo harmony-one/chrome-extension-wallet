@@ -600,3 +600,31 @@ button.add_token:active {
   text-align: center;
   text-transform: uppercase;
 }
+
+.logo-md {
+  width: 100px;
+  height: 100px;
+}
+
+.full-but {
+  margin-top: 20px;
+  height: 40px;
+  width: 100%;
+}
+
+.ledger-badge {
+  background: transparent;
+  margin: auto;
+  margin-right: 15px;
+  margin-left: 5px;
+  font-size: 0.5rem;
+  color: red;
+  border: 1px solid red;
+  padding: 2px 3px;
+}
+
+.ledger-badge.big {
+  padding: 0px 8px;
+  font-size: 1rem;
+  margin: 0;
+}
