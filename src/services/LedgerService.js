@@ -134,7 +134,7 @@ function getBrowser(userAgent) {
   if (isChrome) return "chrome";
 }
 
-export async function signTransactionWithLeger(
+export async function signTransactionWithLedger(
   receiver,
   fromShard,
   toShard,

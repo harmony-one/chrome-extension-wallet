@@ -207,7 +207,7 @@ import account from "../mixins/account";
 import helper from "../mixins/helper";
 import AppHeader from "../components/AppHeader.vue";
 import {
-  signTransactionWithLeger,
+  signTransactionWithLedger,
   isLedgerLocked
 } from "../../services/LedgerService";
 import {
@@ -352,7 +352,7 @@ export default {
     },
     async processLedgerTransfer() {
       try {
-        const { success, result } = await signTransactionWithLeger(
+        const { success, result } = await signTransactionWithLedger(
           this.recipient,
           this.fromShard,
           this.toShard,
