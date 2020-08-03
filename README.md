@@ -9,10 +9,9 @@
 - [x] View and Transfer HRC20 tokens (BUSD, H2O, SEED).
 - [x] View recent transfers .
 - [x] Switch the network to Mainnet, Pangaea, Testnet or Localnet.
-- [x] Ledger Login
+- [x] Support the ledger wallet (login and transfer)
 - [x] Javascript API for calling onewallet for signing 
 - [x] Support staking.harmony.one 
-- [ ] Ledger transfer
 
 ## Install from release zip
 
