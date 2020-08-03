@@ -17,13 +17,14 @@
         />
       </label>
       <div class="row">
-        <label class="input-label symbol-field">
+        <label class="input-label symbol-label">
           Token Symbol
           <input
-            class="input-field"
+            class="input-field symbol-input"
             type="text"
             name="symbol"
             ref="symbol"
+            @keydown.space.prevent
             v-model="symbol"
             placeholder="Input the token symbol"
           />
@@ -35,8 +36,7 @@
               v-for="network in networkList"
               :key="network.chainId"
               :value="network.chainId"
-              >{{ network.name }}</option
-            >
+            >{{ network.name }}</option>
           </select>
         </label>
       </div>
@@ -54,19 +54,9 @@
       </label>
       <div class="button-group">
         <button class="outline" @click="$router.go(-1)">Back</button>
-        <button
-          @click="createToken"
-          :disabled="!precision || !symbol || !contractAddress"
-        >
-          Create
-        </button>
+        <button @click="createToken" :disabled="!precision || !symbol || !contractAddress">Create</button>
       </div>
-      <notifications
-        group="notify"
-        width="250"
-        :max="2"
-        class="notifiaction-container"
-      />
+      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
     </main>
   </div>
 </template>
@@ -87,26 +77,21 @@ export default {
     networkList: [
       {
         chainId: 1,
-        name: "Mainnet",
+        name: "Mainnet"
       },
       {
         chainId: 2,
-        name: "Testnet",
-      },
-    ],
+        name: "Testnet"
+      }
+    ]
   }),
   mixins: [token],
   components: {
-    AppHeader,
+    AppHeader
   },
 
   mounted() {
     this.selectedNetwork = this.networkList[0].chainId;
-  },
-  watch: {
-    symbol() {
-      this.symbol = this.symbol.replace(" ", "").toUpperCase();
-    },
   },
   methods: {
     isValidAddress(address) {
@@ -124,7 +109,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Contract address is invalid",
+            text: "Contract address is invalid"
           });
           return;
         }
@@ -132,18 +117,18 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Contract address already exists",
+            text: "Contract address already exists"
           });
           return;
         }
         const tokenList = Object.keys(
           this.tokens[this.selectedNetwork]
-        ).map((elem) => elem.toUpperCase());
+        ).map(elem => elem.toUpperCase());
         if (tokenList.includes(this.symbol.toUpperCase())) {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Token symbol already exists",
+            text: "Token symbol already exists"
           });
           return;
         }
@@ -151,19 +136,19 @@ export default {
           address: this.contractAddress,
           symbol: this.symbol,
           network: this.selectedNetwork,
-          decimals: this.precision,
+          decimals: this.precision
         });
         const networks = Config.networks;
         const networkIndex = networks.findIndex(
-          (network) => network.chainId === this.selectedNetwork
+          network => network.chainId === this.selectedNetwork
         );
         this.$store.commit("network/change", Config.networks[networkIndex]);
         this.$router.push("/tokens");
       } catch (err) {
         console.error(err);
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -174,10 +159,20 @@ export default {
 .network-field {
   width: 30%;
 }
-.symbol-field {
+
+.symbol-label {
   width: 70%;
   margin-right: 10px;
 }
+
+.symbol-input {
+  text-transform: uppercase;
+}
+
+::placeholder {
+  text-transform: none;
+}
+
 .receive-payment,
 .receive-payment .input-field {
   text-align: center;
