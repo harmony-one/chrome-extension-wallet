@@ -17,8 +17,8 @@
         </div>
         <div v-else-if="isOnlyLedgerAvailable">
           <p>
-            Sorry. The ledger account is not supported for this action at the
-            moment. You should create another account in the extension.
+            The ledger account is not supported for this action at the moment.
+            You should create another account in the extension.
           </p>
         </div>
         <div v-else>
