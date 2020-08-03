@@ -12,7 +12,7 @@
       <div class="account-container">
         <div v-if="!wallets.accounts.length">
           <p>
-            No Accounts. You should create the account first in the extension.
+            No accounts. You should create the account first in the extension.
           </p>
         </div>
         <div v-else-if="isOnlyLedgerAvailable">
@@ -42,6 +42,11 @@
       >
         <button class="outline" @click="deny">Deny</button>
         <button :disabled="selected < 0" @click="accept">Accept</button>
+      </div>
+      <div v-else>
+        <button class="full-but" @click="deny">
+          OK
+        </button>
       </div>
     </main>
   </div>

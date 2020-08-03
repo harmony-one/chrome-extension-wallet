@@ -6,6 +6,15 @@ export default {
     },
   },
   methods: {
+    openExpandPopup(route) {
+      if (!this.isExtendedView) {
+        chrome.tabs.create({
+          url: `popup.html#${route}`,
+        });
+      } else {
+        this.$router.push(route);
+      }
+    },
     compressAddress(address, leftOffset = 15, RightOffet = 5) {
       return (
         address.substr(0, leftOffset) +
