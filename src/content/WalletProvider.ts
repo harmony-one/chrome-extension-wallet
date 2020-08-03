@@ -2,7 +2,7 @@
 import { Transaction } from "@harmony-js/transaction";
 import { StakingTransaction } from "@harmony-js/staking";
 import { Account } from "@harmony-js/account";
-import { decryptKeyStore } from "../lib/txnService";
+import { decryptKeyStore } from "../services/AccountService";
 import {
   THIRDPARTY_FORGET_IDENTITY_REQUEST,
   THIRDPARTY_GET_ACCOUNT_REQUEST,

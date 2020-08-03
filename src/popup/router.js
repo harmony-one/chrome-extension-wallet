@@ -1,6 +1,5 @@
 import Vue from "vue";
 import Router from "vue-router";
-// import SignIn from "./pages/SignIn.vue";
 import CreateWallet from "./pages/CreateWallet.vue";
 import ImportWallet from "./pages/ImportWallet.vue";
 import LogIn from "./pages/LogIn.vue";
@@ -113,11 +112,11 @@ const router = new Router({
       name: "import-wallet",
       component: ImportWallet,
     },
-    // {
-    //   path: "/connect-hardware-wallet",
-    //   name: "connect-hardware-wallet",
-    //   component: ConnectHardwareWallet,
-    // },
+    {
+      path: "/connect-hardware-wallet",
+      name: "connect-hardware-wallet",
+      component: ConnectHardwareWallet,
+    },
   ],
 });
 

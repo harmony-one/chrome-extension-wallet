@@ -154,70 +154,77 @@ export async function transferToken(
   gasLimit = "21000",
   gasPrice = 1
 ) {
-  let harmony = getHarmony();
+  try {
+    let harmony = getHarmony();
 
-  //1e18
-  const txn = harmony.transactions.newTx({
-    //  token send to
-    to: receiver,
-    // amount to send
-    value: new harmony.utils.Unit(amount)
-      .asEther()
-      .toWei()
-      .toString(),
-    // gas limit, you can use string
-    gasLimit: gasLimit,
-    // send token from shardID
-    shardID:
-      typeof fromShard === "string"
-        ? Number.parseInt(fromShard, 10)
-        : fromShard,
-    // send token to toShardID
-    toShardID:
-      typeof toShard === "string" ? Number.parseInt(toShard, 10) : toShard,
-    // gas Price, you can use Unit class, and use Gwei, then remember to use toWei(), which will be transformed to BN
-    gasPrice: new harmony.utils.Unit(gasPrice)
-      .asGwei()
-      .toWei()
-      .toString(),
-  });
-  // update the shard information
-  await getShardInfo();
+    //1e18
+    const txn = harmony.transactions.newTx({
+      //  token send to
+      to: receiver,
+      // amount to send
+      value: new harmony.utils.Unit(amount)
+        .asEther()
+        .toWei()
+        .toString(),
+      // gas limit, you can use string
+      gasLimit: gasLimit,
+      // send token from shardID
+      shardID:
+        typeof fromShard === "string"
+          ? Number.parseInt(fromShard, 10)
+          : fromShard,
+      // send token to toShardID
+      toShardID:
+        typeof toShard === "string" ? Number.parseInt(toShard, 10) : toShard,
+      // gas Price, you can use Unit class, and use Gwei, then remember to use toWei(), which will be transformed to BN
+      gasPrice: new harmony.utils.Unit(gasPrice)
+        .asGwei()
+        .toWei()
+        .toString(),
+    });
+    // update the shard information
+    await getShardInfo();
 
-  // sign the transaction use wallet;
-  const account = harmony.wallet.addByPrivateKey(privateKey);
-  const signedTxn = await account.signTransaction(txn);
+    // sign the transaction use wallet;
+    const account = harmony.wallet.addByPrivateKey(privateKey);
+    const signedTxn = await account.signTransaction(txn);
 
-  signedTxn
-    .observed()
-    .on("transactionHash", (txnHash) => {
-      console.log("--- hash ---");
-      console.log(txnHash);
-    })
-    .on("error", (error) => {
+    signedTxn
+      .observed()
+      .on("transactionHash", (txnHash) => {
+        console.log("--- hash ---");
+        console.log(txnHash);
+      })
+      .on("error", (error) => {
+        return {
+          result: false,
+          mesg: "Failed to sign transaction",
+        };
+      });
+
+    const [sentTxn, txnHash] = await signedTxn.sendTransaction();
+    const confiremdTxn = await sentTxn.confirm(txnHash);
+
+    var explorerLink;
+    if (confiremdTxn.isConfirmed()) {
+      explorerLink = getNetworkLink("/tx/" + txnHash);
+    } else {
       return {
         result: false,
-        mesg: "Failed to sign transaction",
+        mesg: "Can not confirm transaction " + txnHash,
       };
-    });
+    }
 
-  const [sentTxn, txnHash] = await signedTxn.sendTransaction();
-  const confiremdTxn = await sentTxn.confirm(txnHash);
-
-  var explorerLink;
-  if (confiremdTxn.isConfirmed()) {
-    explorerLink = getNetworkLink("/tx/" + txnHash);
-  } else {
+    return {
+      result: true,
+      mesg: explorerLink,
+    };
+  } catch (err) {
     return {
       result: false,
-      mesg: "Can not confirm transaction " + txnHash,
+      mesg: err,
     };
   }
-
-  return {
-    result: true,
-    mesg: explorerLink,
-  };
 }
 
 export async function getTransfers(

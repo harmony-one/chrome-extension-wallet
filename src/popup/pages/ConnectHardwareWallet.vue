@@ -3,22 +3,42 @@
     <app-header headerTab="create-tab" />
     <main class="main connect-wallet">
       <div class="main-logo">
-        <img src="images/harmony.png" alt="Harmony" />
+        <img src="images/harmony.png" :class="{'logo-md': scene === 2 ? true: false}" alt="Harmony" />
       </div>
-      <h3>Connect a hardware wallet</h3>
-      <span class="form-label">Select a ledger hardware wallet</span>
-      <div class="wallet-group">
-        <button class="but-ledger" @click="connect">
-          <img src="images/ledger.svg" alt="Ledger" />
-        </button>
+      <div v-if="scene === 1">
+        <h3>Connect a hardware wallet</h3>
+        <span class="form-label">Select a ledger hardware wallet</span>
+        <div class="wallet-group">
+          <button class="but-ledger" @click="connect">
+            <img src="images/ledger.svg" alt="Ledger" />
+          </button>
+        </div>
+        <div class="button-group">
+          <button
+            v-show="wallets.accounts.length > 0"
+            class="outline"
+            @click="$router.push('/')"
+          >Cancel</button>
+          <button :class="!wallets.accounts.length ? 'full-width' : ''" @click="connect">Connect</button>
+        </div>
       </div>
-      <div class="button-group">
-        <button
-          v-show="wallets.accounts.length > 0"
-          class="outline"
-          @click="$router.push('/')"
-        >Cancel</button>
-        <button :class="!wallets.accounts.length ? 'full-width' : ''" @click="connect">Connect</button>
+      <div v-else>
+        <h3>Create the Account</h3>
+        <div>Address</div>
+        <span class="address-label">{{address}}</span>
+        <label class="input-label align-left">
+          Account Name
+          <input
+            class="input-field"
+            type="text"
+            name="name"
+            ref="name"
+            v-model="name"
+            placeholder="Input the account name"
+            v-on:keyup.enter="createAccount"
+          />
+        </label>
+        <button class="full-but" :disabled="!name" @click="createAccount">Create Account</button>
       </div>
       <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
     </main>
@@ -28,10 +48,13 @@
 <script>
 import { mapState } from "vuex";
 import AppHeader from "../components/AppHeader.vue";
-import { connectLedgerApp } from "../../lib/ledger";
+import { connectLedgerApp } from "../../services/LedgerService";
 
 export default {
   data: () => ({
+    scene: 1,
+    name: "",
+    address: "",
     error: {
       show: false,
       message: ""
@@ -44,34 +67,33 @@ export default {
     AppHeader
   },
   methods: {
-    connect() {
-      console.log("start connecting ledger");
+    createAccount() {
+      const wallet = {
+        isLedger: true,
+        name: this.name,
+        address: this.address,
+        keystore: ""
+      };
 
+      this.$store.commit("wallets/addAccount", wallet);
+      alert(
+        "Your ledger account is loaded. To continue, close this tab and use the extension."
+      );
+      chrome.tabs.getCurrent(function(tab) {
+        chrome.tabs.remove(tab.id, function() {});
+      });
+    },
+    connect() {
       connectLedgerApp()
         .then(address => {
-          const wallet = {
-            isLedger: true,
-            name: "Ledger",
-            address: address,
-            keystore: ""
-          };
-
-          this.$store.commit("wallets/addAccount", wallet);
-
-          // this.$router.push("/");
-          alert(
-            "Your ledger account is loaded. To continue, close this tab and use the extension."
-          );
-          chrome.tabs.getCurrent(function(tab) {
-            chrome.tabs.remove(tab.id, function() {});
-          });
+          this.address = address;
+          this.scene = 2;
         })
         .catch(err => {
           this.$notify({
             group: "notify",
             type: "error",
-            text:
-              "You did not select a Ledger device. Check if the Ledger is plugged in and unlocked."
+            text: err
           });
         });
     }
@@ -82,12 +104,19 @@ export default {
 .connect-wallet {
   text-align: center;
 }
+.align-left {
+  text-align: left;
+}
 .button-group {
   display: flex;
   justify-content: space-between;
 }
 .form-label {
   font-size: 0.8rem;
+}
+.address-label {
+  font-size: 0.65rem;
+  font-style: italic;
 }
 .but-ledger {
   background: white;

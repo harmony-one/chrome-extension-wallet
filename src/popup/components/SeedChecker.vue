@@ -85,11 +85,7 @@ export default {
 .clear-but {
   height: 40px;
 }
-.full-but {
-  margin-top: 20px;
-  height: 40px;
-  width: 100%;
-}
+
 .caption-header {
   display: flex;
   justify-content: space-between;

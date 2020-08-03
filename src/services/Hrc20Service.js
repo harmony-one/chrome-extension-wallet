@@ -1,5 +1,5 @@
-import artifact from "./artifacts/artifact.json";
-import { getNetworkLink, getHarmony } from "../txnService";
+import artifact from "./hrc20/artifacts/artifact.json";
+import { getNetworkLink, getHarmony } from "./AccountService";
 import BN from "bn.js";
 
 export const oneToHexAddress = (address) =>

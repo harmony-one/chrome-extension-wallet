@@ -110,10 +110,13 @@ export default {
   },
   methods: {
     isValidAddress(address) {
-      if (!address) return false;
-      if (String(address).substr(0, 2) !== "0x") return false;
-      if (String(address).length !== 42) return false;
-      return true;
+      try {
+        if (HarmonyAddress.isValidBasic(new HarmonyAddress(address).basic))
+          return true;
+        return false;
+      } catch (err) {
+        return false;
+      }
     },
     async createToken() {
       try {
@@ -178,8 +181,5 @@ export default {
 .receive-payment,
 .receive-payment .input-field {
   text-align: center;
-}
-.address-input {
-  z-index: 1;
 }
 </style>

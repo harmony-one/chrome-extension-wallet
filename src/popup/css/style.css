@@ -388,7 +388,7 @@ button.add_token:active {
   margin-top: 15px;
   margin-bottom: 15px;
   width: 100%;
-  border-top: 1px solid #bbb;
+  border-top: 1px solid #dedede;
 }
 .box {
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
@@ -599,4 +599,32 @@ button.add_token:active {
   font-size: 0.75rem;
   text-align: center;
   text-transform: uppercase;
+}
+
+.logo-md {
+  width: 100px;
+  height: 100px;
+}
+
+.full-but {
+  margin-top: 20px;
+  height: 40px;
+  width: 100%;
+}
+
+.ledger-badge {
+  background: transparent;
+  margin: auto;
+  margin-right: 15px;
+  margin-left: 5px;
+  font-size: 0.5rem;
+  color: red;
+  border: 1px solid red;
+  padding: 2px 3px;
+}
+
+.ledger-badge.big {
+  padding: 0px 8px;
+  font-size: 1rem;
+  margin: 0;
 }

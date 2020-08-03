@@ -45,8 +45,8 @@
               <span
                 v-if="isOutgoingTransfer(transfer)"
                 class="transfer-address"
-              >{{ compressAddress(transfer.to) }}</span>
-              <span v-else class="transfer-address">{{ compressAddress(transfer.from) }}</span>
+              >{{ compressAddress(transfer.to, 15, 7) }}</span>
+              <span v-else class="transfer-address">{{ compressAddress(transfer.from, 15, 7) }}</span>
 
               <span class="transfer-address">{{ formatShard(transfer) }}</span>
               <span class="transfer-date">
@@ -77,6 +77,7 @@
 
 <script>
 import { mapState } from "vuex";
+import helper from "../mixins/helper";
 import moment from "moment-timezone";
 const { Unit } = require("@harmony-js/utils");
 import {
@@ -84,11 +85,12 @@ import {
   getNetworkLink,
   getTransactionCount,
   removeDups
-} from "../../lib/txnService";
+} from "../../services/AccountService";
 import AppHeader from "../components/AppHeader.vue";
 import ExternalLink from "../components/ExternalLink.vue";
 
 export default {
+  mixins: [helper],
   components: {
     AppHeader,
     ExternalLink
@@ -183,14 +185,6 @@ export default {
       return moment(timestamp)
         .tz(timezone)
         .format("MM/DD/YYYY HH:mm:ss z");
-    },
-
-    compressAddress(address) {
-      return (
-        address.substr(0, 10) +
-        "..." +
-        address.substr(address.length - 5, address.length)
-      );
     },
 
     formatShard(transfer) {

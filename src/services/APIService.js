@@ -6,7 +6,7 @@ import {
   FROM_BACK_TO_POPUP,
   CLOSE_WINDOW,
 } from "../types";
-import * as storage from "./storage";
+import * as storage from "./StorageService";
 
 export const msgToContentScript = (type, payload) => ({
   type: HARMONY_RESPONSE_TYPE,
@@ -16,7 +16,7 @@ export const msgToContentScript = (type, payload) => ({
   },
 });
 
-class WalletService {
+class APIService {
   constructor() {
     this.txnInfo = null;
     this.type = null;
@@ -195,6 +195,6 @@ class WalletService {
     });
   };
 }
-const walletService = new WalletService();
+const apiService = new APIService();
 
-export default walletService;
+export default apiService;

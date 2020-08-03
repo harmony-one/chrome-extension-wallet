@@ -1,6 +1,6 @@
 <template>
   <div>
-    <app-header :subtitle="getHeaderName" @refresh="refreshData" />
+    <app-header :subtitle="getHeaderName" @refresh="refreshData" backRoute="/" />
     <main class="main">
       <div v-if="scene === 1">
         <form
@@ -122,7 +122,7 @@
       </div>
       <!-- Approve Transaction Dialog -->
       <div v-else>
-        <h3 class="center">{{ "Approve Transaction" + (wallet.isLedger ? " on Ledger" : "") }}</h3>
+        <h3 class="center">{{ "Approve Transaction" + (wallet.isLedger ? " on the Ledger" : "") }}</h3>
         <p class="addressRow">
           From
           <span class="address__name">{{ compressAddress(getFromAddress) }}</span>
@@ -179,18 +179,14 @@
           </label>
         </div>
         <div class="ledger-content" v-else>
-          <b>Please unlock your ledger and confirm the transaction</b>
+          <b>{{ledgerConfirmTxt}}</b>
         </div>
-        <div class="button-group">
-          <button
-            class="outline"
-            @click="
-              () => {
-                scene = 1;
-              }
-            "
-          >Back</button>
+        <div v-if="!wallet.isLedger" class="button-group">
+          <button class="outline" @click="onBackClick()">Back</button>
           <button @click="sendPayment" :disabled="!password">Approve</button>
+        </div>
+        <div v-else-if="ledgerError">
+          <button @click="onBackClick()" class="full-but">Retry</button>
         </div>
       </div>
       <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
@@ -200,15 +196,30 @@
 
 <script>
 import { mapState } from "vuex";
-import { decryptKeyStore, transferToken } from "../../lib/txnService";
-import { sendToken } from "../../lib/contracts/token-api";
+import {
+  decryptKeyStore,
+  transferToken,
+  getNetworkLink
+} from "../../services/AccountService";
+import { sendToken } from "../../services/Hrc20Service";
 import { isValidAddress } from "@harmony-js/utils";
 import account from "../mixins/account";
+import helper from "../mixins/helper";
 import AppHeader from "../components/AppHeader.vue";
+import {
+  signTransactionWithLedger,
+  isLedgerLocked
+} from "../../services/LedgerService";
+import {
+  LEDGER_CONFIRM_PREPARE,
+  LEDGER_CONFIRM_SUCCESS,
+  LEDGER_CONFIRM_REJECT,
+  LEDGER_LOCKED
+} from "../../types";
 
 export default {
   name: "send-transaction",
-  mixins: [account],
+  mixins: [account, helper],
 
   components: {
     AppHeader
@@ -235,11 +246,13 @@ export default {
     inputData: "",
     selectedToken: "ONE",
     password: "",
+    ledgerError: false,
     message: {
       show: false,
       type: "error",
       text: ""
-    }
+    },
+    ledgerConfirmTxt: LEDGER_CONFIRM_PREPARE
   }),
 
   computed: {
@@ -279,12 +292,15 @@ export default {
   },
 
   async mounted() {
+    this.fromShard = this.account.shard;
     if (this.wallet.isLedger) this.refreshData();
     this.setSelectedToken();
     await this.loadBalance();
   },
   updated() {
-    if (this.scene == 2) this.$refs.password.focus();
+    if (this.scene == 2) {
+      if (!this.wallet.isLedger) this.$refs.password.focus();
+    }
   },
   methods: {
     setGasLimit() {
@@ -319,6 +335,72 @@ export default {
       await this.setSelectedToken();
       await this.loadBalance();
     },
+    onBackClick() {
+      this.scene = 1;
+      this.ledgerError = false;
+      this.ledgerConfirmTxt = LEDGER_CONFIRM_PREPARE;
+      this.password = "";
+    },
+    initScene() {
+      this.scene = 1;
+      this.amount = 0;
+      this.recipient = "";
+      this.toShard = 0;
+      this.password = "";
+      this.ledgerError = false;
+      this.ledgerConfirmTxt = LEDGER_CONFIRM_PREPARE;
+    },
+    async processLedgerTransfer() {
+      try {
+        const { success, result } = await signTransactionWithLedger(
+          this.recipient,
+          this.fromShard,
+          this.toShard,
+          this.amount,
+          this.gasLimit,
+          this.gasPrice
+        );
+        if (success) {
+          const signedTxn = result;
+          this.ledgerConfirmTxt = LEDGER_CONFIRM_SUCCESS;
+          this.$notify({
+            group: "notify",
+            type: "success",
+            text: LEDGER_CONFIRM_SUCCESS
+          });
+          this.$store.commit("loading", true);
+          const [sentTxn, txnHash] = await signedTxn.sendTransaction();
+          const confiremdTxn = await sentTxn.confirm(txnHash);
+
+          var explorerLink;
+          if (confiremdTxn.isConfirmed()) {
+            explorerLink = getNetworkLink("/tx/" + txnHash);
+          } else {
+            this.showErrMessage("Can not confirm transaction " + txnHash);
+            return;
+          }
+
+          this.$store.commit("loading", false);
+          this.showSuccessMsg(explorerLink);
+          this.initScene();
+          this.loadBalance();
+        } else {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: result
+          });
+          this.ledgerConfirmTxt = LEDGER_CONFIRM_REJECT;
+          this.ledgerError = true;
+        }
+      } catch (err) {
+        console.error(err);
+        this.$store.commit("loading", false);
+        this.showErrMessage(
+          "Something went wrong while trying to send the payment"
+        );
+      }
+    },
     async sendPayment() {
       let privateKey;
       if (!this.wallet.isLedger) {
@@ -333,8 +415,6 @@ export default {
           });
           return false;
         }
-      } else {
-        //todo send payment on ledger
       }
 
       this.$store.commit("loading", true);
@@ -342,7 +422,6 @@ export default {
         // use the current selected account in the Account window
         let ret;
         if (!this.isHRCToken) {
-          this.fromShard = this.account.shard;
           ret = await transferToken(
             this.recipient,
             this.fromShard,
@@ -367,8 +446,6 @@ export default {
         }
 
         this.$store.commit("loading", false);
-        this.password = "";
-        this.scene = 1;
 
         if (ret.result) {
           this.showSuccessMsg(ret.mesg);
@@ -376,9 +453,8 @@ export default {
           this.showErrMessage(ret.mesg);
         }
 
+        this.initScene();
         this.loadBalance();
-        this.recipient = "";
-        this.amount = 0;
       } catch (e) {
         this.$store.commit("loading", false);
 
@@ -398,7 +474,7 @@ export default {
       this.message.type = "error";
       this.message.text = err;
     },
-    showConfirmDialog() {
+    async showConfirmDialog() {
       this.message.show = false;
 
       if (!isValidAddress(this.recipient)) {
@@ -431,6 +507,18 @@ export default {
           return false;
         }
       }
+      if (this.wallet.isLedger) {
+        const isLocked = await isLedgerLocked();
+        if (isLocked) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: LEDGER_LOCKED
+          });
+          return;
+        }
+        this.processLedgerTransfer();
+      }
       this.scene = 2;
     },
 
@@ -440,14 +528,6 @@ export default {
       await this.loadShardingInfo();
       await this.refreshToken();
       this.$store.commit("loading", false);
-    },
-
-    compressAddress(address) {
-      return (
-        address.substr(0, 15) +
-        "..." +
-        address.substr(address.length - 5, address.length)
-      );
     }
   }
 };
@@ -483,6 +563,8 @@ h3 {
   text-align: center;
 }
 .ledger-content {
+  font-size: 1rem;
+  text-align: center;
   font-style: italic;
   margin-top: 20px;
 }

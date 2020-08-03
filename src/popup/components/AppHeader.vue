@@ -7,17 +7,9 @@
       </router-link>
 
       <div class="network" v-click-outside="hideNetworkDropdown">
-        <a
-          href="#"
-          class="network-toggle"
-          @click.prevent="toggleNetworkDropdown"
-        >
+        <a href="#" class="network-toggle" @click.prevent="toggleNetworkDropdown">
           <span class="network-icon">
-            <svg
-              class="icon"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-            >
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
               <path
                 d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm7.75-8a8.01 8.01 0 0 0 0-4h-3.82a28.81 28.81 0 0 1 0 4h3.82zm-.82 2h-3.22a14.44 14.44 0 0 1-.95 3.51A8.03 8.03 0 0 0 16.93 14zm-8.85-2h3.84a24.61 24.61 0 0 0 0-4H8.08a24.61 24.61 0 0 0 0 4zm.25 2c.41 2.4 1.13 4 1.67 4s1.26-1.6 1.67-4H8.33zm-6.08-2h3.82a28.81 28.81 0 0 1 0-4H2.25a8.01 8.01 0 0 0 0 4zm.82 2a8.03 8.03 0 0 0 4.17 3.51c-.42-.96-.74-2.16-.95-3.51H3.07zm13.86-8a8.03 8.03 0 0 0-4.17-3.51c.42.96.74 2.16.95 3.51h3.22zm-8.6 0h3.34c-.41-2.4-1.13-4-1.67-4S8.74 3.6 8.33 6zM3.07 6h3.22c.2-1.35.53-2.55.95-3.51A8.03 8.03 0 0 0 3.07 6z"
               />
@@ -27,14 +19,8 @@
           <span class="network-name">{{ currentNetwork.name }}</span>
 
           <span class="network-arrow">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              class="icon"
-            >
-              <path
-                d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
-              />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="icon">
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
             </svg>
           </span>
         </a>
@@ -81,11 +67,7 @@
       </div>
 
       <a class="refresh-toggle" @click.prevent="refreshData" href="#">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          class="icon"
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="icon">
           <path
             d="M14.66 15.66A8 8 0 1 1 17 10h-2a6 6 0 1 0-1.76 4.24l1.42 1.42zM12 10h8l-4 4-4-4z"
           />
@@ -93,16 +75,8 @@
       </a>
 
       <div v-click-outside="hideDropdownMenu">
-        <a
-          class="dropdown-menu-toggle"
-          @click.prevent="toggleDropdownMenu"
-          href="#"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            class="icon"
-          >
+        <a class="dropdown-menu-toggle" @click.prevent="toggleDropdownMenu" href="#">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="icon">
             <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
           </svg>
         </a>
@@ -123,19 +97,22 @@
                     account.address === wallets.active.address &&
                       ((selectedIndex = index) || 1)
                   "
-                  >check</i
+                >check</i>
+                <div
+                  class="name-row"
+                  :class="
+                    account.address === wallets.active.address ? 'active' : ''
+                  "
                 >
-                <a
-                  @click.prevent="
+                  <a
+                    @click.prevent="
                     () => {
                       selectAccount(account.address);
                     }
                   "
-                  :class="
-                    account.address === wallets.active.address ? 'active' : ''
-                  "
-                  >{{ account.name }}</a
-                >
+                  >{{ compressName(account.name) }}</a>
+                  <span v-if="account.isLedger" class="ledger-badge">Ledger</span>
+                </div>
               </div>
             </div>
           </div>
@@ -148,8 +125,7 @@
                   createAccount();
                 }
               "
-              >Create Account</a
-            >
+            >Create Account</a>
           </div>
           <div class="dropdown-menu-item">
             <i class="material-icons">vertical_align_bottom</i>
@@ -159,10 +135,9 @@
                   importAccount();
                 }
               "
-              >Import Account</a
-            >
+            >Import Account</a>
           </div>
-          <div class="dropdown-menu-item disabled">
+          <div class="dropdown-menu-item">
             <i class="material-icons">settings_input_component</i>
             <a
               @click.prevent="
@@ -170,12 +145,14 @@
                   connectHardware();
                 }
               "
-              >Connect Hardware Wallet</a
-            >
+            >Connect Hardware Wallet</a>
           </div>
-          <div class="dropdown-menu-item" v-show="wallets.accounts.length > 0">
-            <i class="material-icons">save</i>
-            <router-link to="/private-key">Export Private Key</router-link>
+          <div v-if="wallets.accounts.length > 0&& !wallets.active.isLedger">
+            <div class="dropdown-menu-divider"></div>
+            <div class="dropdown-menu-item">
+              <i class="material-icons">save</i>
+              <router-link to="/private-key">Export Private Key</router-link>
+            </div>
           </div>
           <div class="dropdown-menu-divider"></div>
           <div class="dropdown-menu-item">
@@ -186,12 +163,8 @@
       </div>
     </div>
     <div v-if="subtitle" class="header-subtitle">
-      <a class="header-subtitle-back" @click="$router.go('-1')">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          class="icon"
-        >
+      <a class="header-subtitle-back" @click="backClicked()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="icon">
           <path
             d="M3.828 9l6.071-6.071-1.414-1.414L0 10l.707.707 7.778 7.778 1.414-1.414L3.828 11H20V9H3.828z"
           />
@@ -200,11 +173,7 @@
 
       <div class="header-subtitle-text">{{ subtitle }}</div>
     </div>
-    <component
-      v-else-if="headerTab"
-      :is="headerTab"
-      :subtitle="subtitle"
-    ></component>
+    <component v-else-if="headerTab" :is="headerTab" :subtitle="subtitle"></component>
   </header>
 </template>
 
@@ -213,31 +182,36 @@ import { mapState } from "vuex";
 import Config from "../../config";
 import MainTab from "./MainTab";
 import CreateTab from "./CreateTab";
+import helper from "../mixins/helper";
 export default {
+  mixins: [helper],
   props: {
+    backRoute: {
+      type: String
+    },
     subtitle: {
-      default: false,
+      default: false
     },
     headerTab: {
       default: "",
-      type: String,
-    },
+      type: String
+    }
   },
   components: {
     MainTab,
-    CreateTab,
+    CreateTab
   },
   data: () => ({
     showDropdownMenu: false,
     showNetworkDropdown: false,
     networks: [],
-    selectedIndex: 0,
+    selectedIndex: 0
   }),
 
   computed: mapState({
-    wallets: (state) => state.wallets,
-    myroute: (state) => state.route,
-    currentNetwork: (state) => state.network,
+    wallets: state => state.wallets,
+    myroute: state => state.route,
+    currentNetwork: state => state.network
   }),
 
   mounted() {
@@ -245,6 +219,17 @@ export default {
   },
 
   methods: {
+    compressName(str) {
+      if (str.length > 15)
+        return (
+          str.substr(0, 10) + "..." + str.substr(str.length - 5, str.length)
+        );
+      return str;
+    },
+    backClicked() {
+      if (!this.backRoute) this.$router.go(-1);
+      else this.$router.push(this.backRoute);
+    },
     toggleDropdownMenu() {
       this.showDropdownMenu = this.showDropdownMenu ? false : true;
       this.$nextTick(() => {
@@ -279,25 +264,37 @@ export default {
       if (this.$route.name !== "account") this.$router.push("/");
     },
     createAccount() {
-      chrome.tabs.create({
-        url: "popup.html#/create-wallet",
-      });
+      if (!this.isExtendedView) {
+        chrome.tabs.create({
+          url: "popup.html#/create-wallet"
+        });
+      } else {
+        this.$router.push("create-wallet");
+      }
     },
     importAccount() {
-      chrome.tabs.create({
-        url: "popup.html#/import-wallet",
-      });
+      if (!this.isExtendedView) {
+        chrome.tabs.create({
+          url: "popup.html#/import-wallet"
+        });
+      } else {
+        this.$router.push("import-wallet");
+      }
     },
     connectHardware() {
-      // chrome.tabs.create({
-      //   url: "popup.html#/connect-hardware-wallet"
-      // });
+      if (!this.isExtendedView) {
+        chrome.tabs.create({
+          url: "popup.html#/connect-hardware-wallet"
+        });
+      } else {
+        this.$router.push("connect-hardware-wallet");
+      }
     },
     refreshData() {
       this.$emit("refresh");
       this.showDropdownMenu = false;
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -330,6 +327,15 @@ i {
     i {
       color: #ccc;
     }
+  }
+}
+.name-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  &.active {
+    background: #f0f0f0;
   }
 }
 .header-top {
@@ -447,14 +453,11 @@ a.network-toggle:hover {
   flex: 1;
   padding: 0.8rem 2rem;
   font-size: 1rem;
-  color: #757575;
+  color: #555;
 }
 .dropdown-menu a:hover,
 .dropdown-menu a:focus {
   color: #d32f2f;
-}
-.dropdown-menu a.active {
-  background: #f0f0f0;
 }
 .dropdown-menu-label {
   padding: 0.8rem 1rem;
@@ -465,7 +468,7 @@ a.network-toggle:hover {
 .dropdown-menu-divider {
   height: 1px;
   width: 100%;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #ccc;
 }
 
 .header-subtitle {
