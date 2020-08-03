@@ -9,18 +9,9 @@
 - [x] View and Transfer HRC20 tokens (BUSD, H2O, SEED).
 - [x] View recent transfers .
 - [x] Switch the network to Mainnet, Pangaea, Testnet or Localnet.
-- [x] Ledger Login
+- [x] Support the ledger wallet (login and transfer)
 - [x] Javascript API for calling onewallet for signing 
 - [x] Support staking.harmony.one 
-- [ ] Ledger transfer
-
-## Install from release zip
-
-Onewallet is a chrome extension wallet. You can install the chrome extension manually following the instructions [here](https://www.cnet.com/how-to/how-to-install-chrome-extensions-manually/). 
-
-| Version        | Link |
-| -------------- | ------------- |
-| Version 1.0 | [Beta Release v1.0 ](https://github.com/harmony-one/onewallet/releases/download/v1.0.0/Harmony_Wallet_v1.0.0.zip)|
 
 ## Development 
 
