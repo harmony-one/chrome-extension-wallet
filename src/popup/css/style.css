@@ -388,7 +388,7 @@ button.add_token:active {
   margin-top: 15px;
   margin-bottom: 15px;
   width: 100%;
-  border-top: 1px solid #bbb;
+  border-top: 1px solid #dedede;
 }
 .box {
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);

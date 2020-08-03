@@ -7,27 +7,39 @@
       </div>
       <h3>Sign in Request</h3>
       <div class="hostrow">
-        <span class="host_label">{{host}}</span>
+        <span class="host_label">{{ host }}</span>
       </div>
       <div class="account-container">
         <div v-if="!wallets.accounts.length">
-          <p>No Accounts. You should create the account first in the extension.</p>
+          <p>
+            No Accounts. You should create the account first in the extension.
+          </p>
+        </div>
+        <div v-else-if="isOnlyLedgerAvailable">
+          <p>
+            Sorry. The ledger account is not supported for this action at the
+            moment. You should create another account in the extension.
+          </p>
         </div>
         <div v-else>
           <div
             v-for="(account, index) in wallets.accounts"
             :key="index"
-            class="card"
             @click="selectAccount(index)"
           >
-            <div class="account-box" :class="{ active: selected === index }">
-              <div>{{ account.name }}</div>
-              <div class="account-address">{{ account.address }}</div>
+            <div class="card" v-if="!account.isLedger">
+              <div class="account-box" :class="{ active: selected === index }">
+                <div>{{ account.name }}</div>
+                <div class="account-address">{{ account.address }}</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="button-group" v-if="wallets.accounts.length">
+      <div
+        class="button-group"
+        v-if="wallets.accounts.length && !isOnlyLedgerAvailable"
+      >
         <button class="outline" @click="deny">Deny</button>
         <button :disabled="selected < 0" @click="accept">Accept</button>
       </div>
@@ -40,15 +52,23 @@ import { mapState } from "vuex";
 import {
   THIRDPARTY_GET_ACCOUNT_CONNECT,
   GET_WALLET_SERVICE_STATE,
-  THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE
+  THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
 } from "../../types";
 export default {
   data: () => ({
     selected: -1,
-    host: ""
+    host: "",
   }),
   computed: {
-    ...mapState(["wallets"])
+    ...mapState(["wallets"]),
+    isOnlyLedgerAvailable() {
+      if (
+        this.wallets.accounts.length === 1 &&
+        this.wallets.accounts[0].isLedger
+      )
+        return true;
+      return false;
+    },
   },
   mounted() {
     chrome.runtime.sendMessage(
@@ -76,11 +96,11 @@ export default {
         action: THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
         payload: {
           name: account.name,
-          address: account.address
-        }
+          address: account.address,
+        },
       });
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>

@@ -61,4 +61,4 @@ export const LEDGER_CONFIRM_PREPARE =
 export const LEDGER_CONFIRM_SUCCESS = "Sign transaction approved by the ledger";
 export const LEDGER_CONFIRM_REJECT = "Sign transaction rejected by the ledger";
 export const LEDGER_LOCKED =
-  "Ledger wallet is locked or request is rejected. Please unlock it first.";
+  "Ledger wallet is locked or Harmony app is not opened.";

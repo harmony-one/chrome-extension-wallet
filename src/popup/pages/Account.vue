@@ -35,7 +35,7 @@
           </select>
         </div>
         <div class="button-group">
-          <button class="outline" @click="$router.push('/receive')">Receive</button>
+          <button class="outline" @click="$router.push('/receive')">Deposit</button>
           <button @click="onSendClick()">Send</button>
         </div>
         <div class="divider"></div>
