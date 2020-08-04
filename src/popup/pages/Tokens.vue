@@ -2,15 +2,19 @@
   <div>
     <app-header @refresh="refreshData" headerTab="main-tab" />
     <main class="main">
-      <div v-if="!tokenArray || account.shard" class="message-empty">No tokens found</div>
+      <div v-if="!tokenArray || account.shard" class="message-empty">
+        No tokens found
+      </div>
 
       <div v-else>
         <div class="token-row" v-for="token in tokenArray" :key="token">
           <span class="token-name">{{ compressSymbol(token) }}</span>
           <div class="token-box">
-            <span
-              class="token-balance"
-            >{{ $formatNumber(getTokenBalance(token), {maximumSignificantDigits: 6}) }}</span>
+            <span class="token-balance">{{
+              $formatNumber(getTokenBalance(token), {
+                maximumSignificantDigits: 6,
+              })
+            }}</span>
             <button
               class="but-token"
               :disabled="
@@ -18,11 +22,15 @@
                   getTokenBalance(token) === undefined
               "
               @click="sendToken(token)"
-            >Send</button>
+            >
+              Send
+            </button>
           </div>
         </div>
       </div>
-      <button class="add_token" @click="$router.push('/addtoken')">+</button>
+      <button class="add_token" @click="$router.push('/addtoken')">
+        <i class="material-icons">add</i>
+      </button>
     </main>
   </div>
 </template>
@@ -35,12 +43,12 @@ export default {
   mixins: [account],
   computed: {
     ...mapState({
-      account: state => state.account,
-      network: state => state.network
-    })
+      account: (state) => state.account,
+      network: (state) => state.network,
+    }),
   },
   components: {
-    AppHeader
+    AppHeader,
   },
   async mounted() {
     await this.loadAllTokenBalance();
@@ -60,8 +68,8 @@ export default {
     },
     sendToken(symbol) {
       this.$router.push({ path: `/send-token/${symbol}` });
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -114,5 +122,10 @@ export default {
   cursor: default;
   color: #ddd;
   border: 1px solid #ddd;
+}
+.add_token i {
+  font-size: 30px;
+  line-height: 40px;
+  color: white;
 }
 </style>

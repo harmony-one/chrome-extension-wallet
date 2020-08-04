@@ -330,7 +330,7 @@ export default {
   background: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-i {
+.dropdown-menu-item i {
   color: #757575;
   padding-top: 11px;
   padding-left: 8px;
