@@ -15,8 +15,10 @@ export default {
       const now = Date.now();
       const lastClosed = data.lastClosed;
       const offset = now - lastClosed;
-      if (offset >= this.timeout) this.$router.push("/lock");
-      else this.$router.push("/main");
+      if (offset >= this.timeout) {
+        this.$store.commit("settings/setLocked", true);
+        this.$router.push("/lock");
+      } else this.$router.push("/main");
     });
   },
 };

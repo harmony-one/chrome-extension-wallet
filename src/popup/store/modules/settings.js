@@ -6,9 +6,10 @@ export default {
       isLocked: false,
       pincode: "1234",
       pindigits: 4,
-      timeout: 30 * 60 * 1000, //default 30min
+      timeout: 30 * 60 * 1000, //milisec, default 30min
       attempts: 5,
-      delayTime: 1 * 60 * 1000, //delay 1min when auth fails
+      countDefault: 60,
+      countdown: 60, //sec, delay 1min when auth fails
     },
   },
 
@@ -26,11 +27,18 @@ export default {
       state.auth.timeout = payload;
     },
     setAttempts(state, payload) {
-      const attempt = payload < 0 ? 0 : payload;
-      state.auth.attempts = attempt;
+      state.auth.attempts = payload;
     },
-    setDelayTime(state, payload) {
-      state.auth.delayTime = payload;
+    setCountdown(state, payload) {
+      state.auth.countdown = payload;
+    },
+    resetFailedTimer(state) {
+      state.auth.attempts = 5;
+      state.auth.countdown = state.auth.countDefault;
+    },
+    setCountDefault(state, payload) {
+      state.auth.countDefault = payload;
+      state.auth.countdown = payload;
     },
   },
 };

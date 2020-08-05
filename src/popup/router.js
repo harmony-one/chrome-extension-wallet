@@ -21,6 +21,7 @@ import Lock from "./pages/Lock.vue";
 import ExportPrivateKey from "./pages/ExportPrivateKey.vue";
 import About from "./pages/About.vue";
 import AuthRoute from "./AuthRoute.vue";
+import * as storage from "../services/StorageService";
 
 import store from "./store";
 
@@ -41,7 +42,7 @@ const router = new Router({
     {
       path: "/",
       name: "auth",
-      component: AuthRoute,
+      component: Account,
       meta: {
         requiredAccount: true,
         authenticate: true,
@@ -159,8 +160,21 @@ const router = new Router({
   ],
 });
 router.beforeEach((to, from, next) => {
-  console.log(store.state.settings.auth.isLocked);
+  if (!from.name) {
+    storage.getValue("lastClosed").then((data) => {
+      console.log("getvalue");
+      const now = Date.now();
+      const lastClosed = data.lastClosed;
+      const offset = now - lastClosed;
+      console.log(offset);
+      if (offset >= 1000) {
+        store.commit("settings/setLocked", true);
+        //next();
+      }
+    });
+  }
   if (to.matched.some((record) => record.meta.authenticate)) {
+    console.log("router.beforeEach", store.state.settings.auth.isLocked);
     if (store.state.settings.auth.isLocked) next({ path: "/lock" });
     else next();
   }

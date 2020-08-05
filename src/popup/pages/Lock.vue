@@ -9,7 +9,7 @@
       <div class="version-info">{{ version }}</div>
     </div>
     <div class="pin-input">
-      <div class="unlock-caption">Unlock your Wallet</div>
+      <div class="unlock-caption">Unlock your wallet</div>
       <div
         class="pin-container"
         :class="{ 'pin-fail': pincodeError ? true : false }"
@@ -23,6 +23,8 @@
           :length="pindigits"
           :secure="true"
           :characterPreview="false"
+          :disabled="!attempts"
+          ref="pincodeInput"
         />
       </div>
       <div class="pin-caption" :class="{ 'failed-caption': attempts < 5 }">
@@ -39,22 +41,19 @@
 
 <script>
 import { mapState } from "vuex";
-import PincodeInput from "vue-pincode-input";
+import * as storage from "../../services/StorageService";
 const AppInfo = require("../../app.json");
 export default {
   data: () => ({
     pin: "",
     pincodeError: false,
   }),
-  components: {
-    PincodeInput,
-  },
   computed: {
     ...mapState({
       pincode: (state) => state.settings.auth.pincode,
       pindigits: (state) => state.settings.auth.pindigits,
       attempts: (state) => state.settings.auth.attempts,
-      delayTime: (state) => state.settings.auth.delayTime,
+      countdown: (state) => state.settings.auth.countdown,
     }),
     version() {
       return "v" + AppInfo.version;
@@ -67,24 +66,68 @@ export default {
           this.attempts > 1 ? "attempts" : "attempt"
         } remaining`;
       else {
-        return `Authentication failed. Try again after`;
+        return `Authentication failed. Try again after ${this.formatTime(
+          this.countdown
+        )}`;
       }
     },
   },
   watch: {
     pin() {
       if (this.pin.length === this.pindigits) {
-        if (this.pin === this.pincode) {
-          this.$store.commit("settings/setLocked", false);
-          this.$router.push("/main");
-        } else {
-          this.pincodeError = true;
-          this.pin = "";
-          this.$store.commit("settings/setAttempts", this.attempts - 1);
-          setTimeout(() => {
-            this.pincodeError = false;
-          }, 800);
+        this.pinCodeComplete();
+      }
+    },
+  },
+  mounted() {
+    if (this.attempts === 0) {
+      storage.getValue("lastClosed").then((data) => {
+        const now = Date.now();
+        const lastClosed = data.lastClosed;
+        const passedtime = Math.floor((now - lastClosed) / 1000);
+        this.$store.commit(
+          "settings/setCountdown",
+          Math.max(this.countdown - passedtime, 0)
+        );
+        this.startCountDown();
+      });
+    }
+  },
+  methods: {
+    startCountDown() {
+      const timerID = setInterval(() => {
+        const count = this.countdown - 1;
+        if (count <= 0) {
+          console.log("reset");
+          this.$store.commit("settings/resetFailedTimer");
+          this.$nextTick(() => this.$refs.pincodeInput.$el.children[0].focus());
+          clearInterval(timerID);
+        } else this.$store.commit("settings/setCountdown", count);
+      }, 1000);
+    },
+    formatTime(count) {
+      return `${String(Math.floor(count / 60)).padStart(2, "0")}:${String(
+        parseInt(count % 60)
+      ).padStart(2, "0")}`;
+    },
+    pinCodeComplete() {
+      if (this.pin === this.pincode) {
+        this.$store.commit("settings/setLocked", false);
+        this.$store.commit("settings/resetFailedTimer");
+        this.$router.push("/main");
+      } else {
+        this.pincodeError = true;
+        this.pin = "";
+        if (this.attempts === 1) {
+          this.startCountDown();
         }
+        this.$store.commit(
+          "settings/setAttempts",
+          Math.max(this.attempts - 1, 0)
+        );
+        setTimeout(() => {
+          this.pincodeError = false;
+        }, 800);
       }
     },
   },
@@ -116,6 +159,9 @@ input.vue-pincode-input {
   color: transparent;
   text-shadow: 0 0 0 black;
   height: 40px;
+}
+input.vue-pincode-input:focus {
+  border: 2px solid rgba(9, 135, 215, 0.8);
 }
 .title {
   margin-top: 10px;

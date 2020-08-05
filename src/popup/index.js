@@ -10,7 +10,7 @@ import VueClipboard from "vue-clipboard2";
 import Notifications from "vue-notification";
 import AppHeader from "./components/AppHeader.vue";
 import SeedChecker from "./components/SeedChecker";
-
+import PincodeInput from "vue-pincode-input";
 import "./css/icons.less";
 import Config from "../config";
 import { CLOSE_WINDOW, FROM_BACK_TO_POPUP } from "../types";
@@ -21,6 +21,7 @@ sync(store, router);
 
 Vue.component("AppHeader", AppHeader);
 Vue.component("SeedChecker", SeedChecker);
+Vue.component("PincodeInput", PincodeInput);
 
 Vue.use(Notifications);
 Vue.use(VueIntl);

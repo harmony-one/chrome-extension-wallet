@@ -9,36 +9,47 @@
       <div class="hostrow">
         <span class="host_label">{{ host }}</span>
       </div>
-      <div class="account-container">
-        <div v-if="!wallets.accounts.length">
-          <p>
-            No accounts. You should create the account first in the extension.
-          </p>
-        </div>
-        <div v-else-if="isOnlyLedgerAvailable">
-          <p>
-            The ledger account is not supported for this action at the moment.
-            You should create another account in the extension.
-          </p>
-        </div>
-        <div v-else>
-          <div
-            v-for="(account, index) in wallets.accounts"
-            :key="index"
-            @click="selectAccount(index)"
-          >
-            <div class="card" v-if="!account.isLedger">
-              <div class="account-box" :class="{ active: selected === index }">
-                <div>{{ account.name }}</div>
-                <div class="account-address">{{ account.address }}</div>
+      <div class="login-container">
+        <div v-if="!isLocked">
+          <div v-if="!wallets.accounts.length">
+            <p>
+              No accounts. You should create the account first in the extension.
+            </p>
+          </div>
+          <div v-else-if="isOnlyLedgerAvailable">
+            <p>
+              The ledger account is not supported for this action at the moment.
+              You should create another account in the extension.
+            </p>
+          </div>
+          <div v-else>
+            <div
+              v-for="(account, index) in wallets.accounts"
+              :key="index"
+              @click="selectAccount(index)"
+            >
+              <div class="card" v-if="!account.isLedger">
+                <div
+                  class="account-box"
+                  :class="{ active: selected === index }"
+                >
+                  <div>{{ account.name }}</div>
+                  <div class="account-address">{{ account.address }}</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+        <div v-else>
+          <p>
+            Sorry. The wallet is locked. You should unlock it first in the
+            extension.
+          </p>
+        </div>
       </div>
       <div
         class="button-group"
-        v-if="wallets.accounts.length && !isOnlyLedgerAvailable"
+        v-if="wallets.accounts.length && !isOnlyLedgerAvailable && !isLocked"
       >
         <button class="outline" @click="deny">Deny</button>
         <button :disabled="selected < 0" @click="accept">Accept</button>
@@ -65,7 +76,10 @@ export default {
     host: "",
   }),
   computed: {
-    ...mapState(["wallets"]),
+    ...mapState({
+      wallets: (state) => state.wallets,
+      isLocked: (state) => state.settings.auth.isLocked,
+    }),
     isOnlyLedgerAvailable() {
       if (
         this.wallets.accounts.length === 1 &&
@@ -76,6 +90,7 @@ export default {
     },
   },
   mounted() {
+    console.log("mounted");
     chrome.runtime.sendMessage(
       { action: GET_WALLET_SERVICE_STATE },
       ({ state } = {}) => {
@@ -114,7 +129,7 @@ h3 {
   margin-bottom: 0px;
   margin-top: 0px;
 }
-.account-container {
+.login-container {
   padding-right: 5px;
   height: 370px;
   overflow: auto;
