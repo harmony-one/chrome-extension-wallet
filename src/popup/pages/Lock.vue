@@ -98,7 +98,6 @@ export default {
       const timerID = setInterval(() => {
         const count = this.countdown - 1;
         if (count <= 0) {
-          console.log("reset");
           this.$store.commit("settings/resetFailedTimer");
           this.$nextTick(() => this.$refs.pincodeInput.$el.children[0].focus());
           clearInterval(timerID);
@@ -114,7 +113,7 @@ export default {
       if (this.pin === this.pincode) {
         this.$store.commit("settings/setLocked", false);
         this.$store.commit("settings/resetFailedTimer");
-        this.$router.push("/main");
+        this.$router.push("/");
       } else {
         this.pincodeError = true;
         this.pin = "";

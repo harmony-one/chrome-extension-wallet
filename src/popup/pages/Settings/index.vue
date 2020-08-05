@@ -2,28 +2,23 @@
   <div>
     <app-header subtitle="Settings" />
     <main class="main">
-      <notifications
-        group="notify"
-        width="250"
-        :max="2"
-        class="notifiaction-container"
-      />
+      <div
+        class="list-item"
+        v-for="item in options"
+        :key="item.route"
+        @click="$router.push(item.route)"
+      >
+        {{ item.name }}
+      </div>
     </main>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
-import AppHeader from "../components/AppHeader.vue";
 export default {
-  data: () => ({}),
-  components: {
-    AppHeader,
-  },
-
-  mounted() {},
-  methods: {},
+  data: () => ({
+    options: [{ name: "Security", route: "/settings/security" }],
+  }),
 };
 </script>
-
-<style></style>

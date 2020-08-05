@@ -628,3 +628,25 @@ button.add_token:active {
   font-size: 1rem;
   margin: 0;
 }
+
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.5s ease;
+  background: #ffffff;
+  border-radius: 5px;
+  padding: 15px 20px;
+  margin-bottom: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  color: #424242;
+}
+.list-item:hover,
+.list-item:focus {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+.list-item:active {
+  background: #f5f5f5;
+}

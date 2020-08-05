@@ -1,7 +1,7 @@
 <template>
   <header class="header">
     <div class="header-top">
-      <router-link class="header-logo" to="/main">
+      <router-link class="header-logo" to="/">
         <img src="images/harmony-small.png" alt="Harmony" />
         <span>Harmony</span>
       </router-link>
@@ -167,9 +167,11 @@
             </div>
           </div>
           <div class="dropdown-menu-divider"></div>
-          <div class="dropdown-menu-item">
-            <i class="material-icons">settings</i>
-            <router-link to="/settings">Settings</router-link>
+          <div v-if="wallets.accounts.length > 0">
+            <div class="dropdown-menu-item">
+              <i class="material-icons">settings</i>
+              <router-link to="/settings">Settings</router-link>
+            </div>
           </div>
           <div class="dropdown-menu-item">
             <i class="material-icons">info</i>
@@ -292,7 +294,7 @@ export default {
       this.$store.commit("wallets/setActive", address);
       this.hideDropdownMenu();
       this.refreshData();
-      if (this.$route.name !== "account") this.$router.push("/main");
+      if (this.$route.name !== "account") this.$router.push("/");
     },
     createAccount() {
       this.openExpandPopup("/create-wallet");

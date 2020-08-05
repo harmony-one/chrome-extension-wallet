@@ -99,7 +99,6 @@ class APIService {
   };
   getVuexStore = () => {
     try {
-      console.log(window.localStorage);
       if (!window.localStorage.vuex) throw new Error("Vuex Store is not found");
       const vuex = JSON.parse(window.localStorage.vuex);
       if (!vuex || !vuex.wallets)

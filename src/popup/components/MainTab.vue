@@ -1,6 +1,6 @@
 <template>
   <nav class="header-tabs">
-    <router-link :class="{ active: myroute.name == 'account' }" to="/main"
+    <router-link :class="{ active: myroute.name == 'account' }" to="/"
       >Account</router-link
     >
     <router-link :class="{ active: myroute.name == 'tokens' }" to="/tokens"

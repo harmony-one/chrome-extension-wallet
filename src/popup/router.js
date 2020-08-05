@@ -20,7 +20,9 @@ import Deposit from "./pages/Deposit.vue";
 import Lock from "./pages/Lock.vue";
 import ExportPrivateKey from "./pages/ExportPrivateKey.vue";
 import About from "./pages/About.vue";
-import AuthRoute from "./AuthRoute.vue";
+import Settings from "./pages/Settings/index.vue";
+import Security from "./pages/Settings/Security.vue";
+
 import * as storage from "../services/StorageService";
 
 import store from "./store";
@@ -29,6 +31,7 @@ Vue.use(Router);
 
 const router = new Router({
   routes: [
+    //third party api route
     {
       path: "/login",
       name: "login",
@@ -39,17 +42,9 @@ const router = new Router({
       name: "signtransaction",
       component: SignTransaction,
     },
+    //end
     {
       path: "/",
-      name: "auth",
-      component: Account,
-      meta: {
-        requiredAccount: true,
-        authenticate: true,
-      },
-    },
-    {
-      path: "/main",
       name: "account",
       component: Account,
       meta: {
@@ -58,6 +53,7 @@ const router = new Router({
       },
     },
     {
+      //token view route
       path: "/tokens",
       name: "tokens",
       component: Tokens,
@@ -67,7 +63,8 @@ const router = new Router({
       },
     },
     {
-      path: "/addtoken",
+      // add token route
+      path: "/tokens/add",
       name: "addtoken",
       component: AddToken,
       meta: {
@@ -84,6 +81,7 @@ const router = new Router({
         authenticate: true,
       },
     },
+    //transaction send route
     {
       path: "/send",
       name: "send",
@@ -102,9 +100,10 @@ const router = new Router({
         authenticate: true,
       },
     },
+    //end
     {
-      path: "/receive",
-      name: "receive",
+      path: "/deposit",
+      name: "deposit",
       component: Deposit,
       meta: {
         requiredAccount: true,
@@ -133,6 +132,7 @@ const router = new Router({
       name: "lock",
       component: Lock,
     },
+    //wallet create route
     {
       path: "/create-wallet",
       name: "create-wallet",
@@ -157,24 +157,43 @@ const router = new Router({
         authenticate: true,
       },
     },
+    //end
+    //settings route
+    {
+      path: "/settings",
+      name: "settings",
+      component: Settings,
+      meta: {
+        requiredAccount: true,
+        authenticate: true,
+      },
+    },
+    {
+      path: "/settings/security",
+      name: "security",
+      component: Security,
+      meta: {
+        requiredAccount: true,
+        authenticate: true,
+      },
+    },
+    //end
   ],
 });
 router.beforeEach((to, from, next) => {
   if (!from.name) {
     storage.getValue("lastClosed").then((data) => {
-      console.log("getvalue");
+      if (!data || !store.state.wallets.accounts.length) return;
       const now = Date.now();
       const lastClosed = data.lastClosed;
       const offset = now - lastClosed;
-      console.log(offset);
-      if (offset >= 1000) {
+      if (offset >= store.state.settings.auth.timeout) {
         store.commit("settings/setLocked", true);
-        //next();
+        if (to.meta.authenticate) next({ path: "/lock" });
       }
     });
   }
   if (to.matched.some((record) => record.meta.authenticate)) {
-    console.log("router.beforeEach", store.state.settings.auth.isLocked);
     if (store.state.settings.auth.isLocked) next({ path: "/lock" });
     else next();
   }

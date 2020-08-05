@@ -38,7 +38,7 @@
           </select>
         </div>
         <div class="button-group">
-          <button class="outline" @click="$router.push('/receive')">
+          <button class="outline" @click="$router.push('/deposit')">
             Deposit
           </button>
           <button @click="onSendClick()">Send</button>
@@ -143,6 +143,7 @@ export default {
   padding: 0.5rem;
   margin: 0 3rem 0.5rem 3rem;
   word-wrap: break-word;
+  transition: box-shadow 0.5s ease;
 }
 .account-box:hover {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);

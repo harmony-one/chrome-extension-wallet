@@ -28,7 +28,7 @@
           </div>
         </div>
       </div>
-      <button class="add_token" @click="$router.push('/addtoken')">
+      <button class="add_token" @click="$router.push('/tokens/add')">
         <i class="material-icons">add</i>
       </button>
     </main>

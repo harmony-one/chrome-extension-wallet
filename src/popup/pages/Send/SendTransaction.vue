@@ -3,7 +3,7 @@
     <app-header
       :subtitle="getHeaderName"
       @refresh="refreshData"
-      backRoute="/main"
+      backRoute="/"
     />
     <main class="main">
       <div v-if="scene === 1">
