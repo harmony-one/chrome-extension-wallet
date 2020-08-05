@@ -189,8 +189,17 @@
           </div>
           <div class="dropdown-menu-divider"></div>
           <div class="dropdown-menu-item">
+            <i class="material-icons">settings</i>
+            <router-link to="/settings">Settings</router-link>
+          </div>
+          <div class="dropdown-menu-item">
             <i class="material-icons">info</i>
             <router-link to="/about">About Harmony</router-link>
+          </div>
+          <div class="dropdown-menu-divider"></div>
+          <div class="dropdown-menu-item">
+            <i class="material-icons">lock</i>
+            <router-link to="/lock">Lock</router-link>
           </div>
         </nav>
       </div>

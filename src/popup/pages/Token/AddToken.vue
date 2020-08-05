@@ -74,10 +74,9 @@
 
 <script>
 import { mapState } from "vuex";
-import AppHeader from "../components/AppHeader.vue";
 import { HarmonyAddress } from "@harmony-js/crypto";
-import token from "../mixins/token";
-import Config from "../../config";
+import token from "../../mixins/token";
+import Config from "../../../config";
 export default {
   data: () => ({
     symbol: "",
@@ -96,9 +95,6 @@ export default {
     ],
   }),
   mixins: [token],
-  components: {
-    AppHeader,
-  },
 
   mounted() {
     this.selectedNetwork = this.networkList[0].chainId;

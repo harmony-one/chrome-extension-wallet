@@ -1,19 +1,26 @@
 import Vue from "vue";
 import Router from "vue-router";
-import CreateWallet from "./pages/CreateWallet.vue";
-import ImportWallet from "./pages/ImportWallet.vue";
-import LogIn from "./pages/LogIn.vue";
-import ConnectHardwareWallet from "./pages/ConnectHardwareWallet.vue";
+
+import CreateWallet from "./pages/Wallet/CreateWallet.vue";
+import ImportWallet from "./pages/Wallet/ImportWallet.vue";
+import ConnectHardwareWallet from "./pages/Wallet/ConnectHardwareWallet.vue";
+
+import LogIn from "./pages/API/LogIn.vue";
+import SignTransaction from "./pages/API/SignTransaction.vue";
+
+import Tokens from "./pages/Token/Tokens.vue";
+import AddToken from "./pages/Token/AddToken.vue";
+
+import SendOne from "./pages/Send/SendOne.vue";
+import SendToken from "./pages/Send/SendToken.vue";
+
 import Account from "./pages/Account.vue";
-import Tokens from "./pages/Tokens.vue";
-import Transfers from "./pages/Transfers.vue";
-import SignTransaction from "./pages/SignTransaction.vue";
-import Send from "./pages/Send.vue";
-import SendToken from "./pages/SendToken.vue";
-import Receive from "./pages/Receive.vue";
-import PrivateKey from "./pages/PrivateKey.vue";
+import History from "./pages/History.vue";
+import Deposit from "./pages/Deposit.vue";
+import Lock from "./pages/Lock.vue";
+import ExportPrivateKey from "./pages/ExportPrivateKey.vue";
 import About from "./pages/About.vue";
-import AddToken from "./pages/AddToken.vue";
+
 import store from "./store";
 
 Vue.use(Router);
@@ -50,9 +57,9 @@ const router = new Router({
       },
     },
     {
-      path: "/transfers",
-      name: "transfers",
-      component: Transfers,
+      path: "/history",
+      name: "history",
+      component: History,
       meta: {
         requiredAccount: true,
       },
@@ -60,7 +67,7 @@ const router = new Router({
     {
       path: "/send",
       name: "send",
-      component: Send,
+      component: SendOne,
       meta: {
         requiredAccount: true,
       },
@@ -84,7 +91,7 @@ const router = new Router({
     {
       path: "/receive",
       name: "receive",
-      component: Receive,
+      component: Deposit,
       meta: {
         requiredAccount: true,
       },
@@ -92,7 +99,7 @@ const router = new Router({
     {
       path: "/private-key",
       name: "private-key",
-      component: PrivateKey,
+      component: ExportPrivateKey,
       meta: {
         requiredAccount: true,
       },
@@ -101,6 +108,11 @@ const router = new Router({
       path: "/about",
       name: "about",
       component: About,
+    },
+    {
+      path: "/lock",
+      name: "lock",
+      component: Lock,
     },
     {
       path: "/create-wallet",

@@ -36,8 +36,7 @@
 </template>
 
 <script>
-import account from "../mixins/account";
-import AppHeader from "../components/AppHeader.vue";
+import account from "../../mixins/account";
 import { mapState } from "vuex";
 export default {
   mixins: [account],
@@ -46,9 +45,6 @@ export default {
       account: (state) => state.account,
       network: (state) => state.network,
     }),
-  },
-  components: {
-    AppHeader,
   },
   async mounted() {
     await this.loadAllTokenBalance();

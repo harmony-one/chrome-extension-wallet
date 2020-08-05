@@ -3,8 +3,7 @@ export default {
 
   state: {
     balance: 0,
-    transfers: [],
-    // transactions: [],
+    history: [],
     shardArray: [],
     shard: 0,
   },
@@ -22,20 +21,12 @@ export default {
       state.balance = balance;
     },
 
-    transfers(state, transfers) {
-      state.transfers = transfers;
+    history(state, history) {
+      state.history = history;
     },
 
-    pushTransfers(state, transfers) {
-      state.transfers.push(...transfers);
+    pushHistory(state, history) {
+      state.history.push(...history);
     },
-
-    // transactions(state, transactions) {
-    //   state.transactions = transactions;
-    // },
-
-    // pushTransactions(state, transactions) {
-    //   state.transactions.push(...transactions);
-    // },
   },
 };

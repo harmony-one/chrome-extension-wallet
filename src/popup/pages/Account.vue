@@ -4,7 +4,7 @@
     <main class="main">
       <div class="relative">
         <div class="main-logo">
-          <img src="images/harmony.png" class="logo-img" alt="Harmony" />
+          <img src="images/harmony-big.png" class="logo-img" alt="Harmony" />
         </div>
         <span
           v-if="wallets.active.isLedger"
@@ -58,7 +58,6 @@
 <script>
 import helper from "../mixins/helper";
 import account from "../mixins/account";
-import AppHeader from "../components/AppHeader.vue";
 import MainTab from "../components/MainTab.vue";
 import { mapState } from "vuex";
 
@@ -66,7 +65,6 @@ export default {
   mixins: [account, helper],
 
   components: {
-    AppHeader,
     MainTab,
   },
 

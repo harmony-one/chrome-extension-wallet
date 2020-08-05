@@ -24,12 +24,16 @@
             v-show="wallets.accounts.length > 0"
             class="outline"
             @click="$router.push('/')"
-          >Cancel</button>
+          >
+            Cancel
+          </button>
           <button
             @click="createName"
             :class="!wallets.accounts.length ? 'full-width' : ''"
             :disabled="!name"
-          >Create</button>
+          >
+            Create
+          </button>
         </div>
       </div>
       <div v-else-if="scene === 2">
@@ -57,7 +61,9 @@
         </label>
         <label class="input-label">
           Seed Phrase
-          <a class="copy-tag" @click.prevent="copyToClipboard">(Click here to copy)</a>
+          <a class="copy-tag" @click.prevent="copyToClipboard"
+            >(Click here to copy)</a
+          >
           <textarea
             class="input-field"
             name="seed_phrase"
@@ -67,7 +73,9 @@
           />
         </label>
         <input type="checkbox" id="seedcheck" :value="agree" v-model="agree" />
-        <label class="check-label" for="seedcheck">I understand that lost seeds cannot be recovered.</label>
+        <label class="check-label" for="seedcheck"
+          >I understand that lost seeds cannot be recovered.</label
+        >
         <div class="button-group">
           <button
             class="outline"
@@ -76,27 +84,35 @@
                 scene = 1;
               }
             "
-          >Back</button>
+          >
+            Back
+          </button>
           <button @click="createAcc" :disabled="!agree">Next</button>
         </div>
       </div>
       <div v-else>
-        <seed-checker :phrase="seed_phrase" :confirm="this.confirmSecurity"></seed-checker>
+        <seed-checker
+          :phrase="seed_phrase"
+          :confirm="this.confirmSecurity"
+        ></seed-checker>
       </div>
-      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
 
 <script>
-import account from "../mixins/account";
+import account from "../../mixins/account";
 import {
   generatePhrase,
-  createAccountFromMnemonic
-} from "../../services/AccountService";
-import AppHeader from "../components/AppHeader.vue";
+  createAccountFromMnemonic,
+} from "../../../services/AccountService";
 import { mapState } from "vuex";
-import SeedChecker from "../components/SeedChecker";
 
 export default {
   mixins: [account],
@@ -106,14 +122,10 @@ export default {
     agree: false,
     password_confirm: "",
     seed_phrase: "",
-    scene: 1
+    scene: 1,
   }),
   computed: {
-    ...mapState(["wallets"])
-  },
-  components: {
-    AppHeader,
-    SeedChecker
+    ...mapState(["wallets"]),
   },
   methods: {
     confirmSecurity() {
@@ -121,18 +133,18 @@ export default {
         this.name,
         this.seed_phrase,
         this.password
-      ).then(wallet => {
+      ).then((wallet) => {
         if (!wallet) {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Password is incorrect or mnemonic is incorrect"
+            text: "Password is incorrect or mnemonic is incorrect",
           });
           return false;
         } else {
           this.$store.commit("wallets/addAccount", {
             ...wallet,
-            isLedger: false
+            isLedger: false,
           });
           alert(
             "Your account is created successfully. To continue, close this tab and use the extension."
@@ -148,14 +160,14 @@ export default {
         this.$notify({
           group: "notify",
           type: "warn",
-          text: "Password must be longer than 8 characters"
+          text: "Password must be longer than 8 characters",
         });
         return;
       } else if (this.password !== this.password_confirm) {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Password doesn't match"
+          text: "Password doesn't match",
         });
         return;
       }
@@ -166,7 +178,7 @@ export default {
         this.$notify({
           group: "notify",
           type: "info",
-          text: "Copied to Clipboard"
+          text: "Copied to Clipboard",
         });
       });
     },
@@ -174,14 +186,14 @@ export default {
       if (this.name === "") {
         this.$notify({
           group: "notify",
-          text: "Invalid name"
+          text: "Invalid name",
         });
         return;
       }
       this.seed_phrase = generatePhrase();
       this.scene = 2;
-    }
-  }
+    },
+  },
 };
 </script>
 

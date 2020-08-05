@@ -6,13 +6,23 @@ import { sync } from "vuex-router-sync";
 import VueIntl from "vue-intl";
 import vClickOutside from "v-click-outside";
 import VueClipboard from "vue-clipboard2";
-import "./css/icons.less";
 // import VModal from "vue-js-modal";
 import Notifications from "vue-notification";
+
+import AppHeader from "./components/AppHeader.vue";
+import SeedChecker from "./components/SeedChecker";
+
 import { CLOSE_WINDOW, FROM_BACK_TO_POPUP } from "../types";
+
+import "./css/icons.less";
+import Config from "../config";
+
 Vue.config.productionTip = false;
 
 sync(store, router);
+
+Vue.component("AppHeader", AppHeader);
+Vue.component("SeedChecker", SeedChecker);
 
 Vue.use(Notifications);
 Vue.use(VueIntl);
@@ -27,6 +37,9 @@ new Vue({
   router,
   render: (h) => h(App),
 }).$mount("#app");
+
+if (store.state.network.name === "")
+  store.commit("network/change", Config.networks[0]);
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   const { type, action, payload } = message;

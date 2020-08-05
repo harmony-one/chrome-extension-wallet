@@ -5,12 +5,12 @@
 </template>
 
 <script>
-import SendTransaction from "../components/SendTransaction";
+import SendTransaction from "./SendTransaction";
 
 export default {
   name: "send",
   components: {
-    SendTransaction
-  }
+    SendTransaction,
+  },
 };
 </script>

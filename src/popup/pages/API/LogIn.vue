@@ -58,7 +58,7 @@ import {
   THIRDPARTY_GET_ACCOUNT_CONNECT,
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
-} from "../../types";
+} from "../../../types";
 export default {
   data: () => ({
     selected: -1,

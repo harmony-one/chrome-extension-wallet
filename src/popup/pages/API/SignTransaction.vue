@@ -73,7 +73,7 @@
   </main>
 </template>
 <script>
-import { decryptKeyStore } from "../../services/AccountService";
+import { decryptKeyStore } from "../../../services/AccountService";
 import { mapState } from "vuex";
 import { Unit } from "@harmony-js/utils";
 import {
@@ -81,7 +81,7 @@ import {
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_SIGN_CONNECT,
   THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
-} from "../../types";
+} from "../../../types";
 
 export default {
   data: () => ({

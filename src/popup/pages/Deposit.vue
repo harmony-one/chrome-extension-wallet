@@ -56,12 +56,10 @@
 
 <script>
 import { mapState } from "vuex";
-import AppHeader from "../components/AppHeader.vue";
 import VueQr from "vue-qr";
 
 export default {
   components: {
-    AppHeader,
     VueQr,
   },
 
