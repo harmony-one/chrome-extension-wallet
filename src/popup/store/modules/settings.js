@@ -4,7 +4,7 @@ export default {
   state: {
     auth: {
       isLocked: false,
-      pincode: "1234",
+      pincode: "",
       pindigits: 4,
       timeout: 30 * 60 * 1000, //milisec, default 30min
       attempts: 5,

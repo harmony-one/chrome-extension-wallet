@@ -22,7 +22,7 @@ import ExportPrivateKey from "./pages/ExportPrivateKey.vue";
 import About from "./pages/About.vue";
 import Settings from "./pages/Settings/index.vue";
 import Security from "./pages/Settings/Security.vue";
-
+import PincodeModal from "./pages/Settings/Security/PincodeModal.vue";
 import * as storage from "../services/StorageService";
 
 import store from "./store";
@@ -177,13 +177,27 @@ const router = new Router({
         authenticate: true,
       },
     },
+    {
+      path: "/settings/security/pincode",
+      name: "pincode",
+      component: PincodeModal,
+      props: { method: "update" },
+      meta: {
+        requiredAccount: true,
+      },
+    },
     //end
   ],
 });
 router.beforeEach((to, from, next) => {
   if (!from.name) {
     storage.getValue("lastClosed").then((data) => {
-      if (!data || !store.state.wallets.accounts.length) return;
+      if (
+        !data ||
+        !store.state.wallets.accounts.length ||
+        !store.state.settings.auth.pincode
+      )
+        return;
       const now = Date.now();
       const lastClosed = data.lastClosed;
       const offset = now - lastClosed;

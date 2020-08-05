@@ -55,18 +55,11 @@
             v-show="wallets.accounts.length > 0"
             class="outline"
             @click="$router.push('/')"
-          >
-            Cancel
-          </button>
-          <button
-            @click="importKey"
-            :class="!wallets.accounts.length ? 'full-width' : ''"
-          >
-            Import
-          </button>
+          >Cancel</button>
+          <button @click="importKey" :class="!wallets.accounts.length ? 'full-width' : ''">Import</button>
         </div>
       </div>
-      <div v-else>
+      <div v-else-if="scene===2">
         <label class="input-label">
           Account Name
           <input
@@ -117,32 +110,19 @@
               ref="password_confirm"
               v-model="password_confirm"
               placeholder="Confirm the password"
-              v-on:keyup.enter="importAcc"
+              v-on:keyup.enter="nextToPincode"
             />
           </label>
         </div>
         <div class="button-group">
-          <button
-            class="outline"
-            @click="
-              () => {
-                scene = 1;
-              }
-            "
-          >
-            Back
-          </button>
-          <button @click="importAcc" :disabled="!name || !password">
-            Import Account
-          </button>
+          <button class="outline" @click="() => scene = 1">Back</button>
+          <button @click="nextToPincode" :disabled="!name || !password">Next</button>
         </div>
       </div>
-      <notifications
-        group="notify"
-        width="250"
-        :max="2"
-        class="notifiaction-container"
-      />
+      <div v-else>
+        <pincode-modal @success="importAcc" />
+      </div>
+      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
     </main>
   </div>
 </template>
@@ -155,7 +135,7 @@ import {
   getAddressFromPrivateKey,
   createAccountFromMnemonic,
   decryptKeyStoreFromFile,
-  validateMnemonic,
+  validateMnemonic
 } from "../../../services/AccountService";
 
 export default {
@@ -169,15 +149,18 @@ export default {
     mnemonic: "",
     scene: 1,
     selectType: "key",
-    file: null,
+    file: null
   }),
   computed: {
-    ...mapState(["wallets"]),
+    ...mapState(["wallets"])
   },
 
   methods: {
     onSelectFile(event) {
       this.file = event.target.files[0];
+    },
+    nextToPincode() {
+      this.scene = 3;
     },
     async importKey() {
       if (this.selectType === "key") {
@@ -185,7 +168,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Please enter a valid private key",
+            text: "Please enter a valid private key"
           });
           return false;
         }
@@ -195,7 +178,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Please enter a valid mnemonic",
+            text: "Please enter a valid mnemonic"
           });
           return false;
         }
@@ -205,7 +188,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Please select a file",
+            text: "Please select a file"
           });
           return false;
         } else {
@@ -220,7 +203,7 @@ export default {
                 _this.$notify({
                   group: "notify",
                   type: "error",
-                  text: "Keystore file invalid",
+                  text: "Keystore file invalid"
                 });
                 return false;
               }
@@ -237,14 +220,14 @@ export default {
       if (!this.password) {
         this.$notify({
           group: "notify",
-          text: "Password is required",
+          text: "Password is required"
         });
         return false;
       }
       if (!this.name) {
         this.$notify({
           group: "notify",
-          text: "Account name is required",
+          text: "Account name is required"
         });
         return false;
       }
@@ -252,14 +235,14 @@ export default {
         this.$notify({
           group: "notify",
           type: "warn",
-          text: "Password must be longer than 8 characters",
+          text: "Password must be longer than 8 characters"
         });
         return false;
       } else if (this.password !== this.password_confirm) {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Password doesn't match",
+          text: "Password doesn't match"
         });
         return false;
       }
@@ -272,7 +255,7 @@ export default {
           name: this.name,
           address: oneAddr,
           keystore,
-          isLedger: false,
+          isLedger: false
         };
       } else if (this.selectType == "mnemonic") {
         wallet = await createAccountFromMnemonic(
@@ -290,7 +273,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Keystore password is incorrect or file is invalid",
+            text: "Keystore password is incorrect or file is invalid"
           });
           return false;
         }
@@ -303,17 +286,17 @@ export default {
           name: this.name,
           address: decryptResult.address,
           keystore: encryptedKeyStore,
-          isLedger: false,
+          isLedger: false
         };
       }
       const acc = this.wallets.accounts.find(
-        (account) => account.address === wallet.address
+        account => account.address === wallet.address
       );
       if (acc) {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Account already exists",
+          text: "Account already exists"
         });
         return false;
       }
@@ -324,8 +307,8 @@ export default {
       chrome.tabs.getCurrent(function(tab) {
         chrome.tabs.remove(tab.id, function() {});
       });
-    },
-  },
+    }
+  }
 };
 </script>
 <style scoped>

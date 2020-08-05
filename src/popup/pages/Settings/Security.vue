@@ -7,38 +7,44 @@
         v-for="item in options"
         :key="item.title"
         @click="item.handler"
-      >
-        {{ item.title }}
-      </div>
+      >{{ item.title }}</div>
+      <pindigits-modal />
     </main>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
+import PindigitsModal from "./Security/PindigitsModal";
 export default {
   data() {
     return {
+      digits: 4,
       options: [
         { title: "Change pin code", handler: () => this.changePincode() },
-        { title: "Change pincode digits", handler: () => this.setPindigits() },
+        { title: "Change pincode digits", handler: () => this.showPindigits() },
         {
-          title: "Set timeout when the extension is idle",
-          handler: () => this.setIdleTimeout(),
-        },
-      ],
+          title: "Set lock timer",
+          handler: () => this.setIdleTimeout()
+        }
+      ]
     };
   },
+  components: {
+    PindigitsModal
+  },
   methods: {
-    changePincode() {
-      console.log("pincode");
+    changeDigits(newValue) {
+      this.digits = newValue;
     },
-    setPindigits() {
-      console.log("pindigits");
+    changePincode() {},
+    showPindigits() {
+      this.$modal.show("modal-pindigits");
     },
     setIdleTimeout() {
       console.log("idletimeout");
-    },
-  },
+    }
+  }
 };
 </script>
+<style></style>

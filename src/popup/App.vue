@@ -40,8 +40,6 @@ export default {
 </script>
 
 <style>
-@import url("css/normalize.css");
-@import url("css/style.css");
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s;

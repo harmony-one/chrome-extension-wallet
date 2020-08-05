@@ -2,10 +2,10 @@
   <div>
     <app-header headerTab="create-tab" />
     <main class="main">
+      <div class="main-logo" v-if="scene === 1 || scene === 4">
+        <img src="images/harmony.png" alt="Harmony" />
+      </div>
       <div v-if="scene === 1">
-        <div class="main-logo">
-          <img src="images/harmony.png" alt="Harmony" />
-        </div>
         <label class="input-label account-name">
           Account Name
           <input
@@ -24,16 +24,12 @@
             v-show="wallets.accounts.length > 0"
             class="outline"
             @click="$router.push('/')"
-          >
-            Cancel
-          </button>
+          >Cancel</button>
           <button
             @click="createName"
             :class="!wallets.accounts.length ? 'full-width' : ''"
             :disabled="!name"
-          >
-            Create
-          </button>
+          >Create</button>
         </div>
       </div>
       <div v-else-if="scene === 2">
@@ -61,9 +57,7 @@
         </label>
         <label class="input-label">
           Seed Phrase
-          <a class="copy-tag" @click.prevent="copyToClipboard"
-            >(Click here to copy)</a
-          >
+          <a class="copy-tag" @click.prevent="copyToClipboard">(Click here to copy)</a>
           <textarea
             class="input-field"
             name="seed_phrase"
@@ -73,35 +67,19 @@
           />
         </label>
         <input type="checkbox" id="seedcheck" :value="agree" v-model="agree" />
-        <label class="check-label" for="seedcheck"
-          >I understand that lost seeds cannot be recovered.</label
-        >
+        <label class="check-label" for="seedcheck">I understand that lost seeds cannot be recovered.</label>
         <div class="button-group">
-          <button
-            class="outline"
-            @click="
-              () => {
-                scene = 1;
-              }
-            "
-          >
-            Back
-          </button>
-          <button @click="createAcc" :disabled="!agree">Next</button>
+          <button class="outline" @click="() => scene = 1">Back</button>
+          <button @click="confirmPassword" :disabled="!agree">Next</button>
         </div>
       </div>
-      <div v-else>
-        <seed-checker
-          :phrase="seed_phrase"
-          :confirm="this.confirmSecurity"
-        ></seed-checker>
+      <div v-else-if="scene === 3">
+        <seed-checker :phrase="seed_phrase" :confirm="() => scene = 4" />
       </div>
-      <notifications
-        group="notify"
-        width="250"
-        :max="2"
-        class="notifiaction-container"
-      />
+      <div v-else>
+        <pincode-modal @success="createAccount" />
+      </div>
+      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
     </main>
   </div>
 </template>
@@ -110,7 +88,7 @@
 import account from "../../mixins/account";
 import {
   generatePhrase,
-  createAccountFromMnemonic,
+  createAccountFromMnemonic
 } from "../../../services/AccountService";
 import { mapState } from "vuex";
 
@@ -122,29 +100,29 @@ export default {
     agree: false,
     password_confirm: "",
     seed_phrase: "",
-    scene: 1,
+    scene: 1
   }),
   computed: {
-    ...mapState(["wallets"]),
+    ...mapState(["wallets"])
   },
   methods: {
-    confirmSecurity() {
+    createAccount() {
       createAccountFromMnemonic(
         this.name,
         this.seed_phrase,
         this.password
-      ).then((wallet) => {
+      ).then(wallet => {
         if (!wallet) {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Password is incorrect or mnemonic is incorrect",
+            text: "Password is incorrect or mnemonic is incorrect"
           });
           return false;
         } else {
           this.$store.commit("wallets/addAccount", {
             ...wallet,
-            isLedger: false,
+            isLedger: false
           });
           alert(
             "Your account is created successfully. To continue, close this tab and use the extension."
@@ -155,19 +133,19 @@ export default {
         }
       });
     },
-    createAcc() {
+    confirmPassword() {
       if (this.password.length < 8) {
         this.$notify({
           group: "notify",
           type: "warn",
-          text: "Password must be longer than 8 characters",
+          text: "Password must be longer than 8 characters"
         });
         return;
       } else if (this.password !== this.password_confirm) {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Password doesn't match",
+          text: "Password doesn't match"
         });
         return;
       }
@@ -178,7 +156,7 @@ export default {
         this.$notify({
           group: "notify",
           type: "info",
-          text: "Copied to Clipboard",
+          text: "Copied to Clipboard"
         });
       });
     },
@@ -186,14 +164,14 @@ export default {
       if (this.name === "") {
         this.$notify({
           group: "notify",
-          text: "Invalid name",
+          text: "Invalid name"
         });
         return;
       }
       this.seed_phrase = generatePhrase();
       this.scene = 2;
-    },
-  },
+    }
+  }
 };
 </script>
 

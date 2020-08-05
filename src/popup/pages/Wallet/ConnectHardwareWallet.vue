@@ -22,18 +22,11 @@
             v-show="wallets.accounts.length > 0"
             class="outline"
             @click="$router.push('/')"
-          >
-            Cancel
-          </button>
-          <button
-            :class="!wallets.accounts.length ? 'full-width' : ''"
-            @click="connect"
-          >
-            Connect
-          </button>
+          >Cancel</button>
+          <button :class="!wallets.accounts.length ? 'full-width' : ''" @click="connect">Connect</button>
         </div>
       </div>
-      <div v-else>
+      <div v-else-if="scene === 2">
         <h3>Create the Account</h3>
         <div>Address</div>
         <span class="address-label">{{ address }}</span>
@@ -46,19 +39,15 @@
             ref="name"
             v-model="name"
             placeholder="Input the account name"
-            v-on:keyup.enter="createAccount"
+            v-on:keyup.enter="nextToPincode"
           />
         </label>
-        <button class="full-but" :disabled="!name" @click="createAccount">
-          Create Account
-        </button>
+        <button class="full-but" :disabled="!name" @click="nextToPincode">Next</button>
       </div>
-      <notifications
-        group="notify"
-        width="250"
-        :max="2"
-        class="notifiaction-container"
-      />
+      <div v-else>
+        <pincode-modal @success="createAccount" />
+      </div>
+      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
     </main>
   </div>
 </template>
@@ -74,19 +63,22 @@ export default {
     address: "",
     error: {
       show: false,
-      message: "",
-    },
+      message: ""
+    }
   }),
   computed: {
-    ...mapState(["wallets"]),
+    ...mapState(["wallets"])
   },
   methods: {
+    nextToPincode() {
+      this.scene = 3;
+    },
     createAccount() {
       const wallet = {
         isLedger: true,
         name: this.name,
         address: this.address,
-        keystore: "",
+        keystore: ""
       };
 
       this.$store.commit("wallets/addAccount", wallet);
@@ -99,19 +91,19 @@ export default {
     },
     connect() {
       connectLedgerApp()
-        .then((address) => {
+        .then(address => {
           this.address = address;
           this.scene = 2;
         })
-        .catch((err) => {
+        .catch(err => {
           this.$notify({
             group: "notify",
             type: "error",
-            text: err,
+            text: err
           });
         });
-    },
-  },
+    }
+  }
 };
 </script>
 <style scoped>
