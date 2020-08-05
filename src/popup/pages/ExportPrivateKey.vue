@@ -56,7 +56,7 @@
         </div>
         <div class="button-group">
           <button class="outline" @click="onBackClick">Back</button>
-          <router-link to="/" class="button">Done</router-link>
+          <router-link to="/main" class="button">Done</router-link>
         </div>
       </div>
 

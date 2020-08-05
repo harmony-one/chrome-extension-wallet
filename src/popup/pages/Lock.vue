@@ -25,7 +25,9 @@
           :characterPreview="false"
         />
       </div>
-      <div class="pin-caption">Input the {{ pindigits }} digits pin code</div>
+      <div class="pin-caption" :class="{ 'failed-caption': attempts < 5 }">
+        {{ statusCaption }}
+      </div>
     </div>
     <div class="footer">
       <span>
@@ -49,27 +51,43 @@ export default {
   },
   computed: {
     ...mapState({
-      pincode: (state) => state.settings.pincode,
-      pindigits: (state) => state.settings.pindigits,
+      pincode: (state) => state.settings.auth.pincode,
+      pindigits: (state) => state.settings.auth.pindigits,
+      attempts: (state) => state.settings.auth.attempts,
+      delayTime: (state) => state.settings.auth.delayTime,
     }),
     version() {
       return "v" + AppInfo.version;
+    },
+    statusCaption() {
+      if (this.attempts === 5)
+        return `Input the ${this.pindigits} digits pin code`;
+      else if (this.attempts > 0)
+        return `${this.attempts} ${
+          this.attempts > 1 ? "attempts" : "attempt"
+        } remaining`;
+      else {
+        return `Authentication failed. Try again after`;
+      }
     },
   },
   watch: {
     pin() {
       if (this.pin.length === this.pindigits) {
         if (this.pin === this.pincode) {
-          this.$router.push("/");
+          this.$store.commit("settings/setLocked", false);
+          this.$router.push("/main");
         } else {
           this.pincodeError = true;
           this.pin = "";
-          setTimeout(() => (this.pincodeError = false), 800);
+          this.$store.commit("settings/setAttempts", this.attempts - 1);
+          setTimeout(() => {
+            this.pincodeError = false;
+          }, 800);
         }
       }
     },
   },
-  methods: {},
 };
 </script>
 
@@ -121,7 +139,9 @@ input.vue-pincode-input {
   font-size: 14px;
   color: grey;
 }
-
+.failed-caption {
+  color: red;
+}
 .footer {
   position: fixed;
   left: 50%;

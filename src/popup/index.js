@@ -8,14 +8,12 @@ import vClickOutside from "v-click-outside";
 import VueClipboard from "vue-clipboard2";
 // import VModal from "vue-js-modal";
 import Notifications from "vue-notification";
-
 import AppHeader from "./components/AppHeader.vue";
 import SeedChecker from "./components/SeedChecker";
 
-import { CLOSE_WINDOW, FROM_BACK_TO_POPUP } from "../types";
-
 import "./css/icons.less";
 import Config from "../config";
+import { CLOSE_WINDOW, FROM_BACK_TO_POPUP } from "../types";
 
 Vue.config.productionTip = false;
 

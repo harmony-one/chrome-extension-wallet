@@ -1,7 +1,7 @@
 <template>
   <header class="header">
     <div class="header-top">
-      <router-link class="header-logo" to="/">
+      <router-link class="header-logo" to="/main">
         <img src="images/harmony-small.png" alt="Harmony" />
         <span>Harmony</span>
       </router-link>
@@ -149,36 +149,15 @@
           <div class="dropdown-menu-divider"></div>
           <div class="dropdown-menu-item">
             <i class="material-icons">add</i>
-            <a
-              @click.prevent="
-                () => {
-                  createAccount();
-                }
-              "
-              >Create Account</a
-            >
+            <a @click.prevent="createAccount">Create Account</a>
           </div>
           <div class="dropdown-menu-item">
             <i class="material-icons">vertical_align_bottom</i>
-            <a
-              @click.prevent="
-                () => {
-                  importAccount();
-                }
-              "
-              >Import Account</a
-            >
+            <a @click.prevent="importAccount">Import Account</a>
           </div>
           <div class="dropdown-menu-item">
             <i class="material-icons">settings_input_component</i>
-            <a
-              @click.prevent="
-                () => {
-                  connectHardware();
-                }
-              "
-              >Connect Hardware Wallet</a
-            >
+            <a @click.prevent="connectHardware">Connect Hardware Wallet</a>
           </div>
           <div v-if="wallets.accounts.length > 0 && !wallets.active.isLedger">
             <div class="dropdown-menu-divider"></div>
@@ -196,10 +175,12 @@
             <i class="material-icons">info</i>
             <router-link to="/about">About Harmony</router-link>
           </div>
-          <div class="dropdown-menu-divider"></div>
-          <div class="dropdown-menu-item">
-            <i class="material-icons">lock</i>
-            <router-link to="/lock">Lock</router-link>
+          <div v-if="wallets.accounts.length > 0">
+            <div class="dropdown-menu-divider"></div>
+            <div class="dropdown-menu-item">
+              <i class="material-icons">lock</i>
+              <a @click.prevent="lockWallet">Lock</a>
+            </div>
           </div>
         </nav>
       </div>
@@ -311,7 +292,7 @@ export default {
       this.$store.commit("wallets/setActive", address);
       this.hideDropdownMenu();
       this.refreshData();
-      if (this.$route.name !== "account") this.$router.push("/");
+      if (this.$route.name !== "account") this.$router.push("/main");
     },
     createAccount() {
       this.openExpandPopup("/create-wallet");
@@ -321,6 +302,10 @@ export default {
     },
     connectHardware() {
       this.openExpandPopup("/connect-hardware-wallet");
+    },
+    lockWallet() {
+      this.$store.commit("settings/setLocked", true);
+      this.$router.push("/lock");
     },
     refreshData() {
       this.$emit("refresh");

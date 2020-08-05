@@ -20,6 +20,7 @@ import Deposit from "./pages/Deposit.vue";
 import Lock from "./pages/Lock.vue";
 import ExportPrivateKey from "./pages/ExportPrivateKey.vue";
 import About from "./pages/About.vue";
+import AuthRoute from "./AuthRoute.vue";
 
 import store from "./store";
 
@@ -33,11 +34,26 @@ const router = new Router({
       component: LogIn,
     },
     {
+      path: "/sign",
+      name: "signtransaction",
+      component: SignTransaction,
+    },
+    {
       path: "/",
+      name: "auth",
+      component: AuthRoute,
+      meta: {
+        requiredAccount: true,
+        authenticate: true,
+      },
+    },
+    {
+      path: "/main",
       name: "account",
       component: Account,
       meta: {
         requiredAccount: true,
+        authenticate: true,
       },
     },
     {
@@ -46,6 +62,7 @@ const router = new Router({
       component: Tokens,
       meta: {
         requiredAccount: true,
+        authenticate: true,
       },
     },
     {
@@ -54,6 +71,7 @@ const router = new Router({
       component: AddToken,
       meta: {
         requiredAccount: true,
+        authenticate: true,
       },
     },
     {
@@ -62,6 +80,7 @@ const router = new Router({
       component: History,
       meta: {
         requiredAccount: true,
+        authenticate: true,
       },
     },
     {
@@ -70,14 +89,7 @@ const router = new Router({
       component: SendOne,
       meta: {
         requiredAccount: true,
-      },
-    },
-    {
-      path: "/sign",
-      name: "signtransaction",
-      component: SignTransaction,
-      meta: {
-        requiredAccount: true,
+        authenticate: true,
       },
     },
     {
@@ -86,6 +98,7 @@ const router = new Router({
       component: SendToken,
       meta: {
         requiredAccount: true,
+        authenticate: true,
       },
     },
     {
@@ -94,6 +107,7 @@ const router = new Router({
       component: Deposit,
       meta: {
         requiredAccount: true,
+        authenticate: true,
       },
     },
     {
@@ -102,12 +116,16 @@ const router = new Router({
       component: ExportPrivateKey,
       meta: {
         requiredAccount: true,
+        authenticate: true,
       },
     },
     {
       path: "/about",
       name: "about",
       component: About,
+      meta: {
+        authenticate: true,
+      },
     },
     {
       path: "/lock",
@@ -118,32 +136,42 @@ const router = new Router({
       path: "/create-wallet",
       name: "create-wallet",
       component: CreateWallet,
+      meta: {
+        authenticate: true,
+      },
     },
     {
       path: "/import-wallet",
       name: "import-wallet",
       component: ImportWallet,
+      meta: {
+        authenticate: true,
+      },
     },
     {
       path: "/connect-hardware-wallet",
       name: "connect-hardware-wallet",
       component: ConnectHardwareWallet,
+      meta: {
+        authenticate: true,
+      },
     },
   ],
 });
-
 router.beforeEach((to, from, next) => {
+  console.log(store.state.settings.auth.isLocked);
+  if (to.matched.some((record) => record.meta.authenticate)) {
+    if (store.state.settings.auth.isLocked) next({ path: "/lock" });
+    else next();
+  }
   if (to.matched.some((record) => record.meta.requiredAccount)) {
     if (!store.state.wallets.accounts.length) {
       chrome.tabs.create({
         url: "popup.html#/create-wallet",
       });
-    } else {
-      next();
-    }
-  } else {
-    next();
+    } else next();
   }
+  next();
 });
 
 export default router;

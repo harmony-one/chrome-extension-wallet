@@ -19,6 +19,7 @@
 
 <script>
 import { mapState } from "vuex";
+import { APP_CONNECT } from "../types";
 export default {
   data: () => ({
     transitionName: "none",
@@ -33,6 +34,7 @@ export default {
       else this.transitionName = "none";
       next();
     });
+    chrome.runtime.connect({ name: APP_CONNECT });
   },
 };
 </script>

@@ -1,6 +1,6 @@
 import apiService from "../services/APIService";
 import { msgToContentScript } from "../services/APIService";
-
+import * as storage from "../services/StorageService";
 import {
   HARMONY_REQUEST_TYPE,
   HARMONY_RESPONSE_TYPE,
@@ -12,6 +12,7 @@ import {
   THIRDPARTY_SIGN_CONNECT,
   THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_CONNECT,
+  APP_CONNECT,
   THIRDPARTY_SIGN_REQUEST_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
 } from "../types";
@@ -73,32 +74,38 @@ function internalMessageListener(message, sender, sendResponse) {
 function onConnectListener(externalPort) {
   const name = externalPort.name;
   externalPort.onDisconnect.addListener(function() {
-    chrome.tabs.query({}, (tabs) => {
-      tabs.forEach((tab) => {
-        setTimeout(() => {
-          switch (name) {
-            case THIRDPARTY_SIGN_CONNECT: {
-              chrome.tabs.sendMessage(
-                tab.id,
-                msgToContentScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
-                  rejected: true,
-                })
-              );
-              break;
+    if (name !== APP_CONNECT) {
+      chrome.tabs.query({}, (tabs) => {
+        tabs.forEach((tab) => {
+          setTimeout(() => {
+            switch (name) {
+              case THIRDPARTY_SIGN_CONNECT: {
+                chrome.tabs.sendMessage(
+                  tab.id,
+                  msgToContentScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
+                    rejected: true,
+                  })
+                );
+                break;
+              }
+              case THIRDPARTY_GET_ACCOUNT_CONNECT: {
+                chrome.tabs.sendMessage(
+                  tab.id,
+                  msgToContentScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
+                    rejected: true,
+                  })
+                );
+                break;
+              }
             }
-            case THIRDPARTY_GET_ACCOUNT_CONNECT: {
-              chrome.tabs.sendMessage(
-                tab.id,
-                msgToContentScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
-                  rejected: true,
-                })
-              );
-              break;
-            }
-          }
-        }, 200);
+          }, 200);
+        });
       });
-    });
+    } else {
+      storage.saveValue({
+        lastClosed: Date.now(),
+      });
+    }
   });
 }
 export function setupExtensionMessageListeners() {
