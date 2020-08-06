@@ -461,8 +461,6 @@ export default {
         this.loadBalance();
       } catch (e) {
         this.$store.commit("loading", false);
-
-        console.log("transfer error =", e);
         this.showErrMessage(
           "Something went wrong while trying to send the payment"
         );

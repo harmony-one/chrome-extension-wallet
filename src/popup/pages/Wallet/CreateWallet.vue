@@ -77,7 +77,7 @@
         <seed-checker :phrase="seed_phrase" :confirm="() => scene = 4" />
       </div>
       <div v-else>
-        <pincode-modal @success="createAccount" />
+        <pincode-modal @success="createAccount" successbut="Create Account" />
       </div>
       <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
     </main>

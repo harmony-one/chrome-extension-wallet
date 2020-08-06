@@ -68,7 +68,7 @@
       <div class="footer">
         <button class="full-but" v-if="attempts > 0 && !success" @click="()=>$router.go(-1)">Back</button>
         <button class="full-but" v-if="!attempts" @click="onRetry">Retry</button>
-        <button class="full-but" v-if="success" @click="onSuccess">Done</button>
+        <button class="full-but" v-if="success" @click="onSuccess">{{successbut}}</button>
       </div>
     </div>
   </div>
@@ -85,6 +85,10 @@ export default {
     subModule: {
       default: true,
       type: Boolean
+    },
+    successbut: {
+      default: "Save",
+      type: String
     }
   },
   data: () => ({

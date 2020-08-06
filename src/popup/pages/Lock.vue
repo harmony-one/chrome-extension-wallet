@@ -27,8 +27,10 @@
       />
     </div>
     <div class="pin-caption" :class="{ 'failed-caption': attempts < 5 }">{{ statusCaption }}</div>
-    <div class="lastopen-fromnow-caption">Last access: {{lastOpenedFromNow}}</div>
-    <div class="lastopen-time-caption">{{lastOpened}}</div>
+    <div v-if="lastOpened">
+      <div class="lastopen-fromnow-caption">Last access {{lastOpenedFromNow}}</div>
+      <div class="lastopen-time-caption">{{lastOpened}}</div>
+    </div>
     <div class="footer">
       <span>Developed by Harmony Team</span>
     </div>
@@ -79,21 +81,18 @@ export default {
     }
   },
   mounted() {
-    storage.getValue("lastOpened").then(data => {
-      if (!data) return;
+    storage.getValue("lastOpened").then(({ lastOpened }) => {
+      if (!lastOpened) return;
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      this.lastOpened = moment(data.lastOpened)
+      this.lastOpened = moment(lastOpened)
         .tz(timezone)
         .format("YYYY/MM/DD HH:mm:ss z");
-      const fromNow = moment(data.lastOpened).fromNow();
-      this.lastOpenedFromNow =
-        fromNow.charAt(0).toUpperCase() + fromNow.slice(1);
+      this.lastOpenedFromNow = moment(lastOpened).fromNow();
     });
     if (this.attempts === 0) {
-      storage.getValue("lastClosed").then(data => {
-        if (!data) return;
+      storage.getValue("lastClosed").then(({ lastClosed }) => {
+        if (!lastClosed) return;
         const now = Date.now();
-        const lastClosed = data.lastClosed;
         const passedtime = Math.floor((now - lastClosed) / 1000);
         this.$store.commit(
           "settings/setCountdown",
@@ -126,6 +125,7 @@ export default {
       if (this.pin === this.pincode) {
         this.$store.commit("settings/setLocked", false);
         this.$store.commit("settings/resetFailedTimer");
+        storage.saveValue({ lastOpened: Date.now() });
         this.$router.push("/");
       } else {
         this.pincodeError = true;

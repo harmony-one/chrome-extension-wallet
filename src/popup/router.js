@@ -189,30 +189,29 @@ const router = new Router({
     //end
   ],
 });
-router.beforeEach((to, from, next) => {
-  if (!from.name) {
-    storage.getValue("lastClosed").then((data) => {
-      if (
-        !data ||
-        !store.state.wallets.accounts.length ||
-        !store.state.settings.auth.pincode
-      )
-        return;
+router.beforeEach(async (to, from, next) => {
+  if (!from.name && to.path === "/") {
+    const { lastClosed } = await storage.getValue("lastClosed");
+    if (
+      lastClosed &&
+      store.state.wallets.accounts.length &&
+      store.state.settings.auth.pincode
+    ) {
       const now = Date.now();
-      storage.saveValue({
-        lastOpened: now,
-      });
-      const lastClosed = data.lastClosed;
       const offset = now - lastClosed;
       if (offset >= store.state.settings.auth.timeout) {
         store.commit("settings/setLocked", true);
         if (to.meta.authenticate) next({ path: "/lock" });
       }
-    });
+    }
   }
   if (to.matched.some((record) => record.meta.authenticate)) {
-    if (store.state.settings.auth.isLocked) next({ path: "/lock" });
-    else next();
+    if (store.state.settings.auth.isLocked) {
+      next({ path: "/lock" });
+    } else {
+      if (!from.name) storage.saveValue({ lastOpened: Date.now() });
+      next();
+    }
   }
   if (to.matched.some((record) => record.meta.requiredAccount)) {
     if (!store.state.wallets.accounts.length) {

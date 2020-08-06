@@ -12,9 +12,7 @@
       <div class="login-container">
         <div v-if="!isLocked">
           <div v-if="!wallets.accounts.length">
-            <p>
-              No accounts. You should create the account first in the extension.
-            </p>
+            <p>No accounts. You should create the account first in the extension.</p>
           </div>
           <div v-else-if="isOnlyLedgerAvailable">
             <p>
@@ -29,10 +27,7 @@
               @click="selectAccount(index)"
             >
               <div class="card" v-if="!account.isLedger">
-                <div
-                  class="account-box"
-                  :class="{ active: selected === index }"
-                >
+                <div class="account-box" :class="{ active: selected === index }">
                   <div>{{ account.name }}</div>
                   <div class="account-address">{{ account.address }}</div>
                 </div>
@@ -55,9 +50,7 @@
         <button :disabled="selected < 0" @click="accept">Accept</button>
       </div>
       <div v-else>
-        <button class="full-but" @click="deny">
-          OK
-        </button>
+        <button class="full-but" @click="deny">OK</button>
       </div>
     </main>
   </div>
@@ -68,17 +61,17 @@ import { mapState } from "vuex";
 import {
   THIRDPARTY_GET_ACCOUNT_CONNECT,
   GET_WALLET_SERVICE_STATE,
-  THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
+  THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE
 } from "../../../types";
 export default {
   data: () => ({
     selected: -1,
-    host: "",
+    host: ""
   }),
   computed: {
     ...mapState({
-      wallets: (state) => state.wallets,
-      isLocked: (state) => state.settings.auth.isLocked,
+      wallets: state => state.wallets,
+      isLocked: state => state.settings.auth.isLocked
     }),
     isOnlyLedgerAvailable() {
       if (
@@ -87,10 +80,9 @@ export default {
       )
         return true;
       return false;
-    },
+    }
   },
   mounted() {
-    console.log("mounted");
     chrome.runtime.sendMessage(
       { action: GET_WALLET_SERVICE_STATE },
       ({ state } = {}) => {
@@ -116,11 +108,11 @@ export default {
         action: THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
         payload: {
           name: account.name,
-          address: account.address,
-        },
+          address: account.address
+        }
       });
-    },
-  },
+    }
+  }
 };
 </script>
 <style scoped>
