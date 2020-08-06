@@ -24,7 +24,7 @@
         class="outline seed-button"
         @click="clickPhrase(index)"
       >{{ item }}</button>
-      <button class="full-but" :disabled="!isMatched" @click="confirm">OK</button>
+      <button class="full-but" :disabled="!isMatched" @click="confirm">Next</button>
     </div>
   </div>
 </template>

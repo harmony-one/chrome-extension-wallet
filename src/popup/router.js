@@ -181,7 +181,10 @@ const router = new Router({
       path: "/settings/security/pincode",
       name: "pincode",
       component: PincodeModal,
-      props: { method: "update", subModule: false },
+      props: {
+        method: "update",
+        subModule: false,
+      },
       meta: {
         requiredAccount: true,
       },

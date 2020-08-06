@@ -45,7 +45,7 @@
         <button class="full-but" :disabled="!name" @click="nextToPincode">Next</button>
       </div>
       <div v-else>
-        <pincode-modal @success="createAccount" successbut="Create Account" />
+        <pincode-modal @success="createAccount" :onBack="() => scene = 2" />
       </div>
       <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
     </main>

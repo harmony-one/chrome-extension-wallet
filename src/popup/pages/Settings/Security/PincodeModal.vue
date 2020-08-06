@@ -20,7 +20,7 @@
             v-model="oldpin"
             :length="pincode.length"
             :secure="true"
-            :characterPreview="true"
+            :characterPreview="false"
             ref="oldpincodeInput"
           />
         </div>
@@ -39,7 +39,7 @@
             v-model="pin"
             :length="pindigits"
             :secure="true"
-            :characterPreview="true"
+            :characterPreview="false"
             ref="pincodeInput"
           />
         </div>
@@ -58,7 +58,7 @@
             v-model="pinconfirm"
             :length="pindigits"
             :secure="true"
-            :characterPreview="true"
+            :characterPreview="false"
             ref="pincodeConfirmInput"
             :disabled="!attempts"
           />
@@ -66,9 +66,8 @@
         <div class="pin-caption" :class="{ 'failed-caption': errorcode === 2 }">{{ statusCaption }}</div>
       </div>
       <div class="footer">
-        <button class="full-but" v-if="attempts > 0 && !success" @click="()=>$router.go(-1)">Back</button>
         <button class="full-but" v-if="!attempts" @click="onRetry">Retry</button>
-        <button class="full-but" v-if="success" @click="onSuccess">{{successbut}}</button>
+        <button class="full-but" v-else @click="onBackClicked">Back</button>
       </div>
     </div>
   </div>
@@ -86,9 +85,8 @@ export default {
       default: true,
       type: Boolean
     },
-    successbut: {
-      default: "Save",
-      type: String
+    onBack: {
+      type: Function
     }
   },
   data: () => ({
@@ -98,7 +96,6 @@ export default {
     errorcode: 0,
     attempts: 3,
     scene: 1,
-    success: false,
     pinfail: false
   }),
   watch: {
@@ -138,6 +135,10 @@ export default {
     }
   },
   methods: {
+    onBackClicked() {
+      if (this.onBack) this.onBack();
+      else this.$router.go(-1);
+    },
     getPinMargin(digits) {
       return digits === 4 ? "50px" : "15px";
     },
@@ -164,8 +165,15 @@ export default {
     },
     pinInputComplete() {
       if (this.pinconfirm === this.pin) {
-        this.success = true;
         this.errorcode = 0;
+        this.$store.commit("settings/setPincode", this.pinconfirm);
+        setTimeout(() => {
+          if (!this.subModule) {
+            this.$router.push("/settings/security");
+          } else {
+            this.$emit("success");
+          }
+        }, 300);
       } else {
         this.errorcode = 2;
         this.pinfail = true;
@@ -174,14 +182,6 @@ export default {
           this.pinconfirm = "";
           this.attempts = Math.max(this.attempts - 1, 0);
         }, 800);
-      }
-    },
-    onSuccess() {
-      this.$store.commit("settings/setPincode", this.pinconfirm);
-      if (!this.subModule) {
-        this.$router.push("/settings/security");
-      } else {
-        this.$emit("success");
       }
     }
   }

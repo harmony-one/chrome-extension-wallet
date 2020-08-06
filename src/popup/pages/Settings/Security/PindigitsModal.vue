@@ -5,7 +5,7 @@
       <radio-button
         name="options"
         v-for="item in dataArray"
-        :key="item"
+        :key="item.data"
         :label="item.label"
         :data="item.data"
         :value="digits"

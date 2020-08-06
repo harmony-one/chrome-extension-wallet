@@ -120,7 +120,7 @@
         </div>
       </div>
       <div v-else>
-        <pincode-modal @success="importAcc" successbut="Create Account" />
+        <pincode-modal @success="importAcc" :onBack="() => scene = 2" />
       </div>
       <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
     </main>
