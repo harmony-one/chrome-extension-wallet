@@ -105,7 +105,7 @@ export async function createAccountFromMnemonic(name, mnemonic, password) {
   try {
     account = getHarmony().wallet.addByMnemonic(mnemonic);
   } catch (e) {
-    console.log("createAccountFromMnemonic =>", e);
+    console.log("createAccountFromMnemonic error = ", e);
     return false;
   }
 

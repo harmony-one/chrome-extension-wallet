@@ -13,9 +13,7 @@
       <div class="sign__address">{{ wallet.address }}</div>
       <p class="txRow">
         <span class="action_caption">{{ displayAction }}</span>
-        <span v-if="type === 'SEND'"
-          >{{ fromShard }} Shard -> {{ toShard }} Shard</span
-        >
+        <span v-if="type === 'SEND'">{{ fromShard }} Shard -> {{ toShard }} Shard</span>
       </p>
       <p class="txRow">
         <span>From</span>
@@ -73,16 +71,9 @@
           extension.
         </p>
       </div>
-      <button class="full-but" @click="reject">
-        OK
-      </button>
+      <button class="full-but" @click="lockReject">OK</button>
     </div>
-    <notifications
-      group="notify"
-      width="250"
-      :max="4"
-      class="notifiaction-container"
-    />
+    <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
   </main>
 </template>
 <script>
@@ -94,6 +85,8 @@ import {
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_SIGN_CONNECT,
   THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
+  THIRDPARTY_SIGNATURE_KEY_REJECT_RESPONSE,
+  WALLET_LOCKED
 } from "../../../types";
 
 export default {
@@ -112,13 +105,13 @@ export default {
     wallet: {
       isLedger: false,
       name: "",
-      address: "",
-    },
+      address: ""
+    }
   }),
   computed: {
     ...mapState({
-      wallets: (state) => state.wallets,
-      isLocked: (state) => state.settings.auth.isLocked,
+      wallets: state => state.wallets,
+      isLocked: state => state.settings.auth.isLocked
     }),
     getGasFee() {
       return Unit.Gwei(this.gasPrice * this.gasLimit).toOne();
@@ -143,7 +136,7 @@ export default {
     },
     isWithdrawal() {
       return this.type === TRANSACTIONTYPE.WITHDRAWREWARD;
-    },
+    }
   },
   methods: {
     async approve() {
@@ -154,7 +147,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Account is invalid",
+            text: "Account is invalid"
           });
           return false;
         }
@@ -164,7 +157,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Password is not correct",
+            text: "Password is not correct"
           });
           return false;
         }
@@ -173,15 +166,22 @@ export default {
         action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
         payload: {
           keystore: this.wallet.keystore, //send keystore and password to the internal message handler of background.js
-          password: this.password,
-        },
+          password: this.password
+        }
       });
-      window.close();
     },
 
     async reject() {
       window.close();
     },
+    lockReject() {
+      chrome.runtime.sendMessage({
+        action: THIRDPARTY_SIGNATURE_KEY_REJECT_RESPONSE,
+        payload: {
+          message: WALLET_LOCKED
+        }
+      });
+    }
   },
   updated() {
     if (this.$refs.password) this.$refs.password.focus();
@@ -204,7 +204,7 @@ export default {
           }
           this.host = state.session.host;
           this.wallet = this.wallets.accounts.find(
-            (acc) => acc.address === state.session.account.address
+            acc => acc.address === state.session.account.address
           );
         } else {
           window.close();
@@ -212,7 +212,7 @@ export default {
       }
     );
     chrome.runtime.connect({ name: THIRDPARTY_SIGN_CONNECT });
-  },
+  }
 };
 </script>
 <style scoped>

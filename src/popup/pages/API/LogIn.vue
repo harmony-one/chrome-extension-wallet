@@ -36,10 +36,7 @@
           </div>
         </div>
         <div v-else>
-          <p>
-            Sorry. The wallet is locked. You should unlock it first in the
-            extension.
-          </p>
+          <p>Sorry. The wallet is locked. You should unlock it first in the extension.</p>
         </div>
       </div>
       <div
@@ -50,7 +47,7 @@
         <button :disabled="selected < 0" @click="accept">Accept</button>
       </div>
       <div v-else>
-        <button class="full-but" @click="deny">OK</button>
+        <button class="full-but" @click="lockReject">OK</button>
       </div>
     </main>
   </div>
@@ -61,7 +58,9 @@ import { mapState } from "vuex";
 import {
   THIRDPARTY_GET_ACCOUNT_CONNECT,
   GET_WALLET_SERVICE_STATE,
-  THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE
+  THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
+  THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
+  WALLET_LOCKED
 } from "../../../types";
 export default {
   data: () => ({
@@ -101,6 +100,14 @@ export default {
     },
     deny() {
       window.close();
+    },
+    lockReject() {
+      chrome.runtime.sendMessage({
+        action: THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
+        payload: {
+          message: WALLET_LOCKED
+        }
+      });
     },
     accept() {
       const account = this.wallets.accounts[this.selected];

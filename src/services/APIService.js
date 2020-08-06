@@ -150,6 +150,13 @@ class APIService {
     this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, payload);
     this.closeWindow();
   };
+  onGetSignatureKeyReject = ({ message }) => {
+    this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
+      rejected: true,
+      message,
+    });
+    this.closeWindow();
+  };
   getHostSessions = async () => {
     let currentSession = await storage.getValue("session");
     let sessionList = [];
@@ -185,6 +192,13 @@ class APIService {
       THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
       payload
     );
+    this.closeWindow();
+  };
+  onGetAccountReject = ({ message }) => {
+    this.sendMessageToInjectScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
+      rejected: true,
+      message,
+    });
     this.closeWindow();
   };
   closeWindow = () => {

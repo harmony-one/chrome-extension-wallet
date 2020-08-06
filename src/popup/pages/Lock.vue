@@ -28,7 +28,7 @@
     </div>
     <div class="pin-caption" :class="{ 'failed-caption': attempts < 5 }">{{ statusCaption }}</div>
     <div v-if="lastOpened">
-      <div class="lastopen-fromnow-caption">Last access {{lastOpenedFromNow}}</div>
+      <div class="lastopen-fromnow-caption">Last accessed {{lastOpenedFromNow}}</div>
       <div class="lastopen-time-caption">{{lastOpened}}</div>
     </div>
     <div class="footer">

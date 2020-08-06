@@ -8,6 +8,7 @@ import {
   THIRDPARTY_GET_ACCOUNT_REQUEST,
   THIRDPARTY_SIGN_REQUEST,
   THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
+  THIRDPARTY_SIGNATURE_KEY_REJECT_RESPONSE,
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_SIGN_CONNECT,
   THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
@@ -15,6 +16,7 @@ import {
   APP_CONNECT,
   THIRDPARTY_SIGN_REQUEST_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
+  THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
 } from "../types";
 
 function externalMessageListener(message, sender, sendResponse) {
@@ -61,8 +63,14 @@ function internalMessageListener(message, sender, sendResponse) {
     case THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE:
       apiService.onGetSignatureKeySuccess(payload);
       break;
+    case THIRDPARTY_SIGNATURE_KEY_REJECT_RESPONSE:
+      apiService.onGetSignatureKeyReject(payload);
+      break;
     case THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE:
       apiService.onGetAccountSuccess(payload);
+      break;
+    case THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE:
+      apiService.onGetAccountReject(payload);
       break;
     default:
       console.log("Unknown internal action received - ", action);

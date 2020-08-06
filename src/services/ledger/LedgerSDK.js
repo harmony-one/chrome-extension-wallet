@@ -103,7 +103,6 @@ export default class HarmonyApp {
     };
   }
 
-  /*
   async signStake(message) {
     let resp = null;
     const p = hexToBytes(message);
@@ -140,7 +139,7 @@ export default class HarmonyApp {
       return_code: returnCode,
     };
   }
-*/
+
   static async getAccountShardNonce(address, shardID, messenger) {
     const nonce = await messenger.send(
       "hmy_getTransactionCount",
@@ -206,7 +205,7 @@ export default class HarmonyApp {
 
     return txn;
   }
-  /*
+
   async signStakingTransaction(stakingTxn, chainId, shardId, messenger) {
     // get public address of ledger account
     let response = await this.publicKey(true);
@@ -261,5 +260,5 @@ export default class HarmonyApp {
     stakingTxn.setRawTransaction(encodedRaw);
 
     return stakingTxn;
-  }*/
+  }
 }
