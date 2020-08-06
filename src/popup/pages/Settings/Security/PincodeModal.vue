@@ -1,20 +1,24 @@
 <template>
   <div>
-    <app-header v-if="method === 'update'" subtitle="Set up your pin code" />
-    <div class="pincode-page">
+    <app-header
+      v-if="!subModule"
+      subtitle="Update your pincode"
+      :backRoute="!subModule ? '/settings/security' : ''"
+    />
+    <div class="pincode-page" :class="{'main': !subModule}">
       <div v-if="scene === 0">
-        <div class="unlock-caption">Input your old pin code</div>
+        <div class="pin-label">Input the old PIN code</div>
         <div
           class="pin-container"
-          :class="{ 'pin-fail': errorcode === 1 }"
+          :class="{ 'pin-fail': pinfail }"
           :style="{
-            'margin-left': pindigits === 4 ? '50px' : '0',
-            'margin-right': pindigits === 4 ? '50px' : '0',
+            'margin-left': getPinMargin(pincode.length),
+            'margin-right': getPinMargin(pincode.length),
           }"
         >
           <PincodeInput
             v-model="oldpin"
-            :length="pindigits"
+            :length="pincode.length"
             :secure="true"
             :characterPreview="true"
             ref="oldpincodeInput"
@@ -23,12 +27,12 @@
         <div class="pin-caption" :class="{ 'failed-caption': errorcode === 1 }">{{ statusCaption }}</div>
       </div>
       <div v-else-if="scene === 1">
-        <div class="unlock-caption">Set up your pin code</div>
+        <div class="pin-label">Set up a new PIN code</div>
         <div
           class="pin-container"
           :style="{
-            'margin-left': pindigits === 4 ? '50px' : '0',
-            'margin-right': pindigits === 4 ? '50px' : '0',
+            'margin-left': getPinMargin(pindigits),
+            'margin-right': getPinMargin(pindigits),
           }"
         >
           <PincodeInput
@@ -39,16 +43,15 @@
             ref="pincodeInput"
           />
         </div>
-        <div class="pin-caption">{{ defaultCaption }}</div>
       </div>
       <div v-else-if="scene === 2">
-        <div class="unlock-caption">Confirm your pin code</div>
+        <div class="pin-label">Confirm the PIN code</div>
         <div
           class="pin-container"
-          :class="{ 'pin-fail': errorcode === 2 }"
+          :class="{ 'pin-fail': pinfail }"
           :style="{
-            'margin-left': pindigits === 4 ? '50px' : '0',
-            'margin-right': pindigits === 4 ? '50px' : '0',
+            'margin-left': getPinMargin(pindigits),
+            'margin-right': getPinMargin(pindigits),
           }"
         >
           <PincodeInput
@@ -61,10 +64,11 @@
           />
         </div>
         <div class="pin-caption" :class="{ 'failed-caption': errorcode === 2 }">{{ statusCaption }}</div>
-        <div class="footer">
-          <button class="full-but" v-if="!attempts" @click="onRetry">Retry</button>
-          <button class="full-but" v-if="success" @click="onSuccess">Done</button>
-        </div>
+      </div>
+      <div class="footer">
+        <button class="full-but" v-if="attempts > 0 && !success" @click="()=>$router.go(-1)">Back</button>
+        <button class="full-but" v-if="!attempts" @click="onRetry">Retry</button>
+        <button class="full-but" v-if="success" @click="onSuccess">Done</button>
       </div>
     </div>
   </div>
@@ -77,6 +81,10 @@ export default {
     method: {
       default: "create",
       type: String
+    },
+    subModule: {
+      default: true,
+      type: Boolean
     }
   },
   data: () => ({
@@ -85,8 +93,9 @@ export default {
     pinconfirm: "",
     errorcode: 0,
     attempts: 3,
-    scene: 0,
-    success: false
+    scene: 1,
+    success: false,
+    pinfail: false
   }),
   watch: {
     pin() {
@@ -100,7 +109,7 @@ export default {
       }
     },
     oldpin() {
-      if (this.oldpin.length === this.pindigits) {
+      if (this.oldpin.length === this.pincode.length) {
         this.oldpinInputComplete();
       }
     }
@@ -110,13 +119,10 @@ export default {
       pincode: state => state.settings.auth.pincode,
       pindigits: state => state.settings.auth.pindigits
     }),
-    defaultCaption() {
-      return `Input the ${this.pindigits} digits pin code`;
-    },
     statusCaption() {
-      if (this.errorcode === 1) return "Old pin code is not correct";
-      else if (this.errorcode === 2) return "Pin code doesn't match";
-      return this.defaultCaption;
+      if (this.errorcode === 1) return "PIN code is not correct";
+      else if (this.errorcode === 2) return "PIN code doesn't match";
+      return "";
     }
   },
   mounted() {
@@ -128,6 +134,9 @@ export default {
     }
   },
   methods: {
+    getPinMargin(digits) {
+      return digits === 4 ? "50px" : "15px";
+    },
     onRetry() {
       this.attempts = 3;
       this.errorcode = 0;
@@ -139,10 +148,12 @@ export default {
     oldpinInputComplete() {
       if (this.oldpin === this.pincode) {
         this.scene = 1;
+        this.errorcode = 0;
       } else {
         this.errorcode = 1;
+        this.pinfail = true;
         setTimeout(() => {
-          this.errorcode = 0;
+          this.pinfail = false;
           this.oldpin = "";
         }, 800);
       }
@@ -150,10 +161,12 @@ export default {
     pinInputComplete() {
       if (this.pinconfirm === this.pin) {
         this.success = true;
+        this.errorcode = 0;
       } else {
         this.errorcode = 2;
+        this.pinfail = true;
         setTimeout(() => {
-          this.errorcode = 0;
+          this.pinfail = false;
           this.pinconfirm = "";
           this.attempts = Math.max(this.attempts - 1, 0);
         }, 800);
@@ -161,9 +174,10 @@ export default {
     },
     onSuccess() {
       this.$store.commit("settings/setPincode", this.pinconfirm);
-      this.$emit("success");
-      if (this.method === "update") {
+      if (!this.subModule) {
         this.$router.push("/settings/security");
+      } else {
+        this.$emit("success");
       }
     }
   }

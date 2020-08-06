@@ -8,7 +8,6 @@ export default {
       pindigits: 4,
       timeout: 30 * 60 * 1000, //milisec, default 30min
       attempts: 5,
-      countDefault: 60,
       countdown: 60, //sec, delay 1min when auth fails
     },
   },
@@ -34,11 +33,7 @@ export default {
     },
     resetFailedTimer(state) {
       state.auth.attempts = 5;
-      state.auth.countdown = state.auth.countDefault;
-    },
-    setCountDefault(state, payload) {
-      state.auth.countDefault = payload;
-      state.auth.countdown = payload;
+      state.auth.countdown = 60;
     },
   },
 };

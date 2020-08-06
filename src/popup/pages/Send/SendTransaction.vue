@@ -1,10 +1,6 @@
 <template>
   <div>
-    <app-header
-      :subtitle="getHeaderName"
-      @refresh="refreshData"
-      backRoute="/"
-    />
+    <app-header :subtitle="getHeaderName" @refresh="refreshData" />
     <main class="main">
       <div v-if="scene === 1">
         <form
@@ -20,9 +16,9 @@
             :class="[message.type]"
             @click="onMessageClick"
           >
-            <span v-if="message.type === 'success'"
-              >Transaction Succeed: Click here to see the transaction</span
-            >
+            <span
+              v-if="message.type === 'success'"
+            >Transaction Succeed: Click here to see the transaction</span>
             <span v-else>{{ message.text }}</span>
           </div>
           <div :class="{ row: !isToken }">
@@ -51,8 +47,7 @@
                   v-for="shard in account.shardArray"
                   :key="shard.shardID"
                   :value="shard.shardID"
-                  >{{ shard.shardID }}</option
-                >
+                >{{ shard.shardID }}</option>
               </select>
             </label>
           </div>
@@ -67,23 +62,15 @@
                 v-model="amount"
                 step="any"
               />
-              <div class="maximum-label" v-show="!loading">
-                Maximum: {{ getMaxBalance + " " + selectedToken }}
-              </div>
+              <div
+                class="maximum-label"
+                v-show="!loading"
+              >Maximum: {{ getMaxBalance + " " + selectedToken }}</div>
             </label>
             <label v-if="!isToken" class="input-label token">
               Token
-              <select
-                class="input-field"
-                v-model="selectedToken"
-                @change="tokenChanged()"
-              >
-                <option
-                  v-for="symbol in tokenList"
-                  :key="symbol"
-                  :value="symbol"
-                  >{{ symbol }}</option
-                >
+              <select class="input-field" v-model="selectedToken" @change="tokenChanged()">
+                <option v-for="symbol in tokenList" :key="symbol" :value="symbol">{{ symbol }}</option>
               </select>
             </label>
           </div>
@@ -137,14 +124,16 @@
       <div v-else>
         <h3 class="center">
           {{
-            "Approve Transaction" + (wallet.isLedger ? " on the Ledger" : "")
+          "Approve Transaction" + (wallet.isLedger ? " on the Ledger" : "")
           }}
         </h3>
         <p class="addressRow">
           From
-          <span class="address__name">{{
+          <span class="address__name">
+            {{
             compressAddress(getFromAddress)
-          }}</span>
+            }}
+          </span>
           of Shard
           <b>{{ fromShard }}</b>
         </p>
@@ -208,12 +197,7 @@
           <button @click="onBackClick()" class="full-but">Retry</button>
         </div>
       </div>
-      <notifications
-        group="notify"
-        width="250"
-        :max="4"
-        class="notifiaction-container"
-      />
+      <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
     </main>
   </div>
 </template>
@@ -223,7 +207,7 @@ import { mapState } from "vuex";
 import {
   decryptKeyStore,
   transferToken,
-  getNetworkLink,
+  getNetworkLink
 } from "../../../services/AccountService";
 import { sendToken } from "../../../services/Hrc20Service";
 import { isValidAddress } from "@harmony-js/utils";
@@ -231,13 +215,13 @@ import account from "../../mixins/account";
 import helper from "../../mixins/helper";
 import {
   signTransactionWithLedger,
-  isLedgerLocked,
+  isLedgerLocked
 } from "../../../services/LedgerService";
 import {
   LEDGER_CONFIRM_PREPARE,
   LEDGER_CONFIRM_SUCCESS,
   LEDGER_CONFIRM_REJECT,
-  LEDGER_LOCKED,
+  LEDGER_LOCKED
 } from "../../../types";
 
 export default {
@@ -247,12 +231,12 @@ export default {
   props: {
     isToken: {
       type: Boolean,
-      default: false,
+      default: false
     },
     token: {
       type: String,
-      default: "ONE",
-    },
+      default: "ONE"
+    }
   },
   data: () => ({
     scene: 1,
@@ -270,15 +254,15 @@ export default {
     message: {
       show: false,
       type: "error",
-      text: "",
+      text: ""
     },
-    ledgerConfirmTxt: LEDGER_CONFIRM_PREPARE,
+    ledgerConfirmTxt: LEDGER_CONFIRM_PREPARE
   }),
 
   computed: {
     ...mapState({
-      wallet: (state) => state.wallets.active,
-      loading: (state) => state.loading,
+      wallet: state => state.wallets.active,
+      loading: state => state.loading
     }),
     getFromAddress() {
       return this.wallet.address;
@@ -308,7 +292,7 @@ export default {
     getHeaderName() {
       if (this.isHRCToken) return `Send ${this.selectedToken} Token`;
       return "Send Payment";
-    },
+    }
   },
 
   async mounted() {
@@ -386,7 +370,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "success",
-            text: LEDGER_CONFIRM_SUCCESS,
+            text: LEDGER_CONFIRM_SUCCESS
           });
           this.$store.commit("loading", true);
           const [sentTxn, txnHash] = await signedTxn.sendTransaction();
@@ -408,7 +392,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: result,
+            text: result
           });
           this.ledgerConfirmTxt = LEDGER_CONFIRM_REJECT;
           this.ledgerError = true;
@@ -431,7 +415,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Password is not correct",
+            text: "Password is not correct"
           });
           return false;
         }
@@ -533,7 +517,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: LEDGER_LOCKED,
+            text: LEDGER_LOCKED
           });
           return;
         }
@@ -548,8 +532,8 @@ export default {
       await this.loadShardingInfo();
       await this.refreshToken();
       this.$store.commit("loading", false);
-    },
-  },
+    }
+  }
 };
 </script>
 <style scoped>

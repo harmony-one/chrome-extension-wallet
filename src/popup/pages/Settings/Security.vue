@@ -1,6 +1,6 @@
 <template>
   <div>
-    <app-header subtitle="Security" />
+    <app-header subtitle="Security" backRoute="/settings" />
     <main class="main">
       <div
         class="list-item"
@@ -9,6 +9,7 @@
         @click="item.handler"
       >{{ item.title }}</div>
       <pindigits-modal />
+      <locktimer-modal />
     </main>
   </div>
 </template>
@@ -16,33 +17,36 @@
 <script>
 import { mapState } from "vuex";
 import PindigitsModal from "./Security/PindigitsModal";
+import LocktimerModal from "./Security/LocktimerModal";
 export default {
   data() {
     return {
-      digits: 4,
       options: [
-        { title: "Change pin code", handler: () => this.changePincode() },
-        { title: "Change pincode digits", handler: () => this.showPindigits() },
+        { title: "Change the PIN code", handler: () => this.changePincode() },
         {
-          title: "Set lock timer",
-          handler: () => this.setIdleTimeout()
+          title: "Change the PIN code digits",
+          handler: () => this.showPindigitsModal()
+        },
+        {
+          title: "Set the lock timer",
+          handler: () => this.showLockTimerModal()
         }
       ]
     };
   },
   components: {
-    PindigitsModal
+    PindigitsModal,
+    LocktimerModal
   },
   methods: {
-    changeDigits(newValue) {
-      this.digits = newValue;
+    changePincode() {
+      this.$router.push("/settings/security/pincode");
     },
-    changePincode() {},
-    showPindigits() {
+    showPindigitsModal() {
       this.$modal.show("modal-pindigits");
     },
-    setIdleTimeout() {
-      console.log("idletimeout");
+    showLockTimerModal() {
+      this.$modal.show("modal-locktimer");
     }
   }
 };

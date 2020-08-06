@@ -15,8 +15,8 @@ export default {
       },
       set: function() {
         this.$emit("change", this.data);
-      },
-    },
-  },
+      }
+    }
+  }
 };
 </script>

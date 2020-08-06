@@ -181,7 +181,7 @@ const router = new Router({
       path: "/settings/security/pincode",
       name: "pincode",
       component: PincodeModal,
-      props: { method: "update" },
+      props: { method: "update", subModule: false },
       meta: {
         requiredAccount: true,
       },
@@ -199,6 +199,9 @@ router.beforeEach((to, from, next) => {
       )
         return;
       const now = Date.now();
+      storage.saveValue({
+        lastOpened: now,
+      });
       const lastClosed = data.lastClosed;
       const offset = now - lastClosed;
       if (offset >= store.state.settings.auth.timeout) {

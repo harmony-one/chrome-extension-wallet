@@ -13,8 +13,8 @@
       class="pin-container"
       :class="{ 'pin-fail': pincodeError ? true : false }"
       :style="{
-        'margin-left': pindigits === 4 ? '50px' : '0',
-        'margin-right': pindigits === 4 ? '50px' : '0',
+        'margin-left': getPinMargin(pindigits),
+        'margin-right': getPinMargin(pindigits),
       }"
     >
       <PincodeInput
@@ -26,13 +26,11 @@
         ref="pincodeInput"
       />
     </div>
-    <div class="pin-caption" :class="{ 'failed-caption': attempts < 5 }">
-      {{ statusCaption }}
-    </div>
+    <div class="pin-caption" :class="{ 'failed-caption': attempts < 5 }">{{ statusCaption }}</div>
+    <div class="lastopen-fromnow-caption">Last access: {{lastOpenedFromNow}}</div>
+    <div class="lastopen-time-caption">{{lastOpened}}</div>
     <div class="footer">
-      <span>
-        Developed by Harmony Team
-      </span>
+      <span>Developed by Harmony Team</span>
     </div>
   </div>
 </template>
@@ -40,25 +38,28 @@
 <script>
 import { mapState } from "vuex";
 import * as storage from "../../services/StorageService";
+import moment from "moment-timezone";
 const AppInfo = require("../../app.json");
 export default {
   data: () => ({
     pin: "",
     pincodeError: false,
+    lastOpened: "",
+    lastOpenedFromNow: ""
   }),
   computed: {
     ...mapState({
-      pincode: (state) => state.settings.auth.pincode,
-      pindigits: (state) => state.settings.auth.pindigits,
-      attempts: (state) => state.settings.auth.attempts,
-      countdown: (state) => state.settings.auth.countdown,
+      pincode: state => state.settings.auth.pincode,
+      pindigits: state => state.settings.auth.pindigits,
+      attempts: state => state.settings.auth.attempts,
+      countdown: state => state.settings.auth.countdown
     }),
     version() {
       return "v" + AppInfo.version;
     },
     statusCaption() {
       if (this.attempts === 5)
-        return `Input the ${this.pindigits} digits pin code`;
+        return `Input the ${this.pindigits} digits PIN code`;
       else if (this.attempts > 0)
         return `${this.attempts} ${
           this.attempts > 1 ? "attempts" : "attempt"
@@ -68,18 +69,29 @@ export default {
           this.countdown
         )}`;
       }
-    },
+    }
   },
   watch: {
     pin() {
       if (this.pin.length === this.pindigits) {
         this.pinCodeComplete();
       }
-    },
+    }
   },
   mounted() {
+    storage.getValue("lastOpened").then(data => {
+      if (!data) return;
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      this.lastOpened = moment(data.lastOpened)
+        .tz(timezone)
+        .format("YYYY/MM/DD HH:mm:ss z");
+      const fromNow = moment(data.lastOpened).fromNow();
+      this.lastOpenedFromNow =
+        fromNow.charAt(0).toUpperCase() + fromNow.slice(1);
+    });
     if (this.attempts === 0) {
-      storage.getValue("lastClosed").then((data) => {
+      storage.getValue("lastClosed").then(data => {
+        if (!data) return;
         const now = Date.now();
         const lastClosed = data.lastClosed;
         const passedtime = Math.floor((now - lastClosed) / 1000);
@@ -92,6 +104,9 @@ export default {
     }
   },
   methods: {
+    getPinMargin(digits) {
+      return digits === 4 ? "50px" : "15px";
+    },
     startCountDown() {
       const timerID = setInterval(() => {
         const count = this.countdown - 1;
@@ -126,8 +141,8 @@ export default {
           this.pincodeError = false;
         }, 800);
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -154,6 +169,16 @@ export default {
 }
 .brand-name {
   font-size: 25px;
+  color: black;
+}
+.lastopen-time-caption {
+  font-size: 12px;
+  margin-top: 5px;
+  color: #555;
+}
+.lastopen-fromnow-caption {
+  font-size: 14px;
+  margin-top: 10px;
   color: black;
 }
 .version-info {
