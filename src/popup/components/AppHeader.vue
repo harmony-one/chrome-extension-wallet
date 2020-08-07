@@ -1,7 +1,7 @@
 <template>
   <header class="header">
     <div class="header-top">
-      <router-link class="header-logo" to="/">
+      <router-link class="header-logo" to="/home">
         <img src="images/harmony-small.png" alt="Harmony" />
         <span>Harmony</span>
       </router-link>
@@ -222,7 +222,7 @@ export default {
       return str;
     },
     backClicked() {
-      if (!this.backRoute) this.$router.push("/");
+      if (!this.backRoute) this.$router.push("/home");
       else this.$router.push(this.backRoute);
     },
     toggleDropdownMenu() {
@@ -256,7 +256,7 @@ export default {
       this.$store.commit("wallets/setActive", address);
       this.hideDropdownMenu();
       this.refreshData();
-      if (this.$route.name !== "account") this.$router.push("/");
+      if (this.$route.name !== "account") this.$router.push("/home");
     },
     createAccount() {
       this.openExpandPopup("/create-wallet");

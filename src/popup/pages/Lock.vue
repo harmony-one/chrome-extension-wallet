@@ -126,7 +126,7 @@ export default {
         this.$store.commit("settings/setLocked", false);
         this.$store.commit("settings/resetFailedTimer");
         storage.saveValue({ lastOpened: Date.now() });
-        this.$router.push("/");
+        this.$router.push("/home");
       } else {
         this.pincodeError = true;
         this.pin = "";

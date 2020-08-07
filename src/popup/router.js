@@ -1,5 +1,6 @@
 import Vue from "vue";
 import Router from "vue-router";
+import AuthRoute from "./AuthRoute.vue";
 
 import CreateWallet from "./pages/Wallet/CreateWallet.vue";
 import ImportWallet from "./pages/Wallet/ImportWallet.vue";
@@ -23,7 +24,6 @@ import About from "./pages/About.vue";
 import Settings from "./pages/Settings/index.vue";
 import Security from "./pages/Settings/Security.vue";
 import PincodeModal from "./pages/Settings/Security/PincodeModal.vue";
-import * as storage from "../services/StorageService";
 
 import store from "./store";
 
@@ -45,6 +45,15 @@ const router = new Router({
     //end
     {
       path: "/",
+      name: "auth",
+      component: AuthRoute,
+      meta: {
+        requiredAccount: true,
+        authenticate: true,
+      },
+    },
+    {
+      path: "/home",
       name: "account",
       component: Account,
       meta: {
@@ -193,28 +202,10 @@ const router = new Router({
   ],
 });
 router.beforeEach(async (to, from, next) => {
-  if (!from.name && to.path === "/") {
-    const { lastClosed } = await storage.getValue("lastClosed");
-    if (
-      lastClosed &&
-      store.state.wallets.accounts.length &&
-      store.state.settings.auth.pincode
-    ) {
-      const now = Date.now();
-      const offset = now - lastClosed;
-      if (offset >= store.state.settings.auth.timeout) {
-        store.commit("settings/setLocked", true);
-        if (to.meta.authenticate) next({ path: "/lock" });
-      }
-    }
-  }
   if (to.matched.some((record) => record.meta.authenticate)) {
     if (store.state.settings.auth.isLocked) {
       next({ path: "/lock" });
-    } else {
-      if (!from.name) storage.saveValue({ lastOpened: Date.now() });
-      next();
-    }
+    } else next();
   }
   if (to.matched.some((record) => record.meta.requiredAccount)) {
     if (!store.state.wallets.accounts.length) {

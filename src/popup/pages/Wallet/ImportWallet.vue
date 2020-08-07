@@ -54,7 +54,7 @@
           <button
             v-show="wallets.accounts.length > 0"
             class="outline"
-            @click="$router.push('/')"
+            @click="$router.push('/home')"
           >Cancel</button>
           <button @click="importKey" :class="!wallets.accounts.length ? 'full-width' : ''">Import</button>
         </div>
