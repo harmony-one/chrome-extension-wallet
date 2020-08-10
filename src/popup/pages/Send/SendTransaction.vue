@@ -541,7 +541,6 @@ h3 {
 .recipient,
 .amount {
   width: 75%;
-  margin-right: 10px;
 }
 .token,
 .shard {
@@ -550,7 +549,6 @@ h3 {
 .gas-price,
 .gas-limit {
   width: 32%;
-  margin-right: 10px;
 }
 .gas-one {
   width: 36%;

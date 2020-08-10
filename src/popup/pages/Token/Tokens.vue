@@ -2,19 +2,19 @@
   <div>
     <app-header @refresh="refreshData" headerTab="main-tab" />
     <main class="main">
-      <div v-if="!tokenArray || account.shard" class="message-empty">
-        No tokens found
-      </div>
+      <div v-if="!tokenArray || account.shard" class="message-empty">No tokens found</div>
 
       <div v-else>
         <div class="token-row" v-for="token in tokenArray" :key="token">
           <span class="token-name">{{ compressSymbol(token) }}</span>
           <div class="token-box">
-            <span class="token-balance">{{
+            <span class="token-balance">
+              {{
               $formatNumber(getTokenBalance(token), {
-                maximumSignificantDigits: 6,
+              maximumSignificantDigits: 6,
               })
-            }}</span>
+              }}
+            </span>
             <button
               class="but-token"
               :disabled="
@@ -22,9 +22,7 @@
                   getTokenBalance(token) === undefined
               "
               @click="sendToken(token)"
-            >
-              Send
-            </button>
+            >Send</button>
           </div>
         </div>
       </div>
@@ -42,9 +40,9 @@ export default {
   mixins: [account],
   computed: {
     ...mapState({
-      account: (state) => state.account,
-      network: (state) => state.network,
-    }),
+      account: state => state.account,
+      network: state => state.network
+    })
   },
   async mounted() {
     await this.loadAllTokenBalance();
@@ -64,8 +62,8 @@ export default {
     },
     sendToken(symbol) {
       this.$router.push({ path: `/send-token/${symbol}` });
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -83,6 +81,8 @@ export default {
 .token-box {
   justify-content: space-between;
   display: flex;
+  flex-direction: row;
+  gap: 10px;
   align-items: center;
 }
 .token span {
@@ -95,7 +95,6 @@ export default {
 .token-balance {
   font-size: 1rem;
   font-weight: 600;
-  margin-right: 10px;
   text-align: right;
   word-break: break-all;
   padding-left: 1rem;

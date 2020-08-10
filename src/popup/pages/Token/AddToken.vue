@@ -157,7 +157,6 @@ export default {
 
 .symbol-label {
   width: 70%;
-  margin-right: 10px;
 }
 
 .symbol-input {

@@ -410,6 +410,7 @@ button.add_token:active {
 .row {
   display: flex;
   flex-direction: row;
+  gap: 10px;
 }
 .transaction {
   display: flex;
