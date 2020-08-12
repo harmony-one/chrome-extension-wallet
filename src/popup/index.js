@@ -43,8 +43,11 @@ new Vue({
   render: (h) => h(App),
 }).$mount("#app");
 
-if (store.state.network.name === "")
+//init the store
+if (!store.state.network.name)
   store.commit("network/change", Config.networks[0]);
+if (!store.state.settings.auth.lockState)
+  store.dispatch("settings/setLockState", false);
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   const { type, action, payload } = message;

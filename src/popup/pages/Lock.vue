@@ -13,23 +13,27 @@
       class="pin-container"
       :class="{ 'pin-fail': pincodeError ? true : false }"
       :style="{
-        'margin-left': getPinMargin(pindigits),
-        'margin-right': getPinMargin(pindigits),
+        'margin-left': getPinMargin(getPinCode.digits),
+        'margin-right': getPinMargin(getPinCode.digits),
       }"
     >
       <PincodeInput
         v-model="pin"
-        :length="pindigits"
+        :length="getPinCode.digits"
         :secure="true"
         :characterPreview="false"
         :disabled="!attempts"
         ref="pincodeInput"
       />
     </div>
-    <div class="pin-caption" :class="{ 'failed-caption': attempts < 5 }">{{ statusCaption }}</div>
+    <div class="pin-caption" :class="{ 'failed-caption': attempts < 5 }">
+      {{ statusCaption }}
+    </div>
     <div v-if="lastOpened">
-      <div class="lastopen-fromnow-caption">Last accessed {{lastOpenedFromNow}}</div>
-      <div class="lastopen-time-caption">{{lastOpened}}</div>
+      <div class="lastopen-fromnow-caption">
+        Last accessed {{ lastOpenedFromNow }}
+      </div>
+      <div class="lastopen-time-caption">{{ lastOpened }}</div>
     </div>
     <div class="footer">
       <span>Developed by Harmony Team</span>
@@ -38,7 +42,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import * as storage from "../../services/StorageService";
 import moment from "moment-timezone";
 const AppInfo = require("../../app.json");
@@ -47,21 +51,20 @@ export default {
     pin: "",
     pincodeError: false,
     lastOpened: "",
-    lastOpenedFromNow: ""
+    lastOpenedFromNow: "",
   }),
   computed: {
+    ...mapGetters(["getPinCode"]),
     ...mapState({
-      pincode: state => state.settings.auth.pincode,
-      pindigits: state => state.settings.auth.pindigits,
-      attempts: state => state.settings.auth.attempts,
-      countdown: state => state.settings.auth.countdown
+      attempts: (state) => state.settings.auth.attempts,
+      countdown: (state) => state.settings.auth.countdown,
     }),
     version() {
       return "v" + AppInfo.version;
     },
     statusCaption() {
       if (this.attempts === 5)
-        return `Input the ${this.pindigits} digits PIN code`;
+        return `Input the ${this.getPinCode.digits} digits PIN code`;
       else if (this.attempts > 0)
         return `${this.attempts} ${
           this.attempts > 1 ? "attempts" : "attempt"
@@ -71,27 +74,29 @@ export default {
           this.countdown
         )}`;
       }
-    }
+    },
   },
   watch: {
     pin() {
-      if (this.pin.length === this.pindigits) {
+      if (this.pin.length === this.getPinCode.digits) {
         this.pinCodeComplete();
       }
-    }
+    },
   },
-  mounted() {
-    storage.getValue("lastOpened").then(({ lastOpened }) => {
-      if (!lastOpened) return;
+  async created() {
+    const { AppState } = await storage.getValue("AppState");
+    if (!AppState) return;
+    const { lastOpened } = AppState;
+    if (lastOpened) {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       this.lastOpened = moment(lastOpened)
         .tz(timezone)
         .format("YYYY/MM/DD HH:mm:ss z");
       this.lastOpenedFromNow = moment(lastOpened).fromNow();
-    });
+    }
     if (this.attempts === 0) {
-      storage.getValue("lastClosed").then(({ lastClosed }) => {
-        if (!lastClosed) return;
+      const { lastClosed } = AppState;
+      if (lastClosed) {
         const now = Date.now();
         const passedtime = Math.floor((now - lastClosed) / 1000);
         this.$store.commit(
@@ -99,7 +104,7 @@ export default {
           Math.max(this.countdown - passedtime, 0)
         );
         this.startCountDown();
-      });
+      }
     }
   },
   methods: {
@@ -121,11 +126,14 @@ export default {
         parseInt(count % 60)
       ).padStart(2, "0")}`;
     },
-    pinCodeComplete() {
-      if (this.pin === this.pincode) {
-        this.$store.commit("settings/setLocked", false);
+    async pinCodeComplete() {
+      if (this.pin === this.getPinCode.pin) {
+        this.$store.dispatch("settings/setLockState", false);
         this.$store.commit("settings/resetFailedTimer");
-        storage.saveValue({ lastOpened: Date.now() });
+        const { AppState } = await storage.getValue("AppState");
+        storage.saveValue({
+          AppState: { ...AppState, lastOpened: Date.now() },
+        });
         this.$router.push("/home");
       } else {
         this.pincodeError = true;
@@ -141,8 +149,8 @@ export default {
           this.pincodeError = false;
         }, 800);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

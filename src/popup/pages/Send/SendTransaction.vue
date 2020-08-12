@@ -122,11 +122,7 @@
       </div>
       <!-- Approve Transaction Dialog -->
       <div v-else>
-        <h3 class="center">
-          {{
-          "Approve Transaction" + (wallet.isLedger ? " on the Ledger" : "")
-          }}
-        </h3>
+        <h3 class="center">Approve Transaction</h3>
         <p class="addressRow">
           From
           <span class="address__name">
@@ -206,7 +202,7 @@
 import { mapState } from "vuex";
 import {
   decryptKeyStore,
-  transferToken,
+  transferOne,
   getNetworkLink
 } from "../../../services/AccountService";
 import { sendToken } from "../../../services/Hrc20Service";
@@ -215,6 +211,7 @@ import account from "../../mixins/account";
 import helper from "../../mixins/helper";
 import {
   signTransactionWithLedger,
+  signHRCTransactionWithLedger,
   isLedgerLocked
 } from "../../../services/LedgerService";
 import {
@@ -332,8 +329,8 @@ export default {
       if (this.message.type == "success") window.open(this.message.text);
     },
     async loadBalance() {
+      await this.loadOneBalance();
       if (this.isHRCToken) await this.loadTokenBalance(this.selectedToken);
-      else await this.loadOneBalance();
     },
     async refreshToken() {
       await this.setSelectedToken();
@@ -356,16 +353,29 @@ export default {
     },
     async processLedgerTransfer() {
       try {
-        const { success, result } = await signTransactionWithLedger(
-          this.recipient,
-          this.fromShard,
-          this.toShard,
-          this.amount,
-          this.gasLimit,
-          this.gasPrice
-        );
-        if (success) {
-          const signedTxn = result;
+        let res;
+        if (this.isHRCToken) {
+          res = await signHRCTransactionWithLedger(
+            this.address,
+            this.recipient,
+            this.amount,
+            this.gasLimit,
+            this.gasPrice,
+            this.getTokenDecimals(this.selectedToken),
+            this.getContractAddress(this.selectedToken)
+          );
+        } else {
+          res = await signTransactionWithLedger(
+            this.recipient,
+            this.fromShard,
+            this.toShard,
+            this.amount,
+            this.gasLimit,
+            this.gasPrice
+          );
+        }
+        if (res.success) {
+          const signedTxn = res.result;
           this.ledgerConfirmTxt = LEDGER_CONFIRM_SUCCESS;
           this.$notify({
             group: "notify",
@@ -426,7 +436,7 @@ export default {
         // use the current selected account in the Account window
         let ret;
         if (!this.isHRCToken) {
-          ret = await transferToken(
+          ret = await transferOne(
             this.recipient,
             this.fromShard,
             this.toShard,

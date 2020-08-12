@@ -35,11 +35,13 @@
 
 <script>
 import account from "../../mixins/account";
+import helper from "../../mixins/helper";
 import { mapState } from "vuex";
 export default {
-  mixins: [account],
+  mixins: [account, helper],
   computed: {
     ...mapState({
+      activeAcc: state => state.wallets.active,
       account: state => state.account,
       network: state => state.network
     })
@@ -61,7 +63,9 @@ export default {
       await this.loadOneBalance();
     },
     sendToken(symbol) {
-      this.$router.push({ path: `/send-token/${symbol}` });
+      if (this.activeAcc.isLedger)
+        this.openExpandPopup(`/send-token/${symbol}`);
+      else this.$router.push(`/send-token/${symbol}`);
     }
   }
 };

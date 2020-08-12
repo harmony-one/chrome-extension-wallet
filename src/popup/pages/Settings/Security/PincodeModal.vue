@@ -5,26 +5,28 @@
       subtitle="Update your pincode"
       :backRoute="!subModule ? '/settings/security' : ''"
     />
-    <div class="pincode-page" :class="{'main': !subModule}">
+    <div class="pincode-page" :class="{ main: !subModule }">
       <div v-if="scene === 0">
         <div class="pin-label">Input the old PIN code</div>
         <div
           class="pin-container"
           :class="{ 'pin-fail': pinfail }"
           :style="{
-            'margin-left': getPinMargin(pincode.length),
-            'margin-right': getPinMargin(pincode.length),
+            'margin-left': getPinMargin(getPinCode.digits),
+            'margin-right': getPinMargin(getPinCode.digits),
           }"
         >
           <PincodeInput
             v-model="oldpin"
-            :length="pincode.length"
+            :length="getPinCode.digits"
             :secure="true"
             :characterPreview="false"
             ref="oldpincodeInput"
           />
         </div>
-        <div class="pin-caption" :class="{ 'failed-caption': errorcode === 1 }">{{ statusCaption }}</div>
+        <div class="pin-caption" :class="{ 'failed-caption': errorcode === 1 }">
+          {{ statusCaption }}
+        </div>
       </div>
       <div v-else-if="scene === 1">
         <div class="pin-label">Set up a new PIN code</div>
@@ -63,10 +65,14 @@
             :disabled="!attempts"
           />
         </div>
-        <div class="pin-caption" :class="{ 'failed-caption': errorcode === 2 }">{{ statusCaption }}</div>
+        <div class="pin-caption" :class="{ 'failed-caption': errorcode === 2 }">
+          {{ statusCaption }}
+        </div>
       </div>
       <div class="footer">
-        <button class="full-but" v-if="!attempts" @click="onRetry">Retry</button>
+        <button class="full-but" v-if="!attempts" @click="onRetry">
+          Retry
+        </button>
         <button class="full-but" v-else @click="onBackClicked">Back</button>
       </div>
     </div>
@@ -74,20 +80,20 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 export default {
   props: {
     method: {
       default: "create",
-      type: String
+      type: String,
     },
     subModule: {
       default: true,
-      type: Boolean
+      type: Boolean,
     },
     onBack: {
-      type: Function
-    }
+      type: Function,
+    },
   },
   data: () => ({
     oldpin: "",
@@ -96,7 +102,7 @@ export default {
     errorcode: 0,
     attempts: 3,
     scene: 1,
-    pinfail: false
+    pinfail: false,
   }),
   watch: {
     pin() {
@@ -110,28 +116,32 @@ export default {
       }
     },
     oldpin() {
-      if (this.oldpin.length === this.pincode.length) {
+      if (this.oldpin.length === this.getPinCode.digits) {
         this.oldpinInputComplete();
       }
-    }
+    },
   },
   computed: {
+    ...mapGetters(["getPinCode"]),
     ...mapState({
-      pincode: state => state.settings.auth.pincode,
-      pindigits: state => state.settings.auth.pindigits
+      pindigits: (state) => state.settings.auth.pindigits,
     }),
     statusCaption() {
       if (this.errorcode === 1) return "PIN code is not correct";
       else if (this.errorcode === 2) return "PIN code doesn't match";
       return "";
-    }
+    },
+    isPincodeEmpty() {
+      return !this.getPinCode;
+    },
   },
   mounted() {
     if (this.method === "create") {
-      if (!this.pincode) this.scene = 1;
+      if (this.isPincodeEmpty) this.scene = 1;
       else this.$emit("success");
     } else if (this.method === "update") {
-      this.scene = 0;
+      if (this.isPincodeEmpty) this.scene = 1;
+      else this.scene = 0;
     }
   },
   methods: {
@@ -151,7 +161,7 @@ export default {
       this.$nextTick(() => this.$refs.pincodeInput.$el.children[0].focus());
     },
     oldpinInputComplete() {
-      if (this.oldpin === this.pincode) {
+      if (this.oldpin === this.getPinCode.pin) {
         this.scene = 1;
         this.errorcode = 0;
       } else {
@@ -166,7 +176,7 @@ export default {
     pinInputComplete() {
       if (this.pinconfirm === this.pin) {
         this.errorcode = 0;
-        this.$store.commit("settings/setPincode", this.pinconfirm);
+        this.$store.dispatch("settings/setPincode", this.pinconfirm);
         setTimeout(() => {
           if (!this.subModule) {
             this.$router.push("/settings/security");
@@ -183,8 +193,8 @@ export default {
           this.attempts = Math.max(this.attempts - 1, 0);
         }, 800);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>

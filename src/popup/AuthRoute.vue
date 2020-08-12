@@ -2,31 +2,33 @@
   <div class="auth-page"></div>
 </template>
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import * as storage from "../services/StorageService";
 export default {
   computed: {
+    ...mapGetters(["getPinCode"]),
     ...mapState({
-      accounts: state => state.wallets.accounts,
-      pincode: state => state.settings.auth.pincode,
-      timeout: state => state.settings.auth.timeout
-    })
+      accounts: (state) => state.wallets.accounts,
+      timeout: (state) => state.settings.auth.timeout,
+    }),
   },
-  mounted() {
-    storage.getValue("lastClosed").then(({ lastClosed }) => {
-      if (lastClosed && this.accounts.length && this.pincode) {
+  async created() {
+    const { AppState } = await storage.getValue("AppState");
+    if (AppState) {
+      const { lastClosed } = AppState;
+      if (lastClosed && this.accounts.length && this.getPinCode) {
         const now = Date.now();
         const offset = now - lastClosed;
         if (offset >= this.timeout) {
-          this.$store.commit("settings/setLocked", true);
+          this.$store.dispatch("settings/setLockState", true);
           this.$router.push("/lock");
           return;
         }
       }
-      storage.saveValue({ lastOpened: Date.now() });
-      this.$router.push("/home");
-    });
-  }
+    }
+    storage.saveValue({ AppState: { ...AppState, lastOpened: Date.now() } });
+    this.$router.push("/home");
+  },
 };
 </script>
 <style>

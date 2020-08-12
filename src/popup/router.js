@@ -203,7 +203,7 @@ const router = new Router({
 });
 router.beforeEach(async (to, from, next) => {
   if (to.matched.some((record) => record.meta.authenticate)) {
-    if (store.state.settings.auth.isLocked) {
+    if (store.getters.getLockState) {
       next({ path: "/lock" });
     } else next();
   }

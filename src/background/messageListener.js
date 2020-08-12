@@ -81,7 +81,7 @@ function internalMessageListener(message, sender, sendResponse) {
 //disconnect listener when the popup is close
 function onConnectListener(externalPort) {
   const name = externalPort.name;
-  externalPort.onDisconnect.addListener(function() {
+  externalPort.onDisconnect.addListener(async function() {
     if (name !== APP_CONNECT) {
       chrome.tabs.query({}, (tabs) => {
         tabs.forEach((tab) => {
@@ -110,8 +110,9 @@ function onConnectListener(externalPort) {
         });
       });
     } else {
+      const { AppState } = await storage.getValue("AppState");
       storage.saveValue({
-        lastClosed: Date.now(),
+        AppState: { ...AppState, lastClosed: Date.now() },
       });
     }
   });

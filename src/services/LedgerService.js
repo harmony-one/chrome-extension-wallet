@@ -1,9 +1,11 @@
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import HarmonyApp, { SW_ERR } from "./ledger/LedgerSDK";
 import { getHarmony } from "./AccountService";
+import { getContractInstance, oneToHexAddress } from "./Hrc20Service";
 import store from "../popup/store";
 import { LEDGER_LOCKED } from "../types";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
+import BN from "bn.js";
 
 const INTERACTION_TIMEOUT = 120 * 1000;
 var harmonyApp;
@@ -133,7 +135,50 @@ function getBrowser(userAgent) {
 
   if (isChrome) return "chrome";
 }
+export async function signHRCTransactionWithLedger(
+  from,
+  to,
+  amount,
+  gasLimit = "250000",
+  gasPrice = 1,
+  decimals,
+  contract
+) {
+  try {
+    const harmony = getHarmony();
+    const instance = getContractInstance(contract);
+    const toHex = oneToHexAddress(to);
+    const app = await getHarmonyApp();
 
+    const txn = await instance.methods
+      .transfer(
+        toHex,
+        new BN(new BN(amount).mul(new BN(10).pow(new BN(decimals))))
+      )
+      .createTransaction();
+    txn.setParams({
+      ...txn.txParams,
+      from: oneToHexAddress(from),
+      gasLimit,
+      gasPrice: new harmony.utils.Unit(gasPrice).asGwei().toWei(),
+    });
+    const signedTxn = await app.signTransaction(
+      txn,
+      store.state.network.chainId,
+      0,
+      harmony.messenger
+    );
+    return {
+      success: true,
+      result: signedTxn,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      result: err,
+    };
+  }
+}
 export async function signTransactionWithLedger(
   receiver,
   fromShard,

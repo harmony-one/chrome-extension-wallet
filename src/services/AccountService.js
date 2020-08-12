@@ -145,7 +145,7 @@ export function checkAddress(address) {
   return isValidAddress(address);
 }
 
-export async function transferToken(
+export async function transferOne(
   receiver,
   fromShard,
   toShard,

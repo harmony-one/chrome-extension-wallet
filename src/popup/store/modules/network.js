@@ -1,4 +1,3 @@
-import Config from "../../../config";
 export default {
   namespaced: true,
 

@@ -77,7 +77,7 @@
         <seed-checker :phrase="seed_phrase" :confirm="() => scene = 4" />
       </div>
       <div v-else>
-        <pincode-modal @success="createAccount" :onBack="() => scene = 3" />
+        <pincode-modal @success="addAccount" :onBack="() => scene = 3" />
       </div>
       <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
     </main>
@@ -100,40 +100,26 @@ export default {
     agree: false,
     password_confirm: "",
     seed_phrase: "",
-    scene: 1
+    scene: 1,
+    wallet: null
   }),
   computed: {
     ...mapState(["wallets"])
   },
   methods: {
-    createAccount() {
-      createAccountFromMnemonic(
-        this.name,
-        this.seed_phrase,
-        this.password
-      ).then(wallet => {
-        if (!wallet) {
-          this.$notify({
-            group: "notify",
-            type: "error",
-            text: "Password is incorrect or mnemonic is incorrect"
-          });
-          return false;
-        } else {
-          this.$store.commit("wallets/addAccount", {
-            ...wallet,
-            isLedger: false
-          });
-          alert(
-            "Your account is created successfully. To continue, close this tab and use the extension."
-          );
-          chrome.tabs.getCurrent(function(tab) {
-            chrome.tabs.remove(tab.id, function() {});
-          });
-        }
+    addAccount() {
+      this.$store.commit("wallets/addAccount", {
+        ...this.wallet,
+        isLedger: false
+      });
+      alert(
+        "Your account is created successfully. To continue, close this tab and use the extension."
+      );
+      chrome.tabs.getCurrent(function(tab) {
+        chrome.tabs.remove(tab.id, function() {});
       });
     },
-    confirmPassword() {
+    async confirmPassword() {
       if (this.password.length < 8) {
         this.$notify({
           group: "notify",
@@ -146,6 +132,19 @@ export default {
           group: "notify",
           type: "error",
           text: "Password doesn't match"
+        });
+        return;
+      }
+      this.wallet = await createAccountFromMnemonic(
+        this.name,
+        this.seed_phrase,
+        this.password
+      );
+      if (!this.wallet) {
+        this.$notify({
+          group: "notify",
+          type: "error",
+          text: "Password is incorrect or mnemonic is incorrect"
         });
         return;
       }
