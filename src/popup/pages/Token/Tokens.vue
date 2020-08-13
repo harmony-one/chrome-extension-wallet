@@ -101,9 +101,9 @@ export default {
       this.editing = false;
     },
     compressSymbol(str) {
-      if (str.length > 14)
+      if (str.length > 15)
         return (
-          str.substr(0, 5) + "..." + str.substr(str.length - 5, str.length)
+          str.substr(0, 8) + "..." + str.substr(str.length - 5, str.length)
         );
       return str;
     },
@@ -172,6 +172,8 @@ export default {
 .token-name {
   color: black;
   font-size: 0.875rem;
+  max-width: 120px;
+  overflow: hidden;
 }
 .token-balance {
   font-size: 1rem;

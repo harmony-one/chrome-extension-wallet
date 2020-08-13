@@ -6,7 +6,7 @@
         <img src="images/harmony.png" alt="Harmony" />
       </div>
       <div class="addtoken-header">
-        <h4>Add HRC20 Token to the {{ network.name }}</h4>
+        <h4>Add Token to the {{ network.name }}</h4>
       </div>
       <label class="input-label">
         Token Contract Address

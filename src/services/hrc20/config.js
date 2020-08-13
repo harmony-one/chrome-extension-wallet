@@ -26,5 +26,17 @@ export const HRCTokens = {
       decimals: 18,
       balance: 0,
     },
+    // {
+    //   symbol: "POPS",
+    //   address: "0x2450bcede73c289c105e7ff9c7ed4df223cc92f8",
+    //   decimals: 18,
+    //   balance: 0,
+    // },
+    // {
+    //   symbol: "MIRROR",
+    //   address: "0x494dfd32b474a2a35020bde7b3da37ef2b61a90d",
+    //   decimals: 18,
+    //   balance: 0,
+    // },
   ],
 };
