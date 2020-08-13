@@ -54,12 +54,19 @@
           <button
             v-show="wallets.accounts.length > 0"
             class="outline"
-            @click="$router.push('/')"
-          >Cancel</button>
-          <button @click="importKey" :class="!wallets.accounts.length ? 'full-width' : ''">Import</button>
+            @click="$router.push('/home')"
+          >
+            Cancel
+          </button>
+          <button
+            @click="importKey"
+            :class="!wallets.accounts.length ? 'full-width' : ''"
+          >
+            Import
+          </button>
         </div>
       </div>
-      <div v-else>
+      <div v-else-if="scene === 2">
         <label class="input-label">
           Account Name
           <input
@@ -110,38 +117,41 @@
               ref="password_confirm"
               v-model="password_confirm"
               placeholder="Confirm the password"
-              v-on:keyup.enter="importAcc"
+              v-on:keyup.enter="nextToPincode"
             />
           </label>
         </div>
         <div class="button-group">
-          <button
-            class="outline"
-            @click="
-              () => {
-                scene = 1;
-              }
-            "
-          >Back</button>
-          <button @click="importAcc" :disabled="!name || !password">Import Account</button>
+          <button class="outline" @click="() => (scene = 1)">Back</button>
+          <button @click="importAcc" :disabled="!name || !password">
+            Next
+          </button>
         </div>
       </div>
-      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
+      <div v-else>
+        <pincode-modal @success="addAcc" :onBack="() => (scene = 2)" />
+      </div>
+      <notifications
+        group="notify"
+        width="250"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
-import AppHeader from "../components/AppHeader.vue";
+import _ from "lodash";
 import {
   encryptKeyStore,
   validatePrivateKey,
   getAddressFromPrivateKey,
   createAccountFromMnemonic,
   decryptKeyStoreFromFile,
-  validateMnemonic
-} from "../../services/AccountService";
+  validateMnemonic,
+} from "../../../services/AccountService";
 
 export default {
   data: () => ({
@@ -154,13 +164,11 @@ export default {
     mnemonic: "",
     scene: 1,
     selectType: "key",
-    file: null
+    file: null,
+    wallet: null,
   }),
-  components: {
-    AppHeader
-  },
   computed: {
-    ...mapState(["wallets"])
+    ...mapState(["wallets"]),
   },
 
   methods: {
@@ -173,7 +181,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Please enter a valid private key"
+            text: "Please enter a valid private key",
           });
           return false;
         }
@@ -183,7 +191,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Please enter a valid mnemonic"
+            text: "Please enter a valid mnemonic",
           });
           return false;
         }
@@ -193,7 +201,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Please select a file"
+            text: "Please select a file",
           });
           return false;
         } else {
@@ -208,7 +216,7 @@ export default {
                 _this.$notify({
                   group: "notify",
                   type: "error",
-                  text: "Keystore file invalid"
+                  text: "Keystore file invalid",
                 });
                 return false;
               }
@@ -219,20 +227,27 @@ export default {
       }
       this.scene = 2;
     },
+    addAcc() {
+      this.$store.commit("wallets/addAccount", this.wallet);
+      alert(
+        "Your account is imported successfully. To continue, close this tab and use the extension."
+      );
+      chrome.tabs.getCurrent(function(tab) {
+        chrome.tabs.remove(tab.id, function() {});
+      });
+    },
     async importAcc() {
-      let wallet;
-
       if (!this.password) {
         this.$notify({
           group: "notify",
-          text: "Password is required"
+          text: "Password is required",
         });
         return false;
       }
       if (!this.name) {
         this.$notify({
           group: "notify",
-          text: "Account name is required"
+          text: "Account name is required",
         });
         return false;
       }
@@ -240,14 +255,14 @@ export default {
         this.$notify({
           group: "notify",
           type: "warn",
-          text: "Password must be longer than 8 characters"
+          text: "Password must be longer than 8 characters",
         });
         return false;
       } else if (this.password !== this.password_confirm) {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Password doesn't match"
+          text: "Password doesn't match",
         });
         return false;
       }
@@ -256,19 +271,19 @@ export default {
         const oneAddr = getAddressFromPrivateKey(this.privateKey);
 
         const keystore = await encryptKeyStore(this.password, this.privateKey);
-        wallet = {
+        this.wallet = {
           name: this.name,
           address: oneAddr,
           keystore,
-          isLedger: false
+          isLedger: false,
         };
       } else if (this.selectType == "mnemonic") {
-        wallet = await createAccountFromMnemonic(
+        this.wallet = await createAccountFromMnemonic(
           this.name,
           this.mnemonic,
           this.password
         );
-        wallet = { ...wallet, isLedger: false };
+        this.wallet = { ...this.wallet, isLedger: false };
       } else {
         const decryptResult = await decryptKeyStoreFromFile(
           this.keystorepass,
@@ -278,7 +293,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Keystore password is incorrect or file is invalid"
+            text: "Keystore password is incorrect or file is invalid",
           });
           return false;
         }
@@ -287,33 +302,27 @@ export default {
           decryptResult.privateKey
         );
 
-        wallet = {
+        this.wallet = {
           name: this.name,
           address: decryptResult.address,
           keystore: encryptedKeyStore,
-          isLedger: false
+          isLedger: false,
         };
       }
-      const acc = this.wallets.accounts.find(
-        account => account.address === wallet.address
-      );
+      const acc = _.find(this.wallets.accounts, {
+        address: this.wallet.address,
+      });
       if (acc) {
         this.$notify({
           group: "notify",
           type: "error",
-          text: "Account already exists"
+          text: "Account already exists",
         });
         return false;
       }
-      this.$store.commit("wallets/addAccount", wallet);
-      alert(
-        "Your account is imported successfully. To continue, close this tab and use the extension."
-      );
-      chrome.tabs.getCurrent(function(tab) {
-        chrome.tabs.remove(tab.id, function() {});
-      });
-    }
-  }
+      this.scene = 3;
+    },
+  },
 };
 </script>
 <style scoped>

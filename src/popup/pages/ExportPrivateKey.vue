@@ -39,7 +39,7 @@
         </div>
         <div class="button-group">
           <button class="outline" @click="onBackClick">Back</button>
-          <router-link to="/" class="button">Done</router-link>
+          <router-link to="/home" class="button">Done</router-link>
         </div>
       </div>
 
@@ -82,13 +82,8 @@
 <script>
 import { mapState } from "vuex";
 import { decryptKeyStore } from "../../services/AccountService";
-import AppHeader from "../components/AppHeader.vue";
 
 export default {
-  components: {
-    AppHeader
-  },
-
   data: () => ({
     name: "",
     address: "",

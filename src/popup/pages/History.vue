@@ -1,15 +1,17 @@
 <template>
   <div>
-    <app-header @refresh="refreshTransfers" headerTab="main-tab" />
+    <app-header @refresh="refreshHistory" headerTab="main-tab" />
     <main class="main">
-      <div v-if="transfers.length === 0" class="message-empty">No transfers yet</div>
+      <div v-if="history.length === 0" class="message-empty">
+        No transactions yet
+      </div>
 
       <div v-else>
         <div>
           <external-link
             :url="getTransferLink(transfer.hash)"
             class="transfer"
-            v-for="transfer in transfers"
+            v-for="transfer in history"
             :key="transfer.hash"
           >
             <span v-if="isOutgoingTransfer(transfer)" class="transfer-icon">
@@ -45,31 +47,34 @@
               <span
                 v-if="isOutgoingTransfer(transfer)"
                 class="transfer-address"
-              >{{ compressAddress(transfer.to, 15, 7) }}</span>
-              <span v-else class="transfer-address">{{ compressAddress(transfer.from, 15, 7) }}</span>
+                >{{ compressAddress(transfer.to, 15, 7) }}</span
+              >
+              <span v-else class="transfer-address">{{
+                compressAddress(transfer.from, 15, 7)
+              }}</span>
 
               <span class="transfer-address">{{ formatShard(transfer) }}</span>
               <span class="transfer-date">
-                {{
-                formatTimestamp(Number(transfer.timestamp) * 1000)
-                }}
+                {{ formatTimestamp(Number(transfer.timestamp) * 1000) }}
               </span>
             </span>
 
-            <span
-              v-if="isOutgoingTransfer(transfer)"
-              class="transfer-amount"
-            >- {{ formatTokenAmount(transfer) }}</span>
-            <span v-else class="transfer-amount incoming">+ {{ formatTokenAmount(transfer) }}</span>
+            <span v-if="isOutgoingTransfer(transfer)" class="transfer-amount"
+              >- {{ formatTokenAmount(transfer) }}</span
+            >
+            <span v-else class="transfer-amount incoming"
+              >+ {{ formatTokenAmount(transfer) }}</span
+            >
           </external-link>
         </div>
 
         <a
           class="load-more"
-          v-show="transfers.length < txCount && !loadMoreLoading"
+          v-show="history.length < txCount && !loadMoreLoading"
           href="#"
           @click="loadMore"
-        >Load More</a>
+          >Load More</a
+        >
       </div>
     </main>
   </div>
@@ -84,36 +89,34 @@ import {
   getTransfers,
   getNetworkLink,
   getTransactionCount,
-  removeDups
+  removeDups,
 } from "../../services/AccountService";
-import AppHeader from "../components/AppHeader.vue";
 import ExternalLink from "../components/ExternalLink.vue";
 
 export default {
   mixins: [helper],
   components: {
-    AppHeader,
-    ExternalLink
+    ExternalLink,
   },
 
   data: () => ({
     limit: 100,
     txCount: 1,
     page: 0,
-    loadMoreLoading: false
+    loadMoreLoading: false,
   }),
 
   computed: mapState({
-    address: state => state.wallets.active.address,
-    transfers: state => state.account.transfers
+    address: (state) => state.wallets.active.address,
+    history: (state) => state.account.history,
   }),
 
   mounted() {
-    this.loadTransfers();
+    this.loadHistory();
   },
 
   methods: {
-    async loadTransfers() {
+    async loadHistory() {
       this.txCount = await getTransactionCount(this.address);
       this.page = 0;
       const transfersData = await getTransfers(
@@ -122,7 +125,7 @@ export default {
         this.limit
       );
       this.$store.commit(
-        "account/transfers",
+        "account/history",
         removeDups(transfersData.transactions)
       );
       this.$store.commit("loading", false);
@@ -140,22 +143,22 @@ export default {
       );
 
       this.$store.commit(
-        "account/pushTransfers",
+        "account/pushHistory",
         removeDups(transfersData.transactions)
       );
 
       // BUG: hmy_getTransactionCount does not return correct count, so use this to stop showing "LOAD MORE"
       if (transfersData.transactions.length == 0) {
-        this.txCount = this.transfers.length;
-        //console.log(this.txCount, this.transfers.length);
+        this.txCount = this.history.length;
+        //console.log(this.txCount, this.history.length);
       }
 
       this.loadMoreLoading = false;
     },
 
-    refreshTransfers() {
+    refreshHistory() {
       this.$store.commit("loading", true);
-      this.loadTransfers();
+      this.loadHistory();
     },
 
     getTransferLink(hash) {
@@ -194,8 +197,8 @@ export default {
         " to shard " +
         transfer.toShardID.toString()
       );
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -145,7 +145,7 @@ export function checkAddress(address) {
   return isValidAddress(address);
 }
 
-export async function transferToken(
+export async function transferOne(
   receiver,
   fromShard,
   toShard,
@@ -191,10 +191,7 @@ export async function transferToken(
 
     signedTxn
       .observed()
-      .on("transactionHash", (txnHash) => {
-        console.log("--- hash ---");
-        console.log(txnHash);
-      })
+      .on("transactionHash", (txnHash) => {})
       .on("error", (error) => {
         return {
           result: false,

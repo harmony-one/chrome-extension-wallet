@@ -14,7 +14,7 @@
         class="input-seed-box"
         v-for="(item, index) in shuffledPhrase"
         :key="index"
-      >{{getConfirmSeedText(index)}}</div>
+      >{{ getConfirmSeedText(index) }}</div>
     </div>
     <div class="seed-button-box">
       <button
@@ -23,8 +23,8 @@
         :disabled="isSelected(index)"
         class="outline seed-button"
         @click="clickPhrase(index)"
-      >{{item}}</button>
-      <button class="full-but" :disabled="!isMatched" @click="confirm">Create Account</button>
+      >{{ item }}</button>
+      <button class="full-but" :disabled="!isMatched" @click="confirm">Next</button>
     </div>
   </div>
 </template>
