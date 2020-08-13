@@ -13,7 +13,10 @@ import SeedChecker from "./components/SeedChecker";
 import RadioButton from "./components/RadioButton";
 import PincodeInput from "vue-pincode-input";
 import PincodeModal from "./pages/Settings/Security/PincodeModal.vue";
+import MoonLoader from "vue-spinner/src/MoonLoader";
+
 import Config from "../config";
+
 import { CLOSE_WINDOW, FROM_BACK_TO_POPUP } from "../types";
 
 import "./css/icons.less";
@@ -24,6 +27,7 @@ Vue.config.productionTip = false;
 
 sync(store, router);
 
+Vue.component("MoonLoader", MoonLoader);
 Vue.component("AppHeader", AppHeader);
 Vue.component("SeedChecker", SeedChecker);
 Vue.component("PincodeInput", PincodeInput);

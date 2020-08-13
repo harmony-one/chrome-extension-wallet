@@ -101,7 +101,7 @@ const router = new Router({
       },
     },
     {
-      path: "/send-token/:symbol",
+      path: "/send-token/:address",
       name: "send-token",
       component: SendToken,
       meta: {
@@ -205,14 +205,15 @@ router.beforeEach(async (to, from, next) => {
   if (to.matched.some((record) => record.meta.authenticate)) {
     if (store.getters.getLockState) {
       next({ path: "/lock" });
-    } else next();
+    }
   }
   if (to.matched.some((record) => record.meta.requiredAccount)) {
     if (!store.state.wallets.accounts.length) {
       chrome.tabs.create({
         url: "popup.html#/create-wallet",
       });
-    } else next();
+      return;
+    }
   }
   next();
 });

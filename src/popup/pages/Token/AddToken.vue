@@ -5,6 +5,9 @@
       <div class="main-logo">
         <img src="images/harmony.png" alt="Harmony" />
       </div>
+      <div class="addtoken-header">
+        <h4>Add HRC20 Token to the {{ network.name }}</h4>
+      </div>
       <label class="input-label">
         Token Contract Address
         <input
@@ -16,30 +19,18 @@
           placeholder="Input the token contract address"
         />
       </label>
-      <div class="row">
-        <label class="input-label symbol-label">
-          Token Symbol
-          <input
-            class="input-field symbol-input"
-            type="text"
-            name="symbol"
-            ref="symbol"
-            @keydown.space.prevent
-            v-model="symbol"
-            placeholder="Input the token symbol"
-          />
-        </label>
-        <label class="input-label network-field">
-          Network
-          <select class="input-field" v-model="selectedNetwork">
-            <option
-              v-for="network in networkList"
-              :key="network.chainId"
-              :value="network.chainId"
-            >{{ network.name }}</option>
-          </select>
-        </label>
-      </div>
+      <label class="input-label">
+        Token Symbol
+        <input
+          class="input-field symbol-input"
+          type="text"
+          name="symbol"
+          ref="symbol"
+          @keydown.space.prevent
+          v-model="symbol"
+          placeholder="Input the token symbol"
+        />
+      </label>
       <label class="input-label">
         Decimals of Precision
         <input
@@ -54,9 +45,19 @@
       </label>
       <div class="button-group">
         <button class="outline" @click="$router.go(-1)">Back</button>
-        <button @click="createToken" :disabled="!precision || !symbol || !contractAddress">Create</button>
+        <button
+          @click="createToken"
+          :disabled="!precision || !symbol || !contractAddress"
+        >
+          Add
+        </button>
       </div>
-      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -64,29 +65,35 @@
 <script>
 import { mapState } from "vuex";
 import { HarmonyAddress } from "@harmony-js/crypto";
+import {
+  getTokenSymbol,
+  getTokenDecimals,
+  getContractInstance,
+} from "../../../services/Hrc20Service";
 import token from "../../mixins/token";
-import Config from "../../../config";
 export default {
   data: () => ({
     symbol: "",
     contractAddress: "",
     precision: 0,
     selectedNetwork: null,
-    networkList: [
-      {
-        chainId: 1,
-        name: "Mainnet"
-      },
-      {
-        chainId: 2,
-        name: "Testnet"
-      }
-    ]
   }),
   mixins: [token],
-
-  mounted() {
-    this.selectedNetwork = this.networkList[0].chainId;
+  watch: {
+    async contractAddress() {
+      if (this.isValidAddress(this.contractAddress)) {
+        try {
+          const symbol = await getTokenSymbol(this.contractAddress);
+          if (!symbol) throw new Error("Symbol not found");
+          this.symbol = symbol;
+          const precision = await getTokenDecimals(this.contractAddress);
+          this.precision = precision;
+        } catch (err) {
+          this.symbol = "";
+          this.precision = 0;
+        }
+      }
+    },
   },
   methods: {
     isValidAddress(address) {
@@ -98,13 +105,34 @@ export default {
         return false;
       }
     },
+    async isContractExist(address) {
+      try {
+        const symbol = await getTokenSymbol(address);
+        if (!symbol) throw new Error("Symbol not found");
+        await getTokenDecimals(address);
+        return true;
+      } catch (err) {
+        return false;
+      }
+    },
     async createToken() {
       try {
         if (!this.isValidAddress(this.contractAddress)) {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Contract address is invalid"
+            text: "Contract address is invalid",
+          });
+          return;
+        }
+        const isContractExist = await this.isContractExist(
+          this.contractAddress
+        );
+        if (!isContractExist) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: `Contract is not found in the ${this.network.name}`,
           });
           return;
         }
@@ -112,63 +140,26 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Contract address already exists"
-          });
-          return;
-        }
-        const tokenList = Object.keys(
-          this.tokens[this.selectedNetwork]
-        ).map(elem => elem.toUpperCase());
-        if (tokenList.includes(this.symbol.toUpperCase())) {
-          this.$notify({
-            group: "notify",
-            type: "error",
-            text: "Token symbol already exists"
+            text: "Contract address already exists",
           });
           return;
         }
         this.$store.commit("hrc20/addToken", {
           address: this.contractAddress,
           symbol: this.symbol,
-          network: this.selectedNetwork,
-          decimals: this.precision
+          network: this.network.name,
+          decimals: this.precision,
         });
-        const networks = Config.networks;
-        const networkIndex = networks.findIndex(
-          network => network.chainId === this.selectedNetwork
-        );
-        this.$store.commit("network/change", Config.networks[networkIndex]);
         this.$router.push("/tokens");
       } catch (err) {
         console.error(err);
       }
-    }
-  }
+    },
+  },
 };
 </script>
-
 <style>
-.receive-payment {
-  font-size: 0.875rem;
-}
-.network-field {
-  width: 30%;
-}
-
-.symbol-label {
-  width: 70%;
-}
-
-.symbol-input {
-  text-transform: uppercase;
-}
-
-::placeholder {
-  text-transform: none;
-}
-
-.receive-payment,
-.receive-payment .input-field {
+.addtoken-header {
   text-align: center;
 }
 </style>

@@ -10,9 +10,11 @@
         <span class="host_label">{{ host }}</span>
       </div>
       <div class="login-container">
-        <div v-if="!isLocked">
+        <div v-if="!getLockState">
           <div v-if="!wallets.accounts.length">
-            <p>No accounts. You should create the account first in the extension.</p>
+            <p>
+              No accounts. You should create the account first in the extension.
+            </p>
           </div>
           <div v-else-if="isOnlyLedgerAvailable">
             <p>
@@ -27,7 +29,10 @@
               @click="selectAccount(index)"
             >
               <div class="card" v-if="!account.isLedger">
-                <div class="account-box" :class="{ active: selected === index }">
+                <div
+                  class="account-box"
+                  :class="{ active: selected === index }"
+                >
                   <div>{{ account.name }}</div>
                   <div class="account-address">{{ account.address }}</div>
                 </div>
@@ -36,12 +41,17 @@
           </div>
         </div>
         <div v-else>
-          <p>Sorry. The wallet is locked. You should unlock it first in the extension.</p>
+          <p>
+            Sorry. The wallet is locked. You should unlock it first in the
+            extension.
+          </p>
         </div>
       </div>
       <div
         class="button-group"
-        v-if="wallets.accounts.length && !isOnlyLedgerAvailable && !isLocked"
+        v-if="
+          wallets.accounts.length && !isOnlyLedgerAvailable && !getLockState
+        "
       >
         <button class="outline" @click="deny">Deny</button>
         <button :disabled="selected < 0" @click="accept">Accept</button>
@@ -54,23 +64,23 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import {
   THIRDPARTY_GET_ACCOUNT_CONNECT,
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
-  WALLET_LOCKED
+  WALLET_LOCKED,
 } from "../../../types";
 export default {
   data: () => ({
     selected: -1,
-    host: ""
+    host: "",
   }),
   computed: {
+    ...mapGetters(["getLockState"]),
     ...mapState({
-      wallets: state => state.wallets,
-      isLocked: state => state.settings.auth.isLocked
+      wallets: (state) => state.wallets,
     }),
     isOnlyLedgerAvailable() {
       if (
@@ -79,7 +89,7 @@ export default {
       )
         return true;
       return false;
-    }
+    },
   },
   mounted() {
     chrome.runtime.sendMessage(
@@ -105,8 +115,8 @@ export default {
       chrome.runtime.sendMessage({
         action: THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
         payload: {
-          message: WALLET_LOCKED
-        }
+          message: WALLET_LOCKED,
+        },
       });
     },
     accept() {
@@ -115,11 +125,11 @@ export default {
         action: THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
         payload: {
           name: account.name,
-          address: account.address
-        }
+          address: account.address,
+        },
       });
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>

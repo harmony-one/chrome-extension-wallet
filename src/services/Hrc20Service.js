@@ -18,6 +18,18 @@ export async function getTokenBalance(address, contractAddress) {
   return balance;
 }
 
+export async function getTokenDecimals(contractAddress) {
+  const instance = getContractInstance(contractAddress);
+  let decimals = await instance.methods.decimals().call();
+  return new BN(decimals, 16).toNumber();
+}
+
+export async function getTokenSymbol(contractAddress) {
+  const instance = getContractInstance(contractAddress);
+  let symbol = await instance.methods.symbol().call();
+  return symbol;
+}
+
 export async function sendToken(
   from,
   to,

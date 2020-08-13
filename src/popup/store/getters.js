@@ -28,6 +28,6 @@ export const getLockState = (state, getters) => {
     return false;
   } catch (err) {
     console.error(err);
-    return false;
+    return true;
   }
 };

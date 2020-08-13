@@ -143,6 +143,7 @@
 
 <script>
 import { mapState } from "vuex";
+import _ from "lodash";
 import {
   encryptKeyStore,
   validatePrivateKey,
@@ -308,9 +309,9 @@ export default {
           isLedger: false,
         };
       }
-      const acc = this.wallets.accounts.find(
-        (account) => account.address === this.wallet.address
-      );
+      const acc = _.find(this.wallets.accounts, {
+        address: this.wallet.address,
+      });
       if (acc) {
         this.$notify({
           group: "notify",

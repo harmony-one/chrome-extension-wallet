@@ -5,6 +5,9 @@
         <img src="images/harmony-small.png" alt="Harmony" />
         <span>Harmony</span>
       </router-link>
+      <a v-if="getPinCode" class="header-lock" @click="lockWallet">
+        <i class="material-icons">lock</i>
+      </a>
 
       <div class="network" v-click-outside="hideNetworkDropdown">
         <a
@@ -177,7 +180,7 @@
             <i class="material-icons">info</i>
             <router-link to="/about">About Harmony</router-link>
           </div>
-          <div v-if="wallets.accounts.length > 0">
+          <div v-if="wallets.accounts.length > 0 && getPinCode">
             <div class="dropdown-menu-divider"></div>
             <div class="dropdown-menu-item">
               <i class="material-icons">lock</i>
@@ -211,7 +214,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import Config from "../../config";
 import MainTab from "./MainTab";
 import CreateTab from "./CreateTab";
@@ -241,11 +244,14 @@ export default {
     selectedIndex: 0,
   }),
 
-  computed: mapState({
-    wallets: (state) => state.wallets,
-    myroute: (state) => state.route,
-    currentNetwork: (state) => state.network,
-  }),
+  computed: {
+    ...mapGetters(["getPinCode"]),
+    ...mapState({
+      wallets: (state) => state.wallets,
+      myroute: (state) => state.route,
+      currentNetwork: (state) => state.network,
+    }),
+  },
 
   mounted() {
     this.networks = Config.networks;
@@ -379,6 +385,12 @@ export default {
   img {
     margin-right: 5px;
   }
+}
+.header-lock {
+  color: black;
+  margin: auto;
+  flex: 1;
+  margin-left: 15px;
 }
 .network {
   margin: -0.2rem 0.75rem 0;

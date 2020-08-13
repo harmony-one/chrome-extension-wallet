@@ -222,7 +222,7 @@ textarea.input-field:read-only {
   margin-top: 50px;
 }
 .button-group {
-  margin-top: 30px;
+  margin-top: 20px;
   display: flex;
   justify-content: space-between;
 }
@@ -256,13 +256,14 @@ button.outline {
   background: rgba(10, 147, 235, 0.05);
   border: 2px solid #0a93eb;
   color: black;
+  &:hover {
+    background-color: #c7e7fc;
+  }
+  &:active {
+    background-color: #76baff;
+  }
 }
-button.outline:hover {
-  background-color: #c7e7fc;
-}
-button.outline:active {
-  background-color: #76baff;
-}
+
 button.outline:disabled,
 button:disabled {
   background: #e0e0e0;
@@ -270,27 +271,37 @@ button:disabled {
   color: #888;
 }
 
-button.add_token {
+button.round {
   background-color: #0987d7;
   width: 40px;
   height: 40px;
   color: white;
-  position: absolute;
   border-radius: 20px;
   padding: 0px;
-  right: 20px;
   min-width: 40px;
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.6);
-  bottom: 20px;
   border: none;
+  &:hover {
+    background-color: #3b9ddb;
+  }
+  &:active {
+    background-color: #1d7ab5;
+  }
+  i {
+    font-size: 24px;
+    line-height: 40px;
+    color: white;
+  }
 }
 
-button.add_token:hover {
-  background-color: #3b9ddb;
-}
-
-button.add_token:active {
-  background-color: #1d7ab5;
+button.edit_token {
+  background-color: #0ac993;
+  &:hover {
+    background-color: #15ebae;
+  }
+  &:active {
+    background-color: #0aab7d;
+  }
 }
 .full-width {
   width: 100%;
