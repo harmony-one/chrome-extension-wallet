@@ -76,7 +76,6 @@ export default {
       });
     },
     deleteToken(state, payload) {
-      console.log(payload);
       state.tokens[payload.network] = [...payload.tokenArray];
     },
     editToken(state, payload) {
