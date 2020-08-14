@@ -1,4 +1,4 @@
-import { HRCTokens } from "../../../services/hrc20/config";
+import HRCTokens from "../../../services/hrc20/config";
 import _ from "lodash";
 
 export default {
@@ -8,12 +8,15 @@ export default {
   },
   actions: {
     setTokenBalanceLoading({ commit, state }, payload) {
-      const tokenArray = state.tokens[payload.network].map((token) => {
-        return {
-          ...token,
-          isLoading: payload.loading,
-        };
+      const tokenArray = state.tokens[payload.network];
+      const index = _.findIndex(tokenArray, {
+        address: payload.token.address,
       });
+      if (index < 0) return;
+      tokenArray[index] = {
+        ...tokenArray[index],
+        isLoading: payload.loading,
+      };
       commit("setTokenBalanceLoading", {
         network: payload.network,
         tokenArray,
@@ -22,7 +25,7 @@ export default {
     loadTokenBalance({ commit, state }, payload) {
       const tokenArray = state.tokens[payload.network];
       const index = _.findIndex(tokenArray, {
-        symbol: payload.symbol,
+        address: payload.token.address,
       });
       if (index < 0) return;
       tokenArray[index] = {
@@ -31,6 +34,26 @@ export default {
         isLoading: false,
       };
       commit("loadTokenBalance", {
+        network: payload.network,
+        tokenArray,
+      });
+    },
+    deleteToken({ commit, state }, payload) {
+      const tokenArray = state.tokens[payload.network];
+      _.remove(tokenArray, { address: payload.token.address });
+      commit("deleteToken", {
+        network: payload.network,
+        tokenArray,
+      });
+    },
+    editToken({ commit, state }, payload) {
+      const tokenArray = state.tokens[payload.network];
+      const index = _.findIndex(tokenArray, {
+        address: payload.token.address,
+      });
+      if (index < 0) return;
+      tokenArray[index].symbol = payload.token.symbol;
+      commit("editToken", {
         network: payload.network,
         tokenArray,
       });
@@ -51,6 +74,13 @@ export default {
         decimals,
         balance: 0,
       });
+    },
+    deleteToken(state, payload) {
+      console.log(payload);
+      state.tokens[payload.network] = [...payload.tokenArray];
+    },
+    editToken(state, payload) {
+      state.tokens[payload.network] = [...payload.tokenArray];
     },
   },
 };

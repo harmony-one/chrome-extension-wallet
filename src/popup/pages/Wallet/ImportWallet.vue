@@ -60,7 +60,7 @@
           </button>
           <button
             @click="importKey"
-            :class="!wallets.accounts.length ? 'full-width' : ''"
+            :class="!wallets.accounts.length ? 'flex' : ''"
           >
             Import
           </button>
