@@ -17,6 +17,9 @@ import MoonLoader from "vue-spinner/src/MoonLoader";
 
 import Config from "../config";
 
+import * as storage from "../services/StorageService";
+import AppInfo from "../app.json";
+
 import { CLOSE_WINDOW, FROM_BACK_TO_POPUP } from "../types";
 
 import "./css/icons.less";
@@ -57,8 +60,8 @@ if (!store.state.settings.auth.lockState)
 //change the state
 
 const HRCTokens = store.state.hrc20.tokens;
-const ifPreviousState = !Array.isArray(HRCTokens[Object.keys(HRCTokens)[0]]);
-if (ifPreviousState) {
+const isPreviousVersion = !Array.isArray(HRCTokens[Object.keys(HRCTokens)[0]]);
+if (isPreviousVersion) {
   const netWorkKeys = Object.keys(HRCTokens);
   let newTokenArray = {
     Mainnet: [],
@@ -95,6 +98,17 @@ if (ifPreviousState) {
   });
 }
 ///
+
+//save the version info
+storage.getValue("meta").then(({ meta }) => {
+  storage.saveValue({
+    meta: {
+      ...meta,
+      version: AppInfo.version,
+    },
+  });
+});
+
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   const { type, action, payload } = message;
   if (!type || type !== FROM_BACK_TO_POPUP) {
