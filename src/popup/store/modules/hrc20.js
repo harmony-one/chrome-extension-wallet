@@ -17,7 +17,7 @@ export default {
         ...tokenArray[index],
         isLoading: payload.loading,
       };
-      commit("setTokenBalanceLoading", {
+      commit("setTokenArray", {
         network: payload.network,
         tokenArray,
       });
@@ -33,7 +33,7 @@ export default {
         balance: payload.balance,
         isLoading: false,
       };
-      commit("loadTokenBalance", {
+      commit("setTokenArray", {
         network: payload.network,
         tokenArray,
       });
@@ -41,7 +41,7 @@ export default {
     deleteToken({ commit, state }, payload) {
       const tokenArray = state.tokens[payload.network];
       _.remove(tokenArray, { address: payload.token.address });
-      commit("deleteToken", {
+      commit("setTokenArray", {
         network: payload.network,
         tokenArray,
       });
@@ -53,17 +53,14 @@ export default {
       });
       if (index < 0) return;
       tokenArray[index].symbol = payload.token.symbol;
-      commit("editToken", {
+      commit("setTokenArray", {
         network: payload.network,
         tokenArray,
       });
     },
   },
   mutations: {
-    setTokenBalanceLoading(state, payload) {
-      state.tokens[payload.network] = [...payload.tokenArray];
-    },
-    loadTokenBalance(state, payload) {
+    setTokenArray(state, payload) {
       state.tokens[payload.network] = [...payload.tokenArray];
     },
     addToken(state, payload) {
@@ -74,12 +71,6 @@ export default {
         decimals,
         balance: 0,
       });
-    },
-    deleteToken(state, payload) {
-      state.tokens[payload.network] = [...payload.tokenArray];
-    },
-    editToken(state, payload) {
-      state.tokens[payload.network] = [...payload.tokenArray];
     },
   },
 };

@@ -161,6 +161,7 @@ export default {
                 network: this.network.name,
                 token,
               });
+              if (!this.tokenArrayOfNetwork.length) this.editStop();
             },
           },
         ],

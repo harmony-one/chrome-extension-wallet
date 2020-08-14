@@ -53,6 +53,48 @@ if (!store.state.network.name)
 if (!store.state.settings.auth.lockState)
   store.dispatch("settings/setLockState", false);
 
+///
+//change the state
+
+const HRCTokens = store.state.hrc20.tokens;
+const ifPreviousState = !Array.isArray(HRCTokens[Object.keys(HRCTokens)[0]]);
+if (ifPreviousState) {
+  const netWorkKeys = Object.keys(HRCTokens);
+  let newTokenArray = {
+    Mainnet: [],
+    Testnet: [],
+  };
+  netWorkKeys.forEach((network) => {
+    const tokenArray = Object.keys(HRCTokens[network]);
+    tokenArray.forEach((token) => {
+      if (network === "1") {
+        newTokenArray["Mainnet"].push({
+          symbol: token,
+          address: HRCTokens[network][token].address,
+          decimals: HRCTokens[network][token].decimals,
+          balance: 0,
+        });
+      } else {
+        newTokenArray["Testnet"].push({
+          symbol: token,
+          address: HRCTokens[network][token].address,
+          decimals: HRCTokens[network][token].decimals,
+          balance: 0,
+        });
+      }
+    });
+  });
+  console.log(newTokenArray);
+  store.commit("hrc20/setTokenArray", {
+    network: "Mainnet",
+    tokenArray: newTokenArray["Mainnet"],
+  });
+  store.commit("hrc20/setTokenArray", {
+    network: "Testnet",
+    tokenArray: newTokenArray["Testnet"],
+  });
+}
+///
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   const { type, action, payload } = message;
   if (!type || type !== FROM_BACK_TO_POPUP) {

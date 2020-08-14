@@ -1,6 +1,5 @@
 <template>
   <div class="lock-page">
-    <div class="background"></div>
     <div class="main-logo">
       <img src="images/harmony-big.png" class="lock-logo" alt="Harmony" />
     </div>
