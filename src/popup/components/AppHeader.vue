@@ -322,7 +322,7 @@ export default {
       if (!this.getPinCode) {
         this.$modal.show("dialog", {
           text:
-            "You haven't set the PIN code yet. Please set the PIN code in the Settings->Security->Change the PIN code.",
+            "You haven't set the PIN code yet. Please set the PIN code in the <b>Settings->Security->Change the PIN code.</b>",
           buttons: [
             {
               title: "CLOSE",

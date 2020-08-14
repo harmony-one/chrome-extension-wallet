@@ -162,6 +162,7 @@ export async function signHRCTransactionWithLedger(
       gasLimit,
       gasPrice: new harmony.utils.Unit(gasPrice).asGwei().toWei(),
     });
+
     const signedTxn = await app.signTransaction(
       txn,
       store.state.network.chainId,

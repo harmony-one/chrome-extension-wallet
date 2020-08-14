@@ -84,7 +84,7 @@ if (ifPreviousState) {
       }
     });
   });
-  console.log(newTokenArray);
+
   store.commit("hrc20/setTokenArray", {
     network: "Mainnet",
     tokenArray: newTokenArray["Mainnet"],

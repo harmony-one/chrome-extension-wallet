@@ -301,9 +301,11 @@ export default {
 
   async mounted() {
     this.fromShard = this.account.shard;
-    this.initSelectedToken();
-    if (this.wallet.isLedger) this.refreshData();
-    await this.loadBalance();
+    if (this.wallet.isLedger) await this.refreshData();
+    else {
+      this.initSelectedToken();
+      await this.loadBalance();
+    }
   },
 
   updated() {
@@ -398,7 +400,7 @@ export default {
           if (confiremdTxn.isConfirmed()) {
             explorerLink = getNetworkLink("/tx/" + txnHash);
           } else {
-            this.showErrMessage("Can not confirm transaction " + txnHash);
+            this.showErrMessage("Can not confirm transaction(" + txnHash + ")");
             return;
           }
 
@@ -459,11 +461,11 @@ export default {
             this.address,
             this.recipient,
             this.amount,
-            this.getTokenDecimals(this.selectedToken),
             privateKey,
             this.gasLimit,
             this.gasPrice,
-            this.getContractAddress(this.selectedToken)
+            this.selectedToken.decimals,
+            this.selectedToken.address
           );
         }
 
@@ -476,8 +478,9 @@ export default {
         }
 
         this.initScene();
-        this.loadBalance();
+        await this.loadBalance();
       } catch (e) {
+        console.error(e);
         this.$store.commit("loading", false);
         this.showErrMessage(
           "Something went wrong while trying to send the payment"

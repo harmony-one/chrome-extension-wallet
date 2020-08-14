@@ -34,10 +34,10 @@ export async function sendToken(
   from,
   to,
   amount,
-  decimals,
   privateKey,
   gasLimit = "250000",
   gasPrice = 1,
+  decimals,
   contractAddress
 ) {
   let txHash, receipt, confirmation, error;
@@ -67,16 +67,16 @@ export async function sendToken(
     .on("error", (_error) => {
       error = _error;
     });
-  if (error) {
-    return {
-      result: false,
-      mesg: "Failed to send transaction",
-    };
-  }
   if (confirmation !== "CONFIRMED") {
     return {
       result: false,
-      mesg: "Can not confirm transaction " + txHash,
+      mesg: "Can't confirm the transaction(" + txHash + ")",
+    };
+  }
+  if (error) {
+    return {
+      result: false,
+      mesg: "Failed to send the transaction. Error: " + error,
     };
   }
   return {
