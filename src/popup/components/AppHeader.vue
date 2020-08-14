@@ -5,7 +5,7 @@
         <img src="images/harmony-small.png" alt="Harmony" />
         <span>Harmony</span>
       </router-link>
-      <a v-if="getPinCode" class="header-lock" @click="lockWallet">
+      <a class="header-lock" @click="lockWallet">
         <i class="material-icons">lock</i>
       </a>
 
@@ -180,7 +180,7 @@
             <i class="material-icons">info</i>
             <router-link to="/about">About Harmony</router-link>
           </div>
-          <div v-if="wallets.accounts.length > 0 && getPinCode">
+          <div v-if="wallets.accounts.length > 0">
             <div class="dropdown-menu-divider"></div>
             <div class="dropdown-menu-item">
               <i class="material-icons">lock</i>
@@ -210,6 +210,13 @@
       :is="headerTab"
       :subtitle="subtitle"
     ></component>
+    <v-dialog
+      name="dialog"
+      :adaptive="true"
+      transition="scale"
+      :width="250"
+      height="auto"
+    />
   </header>
 </template>
 
@@ -312,6 +319,21 @@ export default {
       this.openExpandPopup("/connect-hardware-wallet");
     },
     lockWallet() {
+      if (!this.getPinCode) {
+        this.$modal.show("dialog", {
+          text:
+            "You haven't set the PIN code yet. Please set the PIN code in the Settings->Security->Change the PIN code.",
+          buttons: [
+            {
+              title: "CLOSE",
+              handler: () => {
+                this.$modal.hide("dialog");
+              },
+            },
+          ],
+        });
+        return;
+      }
       this.$store.dispatch("settings/setLockState", true);
       this.$router.push("/lock");
     },

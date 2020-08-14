@@ -42,6 +42,7 @@ export default {
       const decimals = token.decimals;
       this.$store.dispatch("hrc20/setTokenBalanceLoading", {
         network: this.network.name,
+        token,
         loading: true,
       });
       let weiBalance = await getTokenBalance(this.address, contractAddress);
@@ -51,7 +52,7 @@ export default {
         .toFixed(6);
       this.$store.dispatch("hrc20/loadTokenBalance", {
         network: this.network.name,
-        symbol: token.symbol,
+        token,
         balance,
       });
     },
