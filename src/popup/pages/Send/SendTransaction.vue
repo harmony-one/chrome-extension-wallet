@@ -122,7 +122,7 @@
               v-model="inputData"
             />
           </label>
-          <button class="full-width" type="submit">Send</button>
+          <button class="flex" type="submit">Send</button>
         </form>
       </div>
       <!-- Approve Transaction Dialog -->
@@ -156,7 +156,7 @@
         <div class="invoice-content">
           <div class="invoice">
             <div class="invoice__row">
-              <div class="invoice__rowLeft">Subtotal</div>
+              <div class="invoice__rowLeft">Amount</div>
               <div class="invoice__rowRight">{{ getString(amount) }}</div>
             </div>
             <div class="invoice__row">
@@ -193,7 +193,7 @@
           <button @click="sendPayment" :disabled="!password">Approve</button>
         </div>
         <div v-else-if="ledgerError">
-          <button @click="onBackClick()" class="full-but">Retry</button>
+          <button @click="onBackClick()" class="flex mt-20">Retry</button>
         </div>
       </div>
       <notifications

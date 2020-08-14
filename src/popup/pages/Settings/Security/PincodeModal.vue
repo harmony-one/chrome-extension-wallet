@@ -70,10 +70,10 @@
         </div>
       </div>
       <div class="footer">
-        <button class="full-but" v-if="!attempts" @click="onRetry">
+        <button class="flex mt-20" v-if="!attempts" @click="onRetry">
           Retry
         </button>
-        <button class="full-but" v-else @click="onBackClicked">Back</button>
+        <button class="flex mt-20" v-else @click="onBackClicked">Back</button>
       </div>
     </div>
   </div>

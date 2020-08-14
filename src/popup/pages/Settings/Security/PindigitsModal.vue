@@ -1,5 +1,11 @@
 <template>
-  <modal name="modal-pindigits" :adaptive="true" transition="scale" :width="250" height="auto">
+  <modal
+    name="modal-pindigits"
+    :adaptive="true"
+    transition="scale"
+    :width="250"
+    height="auto"
+  >
     <div class="modal-header">Change the PIN code digits</div>
     <div class="modal-body">
       <radio-button
@@ -26,13 +32,13 @@ export default {
     digits: 4,
     dataArray: [
       { label: "4 digits (default)", data: 4 },
-      { label: "6 digits", data: 6 }
-    ]
+      { label: "6 digits", data: 6 },
+    ],
   }),
   computed: {
     ...mapState({
-      pindigits: state => state.settings.auth.pindigits
-    })
+      pindigits: (state) => state.settings.auth.pindigits,
+    }),
   },
   mounted() {
     this.digits = this.pindigits;
@@ -44,7 +50,7 @@ export default {
     saveDigits() {
       this.$store.commit("settings/setPindigits", this.digits);
       this.$modal.hide("modal-pindigits");
-    }
-  }
+    },
+  },
 };
 </script>

@@ -73,7 +73,7 @@
           extension.
         </p>
       </div>
-      <button class="full-but" @click="lockReject">OK</button>
+      <button class="flex mt-20" @click="lockReject">OK</button>
     </div>
     <notifications
       group="notify"
