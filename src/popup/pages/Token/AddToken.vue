@@ -140,7 +140,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Contract address already exists",
+            text: "Token is already added",
           });
           return;
         }

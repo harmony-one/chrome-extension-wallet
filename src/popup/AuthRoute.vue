@@ -26,8 +26,8 @@ export default {
         }
       }
     }
-    this.$router.push("/home");
     storage.saveValue({ AppState: { ...AppState, lastOpened: Date.now() } });
+    this.$router.push("/home");
   },
 };
 </script>

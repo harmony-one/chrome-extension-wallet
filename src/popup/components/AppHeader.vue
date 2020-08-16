@@ -355,12 +355,6 @@ export default {
   background: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-.dropdown-menu-item i {
-  color: #757575;
-  padding-top: 11px;
-  padding-left: 8px;
-  position: absolute;
-}
 .account-content {
   max-height: 160px;
   overflow: auto;
@@ -369,6 +363,13 @@ export default {
   display: flex;
   flex-direction: row;
   position: relative;
+  i {
+    position: absolute;
+    color: #757575;
+    top: 50%;
+    transform: translate(0, -50%);
+    left: 8px;
+  }
   &.disabled {
     pointer-events: none;
     a,

@@ -225,8 +225,8 @@ export default {
 <style scoped>
 .image-bg {
   background-image: linear-gradient(
-      rgba(247, 247, 255, 0.95),
-      rgba(247, 247, 255, 0.95)
+      rgba(247, 247, 255, 0.97),
+      rgba(247, 247, 255, 0.97)
     ),
     url("images/harmony.png");
 }
