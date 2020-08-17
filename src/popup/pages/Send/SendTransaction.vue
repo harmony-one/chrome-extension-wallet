@@ -28,6 +28,7 @@
                 class="input-field"
                 type="text"
                 name="address"
+                ref="address"
                 placeholder="Recipient Address"
                 v-model="recipient"
               />
@@ -59,6 +60,7 @@
                 class="input-field"
                 type="number"
                 name="amount"
+                ref="amount"
                 placeholder="Amount"
                 v-model="amount"
                 step="any"
@@ -86,6 +88,7 @@
                 class="input-field"
                 type="number"
                 name="gasprice"
+                ref="gasprice"
                 placeholder="Gas Price"
                 v-model="gasPrice"
                 step="any"
@@ -97,6 +100,7 @@
                 class="input-field"
                 type="number"
                 name="gaslimit"
+                ref="gaslimit"
                 v-model="gasLimit"
                 placeholder="Gas Limit"
               />
@@ -106,7 +110,8 @@
               <input
                 class="input-field"
                 type="text"
-                name="gasone"
+                name="gasfee"
+                ref="gasfee"
                 readonly
                 :value="`${getGasFee} ONE`"
               />

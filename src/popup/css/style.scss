@@ -37,17 +37,14 @@ body {
   font-size: 1rem;
   line-height: 1.5;
   overflow: hidden;
+  display: flex;
+  place-items: center;
+  place-content: center;
+  height: 100vh;
 }
-
-@media screen and (min-width: 800px) {
-  body {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    -webkit-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-    box-shadow: 0px 5px 15px #00000033;
-  }
+#app {
+  position: relative;
+  box-shadow: 0px 5px 15px #00000033;
 }
 
 ::-moz-selection {
@@ -219,6 +216,7 @@ textarea.input-field:read-only {
 
 .notifiaction-container {
   margin-top: 50px;
+  position: absolute;
 }
 .button-group {
   margin-top: 20px;
@@ -594,50 +592,6 @@ button.green-but {
     }
   }
 }
-.modal-header {
-  padding: 10px 0;
-  font-size: 14px;
-  text-align: center;
-  border-bottom: 1px solid #eee;
-}
-.modal-footer {
-  display: flex;
-  text-align: center;
-  font-size: 12px;
-  .primary {
-    padding: 8px 0;
-    color: #f44336;
-    cursor: pointer;
-    flex: 1;
-    border: 1px solid #eee;
-    border-right: none;
-    border-bottom: none;
-    border-left: none;
-    &:hover,
-    &:focus {
-      background: #f5f5f5;
-    }
-    &:active {
-      background: #ddd;
-    }
-  }
-  .secondary {
-    padding: 8px 0;
-    color: black;
-    cursor: pointer;
-    flex: 1;
-    border: 1px solid #eee;
-    border-left: none;
-    border-bottom: none;
-    &:hover,
-    &:focus {
-      background: #f5f5f5;
-    }
-    &:active {
-      background: #ddd;
-    }
-  }
-}
 
 .pin-fail {
   animation: miss 0.8s ease-out 1;
@@ -703,9 +657,8 @@ input.vue-pincode-input:focus {
     transform: translate(0, 0);
   }
 }
-
 .footer {
-  position: fixed;
+  position: absolute;
   left: 50%;
   bottom: 0;
   width: 338px;
@@ -713,8 +666,4 @@ input.vue-pincode-input:focus {
   color: #555;
   transform: translate(-50%, -50%);
   margin: 0 auto;
-}
-
-.vue-dialog-button {
-  border-radius: 0;
 }

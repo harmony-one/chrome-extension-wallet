@@ -1,0 +1,48 @@
+.vue-dialog-button {
+  border-radius: 0;
+}
+
+.modal-header {
+  padding: 10px 0;
+  font-size: 14px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+.modal-footer {
+  display: flex;
+  text-align: center;
+  font-size: 12px;
+  .primary {
+    padding: 8px 0;
+    color: #f44336;
+    cursor: pointer;
+    flex: 1;
+    border: 1px solid #eee;
+    border-right: none;
+    border-bottom: none;
+    border-left: none;
+    &:hover,
+    &:focus {
+      background: #f5f5f5;
+    }
+    &:active {
+      background: #ddd;
+    }
+  }
+  .secondary {
+    padding: 8px 0;
+    color: black;
+    cursor: pointer;
+    flex: 1;
+    border: 1px solid #eee;
+    border-left: none;
+    border-bottom: none;
+    &:hover,
+    &:focus {
+      background: #f5f5f5;
+    }
+    &:active {
+      background: #ddd;
+    }
+  }
+}

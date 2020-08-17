@@ -4,7 +4,7 @@ import _ from "lodash";
 export default {
   namespaced: true,
   state: {
-    tokens: HRCTokens,
+    tokens: HRCTokens, //default hrc20 tokens
   },
   actions: {
     setTokenBalanceLoading({ commit, state }, payload) {

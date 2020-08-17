@@ -5,7 +5,11 @@
         <img src="images/harmony-small.png" alt="Harmony" />
         <span>Harmony</span>
       </router-link>
-      <a class="header-lock" @click="lockWallet">
+      <a
+        class="header-lock"
+        v-if="wallets.accounts.length > 0"
+        @click="lockWallet"
+      >
         <i class="material-icons">lock</i>
       </a>
 
@@ -212,9 +216,9 @@
     ></component>
     <v-dialog
       name="dialog"
-      :adaptive="true"
       transition="scale"
       :width="250"
+      :adaptive="true"
       height="auto"
     />
   </header>
@@ -322,7 +326,7 @@ export default {
       if (!this.getPinCode) {
         this.$modal.show("dialog", {
           text:
-            "You haven't set the PIN code yet. Please set the PIN code in the <b>Settings->Security->Change the PIN code.</b>",
+            "You haven't set the PIN code yet. Please set the PIN code on the <b>Settings</b> page",
           buttons: [
             {
               title: "CLOSE",
@@ -347,9 +351,9 @@ export default {
 
 <style lang="scss">
 .header {
-  z-index: 1000;
+  z-index: 800;
   width: 370px;
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   background: #ffffff;

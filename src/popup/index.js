@@ -25,6 +25,7 @@ import { CLOSE_WINDOW, FROM_BACK_TO_POPUP } from "../types";
 import "./css/icons.less";
 import "./css/normalize.scss";
 import "./css/style.scss";
+import "./css/modal.scss";
 
 Vue.config.productionTip = false;
 
@@ -40,7 +41,11 @@ Vue.use(Notifications);
 Vue.use(VueIntl);
 Vue.use(vClickOutside);
 Vue.use(VueClipboard);
-Vue.use(VModal, { dialog: true, dynamic: true, injectModalsContainer: true });
+Vue.use(VModal, {
+  dialog: true,
+  dynamic: true,
+  injectModalsContainer: true,
+});
 
 Vue.setLocale("en-US");
 
