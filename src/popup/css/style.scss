@@ -43,7 +43,11 @@ html {
   border-radius: 3px;
   background-color: #0a93eb;
 }
-
+@media screen and (min-width: 768px) {
+  #app {
+    box-shadow: 0px 5px 15px #00000033;
+  }
+}
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
@@ -59,7 +63,6 @@ body {
 }
 #app {
   position: relative;
-  box-shadow: 0px 5px 15px #00000033;
 }
 
 ::-moz-selection {
