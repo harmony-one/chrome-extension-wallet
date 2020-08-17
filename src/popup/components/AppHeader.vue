@@ -1,13 +1,10 @@
 <template>
   <header class="header">
     <div class="header-top">
-      <router-link class="header-logo" to="/home">
+      <router-link class="header-logo" to="/">
         <img src="images/harmony-small.png" alt="Harmony" />
         <span>Harmony</span>
       </router-link>
-      <a class="header-lock" @click="lockWallet">
-        <i class="material-icons">lock</i>
-      </a>
 
       <div class="network" v-click-outside="hideNetworkDropdown">
         <a
@@ -152,15 +149,36 @@
           <div class="dropdown-menu-divider"></div>
           <div class="dropdown-menu-item">
             <i class="material-icons">add</i>
-            <a @click.prevent="createAccount">Create Account</a>
+            <a
+              @click.prevent="
+                () => {
+                  createAccount();
+                }
+              "
+              >Create Account</a
+            >
           </div>
           <div class="dropdown-menu-item">
             <i class="material-icons">vertical_align_bottom</i>
-            <a @click.prevent="importAccount">Import Account</a>
+            <a
+              @click.prevent="
+                () => {
+                  importAccount();
+                }
+              "
+              >Import Account</a
+            >
           </div>
           <div class="dropdown-menu-item">
             <i class="material-icons">settings_input_component</i>
-            <a @click.prevent="connectHardware">Connect Hardware Wallet</a>
+            <a
+              @click.prevent="
+                () => {
+                  connectHardware();
+                }
+              "
+              >Connect Hardware Wallet</a
+            >
           </div>
           <div v-if="wallets.accounts.length > 0 && !wallets.active.isLedger">
             <div class="dropdown-menu-divider"></div>
@@ -170,22 +188,9 @@
             </div>
           </div>
           <div class="dropdown-menu-divider"></div>
-          <div v-if="wallets.accounts.length > 0">
-            <div class="dropdown-menu-item">
-              <i class="material-icons">settings</i>
-              <router-link to="/settings">Settings</router-link>
-            </div>
-          </div>
           <div class="dropdown-menu-item">
             <i class="material-icons">info</i>
             <router-link to="/about">About Harmony</router-link>
-          </div>
-          <div v-if="wallets.accounts.length > 0">
-            <div class="dropdown-menu-divider"></div>
-            <div class="dropdown-menu-item">
-              <i class="material-icons">lock</i>
-              <a @click.prevent="lockWallet">Lock</a>
-            </div>
           </div>
         </nav>
       </div>
@@ -210,18 +215,11 @@
       :is="headerTab"
       :subtitle="subtitle"
     ></component>
-    <v-dialog
-      name="dialog"
-      :adaptive="true"
-      transition="scale"
-      :width="250"
-      height="auto"
-    />
   </header>
 </template>
 
 <script>
-import { mapState, mapGetters } from "vuex";
+import { mapState } from "vuex";
 import Config from "../../config";
 import MainTab from "./MainTab";
 import CreateTab from "./CreateTab";
@@ -251,14 +249,11 @@ export default {
     selectedIndex: 0,
   }),
 
-  computed: {
-    ...mapGetters(["getPinCode"]),
-    ...mapState({
-      wallets: (state) => state.wallets,
-      myroute: (state) => state.route,
-      currentNetwork: (state) => state.network,
-    }),
-  },
+  computed: mapState({
+    wallets: (state) => state.wallets,
+    myroute: (state) => state.route,
+    currentNetwork: (state) => state.network,
+  }),
 
   mounted() {
     this.networks = Config.networks;
@@ -273,7 +268,7 @@ export default {
       return str;
     },
     backClicked() {
-      if (!this.backRoute) this.$router.push("/home");
+      if (!this.backRoute) this.$router.go(-1);
       else this.$router.push(this.backRoute);
     },
     toggleDropdownMenu() {
@@ -307,7 +302,7 @@ export default {
       this.$store.commit("wallets/setActive", address);
       this.hideDropdownMenu();
       this.refreshData();
-      if (this.$route.name !== "account") this.$router.push("/home");
+      if (this.$route.name !== "account") this.$router.push("/");
     },
     createAccount() {
       this.openExpandPopup("/create-wallet");
@@ -317,25 +312,6 @@ export default {
     },
     connectHardware() {
       this.openExpandPopup("/connect-hardware-wallet");
-    },
-    lockWallet() {
-      if (!this.getPinCode) {
-        this.$modal.show("dialog", {
-          text:
-            "You haven't set the PIN code yet. Please set the PIN code in the <b>Settings->Security->Change the PIN code.</b>",
-          buttons: [
-            {
-              title: "CLOSE",
-              handler: () => {
-                this.$modal.hide("dialog");
-              },
-            },
-          ],
-        });
-        return;
-      }
-      this.$store.dispatch("settings/setLockState", true);
-      this.$router.push("/lock");
     },
     refreshData() {
       this.$emit("refresh");
@@ -347,13 +323,18 @@ export default {
 
 <style lang="scss">
 .header {
-  z-index: 1000;
   width: 370px;
   position: fixed;
   top: 0;
   left: 0;
   background: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+i {
+  color: #757575;
+  padding-top: 11px;
+  padding-left: 8px;
+  position: absolute;
 }
 .account-content {
   max-height: 160px;
@@ -363,13 +344,6 @@ export default {
   display: flex;
   flex-direction: row;
   position: relative;
-  i {
-    position: absolute;
-    color: #757575;
-    top: 50%;
-    transform: translate(0, -50%);
-    left: 8px;
-  }
   &.disabled {
     pointer-events: none;
     a,
@@ -408,12 +382,6 @@ export default {
   img {
     margin-right: 5px;
   }
-}
-.header-lock {
-  color: black;
-  margin: auto;
-  flex: 1;
-  margin-left: 15px;
 }
 .network {
   margin: -0.2rem 0.75rem 0;

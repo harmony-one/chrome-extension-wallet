@@ -18,26 +18,14 @@ export async function getTokenBalance(address, contractAddress) {
   return balance;
 }
 
-export async function getTokenDecimals(contractAddress) {
-  const instance = getContractInstance(contractAddress);
-  let decimals = await instance.methods.decimals().call();
-  return new BN(decimals, 16).toNumber();
-}
-
-export async function getTokenSymbol(contractAddress) {
-  const instance = getContractInstance(contractAddress);
-  let symbol = await instance.methods.symbol().call();
-  return symbol;
-}
-
 export async function sendToken(
   from,
   to,
   amount,
+  decimals,
   privateKey,
   gasLimit = "250000",
   gasPrice = 1,
-  decimals,
   contractAddress
 ) {
   let txHash, receipt, confirmation, error;
@@ -67,16 +55,16 @@ export async function sendToken(
     .on("error", (_error) => {
       error = _error;
     });
-  if (confirmation !== "CONFIRMED") {
-    return {
-      result: false,
-      mesg: "Can't confirm the transaction(" + txHash + ")",
-    };
-  }
   if (error) {
     return {
       result: false,
-      mesg: "Failed to send the transaction. Error: " + error,
+      mesg: "Failed to send transaction",
+    };
+  }
+  if (confirmation !== "CONFIRMED") {
+    return {
+      result: false,
+      mesg: "Can not confirm transaction " + txHash,
     };
   }
   return {

@@ -7,18 +7,14 @@
       <div v-else>
         <h4>Please select the seeds in Sequence Order</h4>
       </div>
-      <button class="clear-but" v-if="!isMatched" @click="clearPhrase">
-        Clear
-      </button>
+      <button class="clear-but" v-if="!isMatched" @click="clearPhrase">Clear</button>
     </div>
     <div class="confirm-seed-box">
       <div
         class="input-seed-box"
         v-for="(item, index) in shuffledPhrase"
         :key="index"
-      >
-        {{ getConfirmSeedText(index) }}
-      </div>
+      >{{getConfirmSeedText(index)}}</div>
     </div>
     <div class="seed-button-box">
       <button
@@ -27,12 +23,8 @@
         :disabled="isSelected(index)"
         class="outline seed-button"
         @click="clickPhrase(index)"
-      >
-        {{ item }}
-      </button>
-      <button class="flex mt-20" :disabled="!isMatched" @click="confirm">
-        Next
-      </button>
+      >{{item}}</button>
+      <button class="full-but" :disabled="!isMatched" @click="confirm">Create Account</button>
     </div>
   </div>
 </template>
@@ -42,21 +34,21 @@ export default {
   data: () => ({
     confirmPhrase: [],
     shuffledPhrase: [],
-    selectedFlag: [],
+    selectedFlag: []
   }),
   props: {
     phrase: {
-      type: String,
+      type: String
     },
     confirm: {
-      type: Function,
-    },
+      type: Function
+    }
   },
   computed: {
     isMatched() {
       const confirmStr = this.confirmPhrase.join(" ");
       return confirmStr === this.phrase;
-    },
+    }
   },
   methods: {
     isSelected(index) {
@@ -81,12 +73,12 @@ export default {
         [phraseArray[i], phraseArray[j]] = [phraseArray[j], phraseArray[i]];
       }
       this.shuffledPhrase = phraseArray;
-    },
+    }
   },
   mounted() {
     this.shuffleSeed();
     this.selectedFlag = new Array(12).fill(false);
-  },
+  }
 };
 </script>
 <style lang="scss">

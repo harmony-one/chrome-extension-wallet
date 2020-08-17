@@ -9,79 +9,63 @@
       <div class="hostrow">
         <span class="host_label">{{ host }}</span>
       </div>
-      <div class="login-container">
-        <div v-if="!getLockState">
-          <div v-if="!wallets.accounts.length">
-            <p>
-              No accounts. You should create the account first in the extension.
-            </p>
-          </div>
-          <div v-else-if="isOnlyLedgerAvailable">
-            <p>
-              The ledger account is not supported for this action at the moment.
-              You should create another account in the extension.
-            </p>
-          </div>
-          <div v-else>
-            <div
-              v-for="(account, index) in wallets.accounts"
-              :key="index"
-              @click="selectAccount(index)"
-            >
-              <div class="card" v-if="!account.isLedger">
-                <div
-                  class="account-box"
-                  :class="{ active: selected === index }"
-                >
-                  <div>{{ account.name }}</div>
-                  <div class="account-address">{{ account.address }}</div>
-                </div>
+      <div class="account-container">
+        <div v-if="!wallets.accounts.length">
+          <p>
+            No accounts. You should create the account first in the extension.
+          </p>
+        </div>
+        <div v-else-if="isOnlyLedgerAvailable">
+          <p>
+            The ledger account is not supported for this action at the moment.
+            You should create another account in the extension.
+          </p>
+        </div>
+        <div v-else>
+          <div
+            v-for="(account, index) in wallets.accounts"
+            :key="index"
+            @click="selectAccount(index)"
+          >
+            <div class="card" v-if="!account.isLedger">
+              <div class="account-box" :class="{ active: selected === index }">
+                <div>{{ account.name }}</div>
+                <div class="account-address">{{ account.address }}</div>
               </div>
             </div>
           </div>
         </div>
-        <div v-else>
-          <p>
-            Sorry. The wallet is locked. You should unlock it first in the
-            extension.
-          </p>
-        </div>
       </div>
       <div
         class="button-group"
-        v-if="
-          wallets.accounts.length && !isOnlyLedgerAvailable && !getLockState
-        "
+        v-if="wallets.accounts.length && !isOnlyLedgerAvailable"
       >
         <button class="outline" @click="deny">Deny</button>
         <button :disabled="selected < 0" @click="accept">Accept</button>
       </div>
       <div v-else>
-        <button class="flex mt-20" @click="lockReject">OK</button>
+        <button class="full-but" @click="deny">
+          OK
+        </button>
       </div>
     </main>
   </div>
 </template>
 
 <script>
-import { mapState, mapGetters } from "vuex";
+import { mapState } from "vuex";
 import {
   THIRDPARTY_GET_ACCOUNT_CONNECT,
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
-  THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
-  WALLET_LOCKED,
-} from "../../../types";
+} from "../../types";
 export default {
   data: () => ({
     selected: -1,
     host: "",
   }),
   computed: {
-    ...mapGetters(["getLockState"]),
-    ...mapState({
-      wallets: (state) => state.wallets,
-    }),
+    ...mapState(["wallets"]),
     isOnlyLedgerAvailable() {
       if (
         this.wallets.accounts.length === 1 &&
@@ -111,14 +95,6 @@ export default {
     deny() {
       window.close();
     },
-    lockReject() {
-      chrome.runtime.sendMessage({
-        action: THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
-        payload: {
-          message: WALLET_LOCKED,
-        },
-      });
-    },
     accept() {
       const account = this.wallets.accounts[this.selected];
       chrome.runtime.sendMessage({
@@ -138,7 +114,7 @@ h3 {
   margin-bottom: 0px;
   margin-top: 0px;
 }
-.login-container {
+.account-container {
   padding-right: 5px;
   height: 370px;
   overflow: auto;

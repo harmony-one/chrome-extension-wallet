@@ -1,78 +1,68 @@
 <template>
-  <main class="prompt image-bg">
+  <main class="prompt">
+    <div class="prompt-back"></div>
     <h3 class="center">Approve Transaction</h3>
     <div class="hostrow">
       <span class="host_label">{{ host }}</span>
     </div>
-    <div v-if="!getLockState">
-      <div>
-        <span class="action_caption">Signing by</span>
-        <span class="sign__name">{{ wallet.name }}</span>
+    <div>
+      <span class="action_caption">Signing by</span>
+      <span class="sign__name">{{ wallet.name }}</span>
+    </div>
+    <div class="sign__address">{{ wallet.address }}</div>
+    <p class="txRow">
+      <span class="action_caption">{{ displayAction }}</span>
+      <span v-if="type === 'SEND'"
+        >{{ fromShard }} Shard -> {{ toShard }} Shard</span
+      >
+    </p>
+    <p class="txRow">
+      <span>From</span>
+      <span class="address__name">{{ senderAddress }}</span>
+    </p>
+    <p class="txRow" v-if="!isWithdrawal">
+      <span>To</span>
+      <span class="address__name">{{ targetAddress }}</span>
+    </p>
+    <span class="action_caption">Transaction Details</span>
+    <div class="invoice" :class="{ 'withdraw-section': isWithdrawal }">
+      <div class="invoice__row" v-if="!isWithdrawal && !isTokenTransfer">
+        <div class="invoice__rowLeft">Amount</div>
+        <div class="invoice__rowRight">{{ amount }} ONE</div>
       </div>
-      <div class="sign__address">{{ wallet.address }}</div>
-      <p class="txRow">
-        <span class="action_caption">{{ displayAction }}</span>
-        <span v-if="type === 'SEND'"
-          >{{ fromShard }} Shard -> {{ toShard }} Shard</span
-        >
-      </p>
-      <p class="txRow">
-        <span>From</span>
-        <span class="address__name">{{ senderAddress }}</span>
-      </p>
-      <p class="txRow" v-if="!isWithdrawal">
-        <span>To</span>
-        <span class="address__name">{{ targetAddress }}</span>
-      </p>
-      <span class="action_caption">Transaction Details</span>
-      <div class="invoice" :class="{ 'withdraw-section': isWithdrawal }">
-        <div class="invoice__row" v-if="!isWithdrawal && !isTokenTransfer">
-          <div class="invoice__rowLeft">Amount</div>
-          <div class="invoice__rowRight">{{ amount }} ONE</div>
-        </div>
-        <div class="invoice__row">
-          <div class="invoice__rowLeft">Gas Price</div>
-          <div class="invoice__rowRight">{{ gasPrice }} Gwei</div>
-        </div>
-        <div class="invoice__row">
-          <div class="invoice__rowLeft">Gas Limit</div>
-          <div class="invoice__rowRight">{{ gasLimit }} Gwei</div>
-        </div>
-        <div v-if="isTokenTransfer">
-          <p class="data_caption">Data</p>
-          <div class="data_content">{{ data }}</div>
-        </div>
+      <div class="invoice__row">
+        <div class="invoice__rowLeft">Gas Price</div>
+        <div class="invoice__rowRight">{{ gasPrice }} Gwei</div>
       </div>
-      <div v-if="!wallet.isLedger" class="password-content">
-        <label class="input-label">
-          Password
-          <input
-            class="input-field"
-            type="password"
-            name="password"
-            ref="password"
-            v-model="password"
-            placeholder="Input your password"
-            v-on:keyup.enter="approve"
-          />
-        </label>
+      <div class="invoice__row">
+        <div class="invoice__rowLeft">Gas Limit</div>
+        <div class="invoice__rowRight">{{ gasLimit }} Gwei</div>
       </div>
-      <div class="ledger-content" v-else>
-        <b>Please unlock your ledger and confirm the transaction</b>
-      </div>
-      <div class="button-group">
-        <button class="outline" @click="reject">Reject</button>
-        <button @click="approve" :disabled="!password">Approve</button>
+      <div v-if="isTokenTransfer">
+        <p class="data_caption">Data</p>
+        <div class="data_content">{{ data }}</div>
       </div>
     </div>
-    <div v-else>
-      <div class="error-container">
-        <p>
-          Sorry. The wallet is locked. You should unlock it first in the
-          extension.
-        </p>
-      </div>
-      <button class="flex mt-20" @click="lockReject">OK</button>
+    <div v-if="!wallet.isLedger" class="password-content">
+      <label class="input-label">
+        Password
+        <input
+          class="input-field"
+          type="password"
+          name="password"
+          ref="password"
+          v-model="password"
+          placeholder="Input your password"
+          v-on:keyup.enter="approve"
+        />
+      </label>
+    </div>
+    <div class="ledger-content" v-else>
+      <b>Please unlock your ledger and confirm the transaction</b>
+    </div>
+    <div class="button-group">
+      <button class="outline" @click="reject">Reject</button>
+      <button @click="approve" :disabled="!password">Approve</button>
     </div>
     <notifications
       group="notify"
@@ -83,18 +73,15 @@
   </main>
 </template>
 <script>
-import { decryptKeyStore } from "../../../services/AccountService";
-import { mapState, mapGetters } from "vuex";
+import { decryptKeyStore } from "../../services/AccountService";
+import { mapState } from "vuex";
 import { Unit } from "@harmony-js/utils";
-import _ from "lodash";
 import {
   TRANSACTIONTYPE,
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_SIGN_CONNECT,
   THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
-  THIRDPARTY_SIGNATURE_KEY_REJECT_RESPONSE,
-  WALLET_LOCKED,
-} from "../../../types";
+} from "../../types";
 
 export default {
   data: () => ({
@@ -116,10 +103,7 @@ export default {
     },
   }),
   computed: {
-    ...mapGetters(["getLockState"]),
-    ...mapState({
-      wallets: (state) => state.wallets,
-    }),
+    ...mapState(["wallets"]),
     getGasFee() {
       return Unit.Gwei(this.gasPrice * this.gasLimit).toOne();
     },
@@ -176,18 +160,11 @@ export default {
           password: this.password,
         },
       });
+      window.close();
     },
 
     async reject() {
       window.close();
-    },
-    lockReject() {
-      chrome.runtime.sendMessage({
-        action: THIRDPARTY_SIGNATURE_KEY_REJECT_RESPONSE,
-        payload: {
-          message: WALLET_LOCKED,
-        },
-      });
     },
   },
   updated() {
@@ -210,9 +187,9 @@ export default {
             this.data = state.txnInfo.data;
           }
           this.host = state.session.host;
-          this.wallet = _.find(this.wallets.accounts, {
-            address: state.session.account.address,
-          });
+          this.wallet = this.wallets.accounts.find(
+            (acc) => acc.address === state.session.account.address
+          );
         } else {
           window.close();
         }
@@ -223,13 +200,6 @@ export default {
 };
 </script>
 <style scoped>
-.image-bg {
-  background-image: linear-gradient(
-      rgba(247, 247, 255, 0.97),
-      rgba(247, 247, 255, 0.97)
-    ),
-    url("images/harmony.png");
-}
 h3 {
   margin-top: 0px;
   margin-bottom: 0px;
@@ -288,9 +258,19 @@ h3 {
 .host_label {
   color: #0987d7;
 }
-.error-container {
-  height: 360px;
+.prompt-back {
+  position: absolute;
+  z-index: -1;
+  background-image: url("./images/harmony-big.png");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: 100%;
+  opacity: 0.12;
+  width: 100%;
+  height: 100%;
 }
+
 .withdraw-section {
   margin-bottom: 70px;
 }

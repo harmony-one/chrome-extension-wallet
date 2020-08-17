@@ -1,7 +1,6 @@
 import { mapState } from "vuex";
 import { getTokenBalance } from "../../services/Hrc20Service";
 import BigNumber from "bignumber.js";
-import _ from "lodash";
 
 export default {
   computed: {
@@ -10,55 +9,66 @@ export default {
       network: (state) => state.network,
       address: (state) => state.wallets.active.address,
     }),
-    tokenArrayOfNetwork() {
-      return this.tokens[this.network.name];
+    tokenArray() {
+      return Object.keys(this.tokens[this.network.chainId]);
     },
     getContractAddressList() {
       const networkList = Object.keys(this.tokens);
       let addressList = [];
       networkList.forEach((network) => {
-        this.tokens[network].forEach((token) => {
-          addressList.push(token.address);
+        const tokenList = Object.keys(this.tokens[network]);
+        tokenList.forEach((token) => {
+          addressList.push(this.tokens[network][token].address);
         });
       });
       return addressList;
     },
   },
   methods: {
-    loadAllTokenBalance() {
-      this.tokenArrayOfNetwork.forEach(async (token) => {
-        await this.loadTokenBalance(token);
-      });
+    async loadAllTokenBalance() {
+      for (var symbol of this.tokenArray) {
+        await this.loadTokenBalance(symbol);
+      }
     },
-    getTokenBalance(token) {
-      const { balance } = _.find(this.tokenArrayOfNetwork, {
-        address: token.address,
-      });
-      return balance;
+    getTokenBalance(symbol) {
+      const artifact = this.getTokenArtifact(symbol);
+      if (!artifact) return 0;
+      if (!artifact.balance) return 0;
+      return artifact.balance;
     },
+    getTokenArtifact(symbol) {
+      return this.tokens[this.network.chainId][symbol];
+    },
+    getContractAddress(symbol) {
+      return this.getTokenArtifact(symbol).address;
+    },
+    getTokenDecimals(symbol) {
+      return this.getTokenArtifact(symbol).decimals;
+    },
+    async loadTokenBalance(tokenSymbol) {
+      const symbol = tokenSymbol;
+      const findSymbol = this.tokenArray.find((token) => token === symbol);
+      if (!findSymbol) return;
+      const artifact = this.getTokenArtifact(symbol);
+      if (artifact === undefined) return;
 
-    async loadTokenBalance(token) {
-      const contractAddress = token.address;
-      const decimals = token.decimals;
-      this.$store.dispatch("hrc20/setTokenBalanceLoading", {
-        network: this.network.name,
-        token,
-        loading: true,
-      });
+      const contractAddress = this.getContractAddress(symbol);
+      const decimals = this.getTokenDecimals(symbol);
+
       let weiBalance = await getTokenBalance(this.address, contractAddress);
       if (weiBalance === null) return;
       let balance = BigNumber(weiBalance)
         .dividedBy(Math.pow(10, decimals))
         .toFixed(6);
-      this.$store.dispatch("hrc20/loadTokenBalance", {
-        network: this.network.name,
-        token,
+      this.$store.commit("hrc20/loadTokenBalance", {
+        network: this.network.chainId,
+        symbol,
         balance,
       });
     },
     async refreshTokens() {
       this.$store.commit("loading", true);
-      this.loadAllTokenBalance();
+      await this.loadAllTokenBalance();
       this.$store.commit("loading", false);
     },
   },

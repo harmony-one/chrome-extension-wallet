@@ -3,11 +3,7 @@
     <app-header subtitle="Export Private Key" />
     <main class="main">
       <div class="main-logo">
-        <img
-          :class="wallet ? `medium` : ``"
-          src="images/harmony.png"
-          alt="Harmony"
-        />
+        <img :class="wallet ? `medium` : ``" src="images/harmony.png" alt="Harmony" />
       </div>
       <div v-if="scene === 2">
         <h3 class="center">{{ name }}</h3>
@@ -16,23 +12,10 @@
         <div class="form-info">This is your private key.</div>
 
         <div class="input-group">
-          <textarea
-            class="input-field special"
-            type="text"
-            v-model="wallet.privateKey"
-            readonly
-          ></textarea>
+          <textarea class="input-field special" type="text" v-model="wallet.privateKey" readonly></textarea>
 
-          <button
-            class="button"
-            title="Copy to clipboard"
-            @click="copyToClipboard"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              class="icon"
-            >
+          <button class="button" title="Copy to clipboard" @click="copyToClipboard">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="icon">
               <path
                 d="M6 6V2c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4v4a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8c0-1.1.9-2 2-2h4zm2 0h4a2 2 0 0 1 2 2v4h4V2H8v4zM2 8v10h10V8H2z"
               />
@@ -56,7 +39,7 @@
         </div>
         <div class="button-group">
           <button class="outline" @click="onBackClick">Back</button>
-          <router-link to="/home" class="button">Done</router-link>
+          <router-link to="/" class="button">Done</router-link>
         </div>
       </div>
 
@@ -66,8 +49,7 @@
             v-for="(account, index) in accounts"
             :key="index"
             :value="index"
-            >{{ account.name }}</option
-          >
+          >{{ account.name }}</option>
         </select>
         <div class="form-info center">{{ getAddress }}</div>
         <div class="divider"></div>
@@ -79,9 +61,7 @@
           class="auth-form"
           autocomplete="off"
         >
-          <div class="form-info">
-            Please enter your password to export the private key.
-          </div>
+          <div class="form-info">Please enter your password to export the private key.</div>
           <input
             class="input-field"
             type="password"
@@ -91,15 +71,10 @@
             v-on:keyup.enter="submitForm"
           />
 
-          <button class="button flex" type="submit">Export</button>
+          <button class="button full-width" type="submit">Export</button>
         </form>
       </div>
-      <notifications
-        group="notify"
-        width="250"
-        :max="2"
-        class="notifiaction-container"
-      />
+      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
     </main>
   </div>
 </template>
@@ -107,22 +82,26 @@
 <script>
 import { mapState } from "vuex";
 import { decryptKeyStore } from "../../services/AccountService";
+import AppHeader from "../components/AppHeader.vue";
 
 export default {
+  components: {
+    AppHeader
+  },
+
   data: () => ({
     name: "",
     address: "",
     password: "",
     selectedIndex: 0,
     scene: 1,
-    wallet: false,
+    wallet: false
   }),
 
   computed: {
     ...mapState({
-      accounts: (state) =>
-        state.wallets.accounts.filter((acc) => !acc.isLedger),
-      active: (state) => state.wallets.active,
+      accounts: state => state.wallets.accounts.filter(acc => !acc.isLedger),
+      active: state => state.wallets.active
     }),
     getAddress() {
       if (this.selectedIndex < 0) {
@@ -131,7 +110,7 @@ export default {
       this.name = this.accounts[this.selectedIndex].name;
       this.address = this.accounts[this.selectedIndex].address;
       return this.address;
-    },
+    }
   },
   methods: {
     onBackClick() {
@@ -141,12 +120,12 @@ export default {
       const keystore = this.accounts[this.selectedIndex].keystore;
       if (!keystore) return false;
 
-      decryptKeyStore(this.password, keystore).then((result) => {
+      decryptKeyStore(this.password, keystore).then(result => {
         if (!result) {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Password is incorrect",
+            text: "Password is incorrect"
           });
           return false;
         } else {
@@ -160,17 +139,17 @@ export default {
         this.$notify({
           group: "notify",
           type: "info",
-          text: "Copied to Clipboard",
+          text: "Copied to Clipboard"
         });
       });
-    },
+    }
   },
   mounted() {
     const index = this.accounts.findIndex(
-      (acc) => acc.address === this.active.address
+      acc => acc.address === this.active.address
     );
     this.selectedIndex = index;
-  },
+  }
 };
 </script>
 <style scoped>

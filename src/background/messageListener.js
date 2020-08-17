@@ -1,6 +1,6 @@
 import apiService from "../services/APIService";
 import { msgToContentScript } from "../services/APIService";
-import * as storage from "../services/StorageService";
+
 import {
   HARMONY_REQUEST_TYPE,
   HARMONY_RESPONSE_TYPE,
@@ -8,15 +8,12 @@ import {
   THIRDPARTY_GET_ACCOUNT_REQUEST,
   THIRDPARTY_SIGN_REQUEST,
   THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
-  THIRDPARTY_SIGNATURE_KEY_REJECT_RESPONSE,
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_SIGN_CONNECT,
   THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_CONNECT,
-  APP_CONNECT,
   THIRDPARTY_SIGN_REQUEST_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
-  THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
 } from "../types";
 
 function externalMessageListener(message, sender, sendResponse) {
@@ -63,14 +60,8 @@ function internalMessageListener(message, sender, sendResponse) {
     case THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE:
       apiService.onGetSignatureKeySuccess(payload);
       break;
-    case THIRDPARTY_SIGNATURE_KEY_REJECT_RESPONSE:
-      apiService.onGetSignatureKeyReject(payload);
-      break;
     case THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE:
       apiService.onGetAccountSuccess(payload);
-      break;
-    case THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE:
-      apiService.onGetAccountReject(payload);
       break;
     default:
       console.log("Unknown internal action received - ", action);
@@ -81,40 +72,33 @@ function internalMessageListener(message, sender, sendResponse) {
 //disconnect listener when the popup is close
 function onConnectListener(externalPort) {
   const name = externalPort.name;
-  externalPort.onDisconnect.addListener(async function() {
-    if (name !== APP_CONNECT) {
-      chrome.tabs.query({}, (tabs) => {
-        tabs.forEach((tab) => {
-          setTimeout(() => {
-            switch (name) {
-              case THIRDPARTY_SIGN_CONNECT: {
-                chrome.tabs.sendMessage(
-                  tab.id,
-                  msgToContentScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
-                    rejected: true,
-                  })
-                );
-                break;
-              }
-              case THIRDPARTY_GET_ACCOUNT_CONNECT: {
-                chrome.tabs.sendMessage(
-                  tab.id,
-                  msgToContentScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
-                    rejected: true,
-                  })
-                );
-                break;
-              }
+  externalPort.onDisconnect.addListener(function() {
+    chrome.tabs.query({}, (tabs) => {
+      tabs.forEach((tab) => {
+        setTimeout(() => {
+          switch (name) {
+            case THIRDPARTY_SIGN_CONNECT: {
+              chrome.tabs.sendMessage(
+                tab.id,
+                msgToContentScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
+                  rejected: true,
+                })
+              );
+              break;
             }
-          }, 200);
-        });
+            case THIRDPARTY_GET_ACCOUNT_CONNECT: {
+              chrome.tabs.sendMessage(
+                tab.id,
+                msgToContentScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
+                  rejected: true,
+                })
+              );
+              break;
+            }
+          }
+        }, 200);
       });
-    } else {
-      const { AppState } = await storage.getValue("AppState");
-      storage.saveValue({
-        AppState: { ...AppState, lastClosed: Date.now() },
-      });
-    }
+    });
   });
 }
 export function setupExtensionMessageListeners() {
