@@ -56,7 +56,7 @@
         </div>
         <div class="button-group">
           <button class="outline" @click="onBackClick">Back</button>
-          <router-link to="/home" class="button">Done</router-link>
+          <button @click="() => $router.push('/home')">Done</button>
         </div>
       </div>
 

@@ -86,7 +86,7 @@ class APIService {
           THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
           session.account
         );
-      } else this.openPopup("login", 420, 600);
+      } else this.openPopup("login", 400, 600);
     } catch (err) {
       this.sendMessageToInjectScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
         rejected: true,

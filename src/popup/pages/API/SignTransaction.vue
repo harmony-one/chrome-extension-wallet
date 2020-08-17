@@ -27,16 +27,16 @@
       <span class="action_caption">Transaction Details</span>
       <div class="invoice" :class="{ 'withdraw-section': isWithdrawal }">
         <div class="invoice__row" v-if="!isWithdrawal && !isTokenTransfer">
-          <div class="invoice__rowLeft">Amount</div>
-          <div class="invoice__rowRight">{{ amount }} ONE</div>
+          <span>Amount</span>
+          <span>{{ amount }} ONE</span>
         </div>
         <div class="invoice__row">
-          <div class="invoice__rowLeft">Gas Price</div>
-          <div class="invoice__rowRight">{{ gasPrice }} Gwei</div>
+          <span>Gas Price</span>
+          <span>{{ gasPrice }} Gwei</span>
         </div>
         <div class="invoice__row">
-          <div class="invoice__rowLeft">Gas Limit</div>
-          <div class="invoice__rowRight">{{ gasLimit }} Gwei</div>
+          <span>Gas Limit</span>
+          <span>{{ gasLimit }} Gwei</span>
         </div>
         <div v-if="isTokenTransfer">
           <p class="data_caption">Data</p>
@@ -264,6 +264,7 @@ h3 {
   font-weight: 700;
 }
 .data_caption {
+  font-weight: 600;
   margin-top: 5px;
   margin-bottom: 5px;
 }
@@ -273,7 +274,6 @@ h3 {
   font-style: italic;
   height: 50px;
   overflow: auto;
-  border: 1px solid #ddd;
 }
 .action_caption {
   font-size: 16px;
@@ -292,6 +292,6 @@ h3 {
   height: 360px;
 }
 .withdraw-section {
-  margin-bottom: 70px;
+  margin-bottom: 80px;
 }
 </style>

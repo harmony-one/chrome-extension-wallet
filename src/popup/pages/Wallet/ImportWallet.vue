@@ -109,7 +109,7 @@
         </label>
         <div>
           <label class="input-label">
-            Confirm Password
+            Confirm the password
             <input
               class="input-field"
               type="password"

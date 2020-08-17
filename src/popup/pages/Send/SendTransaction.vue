@@ -162,17 +162,17 @@
         <div class="invoice-content">
           <div class="invoice">
             <div class="invoice__row">
-              <div class="invoice__rowLeft">Amount</div>
-              <div class="invoice__rowRight">{{ getString(amount) }}</div>
+              <span>Amount</span>
+              <span>{{ getString(amount) }}</span>
             </div>
             <div class="invoice__row">
-              <div class="invoice__rowLeft">Network Fee</div>
-              <div class="invoice__rowRight">{{ getGasFee + " ONE" }}</div>
+              <span>Network Fee</span>
+              <span>{{ getGasFee }} ONE</span>
             </div>
             <div class="invoice__divider"></div>
             <div class="invoice__row">
-              <div class="invoice__rowLeft">Total</div>
-              <div class="invoice__rowRight">{{ getString(getTotal) }}</div>
+              <span>Total</span>
+              <span>{{ getString(getTotal) }}</span>
             </div>
           </div>
         </div>
