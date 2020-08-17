@@ -1,3 +1,4 @@
+import _ from "lodash";
 export default {
   namespaced: true,
 
@@ -16,7 +17,7 @@ export default {
       //payload should look like {name: "Account1", address: "one1xxxx", keystore: Object, isLedger: xxx};
       if (payload.isLedger) {
         //check for existing ledger account
-        const acc = state.accounts.find((acc) => acc.isLedger === true);
+        const acc = _.find(state.accounts, { isLedger: true });
 
         //replace the existing account
         if (acc !== undefined) {
@@ -34,7 +35,7 @@ export default {
 
     setActive(state, payload) {
       //set active account when you select the account in the menu
-      const acc = state.accounts.find((acc) => acc.address === payload);
+      const acc = _.find(state.accounts, { address: payload });
       state.active = acc;
     },
   },

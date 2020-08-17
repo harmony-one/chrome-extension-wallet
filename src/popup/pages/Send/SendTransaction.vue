@@ -1,6 +1,6 @@
 <template>
   <div>
-    <app-header :subtitle="getHeaderName" @refresh="refreshData" backRoute="/" />
+    <app-header :subtitle="getHeaderName" @refresh="refreshData" />
     <main class="main">
       <div v-if="scene === 1">
         <form
@@ -16,9 +16,9 @@
             :class="[message.type]"
             @click="onMessageClick"
           >
-            <span
-              v-if="message.type === 'success'"
-            >Transaction Succeed: Click here to see the transaction</span>
+            <span v-if="message.type === 'success'"
+              >Transaction Succeed: Click here to see the transaction</span
+            >
             <span v-else>{{ message.text }}</span>
           </div>
           <div :class="{ row: !isToken }">
@@ -35,19 +35,20 @@
             <label
               v-if="!isToken"
               class="input-label shard"
-              :class="{disabled: selectedToken !== 'ONE'}"
+              :class="{ disabled: isHRCToken }"
             >
               To Shard
               <select
                 class="input-field"
                 v-model="toShard"
-                :disabled="selectedToken !== 'ONE'"
+                :disabled="isHRCToken"
               >
                 <option
                   v-for="shard in account.shardArray"
                   :key="shard.shardID"
                   :value="shard.shardID"
-                >{{ shard.shardID }}</option>
+                  >{{ shard.shardID }}</option
+                >
               </select>
             </label>
           </div>
@@ -62,15 +63,19 @@
                 v-model="amount"
                 step="any"
               />
-              <div
-                class="maximum-label"
-                v-show="!loading"
-              >Maximum: {{ getMaxBalance + " " + selectedToken }}</div>
+              <div class="maximum-label" v-show="!loading">
+                Maximum: {{ getMaxBalance + " " + selectedToken.symbol }}
+              </div>
             </label>
             <label v-if="!isToken" class="input-label token">
               Token
-              <select class="input-field" v-model="selectedToken" @change="tokenChanged()">
-                <option v-for="symbol in tokenList" :key="symbol" :value="symbol">{{ symbol }}</option>
+              <select class="input-field" v-model="selectedToken">
+                <option
+                  v-for="(token, index) in tokenList"
+                  :key="index"
+                  :value="token"
+                  >{{ token.symbol }}</option
+                >
               </select>
             </label>
           </div>
@@ -97,7 +102,7 @@
               />
             </label>
             <label class="input-label gas-one">
-              &nbsp;
+              Gas Fee
               <input
                 class="input-field"
                 type="text"
@@ -107,7 +112,7 @@
               />
             </label>
           </div>
-          <label class="input-label">
+          <label class="input-label" :class="{ disabled: isHRCToken }">
             Input Data
             <textarea
               class="input-field input-data"
@@ -115,17 +120,20 @@
               name="inputdata"
               placeholder="Please enter hexadecimal data (optional)"
               v-model="inputData"
+              :disabled="isHRCToken"
             />
           </label>
-          <button class="full-width" type="submit">Send</button>
+          <button class="flex" type="submit">Send</button>
         </form>
       </div>
       <!-- Approve Transaction Dialog -->
       <div v-else>
-        <h3 class="center">{{ "Approve Transaction" + (wallet.isLedger ? " on the Ledger" : "") }}</h3>
+        <h3 class="center">Approve Transaction</h3>
         <p class="addressRow">
           From
-          <span class="address__name">{{ compressAddress(getFromAddress) }}</span>
+          <span class="address__name">
+            {{ compressAddress(getFromAddress) }}
+          </span>
           of Shard
           <b>{{ fromShard }}</b>
         </p>
@@ -149,7 +157,7 @@
         <div class="invoice-content">
           <div class="invoice">
             <div class="invoice__row">
-              <div class="invoice__rowLeft">Subtotal</div>
+              <div class="invoice__rowLeft">Amount</div>
               <div class="invoice__rowRight">{{ getString(amount) }}</div>
             </div>
             <div class="invoice__row">
@@ -179,17 +187,22 @@
           </label>
         </div>
         <div class="ledger-content" v-else>
-          <b>{{ledgerConfirmTxt}}</b>
+          <b>{{ ledgerConfirmTxt }}</b>
         </div>
         <div v-if="!wallet.isLedger" class="button-group">
           <button class="outline" @click="onBackClick()">Back</button>
           <button @click="sendPayment" :disabled="!password">Approve</button>
         </div>
         <div v-else-if="ledgerError">
-          <button @click="onBackClick()" class="full-but">Retry</button>
+          <button @click="onBackClick()" class="flex mt-20">Retry</button>
         </div>
       </div>
-      <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="4"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -198,41 +211,37 @@
 import { mapState } from "vuex";
 import {
   decryptKeyStore,
-  transferToken,
-  getNetworkLink
-} from "../../services/AccountService";
-import { sendToken } from "../../services/Hrc20Service";
+  transferOne,
+  getNetworkLink,
+} from "../../../services/AccountService";
+import { sendToken } from "../../../services/Hrc20Service";
 import { isValidAddress } from "@harmony-js/utils";
-import account from "../mixins/account";
-import helper from "../mixins/helper";
-import AppHeader from "../components/AppHeader.vue";
+import account from "../../mixins/account";
+import helper from "../../mixins/helper";
 import {
   signTransactionWithLedger,
-  isLedgerLocked
-} from "../../services/LedgerService";
+  signHRCTransactionWithLedger,
+  isLedgerLocked,
+} from "../../../services/LedgerService";
 import {
   LEDGER_CONFIRM_PREPARE,
   LEDGER_CONFIRM_SUCCESS,
   LEDGER_CONFIRM_REJECT,
-  LEDGER_LOCKED
-} from "../../types";
+  LEDGER_LOCKED,
+} from "../../../types";
 
 export default {
   name: "send-transaction",
   mixins: [account, helper],
 
-  components: {
-    AppHeader
-  },
   props: {
     isToken: {
       type: Boolean,
-      default: false
+      default: false,
     },
     token: {
-      type: String,
-      default: "ONE"
-    }
+      type: Object,
+    },
   },
   data: () => ({
     scene: 1,
@@ -242,29 +251,29 @@ export default {
     tokenList: [],
     recipient: "",
     gasPrice: 1,
-    gasLimit: 21000,
+    gasLimit: 25000,
     inputData: "",
-    selectedToken: "ONE",
+    selectedToken: { symbol: "ONE", isMainToken: true },
     password: "",
     ledgerError: false,
     message: {
       show: false,
       type: "error",
-      text: ""
+      text: "",
     },
-    ledgerConfirmTxt: LEDGER_CONFIRM_PREPARE
+    ledgerConfirmTxt: LEDGER_CONFIRM_PREPARE,
   }),
 
   computed: {
     ...mapState({
-      wallet: state => state.wallets.active,
-      loading: state => state.loading
+      wallet: (state) => state.wallets.active,
+      loading: (state) => state.loading,
     }),
     getFromAddress() {
       return this.wallet.address;
     },
     isHRCToken() {
-      return this.selectedToken && this.selectedToken !== "ONE";
+      return this.selectedToken && !this.selectedToken.isMainToken;
     },
     getGasFee() {
       return parseFloat((this.gasPrice * this.gasLimit) / Math.pow(10, 9));
@@ -286,54 +295,51 @@ export default {
       return max;
     },
     getHeaderName() {
-      if (this.isHRCToken) return `Send ${this.selectedToken} Token`;
+      if (this.isHRCToken) return `Send ${this.selectedToken.symbol} Token`;
       return "Send Payment";
-    }
+    },
   },
 
   async mounted() {
     this.fromShard = this.account.shard;
-    if (this.wallet.isLedger) this.refreshData();
-    this.setSelectedToken();
-    await this.loadBalance();
+    if (this.wallet.isLedger) await this.refreshData();
+    else {
+      this.initSelectedToken();
+      await this.loadBalance();
+    }
   },
+
   updated() {
     if (this.scene == 2) {
       if (!this.wallet.isLedger) this.$refs.password.focus();
     }
   },
-  methods: {
-    setGasLimit() {
-      if (!this.isHRCToken) this.gasLimit = 21000;
-      else this.gasLimit = 250000; //this is from the truffle-config.js
-    },
-    async tokenChanged() {
+  watch: {
+    selectedToken() {
       this.toShard = 0;
-      this.setGasLimit();
-      await this.loadBalance();
     },
-    setSelectedToken() {
+  },
+  methods: {
+    initSelectedToken() {
       if (!this.isToken) {
-        this.tokenList = ["ONE", ...this.tokenArray];
-        this.selectedToken = "ONE";
+        this.tokenList = [
+          { symbol: "ONE", isMainToken: true },
+          ...this.tokenArrayOfNetwork,
+        ];
+        this.selectedToken = this.tokenList[0];
       } else {
         this.selectedToken = this.token;
       }
-      this.setGasLimit();
     },
     getString(amount) {
-      return Number(amount).toFixed(6) + " " + this.selectedToken;
+      return Number(amount).toFixed(6) + " " + this.selectedToken.symbol;
     },
     onMessageClick() {
       if (this.message.type == "success") window.open(this.message.text);
     },
     async loadBalance() {
-      if (this.isHRCToken) await this.loadTokenBalance(this.selectedToken);
-      else await this.loadOneBalance();
-    },
-    async refreshToken() {
-      await this.setSelectedToken();
-      await this.loadBalance();
+      await this.loadOneBalance();
+      await this.loadAllTokenBalance();
     },
     onBackClick() {
       this.scene = 1;
@@ -352,21 +358,34 @@ export default {
     },
     async processLedgerTransfer() {
       try {
-        const { success, result } = await signTransactionWithLedger(
-          this.recipient,
-          this.fromShard,
-          this.toShard,
-          this.amount,
-          this.gasLimit,
-          this.gasPrice
-        );
-        if (success) {
-          const signedTxn = result;
+        let res;
+        if (this.isHRCToken) {
+          res = await signHRCTransactionWithLedger(
+            this.address,
+            this.recipient,
+            this.amount,
+            this.gasLimit,
+            this.gasPrice,
+            this.selectedToken.decimals,
+            this.selectedToken.address
+          );
+        } else {
+          res = await signTransactionWithLedger(
+            this.recipient,
+            this.fromShard,
+            this.toShard,
+            this.amount,
+            this.gasLimit,
+            this.gasPrice
+          );
+        }
+        if (res.success) {
+          const signedTxn = res.result;
           this.ledgerConfirmTxt = LEDGER_CONFIRM_SUCCESS;
           this.$notify({
             group: "notify",
             type: "success",
-            text: LEDGER_CONFIRM_SUCCESS
+            text: LEDGER_CONFIRM_SUCCESS,
           });
           this.$store.commit("loading", true);
           const [sentTxn, txnHash] = await signedTxn.sendTransaction();
@@ -376,7 +395,7 @@ export default {
           if (confiremdTxn.isConfirmed()) {
             explorerLink = getNetworkLink("/tx/" + txnHash);
           } else {
-            this.showErrMessage("Can not confirm transaction " + txnHash);
+            this.showErrMessage("Can not confirm transaction(" + txnHash + ")");
             return;
           }
 
@@ -388,7 +407,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: result
+            text: result,
           });
           this.ledgerConfirmTxt = LEDGER_CONFIRM_REJECT;
           this.ledgerError = true;
@@ -411,7 +430,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Password is not correct"
+            text: "Password is not correct",
           });
           return false;
         }
@@ -422,14 +441,15 @@ export default {
         // use the current selected account in the Account window
         let ret;
         if (!this.isHRCToken) {
-          ret = await transferToken(
+          ret = await transferOne(
             this.recipient,
             this.fromShard,
             this.toShard,
             this.amount,
             privateKey,
             this.gasLimit,
-            this.gasPrice
+            this.gasPrice,
+            this.inputData
           );
         } else {
           //token transfer part
@@ -437,11 +457,11 @@ export default {
             this.address,
             this.recipient,
             this.amount,
-            this.getTokenDecimals(this.selectedToken),
             privateKey,
             this.gasLimit,
             this.gasPrice,
-            this.getContractAddress(this.selectedToken)
+            this.selectedToken.decimals,
+            this.selectedToken.address
           );
         }
 
@@ -454,11 +474,10 @@ export default {
         }
 
         this.initScene();
-        this.loadBalance();
+        await this.loadBalance();
       } catch (e) {
+        console.error(e);
         this.$store.commit("loading", false);
-
-        console.log("transfer error =", e);
         this.showErrMessage(
           "Something went wrong while trying to send the payment"
         );
@@ -513,7 +532,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: LEDGER_LOCKED
+            text: LEDGER_LOCKED,
           });
           return;
         }
@@ -525,11 +544,12 @@ export default {
     async refreshData() {
       this.message.show = false;
       this.$store.commit("loading", true);
+      await this.initSelectedToken();
       await this.loadShardingInfo();
-      await this.refreshToken();
+      await this.loadBalance();
       this.$store.commit("loading", false);
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
@@ -539,7 +559,6 @@ h3 {
 .recipient,
 .amount {
   width: 75%;
-  margin-right: 10px;
 }
 .token,
 .shard {
@@ -548,7 +567,6 @@ h3 {
 .gas-price,
 .gas-limit {
   width: 32%;
-  margin-right: 10px;
 }
 .gas-one {
   width: 36%;

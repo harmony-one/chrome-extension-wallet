@@ -5,6 +5,7 @@ import {
   decryptPhrase,
   HarmonyAddress,
 } from "@harmony-js/crypto";
+import { stringToBytes, byteArray2hexStr } from "./CryptoService";
 const { isValidAddress } = require("@harmony-js/utils");
 import { Harmony } from "@harmony-js/core";
 var currentNetwork = "";
@@ -145,19 +146,22 @@ export function checkAddress(address) {
   return isValidAddress(address);
 }
 
-export async function transferToken(
+export async function transferOne(
   receiver,
   fromShard,
   toShard,
   amount,
   privateKey,
   gasLimit = "21000",
-  gasPrice = 1
+  gasPrice = 1,
+  inputData
 ) {
   try {
     let harmony = getHarmony();
-
     //1e18
+    const data = !inputData.match(/^0x([a-f0-9])*$/)
+      ? "0x" + byteArray2hexStr(stringToBytes(inputData))
+      : inputData;
     const txn = harmony.transactions.newTx({
       //  token send to
       to: receiver,
@@ -181,20 +185,17 @@ export async function transferToken(
         .asGwei()
         .toWei()
         .toString(),
+      data,
     });
     // update the shard information
     await getShardInfo();
-
     // sign the transaction use wallet;
     const account = harmony.wallet.addByPrivateKey(privateKey);
     const signedTxn = await account.signTransaction(txn);
 
     signedTxn
       .observed()
-      .on("transactionHash", (txnHash) => {
-        console.log("--- hash ---");
-        console.log(txnHash);
-      })
+      .on("transactionHash", (txnHash) => {})
       .on("error", (error) => {
         return {
           result: false,

@@ -7,7 +7,7 @@ import {
   CLOSE_WINDOW,
 } from "../types";
 import * as storage from "./StorageService";
-
+import _ from "lodash";
 export const msgToContentScript = (type, payload) => ({
   type: HARMONY_RESPONSE_TYPE,
   message: {
@@ -68,9 +68,9 @@ class APIService {
       this.host = hostname;
       const session = await this.getSession(hostname);
       if (session.exist) {
-        const findAcc = store.wallets.accounts.find(
-          (account) => account.address === session.account.address
-        );
+        const findAcc = _.find(store.wallets.accounts, {
+          address: session.account.address,
+        });
         if (!findAcc) {
           this.sendMessageToInjectScript(
             THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
@@ -99,7 +99,6 @@ class APIService {
   };
   getVuexStore = () => {
     try {
-      console.log(window.localStorage);
       if (!window.localStorage.vuex) throw new Error("Vuex Store is not found");
       const vuex = JSON.parse(window.localStorage.vuex);
       if (!vuex || !vuex.wallets)
@@ -118,9 +117,9 @@ class APIService {
       this.txnInfo = payload.txnInfo;
       const session = await this.getSession(hostname);
       if (session.exist) {
-        const findAcc = store.wallets.accounts.find(
-          (account) => account.address === session.account.address
-        );
+        const findAcc = _.find(store.wallets.accounts, {
+          address: session.account.address,
+        });
         if (!findAcc) {
           this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
             rejected: true,
@@ -149,6 +148,13 @@ class APIService {
   };
   onGetSignatureKeySuccess = (payload) => {
     this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, payload);
+    this.closeWindow();
+  };
+  onGetSignatureKeyReject = ({ message }) => {
+    this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
+      rejected: true,
+      message,
+    });
     this.closeWindow();
   };
   getHostSessions = async () => {
@@ -186,6 +192,13 @@ class APIService {
       THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
       payload
     );
+    this.closeWindow();
+  };
+  onGetAccountReject = ({ message }) => {
+    this.sendMessageToInjectScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
+      rejected: true,
+      message,
+    });
     this.closeWindow();
   };
   closeWindow = () => {
