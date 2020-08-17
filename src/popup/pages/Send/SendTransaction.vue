@@ -35,13 +35,13 @@
             <label
               v-if="!isToken"
               class="input-label shard"
-              :class="{ disabled: !selectedToken.isMainToken }"
+              :class="{ disabled: isHRCToken }"
             >
               To Shard
               <select
                 class="input-field"
                 v-model="toShard"
-                :disabled="!selectedToken.isMainToken"
+                :disabled="isHRCToken"
               >
                 <option
                   v-for="shard in account.shardArray"
@@ -112,7 +112,7 @@
               />
             </label>
           </div>
-          <label class="input-label">
+          <label class="input-label" :class="{ disabled: isHRCToken }">
             Input Data
             <textarea
               class="input-field input-data"
@@ -120,6 +120,7 @@
               name="inputdata"
               placeholder="Please enter hexadecimal data (optional)"
               v-model="inputData"
+              :disabled="isHRCToken"
             />
           </label>
           <button class="flex" type="submit">Send</button>
@@ -250,7 +251,7 @@ export default {
     tokenList: [],
     recipient: "",
     gasPrice: 1,
-    gasLimit: 21000,
+    gasLimit: 25000,
     inputData: "",
     selectedToken: { symbol: "ONE", isMainToken: true },
     password: "",
@@ -316,14 +317,9 @@ export default {
   watch: {
     selectedToken() {
       this.toShard = 0;
-      this.setGasLimit();
     },
   },
   methods: {
-    setGasLimit() {
-      if (!this.isHRCToken) this.gasLimit = 21000;
-      else this.gasLimit = 250000; //this is from the truffle-config.js
-    },
     initSelectedToken() {
       if (!this.isToken) {
         this.tokenList = [
@@ -334,7 +330,6 @@ export default {
       } else {
         this.selectedToken = this.token;
       }
-      this.setGasLimit();
     },
     getString(amount) {
       return Number(amount).toFixed(6) + " " + this.selectedToken.symbol;
@@ -453,7 +448,8 @@ export default {
             this.amount,
             privateKey,
             this.gasLimit,
-            this.gasPrice
+            this.gasPrice,
+            this.inputData
           );
         } else {
           //token transfer part
