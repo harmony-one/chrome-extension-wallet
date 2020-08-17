@@ -688,3 +688,7 @@ input.vue-pincode-input:focus {
   transform: translate(-50%, -50%);
   margin: 0 auto;
 }
+
+.vld-overlay {
+  position: absolute !important;
+}
