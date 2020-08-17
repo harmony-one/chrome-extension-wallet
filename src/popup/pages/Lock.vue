@@ -63,7 +63,7 @@ export default {
     },
     statusCaption() {
       if (this.attempts === 5)
-        return `Input the ${this.getPinCode.digits} digits PIN code`;
+        return `Input the ${this.getPinCode.digits} digits PIN Code`;
       else if (this.attempts > 0)
         return `${this.attempts} ${
           this.attempts > 1 ? "attempts" : "attempt"

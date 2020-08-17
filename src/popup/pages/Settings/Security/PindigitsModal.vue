@@ -6,7 +6,7 @@
     :width="250"
     height="auto"
   >
-    <div class="modal-header">Change the PIN code digits</div>
+    <div class="modal-header">Change the PIN Code digits</div>
     <div class="modal-body">
       <radio-button
         name="options"

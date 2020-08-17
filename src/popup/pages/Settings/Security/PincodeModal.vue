@@ -7,7 +7,7 @@
     />
     <div class="pincode-page" :class="{ main: !subModule }">
       <div v-if="scene === 0">
-        <div class="pin-label">Input the old PIN code</div>
+        <div class="pin-label">Input the Old PIN Code</div>
         <div
           class="pin-container"
           :class="{ 'pin-fail': pinfail }"
@@ -29,7 +29,7 @@
         </div>
       </div>
       <div v-else-if="scene === 1">
-        <div class="pin-label">Set up a new PIN code</div>
+        <div class="pin-label">Set up a New PIN Code</div>
         <div
           class="pin-container"
           :style="{
@@ -47,7 +47,7 @@
         </div>
       </div>
       <div v-else-if="scene === 2">
-        <div class="pin-label">Confirm the PIN code</div>
+        <div class="pin-label">Confirm the PIN Code</div>
         <div
           class="pin-container"
           :class="{ 'pin-fail': pinfail }"
@@ -127,8 +127,8 @@ export default {
       pindigits: (state) => state.settings.auth.pindigits,
     }),
     statusCaption() {
-      if (this.errorcode === 1) return "PIN code is not correct";
-      else if (this.errorcode === 2) return "PIN code doesn't match";
+      if (this.errorcode === 1) return "PIN Code is not correct";
+      else if (this.errorcode === 2) return "PIN Code doesn't match";
       return "";
     },
     isPincodeEmpty() {

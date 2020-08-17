@@ -9,10 +9,10 @@
           :key="item.route"
           @click="$router.push(item.route)"
         >
-          <i class="material-icons">{{item.icon}}</i>
+          <i class="material-icons">{{ item.icon }}</i>
           <div class="list-item-content">
             <div>{{ item.name }}</div>
-            <div>{{item.description}}</div>
+            <div>{{ item.description }}</div>
           </div>
         </div>
       </div>
@@ -29,10 +29,10 @@ export default {
         icon: "security",
         name: "Security",
         description:
-          "Change the security settings (PIN code, PIN digits and Lock timer)",
-        route: "/settings/security"
-      }
-    ]
-  })
+          "Change the security settings (PIN Code, PIN digits and Lock timer)",
+        route: "/settings/security",
+      },
+    ],
+  }),
 };
 </script>

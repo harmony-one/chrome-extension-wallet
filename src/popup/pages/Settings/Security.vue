@@ -7,7 +7,9 @@
         v-for="item in options"
         :key="item.title"
         @click="item.handler"
-      >{{ item.title }}</div>
+      >
+        {{ item.title }}
+      </div>
       <pindigits-modal />
       <locktimer-modal />
     </main>
@@ -22,21 +24,21 @@ export default {
   data() {
     return {
       options: [
-        { title: "Change the PIN code", handler: () => this.changePincode() },
+        { title: "Change the PIN Code", handler: () => this.changePincode() },
         {
-          title: "Change the PIN code digits",
-          handler: () => this.showPindigitsModal()
+          title: "Change the PIN Code digits",
+          handler: () => this.showPindigitsModal(),
         },
         {
           title: "Set the lock timer",
-          handler: () => this.showLockTimerModal()
-        }
-      ]
+          handler: () => this.showLockTimerModal(),
+        },
+      ],
     };
   },
   components: {
     PindigitsModal,
-    LocktimerModal
+    LocktimerModal,
   },
   methods: {
     changePincode() {
@@ -47,8 +49,8 @@ export default {
     },
     showLockTimerModal() {
       this.$modal.show("modal-locktimer");
-    }
-  }
+    },
+  },
 };
 </script>
 <style></style>
