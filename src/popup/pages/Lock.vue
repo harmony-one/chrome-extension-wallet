@@ -1,6 +1,5 @@
 <template>
   <div class="lock-page">
-    <div class="background"></div>
     <div class="main-logo">
       <img src="images/harmony-big.png" class="lock-logo" alt="Harmony" />
     </div>
@@ -162,8 +161,8 @@ export default {
   text-align: center;
   position: relative;
   background-image: linear-gradient(
-      rgba(247, 247, 255, 0.95),
-      rgba(247, 247, 255, 0.95)
+      rgba(247, 247, 255, 0.96),
+      rgba(247, 247, 255, 0.96)
     ),
     url("images/harmony.png");
 }

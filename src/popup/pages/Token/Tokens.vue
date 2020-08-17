@@ -3,15 +3,18 @@
     <app-header @refresh="refreshData" headerTab="main-tab" />
     <main class="main">
       <div class="token-container">
-        <div v-if="!tokenArrayOfNetwork || account.shard" class="message-empty">
+        <div
+          v-if="!tokenArrayOfNetwork.length || account.shard"
+          class="message-empty"
+        >
           No tokens found
         </div>
 
         <div v-else>
           <div
             class="token-row"
-            v-for="token in tokenArrayOfNetwork"
-            :key="token.symbol"
+            v-for="(token, index) in tokenArrayOfNetwork"
+            :key="index"
           >
             <span class="token-name">{{ compressSymbol(token.symbol) }}</span>
             <div v-if="!editing">
@@ -55,18 +58,48 @@
           </button>
           <button
             v-if="tokenArrayOfNetwork.length > 0"
-            class="round edit_token"
+            class="round green-but"
             @click="editStart"
           >
             <i class="material-icons">edit</i>
           </button>
         </div>
         <div v-else>
-          <button class="cancel_edit" @click="editStop">
-            Cancel
+          <button @click="editStop">
+            Done
           </button>
         </div>
       </div>
+      <v-dialog
+        name="dialog"
+        :adaptive="true"
+        transition="scale"
+        :width="250"
+        height="auto"
+      />
+      <modal
+        name="modal-token-edit"
+        :adaptive="true"
+        transition="scale"
+        :width="250"
+        height="auto"
+      >
+        <div class="modal-header">Change the token symbol</div>
+        <div class="modal-body">
+          <input
+            type="text"
+            name="tokenSymbol"
+            v-model="tokenSymbol"
+            placeholder="Input the token symbol"
+          />
+        </div>
+        <div class="modal-footer">
+          <div class="secondary" @click="$modal.hide('modal-token-edit')">
+            CLOSE
+          </div>
+          <div class="primary" @click="saveTokenSymbol">SAVE</div>
+        </div>
+      </modal>
     </main>
   </div>
 </template>
@@ -78,6 +111,8 @@ import { mapState } from "vuex";
 export default {
   data: () => ({
     editing: false,
+    editingToken: null,
+    tokenSymbol: null,
   }),
   mixins: [account, helper],
   computed: {
@@ -92,13 +127,53 @@ export default {
     this.$forceUpdate();
   },
   methods: {
-    editToken(token) {},
-    deleteToken(token) {},
+    saveTokenSymbol() {
+      this.$modal.hide("modal-token-edit");
+      this.$store.dispatch("hrc20/editToken", {
+        network: this.network.name,
+        token: {
+          ...this.editingToken,
+          symbol: this.tokenSymbol,
+        },
+      });
+    },
+    editToken(token) {
+      this.editingToken = token;
+      this.tokenSymbol = token.symbol;
+      this.$modal.show("modal-token-edit");
+    },
+    deleteToken(token) {
+      this.$modal.show("dialog", {
+        text: "Are you sure you want to delete this token?",
+        buttons: [
+          {
+            title: "Cancel",
+            default: true,
+            handler: () => {
+              this.$modal.hide("dialog");
+            },
+          },
+          {
+            title: "Delete",
+            handler: () => {
+              this.$modal.hide("dialog");
+              this.$store.dispatch("hrc20/deleteToken", {
+                network: this.network.name,
+                token,
+              });
+              if (!this.tokenArrayOfNetwork.length) this.editStop();
+            },
+          },
+        ],
+      });
+    },
     editStart() {
       this.editing = true;
     },
     editStop() {
       this.editing = false;
+      this.tokenSymbol = "";
+      this.editingToken = null;
     },
     compressSymbol(str) {
       if (str.length > 15)
@@ -214,8 +289,5 @@ button.token_send_but {
   position: absolute;
   right: 20px;
   bottom: 10px;
-}
-button.cancel_edit {
-  width: 80px;
 }
 </style>

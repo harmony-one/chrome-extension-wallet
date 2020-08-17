@@ -5,7 +5,7 @@
         <img src="images/harmony-small.png" alt="Harmony" />
         <span>Harmony</span>
       </router-link>
-      <a v-if="getPinCode" class="header-lock" @click="lockWallet">
+      <a class="header-lock" @click="lockWallet">
         <i class="material-icons">lock</i>
       </a>
 
@@ -180,7 +180,7 @@
             <i class="material-icons">info</i>
             <router-link to="/about">About Harmony</router-link>
           </div>
-          <div v-if="wallets.accounts.length > 0 && getPinCode">
+          <div v-if="wallets.accounts.length > 0">
             <div class="dropdown-menu-divider"></div>
             <div class="dropdown-menu-item">
               <i class="material-icons">lock</i>
@@ -210,6 +210,13 @@
       :is="headerTab"
       :subtitle="subtitle"
     ></component>
+    <v-dialog
+      name="dialog"
+      :adaptive="true"
+      transition="scale"
+      :width="250"
+      height="auto"
+    />
   </header>
 </template>
 
@@ -312,6 +319,21 @@ export default {
       this.openExpandPopup("/connect-hardware-wallet");
     },
     lockWallet() {
+      if (!this.getPinCode) {
+        this.$modal.show("dialog", {
+          text:
+            "You haven't set the PIN code yet. Please set the PIN code in the <b>Settings->Security->Change the PIN code.</b>",
+          buttons: [
+            {
+              title: "CLOSE",
+              handler: () => {
+                this.$modal.hide("dialog");
+              },
+            },
+          ],
+        });
+        return;
+      }
       this.$store.dispatch("settings/setLockState", true);
       this.$router.push("/lock");
     },
@@ -333,12 +355,6 @@ export default {
   background: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-.dropdown-menu-item i {
-  color: #757575;
-  padding-top: 11px;
-  padding-left: 8px;
-  position: absolute;
-}
 .account-content {
   max-height: 160px;
   overflow: auto;
@@ -347,6 +363,13 @@ export default {
   display: flex;
   flex-direction: row;
   position: relative;
+  i {
+    position: absolute;
+    color: #757575;
+    top: 50%;
+    transform: translate(0, -50%);
+    left: 8px;
+  }
   &.disabled {
     pointer-events: none;
     a,

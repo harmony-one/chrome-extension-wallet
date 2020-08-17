@@ -22,8 +22,15 @@
             v-show="wallets.accounts.length > 0"
             class="outline"
             @click="$router.push('/home')"
-          >Cancel</button>
-          <button :class="!wallets.accounts.length ? 'full-width' : ''" @click="connect">Connect</button>
+          >
+            Cancel
+          </button>
+          <button
+            :class="!wallets.accounts.length ? 'flex' : ''"
+            @click="connect"
+          >
+            Connect
+          </button>
         </div>
       </div>
       <div v-else-if="scene === 2">
@@ -42,12 +49,19 @@
             v-on:keyup.enter="nextToPincode"
           />
         </label>
-        <button class="full-but" :disabled="!name" @click="nextToPincode">Next</button>
+        <button class="flex mt-20" :disabled="!name" @click="nextToPincode">
+          Next
+        </button>
       </div>
       <div v-else>
-        <pincode-modal @success="createAccount" :onBack="() => scene = 2" />
+        <pincode-modal @success="createAccount" :onBack="() => (scene = 2)" />
       </div>
-      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -63,11 +77,11 @@ export default {
     address: "",
     error: {
       show: false,
-      message: ""
-    }
+      message: "",
+    },
   }),
   computed: {
-    ...mapState(["wallets"])
+    ...mapState(["wallets"]),
   },
   methods: {
     nextToPincode() {
@@ -78,7 +92,7 @@ export default {
         isLedger: true,
         name: this.name,
         address: this.address,
-        keystore: ""
+        keystore: "",
       };
 
       this.$store.commit("wallets/addAccount", wallet);
@@ -91,19 +105,19 @@ export default {
     },
     connect() {
       connectLedgerApp()
-        .then(address => {
+        .then((address) => {
           this.address = address;
           this.scene = 2;
         })
-        .catch(err => {
+        .catch((err) => {
           this.$notify({
             group: "notify",
             type: "error",
-            text: err
+            text: err,
           });
         });
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>

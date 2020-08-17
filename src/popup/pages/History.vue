@@ -112,6 +112,7 @@ export default {
   }),
 
   mounted() {
+    if (!this.history.length) this.$store.commit("loading", true);
     this.loadHistory();
   },
 

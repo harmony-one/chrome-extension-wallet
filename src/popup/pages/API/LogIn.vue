@@ -57,7 +57,7 @@
         <button :disabled="selected < 0" @click="accept">Accept</button>
       </div>
       <div v-else>
-        <button class="full-but" @click="lockReject">OK</button>
+        <button class="flex mt-20" @click="lockReject">OK</button>
       </div>
     </main>
   </div>

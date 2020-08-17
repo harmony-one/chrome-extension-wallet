@@ -12,7 +12,6 @@ export const getPinCode = (state, getters) => {
     }
     return false;
   } catch (err) {
-    console.error(err);
     return false;
   }
 };
@@ -27,7 +26,6 @@ export const getLockState = (state, getters) => {
     }
     return false;
   } catch (err) {
-    console.error(err);
     return true;
   }
 };

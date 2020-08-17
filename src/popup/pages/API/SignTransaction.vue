@@ -1,6 +1,5 @@
 <template>
-  <main class="prompt">
-    <div class="prompt-back"></div>
+  <main class="prompt image-bg">
     <h3 class="center">Approve Transaction</h3>
     <div class="hostrow">
       <span class="host_label">{{ host }}</span>
@@ -73,7 +72,7 @@
           extension.
         </p>
       </div>
-      <button class="full-but" @click="lockReject">OK</button>
+      <button class="flex mt-20" @click="lockReject">OK</button>
     </div>
     <notifications
       group="notify"
@@ -224,6 +223,13 @@ export default {
 };
 </script>
 <style scoped>
+.image-bg {
+  background-image: linear-gradient(
+      rgba(247, 247, 255, 0.97),
+      rgba(247, 247, 255, 0.97)
+    ),
+    url("images/harmony.png");
+}
 h3 {
   margin-top: 0px;
   margin-bottom: 0px;
@@ -281,18 +287,6 @@ h3 {
 }
 .host_label {
   color: #0987d7;
-}
-.prompt-back {
-  position: absolute;
-  z-index: -1;
-  background-image: url("./images/harmony-big.png");
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-position: center;
-  background-size: 100%;
-  opacity: 0.12;
-  width: 100%;
-  height: 100%;
 }
 .error-container {
   height: 360px;

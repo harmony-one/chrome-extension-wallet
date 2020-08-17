@@ -129,7 +129,6 @@ a:hover {
 
 .prompt {
   padding: 1.5rem 1rem;
-  position: relative;
 }
 .auth {
   clear: both;
@@ -224,7 +223,11 @@ textarea.input-field:read-only {
 .button-group {
   margin-top: 20px;
   display: flex;
+  gap: 15px;
   justify-content: space-between;
+  button {
+    flex: 1;
+  }
 }
 button,
 a.button {
@@ -233,7 +236,6 @@ a.button {
   padding: 10px;
   font-weight: 400;
   min-width: 60px;
-  width: 45%;
   color: white;
   border-radius: 0.3rem;
   cursor: pointer;
@@ -246,11 +248,9 @@ a.button {
 }
 button:hover {
   background-color: #0987d7;
-  border: 2px solid #0987d7;
 }
 button:active {
   background-color: #1f6bb7;
-  border: 2px solid #1f6bb7;
 }
 button.outline {
   background: rgba(10, 147, 235, 0.05);
@@ -294,7 +294,7 @@ button.round {
   }
 }
 
-button.edit_token {
+button.green-but {
   background-color: #0ac993;
   &:hover {
     background-color: #15ebae;
@@ -303,9 +303,8 @@ button.edit_token {
     background-color: #0aab7d;
   }
 }
-.full-width {
+.flex {
   width: 100%;
-  height: 40px;
 }
 .input-group {
   display: flex;
@@ -450,14 +449,6 @@ button.edit_token {
   padding-bottom: 4px;
 }
 
-.transaction__information {
-  max-height: 100px;
-  overflow: auto;
-  font-size: 14px;
-  color: var(--primary-text-color);
-  margin: 10px 0px 5px 0px;
-}
-
 .invoice {
   font-size: 14px;
 }
@@ -519,10 +510,8 @@ button.edit_token {
   height: 100px;
 }
 
-.full-but {
+.mt-20 {
   margin-top: 20px;
-  height: 40px;
-  width: 100%;
 }
 
 .ledger-badge {
@@ -592,23 +581,35 @@ button.edit_token {
   flex-direction: column;
   margin-top: 10px;
   margin-bottom: 10px;
+  font-size: 14px;
   gap: 10px;
+  input {
+    border: none;
+    border-bottom: 1px solid #ccc;
+    border-radius: 0;
+    padding: 5px;
+    outline: none;
+    &:focus {
+      border-bottom: 1px solid rgba(0, 123, 255);
+    }
+  }
 }
 .modal-header {
   padding: 10px 0;
+  font-size: 14px;
   text-align: center;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #eee;
 }
 .modal-footer {
   display: flex;
   text-align: center;
-  font-size: 13px;
+  font-size: 12px;
   .primary {
     padding: 8px 0;
     color: #f44336;
     cursor: pointer;
     flex: 1;
-    border: 1px solid #ddd;
+    border: 1px solid #eee;
     border-right: none;
     border-bottom: none;
     border-left: none;
@@ -625,7 +626,7 @@ button.edit_token {
     color: black;
     cursor: pointer;
     flex: 1;
-    border: 1px solid #ddd;
+    border: 1px solid #eee;
     border-left: none;
     border-bottom: none;
     &:hover,
@@ -712,4 +713,8 @@ input.vue-pincode-input:focus {
   color: #555;
   transform: translate(-50%, -50%);
   margin: 0 auto;
+}
+
+.vue-dialog-button {
+  border-radius: 0;
 }

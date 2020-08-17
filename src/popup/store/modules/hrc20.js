@@ -1,4 +1,4 @@
-import { HRCTokens } from "../../../services/hrc20/config";
+import HRCTokens from "../../../services/hrc20/config";
 import _ from "lodash";
 
 export default {
@@ -8,13 +8,16 @@ export default {
   },
   actions: {
     setTokenBalanceLoading({ commit, state }, payload) {
-      const tokenArray = state.tokens[payload.network].map((token) => {
-        return {
-          ...token,
-          isLoading: payload.loading,
-        };
+      const tokenArray = state.tokens[payload.network];
+      const index = _.findIndex(tokenArray, {
+        address: payload.token.address,
       });
-      commit("setTokenBalanceLoading", {
+      if (index < 0) return;
+      tokenArray[index] = {
+        ...tokenArray[index],
+        isLoading: payload.loading,
+      };
+      commit("setTokenArray", {
         network: payload.network,
         tokenArray,
       });
@@ -22,7 +25,7 @@ export default {
     loadTokenBalance({ commit, state }, payload) {
       const tokenArray = state.tokens[payload.network];
       const index = _.findIndex(tokenArray, {
-        symbol: payload.symbol,
+        address: payload.token.address,
       });
       if (index < 0) return;
       tokenArray[index] = {
@@ -30,17 +33,34 @@ export default {
         balance: payload.balance,
         isLoading: false,
       };
-      commit("loadTokenBalance", {
+      commit("setTokenArray", {
+        network: payload.network,
+        tokenArray,
+      });
+    },
+    deleteToken({ commit, state }, payload) {
+      const tokenArray = state.tokens[payload.network];
+      _.remove(tokenArray, { address: payload.token.address });
+      commit("setTokenArray", {
+        network: payload.network,
+        tokenArray,
+      });
+    },
+    editToken({ commit, state }, payload) {
+      const tokenArray = state.tokens[payload.network];
+      const index = _.findIndex(tokenArray, {
+        address: payload.token.address,
+      });
+      if (index < 0) return;
+      tokenArray[index].symbol = payload.token.symbol;
+      commit("setTokenArray", {
         network: payload.network,
         tokenArray,
       });
     },
   },
   mutations: {
-    setTokenBalanceLoading(state, payload) {
-      state.tokens[payload.network] = [...payload.tokenArray];
-    },
-    loadTokenBalance(state, payload) {
+    setTokenArray(state, payload) {
       state.tokens[payload.network] = [...payload.tokenArray];
     },
     addToken(state, payload) {

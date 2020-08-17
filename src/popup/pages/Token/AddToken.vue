@@ -85,8 +85,8 @@ export default {
         try {
           const symbol = await getTokenSymbol(this.contractAddress);
           if (!symbol) throw new Error("Symbol not found");
-          this.symbol = symbol;
           const precision = await getTokenDecimals(this.contractAddress);
+          this.symbol = symbol;
           this.precision = precision;
         } catch (err) {
           this.symbol = "";
@@ -140,7 +140,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Contract address already exists",
+            text: "Token is already added",
           });
           return;
         }

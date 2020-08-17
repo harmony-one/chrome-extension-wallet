@@ -35,11 +35,5 @@ export default {
 .auth-page {
   width: 370px;
   height: 600px;
-  padding: 1rem;
-  background-image: linear-gradient(
-      rgba(247, 247, 255, 0.95),
-      rgba(247, 247, 255, 0.95)
-    ),
-    url("images/harmony.png");
 }
 </style>
