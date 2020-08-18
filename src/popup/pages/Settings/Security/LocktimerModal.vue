@@ -8,7 +8,7 @@
         :key="item"
         :label="item + ' minutes' + (item === 30 ? ' (default)' : '')"
         :data="item"
-        :value="timeout"
+        :value="lockTimer"
         @change="changeTimeout"
       />
     </div>
@@ -28,11 +28,8 @@ export default {
   }),
   computed: {
     ...mapState({
-      lockTimer: state => state.settings.auth.timeout
+      lockTimer: state => state.settings.auth.timeout / 60 / 1000
     })
-  },
-  mounted() {
-    this.timeout = parseInt(this.lockTimer / 60 / 1000);
   },
   methods: {
     changeTimeout(newValue) {
