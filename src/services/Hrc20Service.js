@@ -66,12 +66,20 @@ export async function sendToken(
     })
     .on("error", (_error) => {
       error = _error;
+      console.error(error);
     });
   if (confirmation !== "CONFIRMED") {
-    return {
-      result: false,
-      mesg: "Can't confirm the transaction(" + txHash + ")",
-    };
+    if (confirmation === "PENDING") {
+      return {
+        result: false,
+        mesg: "Can't confirm the transaction. The gas fee is not enough.",
+      };
+    } else {
+      return {
+        result: false,
+        mesg: "Transaction rejected. TxHash: " + txHash,
+      };
+    }
   }
   if (error) {
     return {
