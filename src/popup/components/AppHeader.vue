@@ -214,13 +214,6 @@
       :is="headerTab"
       :subtitle="subtitle"
     ></component>
-    <v-dialog
-      name="dialog"
-      transition="scale"
-      :width="250"
-      :adaptive="true"
-      height="auto"
-    />
   </header>
 </template>
 

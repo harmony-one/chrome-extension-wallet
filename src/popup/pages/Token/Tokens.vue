@@ -70,13 +70,6 @@
           </button>
         </div>
       </div>
-      <v-dialog
-        name="dialog"
-        :adaptive="true"
-        transition="scale"
-        :width="250"
-        height="auto"
-      />
       <modal
         name="modal-token-edit"
         :adaptive="true"
