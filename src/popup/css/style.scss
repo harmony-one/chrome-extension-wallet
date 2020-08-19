@@ -30,7 +30,7 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  border-radius: 4px;
+  border-radius: 3px;
   background-color: transparent;
 }
 
@@ -281,7 +281,7 @@ button.outline {
     background-color: #c7e7fc;
   }
   &:active {
-    background-color: #76baff;
+    background-color: #c5dbf7;
   }
 }
 
@@ -381,7 +381,7 @@ button.green-but {
 .message.error {
   background: #ffcdd2;
   border-left-color: #e57373;
-  color: #e53935;
+  color: black;
 }
 .message.success {
   background: #dcedc8;

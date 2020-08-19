@@ -382,11 +382,21 @@ export default {
             text: LEDGER_CONFIRM_SUCCESS
           });
           this.$store.commit("loading", true);
+          signedTxn
+            .observed()
+            .on("transactionHash", txnHash => {})
+            .on("confirmation", confirmation => {
+              if (confirmation !== "CONFIRMED")
+                throw new Error("Gas fee is too low or something is wrong.");
+            })
+            .on("error", error => {
+              throw new Error(error);
+            });
           const [sentTxn, txnHash] = await signedTxn.sendTransaction();
-          const confiremdTxn = await sentTxn.confirm(txnHash);
+          const confirmedTxn = await sentTxn.confirm(txnHash);
 
           var explorerLink;
-          if (confiremdTxn.isConfirmed()) {
+          if (confirmedTxn.isConfirmed()) {
             explorerLink = getNetworkLink("/tx/" + txnHash);
           } else {
             this.showErrMessage("Can not confirm transaction(" + txnHash + ")");
@@ -409,9 +419,7 @@ export default {
       } catch (err) {
         console.error(err);
         this.$store.commit("loading", false);
-        this.showErrMessage(
-          "Something went wrong while trying to send the payment"
-        );
+        this.showErrMessage(err);
       }
     },
     async sendPayment() {

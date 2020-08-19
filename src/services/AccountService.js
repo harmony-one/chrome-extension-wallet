@@ -196,18 +196,18 @@ export async function transferOne(
     signedTxn
       .observed()
       .on("transactionHash", (txnHash) => {})
+      .on("confirmation", (confirmation) => {
+        if (confirmation !== "CONFIRMED") throw new Error(confirmation);
+      })
       .on("error", (error) => {
-        return {
-          result: false,
-          mesg: "Failed to sign transaction",
-        };
+        throw new Error(error);
       });
 
     const [sentTxn, txnHash] = await signedTxn.sendTransaction();
-    const confiremdTxn = await sentTxn.confirm(txnHash);
+    const confirmedTxn = await sentTxn.confirm(txnHash);
 
     var explorerLink;
-    if (confiremdTxn.isConfirmed()) {
+    if (confirmedTxn.isConfirmed()) {
       explorerLink = getNetworkLink("/tx/" + txnHash);
     } else {
       return {

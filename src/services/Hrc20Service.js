@@ -40,55 +40,48 @@ export async function sendToken(
   decimals,
   contractAddress
 ) {
-  let txHash, receipt, confirmation, error;
-  let harmony = getHarmony();
-  const instance = getContractInstance(contractAddress);
-  const toHex = oneToHexAddress(to);
-  harmony.wallet.addByPrivateKey(privateKey);
-  await instance.methods
-    .transfer(
-      toHex,
-      new BN(new BN(amount).mul(new BN(10).pow(new BN(decimals))))
-    )
-    .send({
-      from,
-      gasLimit,
-      gasPrice: new harmony.utils.Unit(gasPrice).asGwei().toWei(),
-    })
-    .on("transactionHash", (_hash) => {
-      txHash = _hash;
-    })
-    .on("receipt", (_receipt) => {
-      receipt = _receipt;
-    })
-    .on("confirmation", (_confirmation) => {
-      confirmation = _confirmation;
-    })
-    .on("error", (_error) => {
-      error = _error;
-      console.error(error);
+  try {
+    let txHash, receipt;
+    let harmony = getHarmony();
+    const instance = getContractInstance(contractAddress);
+    const toHex = oneToHexAddress(to);
+    harmony.wallet.addByPrivateKey(privateKey);
+    await new Promise(async (resolve, reject) => {
+      await instance.methods
+        .transfer(
+          toHex,
+          new BN(new BN(amount).mul(new BN(10).pow(new BN(decimals))))
+        )
+        .send({
+          from,
+          gasLimit,
+          gasPrice: new harmony.utils.Unit(gasPrice).asGwei().toWei(),
+        })
+        .on("transactionHash", (_hash) => {
+          txHash = _hash;
+        })
+        .on("receipt", (_receipt) => {
+          receipt = _receipt;
+        })
+        .on("confirmation", (confirmation) => {
+          if (confirmation !== "CONFIRMED") {
+            reject("Gas fee is too low or something is wrong.");
+          }
+        })
+        .on("error", (error) => {
+          reject(error);
+        });
+      resolve("Confirmed");
     });
-  if (confirmation !== "CONFIRMED") {
-    if (confirmation === "PENDING") {
-      return {
-        result: false,
-        mesg: "Can't confirm the transaction. The gas fee is not enough.",
-      };
-    } else {
-      return {
-        result: false,
-        mesg: "Transaction rejected. TxHash: " + txHash,
-      };
-    }
-  }
-  if (error) {
+
+    return {
+      result: true,
+      mesg: getNetworkLink("/tx/" + txHash),
+    };
+  } catch (err) {
     return {
       result: false,
-      mesg: "Failed to send the transaction. Error: " + error,
+      mesg: err,
     };
   }
-  return {
-    result: true,
-    mesg: getNetworkLink("/tx/" + txHash),
-  };
 }
