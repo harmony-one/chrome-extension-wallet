@@ -12,6 +12,7 @@
 - [x] Support staking.harmony.one 
 - [x] Lock the wallet with the 4/6 digits PIN Code
 - [x] Auto lock the wallet after timeout
+- [x] Set the pin code, pin digits and lock timer on the settings
 - [ ] Support the ledger wallet to communicate between onewallet and staking.harmony.one
 - [ ] Add/Delete/Edit the contacts
 - [ ] Revoke the accounts connected to the third-party website
