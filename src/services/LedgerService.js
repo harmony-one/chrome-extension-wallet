@@ -5,6 +5,7 @@ import { getContractInstance, oneToHexAddress } from "./Hrc20Service";
 import store from "../popup/store";
 import { LEDGER_LOCKED } from "../types";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
+import { stringToHex } from "./CryptoService";
 import BN from "bn.js";
 
 const INTERACTION_TIMEOUT = 120 * 1000;
@@ -186,10 +187,14 @@ export async function signTransactionWithLedger(
   toShard,
   amount,
   gasLimit = "21000",
-  gasPrice = 1
+  gasPrice = 1,
+  inputData
 ) {
   try {
     const harmony = getHarmony();
+    const data = !inputData.match(/^0x([a-f0-9])*$/)
+      ? stringToHex(inputData)
+      : inputData;
     const app = await getHarmonyApp();
     const txn = harmony.transactions.newTx({
       to: receiver,
@@ -208,6 +213,7 @@ export async function signTransactionWithLedger(
         .asGwei()
         .toWei()
         .toString(),
+      data,
     });
     const signedTxn = await app.signTransaction(
       txn,

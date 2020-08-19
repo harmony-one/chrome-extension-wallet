@@ -370,7 +370,8 @@ export default {
             this.toShard,
             this.amount,
             this.gasLimit,
-            this.gasPrice
+            this.gasPrice,
+            this.inputData
           );
         }
         if (res.success) {
@@ -395,19 +396,16 @@ export default {
           const [sentTxn, txnHash] = await signedTxn.sendTransaction();
           const confirmedTxn = await sentTxn.confirm(txnHash);
 
-          var explorerLink;
           if (confirmedTxn.isConfirmed()) {
-            explorerLink = getNetworkLink("/tx/" + txnHash);
+            this.showSuccessMsg(getNetworkLink("/tx/" + txnHash));
           } else {
             this.showErrMessage("Can not confirm transaction(" + txnHash + ")");
-            return;
           }
-
           this.$store.commit("loading", false);
-          this.showSuccessMsg(explorerLink);
           this.initScene();
           this.loadBalance();
         } else {
+          const { result } = res;
           this.$notify({
             group: "notify",
             type: "error",
@@ -418,7 +416,9 @@ export default {
         }
       } catch (err) {
         console.error(err);
+
         this.$store.commit("loading", false);
+        this.initScene();
         this.showErrMessage(err);
       }
     },
@@ -480,6 +480,7 @@ export default {
       } catch (e) {
         console.error(e);
         this.$store.commit("loading", false);
+        this.initScene();
         this.showErrMessage(
           "Something went wrong while trying to send the payment"
         );

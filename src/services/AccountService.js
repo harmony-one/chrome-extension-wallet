@@ -5,7 +5,7 @@ import {
   decryptPhrase,
   HarmonyAddress,
 } from "@harmony-js/crypto";
-import { stringToBytes, byteArray2hexStr } from "./CryptoService";
+import { stringToHex } from "./CryptoService";
 const { isValidAddress } = require("@harmony-js/utils");
 import { Harmony } from "@harmony-js/core";
 var currentNetwork = "";
@@ -160,7 +160,7 @@ export async function transferOne(
     let harmony = getHarmony();
     //1e18
     const data = !inputData.match(/^0x([a-f0-9])*$/)
-      ? "0x" + byteArray2hexStr(stringToBytes(inputData))
+      ? stringToHex(inputData)
       : inputData;
     const txn = harmony.transactions.newTx({
       //  token send to
