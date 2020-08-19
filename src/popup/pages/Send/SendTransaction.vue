@@ -16,9 +16,9 @@
             :class="[message.type]"
             @click="onMessageClick"
           >
-            <span
-              v-if="message.type === 'success'"
-            >Transaction Succeed: Click here to see the transaction</span>
+            <span v-if="message.type === 'success'"
+              >Transaction Succeed: Click here to see the transaction</span
+            >
             <span v-else>{{ message.text }}</span>
           </div>
           <div :class="{ row: !isToken }">
@@ -33,14 +33,23 @@
                 v-model="recipient"
               />
             </label>
-            <label v-if="!isToken" class="input-label shard" :class="{ disabled: isHRCToken }">
+            <label
+              v-if="!isToken"
+              class="input-label shard"
+              :class="{ disabled: isHRCToken }"
+            >
               To Shard
-              <select class="input-field" v-model="toShard" :disabled="isHRCToken">
+              <select
+                class="input-field"
+                v-model="toShard"
+                :disabled="isHRCToken"
+              >
                 <option
                   v-for="shard in account.shardArray"
                   :key="shard.shardID"
                   :value="shard.shardID"
-                >{{ shard.shardID }}</option>
+                  >{{ shard.shardID }}</option
+                >
               </select>
             </label>
           </div>
@@ -56,10 +65,9 @@
                 v-model="amount"
                 step="any"
               />
-              <div
-                class="maximum-label"
-                v-show="!loading"
-              >Maximum: {{ getMaxBalance + " " + selectedToken.symbol }}</div>
+              <div class="maximum-label" v-show="!loading">
+                Maximum: {{ getMaxBalance + " " + selectedToken.symbol }}
+              </div>
             </label>
             <label v-if="!isToken" class="input-label token">
               Token
@@ -68,7 +76,8 @@
                   v-for="(token, index) in tokenList"
                   :key="index"
                   :value="token"
-                >{{ token.symbol }}</option>
+                  >{{ token.symbol }}</option
+                >
               </select>
             </label>
           </div>
@@ -127,7 +136,9 @@
         <h3 class="center">Approve Transaction</h3>
         <p class="addressRow">
           From
-          <span class="address__name">{{ compressAddress(getFromAddress) }}</span>
+          <span class="address__name">{{
+            compressAddress(getFromAddress)
+          }}</span>
           of Shard
           <b>{{ fromShard }}</b>
         </p>
@@ -191,7 +202,12 @@
           <button @click="onBackClick()" class="flex mt-20">Retry</button>
         </div>
       </div>
-      <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="4"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -201,7 +217,7 @@ import { mapState } from "vuex";
 import {
   decryptKeyStore,
   transferOne,
-  getNetworkLink
+  getNetworkLink,
 } from "../../../services/AccountService";
 import { sendToken } from "../../../services/Hrc20Service";
 import { isValidAddress } from "@harmony-js/utils";
@@ -210,13 +226,13 @@ import helper from "../../mixins/helper";
 import {
   signTransactionWithLedger,
   signHRCTransactionWithLedger,
-  isLedgerLocked
+  isLedgerLocked,
 } from "../../../services/LedgerService";
 import {
   LEDGER_CONFIRM_PREPARE,
   LEDGER_CONFIRM_SUCCESS,
   LEDGER_CONFIRM_REJECT,
-  LEDGER_LOCKED
+  LEDGER_LOCKED,
 } from "../../../types";
 
 export default {
@@ -226,11 +242,11 @@ export default {
   props: {
     isToken: {
       type: Boolean,
-      default: false
+      default: false,
     },
     token: {
-      type: Object
-    }
+      type: Object,
+    },
   },
   data: () => ({
     scene: 1,
@@ -248,15 +264,15 @@ export default {
     message: {
       show: false,
       type: "error",
-      text: ""
+      text: "",
     },
-    ledgerConfirmTxt: LEDGER_CONFIRM_PREPARE
+    ledgerConfirmTxt: LEDGER_CONFIRM_PREPARE,
   }),
 
   computed: {
     ...mapState({
-      wallet: state => state.wallets.active,
-      loading: state => state.loading
+      wallet: (state) => state.wallets.active,
+      loading: (state) => state.loading,
     }),
     getFromAddress() {
       return this.wallet.address;
@@ -286,7 +302,7 @@ export default {
     getHeaderName() {
       if (this.isHRCToken) return `Send ${this.selectedToken.symbol} Token`;
       return "Send Payment";
-    }
+    },
   },
 
   async mounted() {
@@ -307,7 +323,7 @@ export default {
     selectedToken() {
       this.toShard = 0;
       this.setGasLimit();
-    }
+    },
   },
   methods: {
     setGasLimit() {
@@ -318,7 +334,7 @@ export default {
       if (!this.isToken) {
         this.tokenList = [
           { symbol: "ONE", isMainToken: true },
-          ...this.tokenArrayOfNetwork
+          ...this.tokenArrayOfNetwork,
         ];
         this.selectedToken = this.tokenList[0];
       } else {
@@ -380,17 +396,17 @@ export default {
           this.$notify({
             group: "notify",
             type: "success",
-            text: LEDGER_CONFIRM_SUCCESS
+            text: LEDGER_CONFIRM_SUCCESS,
           });
           this.$store.commit("loading", true);
           signedTxn
             .observed()
-            .on("transactionHash", txnHash => {})
-            .on("confirmation", confirmation => {
+            .on("transactionHash", (txnHash) => {})
+            .on("confirmation", (confirmation) => {
               if (confirmation !== "CONFIRMED")
                 throw new Error("Gas fee is too low or something is wrong.");
             })
-            .on("error", error => {
+            .on("error", (error) => {
               throw new Error(error);
             });
           const [sentTxn, txnHash] = await signedTxn.sendTransaction();
@@ -406,10 +422,11 @@ export default {
           this.loadBalance();
         } else {
           const { result } = res;
+          console.error(result);
           this.$notify({
             group: "notify",
             type: "error",
-            text: result
+            text: result,
           });
           this.ledgerConfirmTxt = LEDGER_CONFIRM_REJECT;
           this.ledgerError = true;
@@ -432,7 +449,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Password is not correct"
+            text: "Password is not correct",
           });
           return false;
         }
@@ -535,7 +552,7 @@ export default {
           this.$notify({
             group: "notify",
             type: "error",
-            text: LEDGER_LOCKED
+            text: LEDGER_LOCKED,
           });
           return;
         }
@@ -551,8 +568,8 @@ export default {
       await this.loadShardingInfo();
       await this.loadBalance();
       this.$store.commit("loading", false);
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
