@@ -3,11 +3,15 @@
     <app-header headerTab="create-tab" />
     <main class="main connect-wallet">
       <div class="main-logo">
-        <img src="images/harmony.png" :class="{'logo-md': scene === 2 ? true: false}" alt="Harmony" />
+        <img
+          src="images/harmony.png"
+          :class="{ 'logo-md': scene === 2 ? true : false }"
+          alt="Harmony"
+        />
       </div>
       <div v-if="scene === 1">
         <h3>Connect a hardware wallet</h3>
-        <span class="form-label">Select a ledger hardware wallet</span>
+        <span class="form-label">Please plug in your Ledger Nano S and open the Harmony App.</span>
         <div class="wallet-group">
           <button class="but-ledger" @click="connect">
             <img src="images/ledger.svg" alt="Ledger" />
@@ -17,15 +21,15 @@
           <button
             v-show="wallets.accounts.length > 0"
             class="outline"
-            @click="$router.push('/')"
+            @click="$router.push('/home')"
           >Cancel</button>
-          <button :class="!wallets.accounts.length ? 'full-width' : ''" @click="connect">Connect</button>
+          <button :class="!wallets.accounts.length ? 'flex' : ''" @click="connect">Connect</button>
         </div>
       </div>
-      <div v-else>
+      <div v-else-if="scene === 2">
         <h3>Create the Account</h3>
         <div>Address</div>
-        <span class="address-label">{{address}}</span>
+        <span class="address-label">{{ address }}</span>
         <label class="input-label align-left">
           Account Name
           <input
@@ -35,10 +39,13 @@
             ref="name"
             v-model="name"
             placeholder="Input the account name"
-            v-on:keyup.enter="createAccount"
+            v-on:keyup.enter="nextToPincode"
           />
         </label>
-        <button class="full-but" :disabled="!name" @click="createAccount">Create Account</button>
+        <button class="flex mt-20" :disabled="!name" @click="nextToPincode">Next</button>
+      </div>
+      <div v-else>
+        <pincode-modal @success="createAccount" :onBack="() => (scene = 2)" />
       </div>
       <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
     </main>
@@ -47,8 +54,7 @@
 
 <script>
 import { mapState } from "vuex";
-import AppHeader from "../components/AppHeader.vue";
-import { connectLedgerApp } from "../../services/LedgerService";
+import { connectLedgerApp } from "../../../services/LedgerService";
 
 export default {
   data: () => ({
@@ -63,10 +69,10 @@ export default {
   computed: {
     ...mapState(["wallets"])
   },
-  components: {
-    AppHeader
-  },
   methods: {
+    nextToPincode() {
+      this.scene = 3;
+    },
     createAccount() {
       const wallet = {
         isLedger: true,

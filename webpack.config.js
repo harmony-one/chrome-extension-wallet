@@ -55,6 +55,20 @@ const config = {
         ],
       },
       {
+        test: /\.scss$/,
+        use: [
+          {
+            loader: "style-loader",
+          },
+          {
+            loader: "css-loader",
+          },
+          {
+            loader: "sass-loader",
+          },
+        ],
+      },
+      {
         test: /\.less$/,
         use: [
           {
@@ -87,10 +101,6 @@ const config = {
       {
         test: /\.ts?$/,
         use: ["ts-loader"],
-      },
-      {
-        test: /\.scss$/,
-        loader: "style-loader!css-loader!sass-loader",
       },
       {
         test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,

@@ -18,57 +18,70 @@ export async function getTokenBalance(address, contractAddress) {
   return balance;
 }
 
+export async function getTokenDecimals(contractAddress) {
+  const instance = getContractInstance(contractAddress);
+  let decimals = await instance.methods.decimals().call();
+  return new BN(decimals, 16).toNumber();
+}
+
+export async function getTokenSymbol(contractAddress) {
+  const instance = getContractInstance(contractAddress);
+  let symbol = await instance.methods.symbol().call();
+  return symbol;
+}
+
 export async function sendToken(
   from,
   to,
   amount,
-  decimals,
   privateKey,
   gasLimit = "250000",
   gasPrice = 1,
+  decimals,
   contractAddress
 ) {
-  let txHash, receipt, confirmation, error;
-  let harmony = getHarmony();
-  const instance = getContractInstance(contractAddress);
-  const toHex = oneToHexAddress(to);
-  harmony.wallet.addByPrivateKey(privateKey);
-  await instance.methods
-    .transfer(
-      toHex,
-      new BN(new BN(amount).mul(new BN(10).pow(new BN(decimals))))
-    )
-    .send({
-      from,
-      gasLimit,
-      gasPrice: new harmony.utils.Unit(gasPrice).asGwei().toWei(),
-    })
-    .on("transactionHash", (_hash) => {
-      txHash = _hash;
-    })
-    .on("receipt", (_receipt) => {
-      receipt = _receipt;
-    })
-    .on("confirmation", (_confirmation) => {
-      confirmation = _confirmation;
-    })
-    .on("error", (_error) => {
-      error = _error;
+  try {
+    let txHash, receipt;
+    let harmony = getHarmony();
+    const instance = getContractInstance(contractAddress);
+    const toHex = oneToHexAddress(to);
+    harmony.wallet.addByPrivateKey(privateKey);
+    await new Promise(async (resolve, reject) => {
+      await instance.methods
+        .transfer(
+          toHex,
+          new BN(new BN(amount).mul(new BN(10).pow(new BN(decimals))))
+        )
+        .send({
+          from,
+          gasLimit,
+          gasPrice: new harmony.utils.Unit(gasPrice).asGwei().toWei(),
+        })
+        .on("transactionHash", (_hash) => {
+          txHash = _hash;
+        })
+        .on("receipt", (_receipt) => {
+          receipt = _receipt;
+        })
+        .on("confirmation", (confirmation) => {
+          if (confirmation !== "CONFIRMED") {
+            reject("Gas fee is too low or something is wrong.");
+          }
+        })
+        .on("error", (error) => {
+          reject(error);
+        });
+      resolve("Confirmed");
     });
-  if (error) {
+
+    return {
+      result: true,
+      mesg: getNetworkLink("/tx/" + txHash),
+    };
+  } catch (err) {
     return {
       result: false,
-      mesg: "Failed to send transaction",
+      mesg: err,
     };
   }
-  if (confirmation !== "CONFIRMED") {
-    return {
-      result: false,
-      mesg: "Can not confirm transaction " + txHash,
-    };
-  }
-  return {
-    result: true,
-    mesg: getNetworkLink("/tx/" + txHash),
-  };
 }

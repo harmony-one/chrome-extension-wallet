@@ -4,7 +4,7 @@
     <main class="main">
       <div class="relative">
         <div class="main-logo">
-          <img src="images/harmony.png" class="logo-img" alt="Harmony" />
+          <img src="images/harmony-big.png" class="logo-img" alt="Harmony" />
         </div>
         <span
           v-if="wallets.active.isLedger"
@@ -38,7 +38,7 @@
           </select>
         </div>
         <div class="button-group">
-          <button class="outline" @click="$router.push('/receive')">
+          <button class="outline" @click="$router.push('/deposit')">
             Deposit
           </button>
           <button @click="onSendClick()">Send</button>
@@ -58,7 +58,6 @@
 <script>
 import helper from "../mixins/helper";
 import account from "../mixins/account";
-import AppHeader from "../components/AppHeader.vue";
 import MainTab from "../components/MainTab.vue";
 import { mapState } from "vuex";
 
@@ -66,7 +65,6 @@ export default {
   mixins: [account, helper],
 
   components: {
-    AppHeader,
     MainTab,
   },
 
@@ -145,6 +143,7 @@ export default {
   padding: 0.5rem;
   margin: 0 3rem 0.5rem 3rem;
   word-wrap: break-word;
+  transition: box-shadow 0.5s ease;
 }
 .account-box:hover {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
