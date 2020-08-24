@@ -1,21 +1,28 @@
 
 ## Features
-- [x] Generate a new wallet.
-- [x] View wallet address with the QR code.
-- [x] Import wallet from private key, hmy cli store or mnemonic
+- [x] Create/Import the wallet with Mnemonic, Private Key and Harmony keystore
+- [x] Deposit with the QR code.
+- [x] Switch the network to Mainnet, Testnet or Localnet.
+- [x] Send & receive ONE tokens (support the ledger wallet).
+- [x] Send & receive HRC20 tokens (support the ledger wallet).
+- [x] Add/Edit/Delete HRC20 tokens
 - [x] Export private key  
-- [x] Send & receive ONE tokens.
-- [x] View ONE balance .
-- [x] View and Transfer HRC20 tokens (BUSD, H2O, SEED).
-- [x] View recent transfers .
-- [x] Switch the network to Mainnet, Pangaea, Testnet or Localnet.
-- [x] Support the ledger wallet (login and transfer)
-- [x] Javascript API for calling onewallet for signing 
+- [x] View transaction history .
+- [x] Provide the api for signing the transaction
 - [x] Support staking.harmony.one 
+- [x] Lock the wallet with the 4/6 digits PIN Code
+- [x] Auto lock the wallet after timeout
+- [x] Set the pin code, pin digits and lock timer on the settings
+- [ ] Support the ledger wallet to communicate between onewallet and staking.harmony.one
+- [ ] Add/Delete/Edit the contacts
+- [ ] View and revoke the accounts connected to the third-party website
+- [ ] View the USD balance on the main page
+- [ ] View the recent transaction history on the home page
+- [ ] Update the expand view page of the create/import/connect the hardware wallet
 
 ## Development 
 
-* Install [node.js](https://nodejs.org/) and npm (I used node.js version v10.17.0 on my Mac)
+* Install [node.js](https://nodejs.org/) and npm
 * Install dependencies :
   ```
   npm install
