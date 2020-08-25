@@ -63,6 +63,9 @@ export default {
     setTokenArray(state, payload) {
       state.tokens[payload.network] = [...payload.tokenArray];
     },
+    resetTokens(state) {
+      state.tokens = HRCTokens;
+    },
     addToken(state, payload) {
       const { address, symbol, network, decimals } = payload;
       state.tokens[network].push({

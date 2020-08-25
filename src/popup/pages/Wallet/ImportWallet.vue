@@ -117,7 +117,7 @@
               ref="password_confirm"
               v-model="password_confirm"
               placeholder="Confirm the password"
-              v-on:keyup.enter="nextToPincode"
+              v-on:keyup.enter="importAcc"
             />
           </label>
         </div>

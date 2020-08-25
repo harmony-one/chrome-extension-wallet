@@ -270,24 +270,12 @@ export function getNetworkLink(path) {
       basic = "https://explorer.harmony.one/#";
       break;
     }
-    case "Pangaea": {
-      basic = "https://explorer.pangaea.harmony.one/#";
-      break;
-    }
     case "Testnet": {
-      basic = "https://explorer.testnet.harmony.one/#";
-      break;
-    }
-    case "OpensSakingNet": {
-      basic = "https://explorer.os.hmny.io/#";
+      basic = "https://explorer.pops.one/#";
       break;
     }
     case "Localnet": {
       basic = "";
-      break;
-    }
-    case "PartnerNet": {
-      basic = "https://explorer.ps.hmny.io/#";
       break;
     }
     default: {

@@ -390,8 +390,9 @@ export default {
             this.inputData
           );
         }
-        if (res.success) {
-          const signedTxn = res.result;
+        const {result, success} = res;
+        if (success) {
+          const signedTxn = result;
           this.ledgerConfirmTxt = LEDGER_CONFIRM_SUCCESS;
           this.$notify({
             group: "notify",
@@ -421,7 +422,6 @@ export default {
           this.initScene();
           this.loadBalance();
         } else {
-          const { result } = res;
           console.error(result);
           this.$notify({
             group: "notify",
