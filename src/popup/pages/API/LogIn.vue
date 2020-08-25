@@ -12,30 +12,21 @@
       <div class="login-container">
         <div v-if="!getLockState">
           <div v-if="!wallets.accounts.length">
-            <p>
-              No accounts. You should create the account first in the extension.
-            </p>
-          </div>
-          <div v-else-if="isOnlyLedgerAvailable">
-            <p>
-              The ledger account is not supported for this action at the moment.
-              You should create another account in the extension.
-            </p>
+            <p>No accounts. You should create the account first in the extension.</p>
           </div>
           <div v-else>
             <div
+              class="card"
               v-for="(account, index) in wallets.accounts"
               :key="index"
               @click="selectAccount(index)"
             >
-              <div class="card" v-if="!account.isLedger">
-                <div
-                  class="account-box"
-                  :class="{ active: selected === index }"
-                >
-                  <div>{{ account.name }}</div>
-                  <div class="account-address">{{ account.address }}</div>
+              <div class="card-item" :class="{ active: selected === index }">
+                <div class="card-item-name-box">
+                  <div>{{ compressName(account.name) }}</div>
+                  <div v-if="account.isLedger" class="ledger-badge">Ledger</div>
                 </div>
+                <div class="account-address">{{ account.address }}</div>
               </div>
             </div>
           </div>
@@ -47,12 +38,9 @@
           </p>
         </div>
       </div>
-      <div
-        class="button-group"
-        v-if="
-          wallets.accounts.length && !isOnlyLedgerAvailable && !getLockState
-        "
-      >
+      <div class="button-group" v-if="
+          wallets.accounts.length && !getLockState
+        ">
         <button class="outline" @click="deny">Deny</button>
         <button :disabled="selected < 0" @click="accept">Accept</button>
       </div>
@@ -82,14 +70,6 @@ export default {
     ...mapState({
       wallets: (state) => state.wallets,
     }),
-    isOnlyLedgerAvailable() {
-      if (
-        this.wallets.accounts.length === 1 &&
-        this.wallets.accounts[0].isLedger
-      )
-        return true;
-      return false;
-    },
   },
   mounted() {
     chrome.runtime.sendMessage(
@@ -105,6 +85,14 @@ export default {
     chrome.runtime.connect({ name: THIRDPARTY_GET_ACCOUNT_CONNECT });
   },
   methods: {
+    compressName(str) {
+      if (str.length > 20)
+        return (
+          str.substr(0, 10) + "..." + str.substr(str.length - 10, str.length)
+        );
+      return str;
+    },
+
     selectAccount(index) {
       this.selected = index;
     },
@@ -153,12 +141,21 @@ h3 {
   margin-bottom: 8px;
   cursor: pointer;
 }
-.card > div {
+
+.card-item {
   background: url("images/checkbox_off@2x.png") no-repeat right center/20px;
 }
-.card > div.active {
+
+.card-item.active {
   background: url("images/checkbox_on@2x.png") no-repeat right center/20px;
 }
+
+.card-item-name-box {
+  display: flex;
+  gap: 10px;
+  padding-right: 25px;
+}
+
 .account-address {
   font-size: 11px;
 }

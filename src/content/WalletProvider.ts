@@ -77,6 +77,7 @@ class WalletProvider {
   ) {
     return new Promise(async (resolve, reject) => {
       try {
+        console.log(transaction);
         const parsedTxn: any = await getTxnInfo(transaction);
         const txnType = checkTransactionType(transaction);
         const res = await sendAsyncMessageToContentScript({

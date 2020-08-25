@@ -73,6 +73,7 @@ export const getTxnInfo = (transaction: any) =>
             fromShard: txnParams.shardID,
             toShard: txnParams.toShardID,
             data: txnParams.data,
+            chainId: transaction.chainId,
           },
         };
       } else if (txnType === FACTORYTYPE.STAKINGTRANSACTION) {
@@ -97,6 +98,9 @@ export const getTxnInfo = (transaction: any) =>
               amount: Unit.Wei(stakeMsg.amount).toEther(),
               gasLimit,
               gasPrice,
+              nonce: stakeTransaction.nonce,
+              chainId: stakeTransaction.chainId,
+              shardID: stakeTransaction.shardID,
             },
           };
         } else if (stakeTransaction.directive === STAKINGTYPE.WITHDRAWREWARD) {
@@ -106,6 +110,9 @@ export const getTxnInfo = (transaction: any) =>
               from: delegatorAddress,
               gasLimit,
               gasPrice,
+              nonce: stakeTransaction.nonce,
+              chainId: stakeTransaction.chainId,
+              shardID: stakeTransaction.shardID,
             },
           };
         }

@@ -8,6 +8,10 @@ import {
 } from "../types";
 import * as storage from "./StorageService";
 import _ from "lodash";
+import Config from "../config";
+import { Harmony } from "@harmony-js/core";
+import { Unit } from "@harmony-js/utils";
+
 export const msgToContentScript = (type, payload) => ({
   type: HARMONY_RESPONSE_TYPE,
   message: {
@@ -94,9 +98,6 @@ class APIService {
       });
     }
   };
-  isTokenTransfer = (data) => {
-    return data && data !== "0x";
-  };
   getVuexStore = () => {
     try {
       if (!window.localStorage.vuex) throw new Error("Vuex Store is not found");
@@ -129,9 +130,7 @@ class APIService {
           return;
         }
         this.activeSession = session;
-        if (this.isTokenTransfer(this.txnInfo.data))
-          this.openPopup("sign", 400, 600);
-        else this.openPopup("sign", 400, 550);
+        this.openPopup("sign", 400, 600);
       } else {
         this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
           rejected: true,
@@ -211,3 +210,70 @@ class APIService {
 const apiService = new APIService();
 
 export default apiService;
+
+const getHarmony = (chainId) => {
+  const network = _.find(Config.networks, { chainId });
+  const harmony = new Harmony(
+    // rpc url
+    network.apiUrl,
+    {
+      chainType: network.type,
+      chainId: network.chainId,
+    }
+  );
+  return harmony;
+};
+export const createTransaction = ({
+  chainId,
+  to,
+  amount,
+  gasLimit,
+  fromShard,
+  toShard,
+  gasPrice,
+  data,
+}) => {
+  const harmony = getHarmony(chainId);
+  const txn = harmony.transactions.newTx({
+    to,
+    value: new harmony.utils.Unit(amount)
+      .asEther()
+      .toWei()
+      .toString(),
+    gasLimit,
+    shardID: fromShard,
+    toShardID: toShard,
+    gasPrice: new harmony.utils.Unit(gasPrice)
+      .asGwei()
+      .toWei()
+      .toString(),
+    data,
+  });
+  return txn;
+};
+export const createDelegateTransaction = ({
+  from,
+  to,
+  amount,
+  gasLimit,
+  gasPrice,
+  chainId,
+  nonce,
+}) => {
+  const harmony = getHarmony(chainId);
+  const stakingTxn = harmony.stakings
+    .delegate({
+      delegatorAddress: from,
+      validatorAddress: to,
+      amount: new Unit(amount).asEther().toHex(),
+    })
+    .setTxParams({
+      nonce: "0x2",
+      gasLimit: new Unit(gasLimit).asWei().toHex(),
+      gasPrice: new Unit(gasPrice).asGwei().toHex(),
+      chainId: chainId,
+    })
+    .build();
+};
+export const createUndelegateTransaction = ({}) => {};
+export const createRewardsTransaction = ({}) => {};

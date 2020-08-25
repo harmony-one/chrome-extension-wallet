@@ -12,35 +12,35 @@
       <div class="sign__address">{{ wallet.address }}</div>
       <p class="txRow">
         <span class="action_caption">{{ displayAction }}</span>
-        <span v-if="type === 'SEND'"
-          >{{ fromShard }} Shard -> {{ toShard }} Shard</span
-        >
+        <span
+          v-if="type === 'SEND'"
+        >{{ txnParams.fromShard }} Shard -> {{ txnParams.toShard }} Shard</span>
       </p>
       <p class="txRow">
         <span>From</span>
-        <span class="address__name">{{ senderAddress }}</span>
+        <span class="address__name">{{ txnParams.from }}</span>
       </p>
       <p class="txRow" v-if="!isWithdrawal">
         <span>To</span>
-        <span class="address__name">{{ targetAddress }}</span>
+        <span class="address__name">{{ txnParams.to }}</span>
       </p>
       <span class="action_caption">Transaction Details</span>
       <div class="invoice" :class="{ 'withdraw-section': isWithdrawal }">
-        <div class="invoice__row" v-if="!isWithdrawal && !isTokenTransfer">
+        <div class="invoice__row" v-if="!isWithdrawal">
           <span>Amount</span>
-          <span>{{ amount }} ONE</span>
+          <span>{{ txnParams.amount }} ONE</span>
         </div>
         <div class="invoice__row">
           <span>Gas Price</span>
-          <span>{{ gasPrice }} Gwei</span>
+          <span>{{ txnParams.gasPrice }} Gwei</span>
         </div>
         <div class="invoice__row">
           <span>Gas Limit</span>
-          <span>{{ gasLimit }} Gwei</span>
+          <span>{{ txnParams.gasLimit }} Gwei</span>
         </div>
-        <div v-if="isTokenTransfer">
+        <div v-if="isDataExist">
           <p class="data_caption">Data</p>
-          <div class="data_content">{{ data }}</div>
+          <div class="data_content">{{ txnParams.data }}</div>
         </div>
       </div>
       <div v-if="!wallet.isLedger" class="password-content">
@@ -74,17 +74,18 @@
       </div>
       <button class="flex mt-20" @click="lockReject">OK</button>
     </div>
-    <notifications
-      group="notify"
-      width="250"
-      :max="4"
-      class="notifiaction-container"
-    />
+    <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
   </main>
 </template>
 <script>
 import { decryptKeyStore } from "../../../services/AccountService";
 import { mapState, mapGetters } from "vuex";
+import {
+  createTransaction,
+  createDelegateTransaction,
+  createUndelegateTransaction,
+  createRewardsTransaction,
+} from "../../../services/APIService";
 import { Unit } from "@harmony-js/utils";
 import _ from "lodash";
 import {
@@ -98,17 +99,23 @@ import {
 
 export default {
   data: () => ({
-    gasLimit: null,
-    gasPrice: null,
-    amount: null,
-    senderAddress: "",
-    targetAddress: "",
+    transaction: null,
+    txnParams: {
+      gasLimit: null,
+      gasPrice: null,
+      amount: null,
+      from: "",
+      to: "",
+      fromShard: 0,
+      toShard: 0,
+      data: "0x",
+      chainId: 1,
+      nonce: 0,
+      shardID: 0,
+    },
+    host: "",
     password: "",
     type: "Send",
-    host: "",
-    fromShard: false,
-    toShard: false,
-    data: false,
     wallet: {
       isLedger: false,
       name: "",
@@ -121,13 +128,15 @@ export default {
       wallets: (state) => state.wallets,
     }),
     getGasFee() {
-      return Unit.Gwei(this.gasPrice * this.gasLimit).toOne();
+      return Unit.Gwei(
+        this.txnParams.gasPrice * this.txnParams.gasLimit
+      ).toOne();
     },
     getTotal() {
-      return Number(this.amount) + Number(this.getGasFee);
+      return Number(this.txnParams.amount) + Number(this.txnParams.getGasFee);
     },
-    isTokenTransfer() {
-      return this.data && this.data !== "0x";
+    isDataExist() {
+      return this.txnParams.data && this.txnParams.data !== "0x";
     },
     displayAction() {
       switch (this.type) {
@@ -198,20 +207,21 @@ export default {
       { action: GET_WALLET_SERVICE_STATE },
       ({ state } = {}) => {
         if (state && state.type && state.txnInfo && state.session) {
-          this.type = state.type;
-          this.senderAddress = state.txnInfo.from;
-          this.targetAddress = state.txnInfo.to;
-          this.gasLimit = state.txnInfo.gasLimit;
-          this.gasPrice = state.txnInfo.gasPrice;
-          this.amount = state.txnInfo.amount;
-          if (state.type === TRANSACTIONTYPE.SEND) {
-            this.fromShard = state.txnInfo.fromShard;
-            this.toShard = state.txnInfo.toShard;
-            this.data = state.txnInfo.data;
+          const { type, txnInfo, session } = state;
+          this.type = type;
+          this.txnParams = txnInfo;
+          if (type === TRANSACTIONTYPE.SEND) {
+            this.transaction = createTransaction(txnInfo);
+          } else if (type === TRANSACTIONTYPE.DELEGATE) {
+            this.transaction = createDelegateTransaction(txnInfo);
+          } else if (type === TRANSACTIONTYPE.UNDELEGATE) {
+            this.transaction = createUndelegateTransaction(txnInfo);
+          } else {
+            this.transaction = createRewardsTransaction(txnInfo);
           }
-          this.host = state.session.host;
+          this.host = session.host;
           this.wallet = _.find(this.wallets.accounts, {
-            address: state.session.account.address,
+            address: session.account.address,
           });
         } else {
           window.close();
