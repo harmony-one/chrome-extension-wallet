@@ -65,14 +65,14 @@ if (!store.state.settings.auth.lockState)
 //change the state
 
 const HRCTokens = store.state.hrc20.tokens;
-const isPreviousVersion = !Array.isArray(HRCTokens[Object.keys(HRCTokens)[0]]);
+const isPreviousVersion = HRCTokens["1"] && !Array.isArray(HRCTokens["1"]);
 if (isPreviousVersion) {
-  const netWorkKeys = Object.keys(HRCTokens);
+  const networkKeys = ["1", "2"];
   let newTokenArray = {
     Mainnet: [],
     Testnet: [],
   };
-  netWorkKeys.forEach((network) => {
+  networkKeys.forEach((network) => {
     const tokenArray = Object.keys(HRCTokens[network]);
     tokenArray.forEach((token) => {
       if (network === "1") {
@@ -82,7 +82,7 @@ if (isPreviousVersion) {
           decimals: HRCTokens[network][token].decimals,
           balance: 0,
         });
-      } else {
+      } else if (network === "2") {
         newTokenArray["Testnet"].push({
           symbol: token,
           address: HRCTokens[network][token].address,
@@ -92,6 +92,8 @@ if (isPreviousVersion) {
       }
     });
   });
+
+  store.commit("hrc20/resetTokens");
 
   store.commit("hrc20/setTokenArray", {
     network: "Mainnet",
