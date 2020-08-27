@@ -16,9 +16,9 @@
               <div class="token-box" v-if="!token.isLoading">
                 <span class="token-balance">
                   {{
-                  $formatNumber(token.balance, {
-                  maximumSignificantDigits: 6,
-                  })
+                    Number(token.balance).toLocaleString("en-US", {
+                      maximumFractionDigits: 6,
+                    })
                   }}
                 </span>
                 <button

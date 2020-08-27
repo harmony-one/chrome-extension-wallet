@@ -6,7 +6,7 @@ import store from "../popup/store";
 import { LEDGER_LOCKED } from "../types";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import { stringToHex } from "./CryptoService";
-import BN from "bn.js";
+import BigNumber from "bignumber.js";
 
 const INTERACTION_TIMEOUT = 120 * 1000;
 var harmonyApp;
@@ -154,7 +154,7 @@ export async function signHRCTransactionWithLedger(
     const txn = await instance.methods
       .transfer(
         toHex,
-        new BN(new BN(amount).mul(new BN(10).pow(new BN(decimals))))
+        new BigNumber(amount).multipliedBy(Math.pow(10, decimals)).toString()
       )
       .createTransaction();
     txn.setParams({

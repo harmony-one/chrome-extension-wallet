@@ -296,7 +296,7 @@ export default {
       else {
         max = this.getTokenBalance(this.selectedToken);
       }
-      if (max === undefined) return Number(0).toFixed(6);
+      if (max === undefined) return Number(0).toFixed(9);
       return max;
     },
     getHeaderName() {
@@ -390,7 +390,7 @@ export default {
             this.inputData
           );
         }
-        const {result, success} = res;
+        const { result, success } = res;
         if (success) {
           const signedTxn = result;
           this.ledgerConfirmTxt = LEDGER_CONFIRM_SUCCESS;
@@ -528,6 +528,12 @@ export default {
 
       if (this.amount <= 0) {
         this.showErrMessage("Invalid token amount");
+        return false;
+      }
+      if (Number(this.amount) < Number(0.000001)) {
+        this.showErrMessage(
+          `Minimum send amount is 0.000001 ${this.selectedToken.symbol}`
+        );
         return false;
       }
 
