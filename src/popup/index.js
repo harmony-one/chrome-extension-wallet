@@ -3,7 +3,6 @@ import App from "./App.vue";
 import store from "./store";
 import router from "./router";
 import { sync } from "vuex-router-sync";
-import VueIntl from "vue-intl";
 import vClickOutside from "v-click-outside";
 import VueClipboard from "vue-clipboard2";
 import VModal from "vue-js-modal";
@@ -38,7 +37,6 @@ Vue.component("PincodeInput", PincodeInput);
 Vue.component("RadioButton", RadioButton);
 Vue.component("PincodeModal", PincodeModal);
 Vue.use(Notifications);
-Vue.use(VueIntl);
 Vue.use(vClickOutside);
 Vue.use(VueClipboard);
 Vue.use(VModal, {
@@ -46,8 +44,6 @@ Vue.use(VModal, {
   dynamic: true,
   injectModalsContainer: true,
 });
-
-Vue.setLocale("en-US");
 
 new Vue({
   store,

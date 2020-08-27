@@ -1,6 +1,6 @@
 import artifact from "./hrc20/artifacts/artifact.json";
 import { getNetworkLink, getHarmony } from "./AccountService";
-import BN from "bn.js";
+import BigNumber from "bignumber.js";
 
 export const oneToHexAddress = (address) =>
   getHarmony().crypto.getAddress(address).basicHex;
@@ -21,7 +21,7 @@ export async function getTokenBalance(address, contractAddress) {
 export async function getTokenDecimals(contractAddress) {
   const instance = getContractInstance(contractAddress);
   let decimals = await instance.methods.decimals().call();
-  return new BN(decimals, 16).toNumber();
+  return new BigNumber(decimals, 16).toNumber();
 }
 
 export async function getTokenSymbol(contractAddress) {
@@ -50,7 +50,7 @@ export async function sendToken(
       await instance.methods
         .transfer(
           toHex,
-          new BN(new BN(amount).mul(new BN(10).pow(new BN(decimals))))
+          new BigNumber(amount).multipliedBy(Math.pow(10, decimals)).toString()
         )
         .send({
           from,

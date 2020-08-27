@@ -21,7 +21,11 @@
         <div class="box-label">Account Balance</div>
 
         <div class="box-balance">
-          {{ $formatNumber(account.balance, { maximumSignificantDigits: 7 }) }}
+          {{
+            Number(account.balance).toLocaleString("en-US", {
+              maximumFractionDigits: 6,
+            })
+          }}
           <span class="box-balance-code">ONE</span>
         </div>
 
