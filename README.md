@@ -18,7 +18,7 @@
 - [ ] View and revoke the accounts connected to the third-party website
 - [ ] View the USD balance on the main page
 - [ ] View the recent transaction history on the home page
-- [ ] Update the expand view page of the create/import/connect the hardware wallet
+- [ ] View the HRC20 token transaction amount in the history page
 
 ## Development 
 

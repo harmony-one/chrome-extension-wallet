@@ -1,28 +1,18 @@
 <template>
   <div>
     <app-header @refresh="refreshData" headerTab="main-tab" />
-    <main class="main">
+    <main class="main" :style="{'padding-right': '0px'}">
       <div class="token-container">
         <div
           v-if="!tokenArrayOfNetwork.length || account.shard"
           class="message-empty"
-        >
-          No tokens found
-        </div>
+        >No tokens found</div>
 
         <div v-else>
-          <div
-            class="token-row"
-            v-for="(token, index) in tokenArrayOfNetwork"
-            :key="index"
-          >
+          <div class="token-row" v-for="(token, index) in tokenArrayOfNetwork" :key="index">
             <span class="token-name">{{ compressSymbol(token.symbol) }}</span>
             <div v-if="!editing">
-              <moon-loader
-                :loading="token.isLoading"
-                color="#0a93eb"
-                size="26px"
-              />
+              <moon-loader :loading="token.isLoading" color="#0a93eb" size="26px" />
               <div class="token-box" v-if="!token.isLoading">
                 <span class="token-balance">
                   {{
@@ -35,18 +25,12 @@
                   class="token_send_but"
                   :disabled="token.balance <= 0"
                   @click="sendToken(token)"
-                >
-                  Send
-                </button>
+                >Send</button>
               </div>
             </div>
             <div v-else class="token-edit-box">
-              <button class="edit_but" @click="editToken(token)">
-                Edit
-              </button>
-              <button class="delete_but" @click="deleteToken(token)">
-                Delete
-              </button>
+              <button class="edit_but" @click="editToken(token)">Edit</button>
+              <button class="delete_but" @click="deleteToken(token)">Delete</button>
             </div>
           </div>
         </div>
@@ -56,27 +40,15 @@
           <button class="round add_token" @click="$router.push('/tokens/add')">
             <i class="material-icons">add</i>
           </button>
-          <button
-            v-if="tokenArrayOfNetwork.length > 0"
-            class="round green-but"
-            @click="editStart"
-          >
+          <button v-if="tokenArrayOfNetwork.length > 0" class="round green-but" @click="editStart">
             <i class="material-icons">edit</i>
           </button>
         </div>
         <div v-else>
-          <button @click="editStop">
-            Done
-          </button>
+          <button @click="editStop">Done</button>
         </div>
       </div>
-      <modal
-        name="modal-token-edit"
-        :adaptive="true"
-        transition="scale"
-        :width="250"
-        height="auto"
-      >
+      <modal name="modal-token-edit" :adaptive="true" transition="scale" :width="250" height="auto">
         <div class="modal-header">Change the token symbol</div>
         <div class="modal-body">
           <input
@@ -87,9 +59,7 @@
           />
         </div>
         <div class="modal-footer">
-          <div class="secondary" @click="$modal.hide('modal-token-edit')">
-            CLOSE
-          </div>
+          <div class="secondary" @click="$modal.hide('modal-token-edit')">CLOSE</div>
           <div class="primary" @click="saveTokenSymbol">SAVE</div>
         </div>
       </modal>
@@ -271,8 +241,9 @@ button.token_send_but {
 }
 
 .token-container {
-  height: calc(100% - 40px);
+  padding-right: 1rem;
   overflow: auto;
+  height: calc(100% - 40px);
 }
 .token-button-group {
   display: flex;
