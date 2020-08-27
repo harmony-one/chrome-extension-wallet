@@ -11,7 +11,7 @@ import BN from "bn.js";
 const INTERACTION_TIMEOUT = 120 * 1000;
 var harmonyApp;
 
-async function getHarmonyApp() {
+export async function getHarmonyApp() {
   if (harmonyApp) {
     return harmonyApp;
   }
@@ -97,10 +97,15 @@ export async function connectLedgerApp() {
   return response.one_address.toString();
 }
 export async function isLedgerLocked() {
-  const app = await getHarmonyApp();
-  let response = await app.publicKey(true);
-  if (response.return_code === SW_ERR) return true;
-  return false;
+  try {
+    const app = await getHarmonyApp();
+    let response = await app.publicKey(true);
+    if (response.return_code === SW_ERR) return true;
+    return false;
+  } catch (err) {
+    console.error(err);
+    return true;
+  }
 }
 /*
 export async function showLedgerAddress() {

@@ -12,9 +12,10 @@
       <div class="sign__address">{{ wallet.address }}</div>
       <p class="txRow">
         <span class="action_caption">{{ displayAction }}</span>
-        <span
-          v-if="type === 'SEND'"
-        >{{ txnParams.fromShard }} Shard -> {{ txnParams.toShard }} Shard</span>
+        <span v-if="type === 'SEND'"
+          >{{ txnParams.fromShard }} Shard ->
+          {{ txnParams.toShard }} Shard</span
+        >
       </p>
       <p class="txRow">
         <span>From</span>
@@ -58,11 +59,17 @@
         </label>
       </div>
       <div class="ledger-content" v-else>
-        <b>Please unlock your ledger and confirm the transaction</b>
+        <b>{{ caption }}</b>
       </div>
-      <div class="button-group">
-        <button class="outline" @click="reject">Reject</button>
-        <button @click="approve" :disabled="!password">Approve</button>
+      <div class="footer">
+        <div class="button-group" v-if="!wallet.isLedger">
+          <button class="outline" @click="reject">Reject</button>
+          <button @click="approve" :disabled="!password">Approve</button>
+        </div>
+        <div class="button-group" v-else>
+          <button v-if="!hasError" @click="reject">Close</button>
+          <button v-else @click="signwithLedger">Retry</button>
+        </div>
       </div>
     </div>
     <div v-else>
@@ -74,7 +81,12 @@
       </div>
       <button class="flex mt-20" @click="lockReject">OK</button>
     </div>
-    <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
+    <notifications
+      group="notify"
+      width="250"
+      :max="4"
+      class="notifiaction-container"
+    />
   </main>
 </template>
 <script>
@@ -87,19 +99,30 @@ import {
   createRewardsTransaction,
 } from "../../../services/APIService";
 import { Unit } from "@harmony-js/utils";
+import { Account } from "@harmony-js/account";
+import { getHarmonyApp, isLedgerLocked } from "../../../services/LedgerService";
 import _ from "lodash";
 import {
   TRANSACTIONTYPE,
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_SIGN_CONNECT,
+  LEDGER_CONFIRM_SUCCESS,
   THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
   THIRDPARTY_SIGNATURE_KEY_REJECT_RESPONSE,
   WALLET_LOCKED,
+  LEDGER_LOCKED,
+  LEDGER_CONFIRM_PREPARE,
 } from "../../../types";
 
 export default {
   data: () => ({
     transaction: null,
+    params: {
+      updateNonce: true,
+      encodeMode: "rlp",
+      blockNumber: "latest",
+      shardID: null,
+    },
     txnParams: {
       gasLimit: null,
       gasPrice: null,
@@ -116,6 +139,8 @@ export default {
     host: "",
     password: "",
     type: "Send",
+    hasError: false,
+    caption: LEDGER_CONFIRM_PREPARE,
     wallet: {
       isLedger: false,
       name: "",
@@ -154,7 +179,70 @@ export default {
       return this.type === TRANSACTIONTYPE.WITHDRAWREWARD;
     },
   },
+  watch: {
+    async transaction() {
+      if (this.transaction && this.wallet.isLedger) {
+        await this.signwithLedger();
+      }
+    },
+  },
   methods: {
+    async signwithLedger() {
+      try {
+        this.caption = LEDGER_CONFIRM_PREPARE;
+        this.hasError = false;
+        const app = await getHarmonyApp();
+        let signedTxParams;
+        if (this.type === TRANSACTIONTYPE.SEND) {
+          const signedTransaction = await app.signTransaction(
+            this.transaction,
+            this.transaction.chainId,
+            this.transaction.shardID,
+            this.transaction.messenger
+          );
+          signedTxParams = signedTransaction.txParams;
+        } else {
+          const signedTransaction = await app.signStakingTransaction(
+            this.transaction,
+            this.transaction.chainId,
+            this.transaction.shardID,
+            this.transaction.messenger
+          );
+          const parsedTxn = JSON.parse(JSON.stringify(signedTransaction));
+          signedTxParams = {
+            from: parsedTxn.from,
+            nonce: parsedTxn.nonce,
+            unsignedRawTransaction: parsedTxn.unsignedRawTransaction,
+            rawTransaction: parsedTxn.rawTransaction,
+            signature: parsedTxn.signature,
+          };
+        }
+        this.caption = LEDGER_CONFIRM_SUCCESS;
+        this.$notify({
+          group: "notify",
+          type: "success",
+          text: LEDGER_CONFIRM_SUCCESS,
+        });
+        setTimeout(
+          () =>
+            chrome.runtime.sendMessage({
+              action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
+              payload: {
+                txParams: signedTxParams,
+              },
+            }),
+          500
+        );
+      } catch (err) {
+        this.hasError = true;
+        this.caption = err.message;
+        this.$notify({
+          group: "notify",
+          type: "error",
+          text: err.message,
+        });
+      }
+    },
     async approve() {
       let privateKey;
       if (!this.wallet.isLedger) {
@@ -177,14 +265,35 @@ export default {
           });
           return false;
         }
+        const signer = new Account(privateKey, this.transaction.messenger);
+        let signedTxParams;
+        if (this.type === TRANSACTIONTYPE.SEND) {
+          const signedTransaction = await signer.signTransaction(
+            this.transaction,
+            ...this.params
+          );
+          signedTxParams = signedTransaction.txParams;
+        } else {
+          const signedTransaction = await signer.signStaking(
+            this.transaction,
+            ...this.params
+          );
+          const parsedTxn = JSON.parse(JSON.stringify(signedTransaction));
+          signedTxParams = {
+            from: parsedTxn.from,
+            nonce: parsedTxn.nonce,
+            unsignedRawTransaction: parsedTxn.unsignedRawTransaction,
+            rawTransaction: parsedTxn.rawTransaction,
+            signature: parsedTxn.signature,
+          };
+        }
+        chrome.runtime.sendMessage({
+          action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
+          payload: {
+            txParams: signedTxParams,
+          },
+        });
       }
-      chrome.runtime.sendMessage({
-        action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
-        payload: {
-          keystore: this.wallet.keystore, //send keystore and password to the internal message handler of background.js
-          password: this.password,
-        },
-      });
     },
 
     async reject() {
@@ -207,22 +316,27 @@ export default {
       { action: GET_WALLET_SERVICE_STATE },
       ({ state } = {}) => {
         if (state && state.type && state.txnInfo && state.session) {
-          const { type, txnInfo, session } = state;
+          const { type, txnInfo, params, session } = state;
           this.type = type;
           this.txnParams = txnInfo;
-          if (type === TRANSACTIONTYPE.SEND) {
-            this.transaction = createTransaction(txnInfo);
-          } else if (type === TRANSACTIONTYPE.DELEGATE) {
-            this.transaction = createDelegateTransaction(txnInfo);
-          } else if (type === TRANSACTIONTYPE.UNDELEGATE) {
-            this.transaction = createUndelegateTransaction(txnInfo);
-          } else {
-            this.transaction = createRewardsTransaction(txnInfo);
-          }
+          this.params = { ...params };
           this.host = session.host;
           this.wallet = _.find(this.wallets.accounts, {
             address: session.account.address,
           });
+          try {
+            if (type === TRANSACTIONTYPE.SEND) {
+              this.transaction = createTransaction(txnInfo);
+            } else if (type === TRANSACTIONTYPE.DELEGATE) {
+              this.transaction = createDelegateTransaction(txnInfo);
+            } else if (type === TRANSACTIONTYPE.UNDELEGATE) {
+              this.transaction = createUndelegateTransaction(txnInfo);
+            } else {
+              this.transaction = createRewardsTransaction(txnInfo);
+            }
+          } catch (err) {
+            console.error(err);
+          }
         } else {
           window.close();
         }
@@ -252,6 +366,7 @@ h3 {
 }
 .ledger-content {
   font-style: italic;
+  text-align: center;
   margin-top: 20px;
 }
 .sign__name {
@@ -282,7 +397,7 @@ h3 {
   word-break: break-word;
   font-size: 12px;
   font-style: italic;
-  height: 50px;
+  height: 35px;
   overflow: auto;
 }
 .action_caption {

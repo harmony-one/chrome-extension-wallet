@@ -38,9 +38,12 @@
           </p>
         </div>
       </div>
-      <div class="button-group" v-if="
+      <div
+        class="button-group footer"
+        v-if="
           wallets.accounts.length && !getLockState
-        ">
+        "
+      >
         <button class="outline" @click="deny">Deny</button>
         <button :disabled="selected < 0" @click="accept">Accept</button>
       </div>

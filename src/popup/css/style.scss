@@ -274,7 +274,7 @@ button:active {
   background-color: #1f6bb7;
 }
 button.outline {
-  background: rgba(10, 147, 235, 0.05);
+  background: #f7f7ff;
   border: 2px solid #0a93eb;
   color: black;
   &:hover {
@@ -681,15 +681,17 @@ input.vue-pincode-input:focus {
     transform: translate(0, 0);
   }
 }
-.footer {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: 338px;
+
+.credit-title {
   font-size: 14px;
   color: #555;
-  transform: translate(-50%, -50%);
-  margin: 0 auto;
+}
+
+.footer {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  right: 1rem;
 }
 
 .vld-overlay {
