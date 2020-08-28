@@ -465,6 +465,7 @@ button.green-but {
 }
 .transaction__caption {
   color: black;
+  word-break: break-all;
   line-height: 18px;
   font-size: 18px;
   padding-bottom: 4px;

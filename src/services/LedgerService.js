@@ -6,7 +6,8 @@ import store from "../popup/store";
 import { LEDGER_LOCKED } from "../types";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import { stringToHex } from "./CryptoService";
-import BigNumber from "bignumber.js";
+import { Unit } from "@harmony-js/utils";
+import BN from "bn.js";
 
 const INTERACTION_TIMEOUT = 120 * 1000;
 var harmonyApp;
@@ -151,11 +152,19 @@ export async function signHRCTransactionWithLedger(
     const toHex = oneToHexAddress(to);
     const app = await getHarmonyApp();
 
+    const weiAmount =
+      decimals >= 6
+        ? new Unit(amount)
+            .asMwei()
+            .toWei()
+            .mul(new BN(10).pow(new BN(decimals - 6)))
+        : new Unit(amount)
+            .asMwei()
+            .toWei()
+            .div(new BN(10).pow(new BN(6 - decimals)));
+
     const txn = await instance.methods
-      .transfer(
-        toHex,
-        new BigNumber(amount).multipliedBy(Math.pow(10, decimals)).toString()
-      )
+      .transfer(toHex, weiAmount)
       .createTransaction();
     txn.setParams({
       ...txn.txParams,

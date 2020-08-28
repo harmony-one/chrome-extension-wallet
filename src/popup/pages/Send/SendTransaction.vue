@@ -214,6 +214,7 @@
 
 <script>
 import { mapState } from "vuex";
+import BigNumber from "bignumber.js";
 import {
   decryptKeyStore,
   transferOne,
@@ -342,7 +343,7 @@ export default {
       }
     },
     getString(amount) {
-      return Number(amount).toFixed(6) + " " + this.selectedToken.symbol;
+      return `${amount} ${this.selectedToken.symbol}`;
     },
     onMessageClick() {
       if (this.message.type == "success") window.open(this.message.text);
@@ -529,12 +530,19 @@ export default {
       if (this.amount <= 0) {
         this.showErrMessage("Invalid token amount");
         return false;
-      }
-      if (Number(this.amount) < Number(0.000001)) {
-        this.showErrMessage(
-          `Minimum send amount is 0.000001 ${this.selectedToken.symbol}`
-        );
-        return false;
+      } else {
+        const minAmount =
+          1 /
+          Math.pow(
+            10,
+            this.selectedToken.decimals >= 6 ? 6 : this.selectedToken.decimals
+          );
+        if (Number(this.amount) < minAmount) {
+          this.showErrMessage(
+            `Minimum send amount is ${minAmount} ${this.selectedToken.symbol}`
+          );
+          return false;
+        }
       }
 
       if (!this.isHRCToken) {
@@ -547,7 +555,12 @@ export default {
           this.showErrMessage("Your ONE balance is not enough");
           return false;
         }
-        if (this.getTotal > this.getMaxBalance) {
+        if (
+          new BigNumber(this.getTotal).isGreaterThan(
+            new BigNumber(this.getMaxBalance),
+            10
+          )
+        ) {
           this.showErrMessage("Your token balance is not enough");
           return false;
         }
