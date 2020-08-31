@@ -64,6 +64,7 @@
                 placeholder="Amount"
                 v-model="amount"
                 step="any"
+                v-on:keyup.enter="showConfirmDialog"
               />
               <div class="maximum-label" v-show="!loading">
                 Maximum: {{ getMaxBalance + " " + selectedToken.symbol }}
@@ -214,10 +215,12 @@
 
 <script>
 import { mapState } from "vuex";
+import BigNumber from "bignumber.js";
 import {
   decryptKeyStore,
   transferOne,
   getNetworkLink,
+  sendTransction,
 } from "../../../services/AccountService";
 import { sendToken } from "../../../services/Hrc20Service";
 import { isValidAddress } from "@harmony-js/utils";
@@ -258,7 +261,7 @@ export default {
     gasPrice: 1,
     gasLimit: 25000,
     inputData: "",
-    selectedToken: { symbol: "ONE", isMainToken: true },
+    selectedToken: { symbol: "ONE", decimals: 18, isMainToken: true },
     password: "",
     ledgerError: false,
     message: {
@@ -284,19 +287,21 @@ export default {
       return parseFloat((this.gasPrice * this.gasLimit) / Math.pow(10, 9));
     },
     getTotal() {
-      if (!this.isHRCToken) return Number(this.amount) + Number(this.getGasFee);
-      else return Number(this.amount);
+      if (!this.isHRCToken)
+        return new BigNumber(this.amount).plus(this.getGasFee).toFixed(6);
+      else return this.amount;
     },
     getOneBalance() {
-      return Number(this.account.balance).toFixed(9);
+      return new BigNumber(this.account.balance).toFixed(6);
     },
     getMaxBalance() {
       let max;
-      if (!this.isHRCToken) max = Number(this.account.balance).toFixed(9);
+      if (!this.isHRCToken)
+        max = new BigNumber(this.account.balance).toFixed(6);
       else {
         max = this.getTokenBalance(this.selectedToken);
       }
-      if (max === undefined) return Number(0).toFixed(9);
+      if (max === undefined) return Number(0);
       return max;
     },
     getHeaderName() {
@@ -307,11 +312,8 @@ export default {
 
   async mounted() {
     this.fromShard = this.account.shard;
-    if (this.wallet.isLedger) await this.refreshData();
-    else {
-      this.initSelectedToken();
-      await this.loadBalance();
-    }
+    this.initSelectedToken();
+    await this.loadBalance();
   },
 
   updated() {
@@ -333,7 +335,7 @@ export default {
     initSelectedToken() {
       if (!this.isToken) {
         this.tokenList = [
-          { symbol: "ONE", isMainToken: true },
+          { symbol: "ONE", decimals: 18, isMainToken: true },
           ...this.tokenArrayOfNetwork,
         ];
         this.selectedToken = this.tokenList[0];
@@ -342,7 +344,7 @@ export default {
       }
     },
     getString(amount) {
-      return Number(amount).toFixed(6) + " " + this.selectedToken.symbol;
+      return `${amount} ${this.selectedToken.symbol}`;
     },
     onMessageClick() {
       if (this.message.type == "success") window.open(this.message.text);
@@ -368,9 +370,9 @@ export default {
     },
     async processLedgerTransfer() {
       try {
-        let res;
+        let signedRes;
         if (this.isHRCToken) {
-          res = await signHRCTransactionWithLedger(
+          signedRes = await signHRCTransactionWithLedger(
             this.address,
             this.recipient,
             this.amount,
@@ -380,7 +382,7 @@ export default {
             this.selectedToken.address
           );
         } else {
-          res = await signTransactionWithLedger(
+          signedRes = await signTransactionWithLedger(
             this.recipient,
             this.fromShard,
             this.toShard,
@@ -390,7 +392,7 @@ export default {
             this.inputData
           );
         }
-        const { result, success } = res;
+        const { result, success } = signedRes;
         if (success) {
           const signedTxn = result;
           this.ledgerConfirmTxt = LEDGER_CONFIRM_SUCCESS;
@@ -400,29 +402,18 @@ export default {
             text: LEDGER_CONFIRM_SUCCESS,
           });
           this.$store.commit("loading", true);
-          signedTxn
-            .observed()
-            .on("transactionHash", (txnHash) => {})
-            .on("confirmation", (confirmation) => {
-              if (confirmation !== "CONFIRMED")
-                throw new Error("Gas fee is too low or something is wrong.");
-            })
-            .on("error", (error) => {
-              throw new Error(error);
-            });
-          const [sentTxn, txnHash] = await signedTxn.sendTransaction();
-          const confirmedTxn = await sentTxn.confirm(txnHash);
-
-          if (confirmedTxn.isConfirmed()) {
-            this.showSuccessMsg(getNetworkLink("/tx/" + txnHash));
-          } else {
-            this.showErrMessage("Can not confirm transaction(" + txnHash + ")");
-          }
+          const sendRes = await sendTransction(signedTxn);
           this.$store.commit("loading", false);
+
+          if (sendRes.result) {
+            this.showSuccessMsg(sendRes.mesg);
+          } else {
+            this.showErrMessage(sendRes.mesg);
+          }
           this.initScene();
           this.loadBalance();
         } else {
-          console.error(result);
+          this.$store.commit("loading", false);
           this.$notify({
             group: "notify",
             type: "error",
@@ -529,39 +520,53 @@ export default {
       if (this.amount <= 0) {
         this.showErrMessage("Invalid token amount");
         return false;
-      }
-      if (Number(this.amount) < Number(0.000001)) {
-        this.showErrMessage(
-          `Minimum send amount is 0.000001 ${this.selectedToken.symbol}`
-        );
-        return false;
+      } else {
+        const minAmount =
+          1 /
+          Math.pow(
+            10,
+            this.selectedToken.decimals >= 6 ? 6 : this.selectedToken.decimals
+          );
+        if (new BigNumber(this.amount).isLessThan(new BigNumber(minAmount))) {
+          this.showErrMessage(
+            `Minimum send amount is ${minAmount} ${this.selectedToken.symbol}`
+          );
+          return false;
+        }
       }
 
       if (!this.isHRCToken) {
-        if (this.getTotal > this.getOneBalance) {
+        if (
+          new BigNumber(this.getTotal).isGreaterThan(
+            new BigNumber(this.getOneBalance)
+          )
+        ) {
           this.showErrMessage("Your balance is not enough");
           return false;
         }
       } else {
-        if (this.getOneBalance < this.getGasFee) {
+        if (
+          new BigNumber(this.getOneBalance).isLessThan(
+            new BigNumber(this.getGasFee)
+          )
+        ) {
           this.showErrMessage("Your ONE balance is not enough");
           return false;
         }
-        if (this.getTotal > this.getMaxBalance) {
+        if (
+          new BigNumber(this.getTotal).isGreaterThan(
+            new BigNumber(this.getMaxBalance),
+            10
+          )
+        ) {
           this.showErrMessage("Your token balance is not enough");
           return false;
         }
       }
+      this.amount = new BigNumber(this.amount).toFixed(
+        Math.min(this.selectedToken.decimals, 6)
+      );
       if (this.wallet.isLedger) {
-        const isLocked = await isLedgerLocked();
-        if (isLocked) {
-          this.$notify({
-            group: "notify",
-            type: "error",
-            text: LEDGER_LOCKED,
-          });
-          return;
-        }
         this.processLedgerTransfer();
       }
       this.scene = 2;

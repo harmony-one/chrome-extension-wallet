@@ -158,46 +158,51 @@ export async function transferOne(
 ) {
   try {
     let harmony = getHarmony();
-    //1e18
     const data = !inputData.match(/^0x([a-f0-9])*$/)
       ? stringToHex(inputData)
       : inputData;
     const txn = harmony.transactions.newTx({
-      //  token send to
       to: receiver,
-      // amount to send
       value: new harmony.utils.Unit(amount)
         .asEther()
         .toWei()
         .toString(),
-      // gas limit, you can use string
-      gasLimit: gasLimit,
-      // send token from shardID
+      gasLimit,
       shardID:
         typeof fromShard === "string"
           ? Number.parseInt(fromShard, 10)
           : fromShard,
-      // send token to toShardID
       toShardID:
         typeof toShard === "string" ? Number.parseInt(toShard, 10) : toShard,
-      // gas Price, you can use Unit class, and use Gwei, then remember to use toWei(), which will be transformed to BN
       gasPrice: new harmony.utils.Unit(gasPrice)
         .asGwei()
         .toWei()
         .toString(),
       data,
     });
-    // update the shard information
     await getShardInfo();
-    // sign the transaction use wallet;
     const account = harmony.wallet.addByPrivateKey(privateKey);
     const signedTxn = await account.signTransaction(txn);
+    const res = await sendTransction(signedTxn);
+    return res;
+  } catch (err) {
+    return {
+      result: false,
+      mesg: err,
+    };
+  }
+}
 
+export async function sendTransction(signedTxn) {
+  try {
     signedTxn
       .observed()
       .on("transactionHash", (txnHash) => {})
       .on("confirmation", (confirmation) => {
-        if (confirmation !== "CONFIRMED") throw new Error(confirmation);
+        if (confirmation !== "CONFIRMED")
+          throw new Error(
+            "Transaction confirm failed. Network fee is not enough or something went wrong."
+          );
       })
       .on("error", (error) => {
         throw new Error(error);

@@ -13,7 +13,7 @@ import RadioButton from "./components/RadioButton";
 import PincodeInput from "vue-pincode-input";
 import PincodeModal from "./pages/Settings/Security/PincodeModal.vue";
 import MoonLoader from "vue-spinner/src/MoonLoader";
-
+import BigNumber from "bignumber.js";
 import Config from "../config";
 
 import * as storage from "../services/StorageService";
@@ -58,6 +58,19 @@ if (!store.state.settings.auth.lockState)
   store.dispatch("settings/setLockState", false);
 
 ///
+
+const fmt = {
+  prefix: "",
+  decimalSeparator: ".",
+  groupSeparator: ",",
+  groupSize: 3,
+  secondaryGroupSize: 0,
+  fractionGroupSeparator: " ",
+  fractionGroupSize: 0,
+  suffix: "",
+};
+
+BigNumber.config({ FORMAT: fmt });
 //change the state
 
 const HRCTokens = store.state.hrc20.tokens;

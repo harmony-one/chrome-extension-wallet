@@ -270,7 +270,7 @@ export default {
       return str;
     },
     backClicked() {
-      if (!this.backRoute) this.$router.push("/home");
+      if (!this.backRoute) this.$router.go(-1);
       else this.$router.push(this.backRoute);
     },
     toggleDropdownMenu() {
@@ -313,7 +313,7 @@ export default {
       this.openExpandPopup("/import-wallet");
     },
     connectHardware() {
-      this.openExpandPopup("/connect-hardware-wallet");
+      this.$router.push("/connect-hardware-wallet");
     },
     lockWallet() {
       if (!this.getPinCode) {
