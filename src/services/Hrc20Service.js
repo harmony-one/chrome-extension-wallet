@@ -1,7 +1,7 @@
 import artifact from "./hrc20/artifacts/artifact.json";
 import { getNetworkLink, getHarmony } from "./AccountService";
-import { Unit } from "@harmony-js/utils";
 import BN from "bn.js";
+import BigNumber from "bignumber.js";
 
 export const oneToHexAddress = (address) =>
   getHarmony().crypto.getAddress(address).basicHex;
@@ -47,16 +47,10 @@ export async function sendToken(
     const instance = getContractInstance(contractAddress);
     const toHex = oneToHexAddress(to);
     harmony.wallet.addByPrivateKey(privateKey);
-    const weiAmount =
-      decimals >= 6
-        ? new Unit(amount)
-            .asMwei()
-            .toWei()
-            .mul(new BN(10).pow(new BN(decimals - 6)))
-        : new Unit(amount)
-            .asMwei()
-            .toWei()
-            .div(new BN(10).pow(new BN(6 - decimals)));
+    const weiAmount = new BN(
+      new BigNumber(amount).multipliedBy(Math.pow(10, decimals)).toFixed(),
+      10
+    );
     await new Promise(async (resolve, reject) => {
       await instance.methods
         .transfer(toHex, weiAmount)

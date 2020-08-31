@@ -25,11 +25,7 @@
               />
               <div class="token-box" v-if="!token.isLoading">
                 <span class="token-balance">
-                  {{
-                    Number(token.balance).toLocaleString("en-US", {
-                      maximumFractionDigits: 6,
-                    })
-                  }}
+                  {{ formatBalance(token.balance) }}
                 </span>
                 <button
                   class="token_send_but"
@@ -97,6 +93,7 @@
 import account from "../../mixins/account";
 import helper from "../../mixins/helper";
 import { mapState } from "vuex";
+import BigNumber from "bignumber.js";
 export default {
   data: () => ({
     editing: false,
@@ -116,6 +113,9 @@ export default {
     this.$forceUpdate();
   },
   methods: {
+    formatBalance(balance) {
+      return new BigNumber(balance).toFormat(6);
+    },
     saveTokenSymbol() {
       this.$modal.hide("modal-token-edit");
       this.$store.dispatch("hrc20/editToken", {
@@ -176,9 +176,7 @@ export default {
       await this.loadOneBalance();
     },
     sendToken(token) {
-      if (this.activeAcc.isLedger)
-        this.openExpandPopup(`/send-token/${token.address}`);
-      else this.$router.push(`/send-token/${token.address}`);
+      this.$router.push(`/send-token/${token.address}`);
     },
   },
 };

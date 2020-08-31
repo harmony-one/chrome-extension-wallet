@@ -21,11 +21,7 @@
         <div class="box-label">Account Balance</div>
 
         <div class="box-balance">
-          {{
-            Number(account.balance).toLocaleString("en-US", {
-              maximumFractionDigits: 6,
-            })
-          }}
+          {{ formatBalance(account.balance) }}
           <span class="box-balance-code">ONE</span>
         </div>
 
@@ -45,7 +41,7 @@
           <button class="outline" @click="$router.push('/deposit')">
             Deposit
           </button>
-          <button @click="onSendClick()">Send</button>
+          <button @click="$router.push('/send')">Send</button>
         </div>
         <div class="divider"></div>
       </div>
@@ -64,6 +60,7 @@ import helper from "../mixins/helper";
 import account from "../mixins/account";
 import MainTab from "../components/MainTab.vue";
 import { mapState } from "vuex";
+import BigNumber from "bignumber.js";
 
 export default {
   mixins: [account, helper],
@@ -103,9 +100,8 @@ export default {
   },
 
   methods: {
-    async onSendClick() {
-      if (this.wallets.active.isLedger) this.openExpandPopup("/send");
-      else this.$router.push("/send");
+    formatBalance(balance) {
+      return new BigNumber(balance).toFormat(6);
     },
     onClickAccount() {
       this.$copyText(this.address).then(() => {
