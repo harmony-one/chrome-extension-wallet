@@ -59,18 +59,18 @@ if (!store.state.settings.auth.lockState)
 
 ///
 
-const fmt = {
-  prefix: "",
-  decimalSeparator: ".",
-  groupSeparator: ",",
-  groupSize: 3,
-  secondaryGroupSize: 0,
-  fractionGroupSeparator: " ",
-  fractionGroupSize: 0,
-  suffix: "",
-};
-
-BigNumber.config({ FORMAT: fmt });
+BigNumber.config({
+  FORMAT: {
+    prefix: "",
+    decimalSeparator: ".",
+    groupSeparator: ",",
+    groupSize: 3,
+    secondaryGroupSize: 0,
+    fractionGroupSeparator: " ",
+    fractionGroupSize: 0,
+    suffix: "",
+  },
+});
 //change the state
 
 const HRCTokens = store.state.hrc20.tokens;

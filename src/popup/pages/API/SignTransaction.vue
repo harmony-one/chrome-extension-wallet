@@ -37,7 +37,7 @@
         </div>
         <div class="invoice__row">
           <span>Gas Limit</span>
-          <span>{{ txnParams.gasLimit }} Gwei</span>
+          <span>{{ txnParams.gasLimit }} Wei</span>
         </div>
         <div v-if="isDataExist">
           <p class="data_caption">Data</p>
@@ -228,10 +228,11 @@ export default {
             chrome.runtime.sendMessage({
               action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
               payload: {
+                isLedger: true,
                 txParams: signedTxParams,
               },
             }),
-          500
+          200
         );
       } catch (err) {
         this.hasError = true;
@@ -245,55 +246,33 @@ export default {
     },
     async approve() {
       let privateKey;
-      if (!this.wallet.isLedger) {
-        if (!this.password) return;
-        if (!this.wallet) {
-          this.$notify({
-            group: "notify",
-            type: "error",
-            text: "Account is invalid",
-          });
-          return false;
-        }
-        privateKey = await decryptKeyStore(this.password, this.wallet.keystore);
-
-        if (!privateKey) {
-          this.$notify({
-            group: "notify",
-            type: "error",
-            text: "Password is not correct",
-          });
-          return false;
-        }
-        const signer = new Account(privateKey, this.transaction.messenger);
-        let signedTxParams;
-        if (this.type === TRANSACTIONTYPE.SEND) {
-          const signedTransaction = await signer.signTransaction(
-            this.transaction,
-            ...this.params
-          );
-          signedTxParams = signedTransaction.txParams;
-        } else {
-          const signedTransaction = await signer.signStaking(
-            this.transaction,
-            ...this.params
-          );
-          const parsedTxn = JSON.parse(JSON.stringify(signedTransaction));
-          signedTxParams = {
-            from: parsedTxn.from,
-            nonce: parsedTxn.nonce,
-            unsignedRawTransaction: parsedTxn.unsignedRawTransaction,
-            rawTransaction: parsedTxn.rawTransaction,
-            signature: parsedTxn.signature,
-          };
-        }
-        chrome.runtime.sendMessage({
-          action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
-          payload: {
-            txParams: signedTxParams,
-          },
+      if (!this.password) return;
+      if (!this.wallet) {
+        this.$notify({
+          group: "notify",
+          type: "error",
+          text: "Account is invalid",
         });
+        return false;
       }
+      privateKey = await decryptKeyStore(this.password, this.wallet.keystore);
+
+      if (!privateKey) {
+        this.$notify({
+          group: "notify",
+          type: "error",
+          text: "Password is not correct",
+        });
+        return false;
+      }
+      chrome.runtime.sendMessage({
+        action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
+        payload: {
+          isLedger: false,
+          keystore: this.wallet.keystore,
+          password: this.password,
+        },
+      });
     },
 
     async reject() {
@@ -324,6 +303,7 @@ export default {
           this.wallet = _.find(this.wallets.accounts, {
             address: session.account.address,
           });
+          if (!this.wallet.isLedger) return;
           try {
             if (type === TRANSACTIONTYPE.SEND) {
               this.transaction = createTransaction(txnInfo);

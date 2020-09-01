@@ -54,7 +54,6 @@ export const createTransaction = ({
     nonce,
     data,
   });
-  console.log(txn);
   return txn;
 };
 export const createDelegateTransaction = ({
@@ -80,7 +79,6 @@ export const createDelegateTransaction = ({
       chainId,
     })
     .build();
-  console.log(stakingTxn);
   return stakingTxn;
 };
 export const createUndelegateTransaction = ({
@@ -106,7 +104,6 @@ export const createUndelegateTransaction = ({
       chainId,
     })
     .build();
-  console.log(stakingTxn);
   return stakingTxn;
 };
 export const createRewardsTransaction = ({
@@ -128,7 +125,6 @@ export const createRewardsTransaction = ({
       chainId,
     })
     .build();
-  console.log(stakingTxn);
   return stakingTxn;
 };
 

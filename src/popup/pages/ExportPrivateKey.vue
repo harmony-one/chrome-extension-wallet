@@ -76,7 +76,7 @@
           @submit.prevent="submitForm"
           action
           method="post"
-          class="auth-form"
+          class="key-form"
           autocomplete="off"
         >
           <div class="form-info">

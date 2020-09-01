@@ -7,7 +7,7 @@
           @submit.prevent="showConfirmDialog"
           action
           method="post"
-          class="auth-form"
+          class="send-form"
           autocomplete="off"
         >
           <div
@@ -199,8 +199,13 @@
           <button class="outline" @click="onBackClick()">Back</button>
           <button @click="sendPayment" :disabled="!password">Approve</button>
         </div>
-        <div v-else-if="ledgerError">
-          <button @click="onBackClick()" class="flex mt-20">Retry</button>
+        <div v-else class="footer">
+          <button v-if="ledgerError" @click="onBackClick()" class="flex">
+            Retry
+          </button>
+          <button v-else @click="onBackClick()" class="flex">
+            Back
+          </button>
         </div>
       </div>
       <notifications
@@ -419,7 +424,7 @@ export default {
             type: "error",
             text: result,
           });
-          this.ledgerConfirmTxt = LEDGER_CONFIRM_REJECT;
+          this.ledgerConfirmTxt = result;
           this.ledgerError = true;
         }
       } catch (err) {
@@ -427,7 +432,7 @@ export default {
 
         this.$store.commit("loading", false);
         this.initScene();
-        this.showErrMessage(err);
+        this.showErrMessage(err.message);
       }
     },
     async sendPayment() {
@@ -563,9 +568,12 @@ export default {
           return false;
         }
       }
-      this.amount = new BigNumber(this.amount).toFixed(
-        Math.min(this.selectedToken.decimals, 6)
-      );
+      this.amount = new BigNumber(this.amount)
+        .decimalPlaces(
+          Number(this.selectedToken.decimals),
+          BigNumber.ROUND_HALF_DOWN
+        )
+        .toFixed();
       if (this.wallet.isLedger) {
         this.processLedgerTransfer();
       }
