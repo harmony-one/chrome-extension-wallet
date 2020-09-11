@@ -86,7 +86,7 @@ export default {
   },
   methods: {
     formatBalance(balance, decimals) {
-      return new BigNumber(balance).toFormat(Math.min(6, decimals));
+      return new BigNumber(balance).toFormat(Math.min(4, decimals));
     },
     saveTokenSymbol() {
       this.$modal.hide("modal-token-edit");

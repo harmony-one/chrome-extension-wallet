@@ -20,7 +20,10 @@
         />
       </label>
       <label class="input-label">
-        Token Symbol
+        <div class="label-header">
+          <span>Token Symbol</span>
+          <clip-loader :loading="isLoading" color="#0a93eb" size="13px" />
+        </div>
         <input
           class="input-field symbol-input"
           type="text"
@@ -32,7 +35,10 @@
         />
       </label>
       <label class="input-label">
-        Decimals of Precision
+        <div class="label-header">
+          <span>Decimals of Precision</span>
+          <clip-loader :loading="isLoading" color="#0a93eb" size="13px" />
+        </div>
         <input
           class="input-field"
           type="number"
@@ -65,6 +71,7 @@ export default {
   data: () => ({
     symbol: "",
     contractAddress: "",
+    isLoading: false,
     precision: 0,
     selectedNetwork: null,
   }),
@@ -73,14 +80,17 @@ export default {
     async contractAddress() {
       if (this.isValidAddress(this.contractAddress)) {
         try {
+          this.isLoading = true;
           const symbol = await getTokenSymbol(this.contractAddress);
           if (!symbol) throw new Error("Symbol not found");
           const precision = await getTokenDecimals(this.contractAddress);
           this.symbol = symbol;
           this.precision = precision;
+          this.isLoading = false;
         } catch (err) {
           this.symbol = "";
           this.precision = 0;
+          this.isLoading = false;
         }
       }
     },
@@ -148,8 +158,18 @@ export default {
   },
 };
 </script>
-<style>
+<style lang="scss" scoped>
 .addtoken-header {
   text-align: center;
+}
+.label-header {
+  display: flex;
+  span {
+    margin-right: 5px;
+  }
+}
+.v-spinner {
+  display: flex;
+  align-items: center;
 }
 </style>

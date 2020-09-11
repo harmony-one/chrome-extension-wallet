@@ -6,11 +6,7 @@
         <div class="main-logo">
           <img src="images/harmony-big.png" class="logo-img" alt="Harmony" />
         </div>
-        <span
-          v-if="wallets.active.isLedger"
-          class="ledger-badge big account-badge"
-          >Ledger</span
-        >
+        <span v-if="wallets.active.isLedger" class="ledger-badge big account-badge">Ledger</span>
       </div>
       <div class="container">
         <div class="account-box" @click="onClickAccount()">
@@ -33,24 +29,16 @@
               v-for="item in account.shardArray"
               :value="item.shardID"
               :key="item.shardID"
-              >{{ item.shardID }}</option
-            >
+            >{{ item.shardID }}</option>
           </select>
         </div>
         <div class="button-group">
-          <button class="outline" @click="$router.push('/deposit')">
-            Deposit
-          </button>
+          <button class="outline" @click="$router.push('/deposit')">Deposit</button>
           <button @click="$router.push('/send')">Send</button>
         </div>
         <div class="divider"></div>
       </div>
-      <notifications
-        group="copied"
-        width="180"
-        :max="2"
-        class="notifiaction-container"
-      />
+      <notifications group="copied" width="180" :max="2" class="notifiaction-container" />
     </main>
   </div>
 </template>
@@ -101,7 +89,7 @@ export default {
 
   methods: {
     formatBalance(balance) {
-      return new BigNumber(balance).toFormat(6);
+      return new BigNumber(balance).toFormat(4);
     },
     onClickAccount() {
       this.$copyText(this.address).then(() => {
