@@ -45,19 +45,9 @@
       </label>
       <div class="button-group">
         <button class="outline" @click="$router.go(-1)">Back</button>
-        <button
-          @click="createToken"
-          :disabled="!precision || !symbol || !contractAddress"
-        >
-          Add
-        </button>
+        <button @click="createToken" :disabled="!precision || !symbol || !contractAddress">Add</button>
       </div>
-      <notifications
-        group="notify"
-        width="250"
-        :max="2"
-        class="notifiaction-container"
-      />
+      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
     </main>
   </div>
 </template>

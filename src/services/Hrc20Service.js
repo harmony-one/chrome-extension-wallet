@@ -2,6 +2,7 @@ import artifact from "./hrc20/artifacts/artifact.json";
 import { getNetworkLink, getHarmony } from "./AccountService";
 import BN from "bn.js";
 import BigNumber from "bignumber.js";
+import { toBech32 } from "@harmony-js/crypto";
 
 export const oneToHexAddress = (address) =>
   getHarmony().crypto.getAddress(address).basicHex;
@@ -85,5 +86,34 @@ export async function sendToken(
       result: false,
       mesg: err,
     };
+  }
+}
+
+export async function decodeInput(contract, hexData) {
+  try {
+    let decodeParameters = (inputs, data) => {
+      if (0 == inputs.length) return [];
+      let params = contract.abiCoder.decodeParameters(inputs, data);
+      params.length = inputs.length;
+      return Array.from(params);
+    };
+
+    const no0x = hexData.startsWith("0x") ? hexData.slice(2) : hexData;
+    const sig = no0x.slice(0, 8).toLowerCase();
+    const method = contract.abiModel.getMethod("0x" + sig);
+    if (!method) return false;
+
+    const params = decodeParameters(method.inputs, "0x" + no0x.slice(8));
+    const decimals = await contract.methods.decimals().call();
+    const symbol = await contract.methods.symbol().call();
+    return {
+      to: toBech32(params[0]),
+      amount: new BigNumber(params[1])
+        .dividedBy(Math.pow(10, new BN(decimals, 16).toNumber()))
+        .toString(),
+      symbol,
+    };
+  } catch (err) {
+    return false;
   }
 }

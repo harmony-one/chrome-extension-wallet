@@ -13,6 +13,7 @@ import RadioButton from "./components/RadioButton";
 import PincodeInput from "vue-pincode-input";
 import PincodeModal from "./pages/Settings/Security/PincodeModal.vue";
 import MoonLoader from "vue-spinner/src/MoonLoader";
+import ScaleLoader from "vue-spinner/src/ScaleLoader";
 import BigNumber from "bignumber.js";
 import Config from "../config";
 
@@ -31,6 +32,7 @@ Vue.config.productionTip = false;
 sync(store, router);
 
 Vue.component("MoonLoader", MoonLoader);
+Vue.component("ScaleLoader", ScaleLoader);
 Vue.component("AppHeader", AppHeader);
 Vue.component("SeedChecker", SeedChecker);
 Vue.component("PincodeInput", PincodeInput);
@@ -60,6 +62,7 @@ if (!store.state.settings.auth.lockState)
 ///
 
 BigNumber.config({
+  EXPONENTIAL_AT: [-50, 50],
   FORMAT: {
     prefix: "",
     decimalSeparator: ".",
