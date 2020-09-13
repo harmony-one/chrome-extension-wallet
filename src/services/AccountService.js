@@ -106,7 +106,7 @@ export async function createAccountFromMnemonic(name, mnemonic, password) {
   try {
     account = getHarmony().wallet.addByMnemonic(mnemonic);
   } catch (e) {
-    console.log("createAccountFromMnemonic error = ", e);
+    console.error("createAccountFromMnemonic error = ", e);
     return false;
   }
 
@@ -255,7 +255,6 @@ export async function getTransfers(
     harmony.messenger.chainPrefix,
     harmony.messenger.getCurrentShardID()
   );
-
   return ret.result;
 }
 

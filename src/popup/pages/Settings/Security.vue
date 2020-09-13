@@ -7,9 +7,7 @@
         v-for="item in options"
         :key="item.title"
         @click="item.handler"
-      >
-        {{ item.title }}
-      </div>
+      >{{ item.title }}</div>
       <pindigits-modal />
       <locktimer-modal />
     </main>

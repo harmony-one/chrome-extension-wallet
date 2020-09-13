@@ -13,6 +13,11 @@ import RadioButton from "./components/RadioButton";
 import PincodeInput from "vue-pincode-input";
 import PincodeModal from "./pages/Settings/Security/PincodeModal.vue";
 import MoonLoader from "vue-spinner/src/MoonLoader";
+import ScaleLoader from "vue-spinner/src/ScaleLoader";
+import ClipLoader from "vue-spinner/src/ClipLoader";
+import Tooltip from "vue-directive-tooltip";
+import "vue-directive-tooltip/dist/vueDirectiveTooltip.css";
+
 import BigNumber from "bignumber.js";
 import Config from "../config";
 
@@ -31,6 +36,8 @@ Vue.config.productionTip = false;
 sync(store, router);
 
 Vue.component("MoonLoader", MoonLoader);
+Vue.component("ClipLoader", ClipLoader);
+Vue.component("ScaleLoader", ScaleLoader);
 Vue.component("AppHeader", AppHeader);
 Vue.component("SeedChecker", SeedChecker);
 Vue.component("PincodeInput", PincodeInput);
@@ -39,6 +46,9 @@ Vue.component("PincodeModal", PincodeModal);
 Vue.use(Notifications);
 Vue.use(vClickOutside);
 Vue.use(VueClipboard);
+Vue.use(Tooltip, {
+  delay: 1,
+});
 Vue.use(VModal, {
   dialog: true,
   dynamic: true,
@@ -59,18 +69,19 @@ if (!store.state.settings.auth.lockState)
 
 ///
 
-const fmt = {
-  prefix: "",
-  decimalSeparator: ".",
-  groupSeparator: ",",
-  groupSize: 3,
-  secondaryGroupSize: 0,
-  fractionGroupSeparator: " ",
-  fractionGroupSize: 0,
-  suffix: "",
-};
-
-BigNumber.config({ FORMAT: fmt });
+BigNumber.config({
+  EXPONENTIAL_AT: [-50, 50],
+  FORMAT: {
+    prefix: "",
+    decimalSeparator: ".",
+    groupSeparator: ",",
+    groupSize: 3,
+    secondaryGroupSize: 0,
+    fractionGroupSeparator: " ",
+    fractionGroupSize: 0,
+    suffix: "",
+  },
+});
 //change the state
 
 const HRCTokens = store.state.hrc20.tokens;

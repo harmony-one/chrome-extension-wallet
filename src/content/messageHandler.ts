@@ -1,11 +1,11 @@
 import { HARMONY_REQUEST_TYPE, HARMONY_RESPONSE_TYPE } from "../types";
 import {
   TRANSACTIONTYPE,
-  STAKINGTYPE,
   FACTORYTYPE,
   ONEWALLET_SERVICE_EVENT_REQUEST,
   ONEWALLET_SERVICE_EVENT_RESPONSE,
 } from "../types";
+import { Directive } from "@harmony-js/staking";
 import { HarmonyAddress } from "@harmony-js/crypto";
 import { Unit } from "@harmony-js/utils";
 
@@ -73,6 +73,8 @@ export const getTxnInfo = (transaction: any) =>
             fromShard: txnParams.shardID,
             toShard: txnParams.toShardID,
             data: txnParams.data,
+            nonce: txnParams.nonce,
+            chainId: transaction.chainId,
           },
         };
       } else if (txnType === FACTORYTYPE.STAKINGTRANSACTION) {
@@ -83,12 +85,12 @@ export const getTxnInfo = (transaction: any) =>
         const gasLimit = Unit.Wei(stakeTransaction.gasLimit).toWeiString();
         const gasPrice = Unit.Wei(stakeTransaction.gasPrice).toGwei();
         if (
-          stakeTransaction.directive === STAKINGTYPE.DELEGATE ||
-          stakeTransaction.directive === STAKINGTYPE.UNDELEGATE
+          stakeTransaction.directive === Directive.DirectiveDelegate ||
+          stakeTransaction.directive === Directive.DirectiveUndelegate
         ) {
           response = {
             type:
-              stakeTransaction.directive === STAKINGTYPE.DELEGATE
+              stakeTransaction.directive === Directive.DirectiveDelegate
                 ? TRANSACTIONTYPE.DELEGATE
                 : TRANSACTIONTYPE.UNDELEGATE,
             txnInfo: {
@@ -97,15 +99,23 @@ export const getTxnInfo = (transaction: any) =>
               amount: Unit.Wei(stakeMsg.amount).toEther(),
               gasLimit,
               gasPrice,
+              nonce: stakeTransaction.nonce,
+              chainId: stakeTransaction.chainId,
+              shardID: stakeTransaction.shardID,
             },
           };
-        } else if (stakeTransaction.directive === STAKINGTYPE.WITHDRAWREWARD) {
+        } else if (
+          stakeTransaction.directive === Directive.DirectiveCollectRewards
+        ) {
           response = {
             type: TRANSACTIONTYPE.WITHDRAWREWARD,
             txnInfo: {
               from: delegatorAddress,
               gasLimit,
               gasPrice,
+              nonce: stakeTransaction.nonce,
+              chainId: stakeTransaction.chainId,
+              shardID: stakeTransaction.shardID,
             },
           };
         }

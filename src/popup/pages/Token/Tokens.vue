@@ -24,13 +24,14 @@
                 size="26px"
               />
               <div class="token-box" v-if="!token.isLoading">
-                <span class="token-balance">
-                  {{ formatBalance(token.balance) }}
-                </span>
+                <span class="token-balance">{{
+                  formatBalance(token.balance, token.decimals)
+                }}</span>
                 <button
                   class="token_send_but"
                   :disabled="token.balance <= 0"
                   @click="sendToken(token)"
+                  v-tooltip.top="'Send token'"
                 >
                   Send
                 </button>
@@ -47,19 +48,26 @@
       </div>
       <div class="token-button-footer">
         <div class="token-button-group" v-if="!editing">
-          <button class="round add_token" @click="$router.push('/tokens/add')">
+          <button
+            class="round add_token"
+            @click="$router.push('/tokens/add')"
+            v-tooltip.top="'Add token'"
+          >
             <i class="material-icons">add</i>
           </button>
           <button
             v-if="tokenArrayOfNetwork.length > 0"
             class="round green-but"
             @click="editStart"
+            v-tooltip.top="'Edit token'"
           >
             <i class="material-icons">edit</i>
           </button>
         </div>
         <div v-else>
-          <button @click="editStop">Done</button>
+          <button @click="editStop" v-tooltip.top="'Finish editing'">
+            Done
+          </button>
         </div>
       </div>
       <modal
@@ -113,8 +121,8 @@ export default {
     this.$forceUpdate();
   },
   methods: {
-    formatBalance(balance) {
-      return new BigNumber(balance).toFormat(6);
+    formatBalance(balance, decimals) {
+      return new BigNumber(balance).toFormat(Math.min(4, decimals));
     },
     saveTokenSymbol() {
       this.$modal.hide("modal-token-edit");
@@ -239,7 +247,7 @@ export default {
   overflow: hidden;
 }
 .token-balance {
-  font-size: 1rem;
+  font-size: 15px;
   font-weight: 600;
   text-align: right;
   word-break: break-all;

@@ -8,6 +8,126 @@ import {
 } from "../types";
 import * as storage from "./StorageService";
 import _ from "lodash";
+import Config from "../config";
+import { Harmony } from "@harmony-js/core";
+import { Unit } from "@harmony-js/utils";
+
+const getHarmony = (chainId) => {
+  const network = _.find(Config.networks, { chainId });
+  const harmony = new Harmony(
+    // rpc url
+    network.apiUrl,
+    {
+      chainType: network.type,
+      chainId: network.chainId,
+    }
+  );
+  return harmony;
+};
+export const createTransaction = ({
+  chainId,
+  from,
+  to,
+  amount,
+  gasLimit,
+  fromShard,
+  toShard,
+  gasPrice,
+  nonce,
+  data,
+}) => {
+  const harmony = getHarmony(chainId);
+  const txn = harmony.transactions.newTx({
+    from,
+    to,
+    value: new harmony.utils.Unit(amount)
+      .asEther()
+      .toWei()
+      .toString(),
+    gasLimit,
+    shardID: fromShard,
+    toShardID: toShard,
+    gasPrice: new harmony.utils.Unit(gasPrice)
+      .asGwei()
+      .toWei()
+      .toString(),
+    nonce,
+    data,
+  });
+  return txn;
+};
+export const createDelegateTransaction = ({
+  from,
+  to,
+  amount,
+  gasLimit,
+  gasPrice,
+  chainId,
+  nonce,
+}) => {
+  const harmony = getHarmony(chainId);
+  const stakingTxn = harmony.stakings
+    .delegate({
+      delegatorAddress: from,
+      validatorAddress: to,
+      amount: new Unit(amount).asEther().toHex(),
+    })
+    .setTxParams({
+      nonce,
+      gasLimit: new Unit(gasLimit).asWei().toHex(),
+      gasPrice: new Unit(gasPrice).asGwei().toHex(),
+      chainId,
+    })
+    .build();
+  return stakingTxn;
+};
+export const createUndelegateTransaction = ({
+  from,
+  to,
+  amount,
+  gasLimit,
+  gasPrice,
+  chainId,
+  nonce,
+}) => {
+  const harmony = getHarmony(chainId);
+  const stakingTxn = harmony.stakings
+    .undelegate({
+      delegatorAddress: from,
+      validatorAddress: to,
+      amount: new Unit(amount).asEther().toHex(),
+    })
+    .setTxParams({
+      nonce,
+      gasLimit: new Unit(gasLimit).asWei().toHex(),
+      gasPrice: new Unit(gasPrice).asGwei().toHex(),
+      chainId,
+    })
+    .build();
+  return stakingTxn;
+};
+export const createRewardsTransaction = ({
+  from,
+  gasLimit,
+  gasPrice,
+  chainId,
+  nonce,
+}) => {
+  const harmony = getHarmony(chainId);
+  const stakingTxn = harmony.stakings
+    .collectRewards({
+      delegatorAddress: from,
+    })
+    .setTxParams({
+      nonce,
+      gasLimit: new Unit(gasLimit).asWei().toHex(),
+      gasPrice: new Unit(gasPrice).asGwei().toHex(),
+      chainId,
+    })
+    .build();
+  return stakingTxn;
+};
+
 export const msgToContentScript = (type, payload) => ({
   type: HARMONY_RESPONSE_TYPE,
   message: {
@@ -18,6 +138,7 @@ export const msgToContentScript = (type, payload) => ({
 
 class APIService {
   constructor() {
+    this.params = null;
     this.txnInfo = null;
     this.type = null;
     this.sender = null;
@@ -29,6 +150,7 @@ class APIService {
       type: this.type,
       host: this.host,
       txnInfo: this.txnInfo,
+      params: this.params,
       session: this.activeSession,
     };
   };
@@ -94,9 +216,6 @@ class APIService {
       });
     }
   };
-  isTokenTransfer = (data) => {
-    return data && data !== "0x";
-  };
   getVuexStore = () => {
     try {
       if (!window.localStorage.vuex) throw new Error("Vuex Store is not found");
@@ -114,6 +233,7 @@ class APIService {
       this.sender = tabid;
       this.host = hostname;
       this.type = payload.type;
+      this.params = payload.params;
       this.txnInfo = payload.txnInfo;
       const session = await this.getSession(hostname);
       if (session.exist) {
@@ -129,8 +249,7 @@ class APIService {
           return;
         }
         this.activeSession = session;
-        if (this.isTokenTransfer(this.txnInfo.data))
-          this.openPopup("sign", 400, 600);
+        if (this.isDataExist()) this.openPopup("sign", 400, 610);
         else this.openPopup("sign", 400, 550);
       } else {
         this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
@@ -149,6 +268,9 @@ class APIService {
   onGetSignatureKeySuccess = (payload) => {
     this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, payload);
     this.closeWindow();
+  };
+  isDataExist = () => {
+    return this.txnInfo.data && this.txnInfo.data !== "0x";
   };
   onGetSignatureKeyReject = ({ message }) => {
     this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {

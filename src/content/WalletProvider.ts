@@ -78,6 +78,10 @@ class WalletProvider {
     return new Promise(async (resolve, reject) => {
       try {
         const parsedTxn: any = await getTxnInfo(transaction);
+        if (!parsedTxn)
+          return reject(
+            "Sorry. Currently, onewallet doesn't support signing the CreateValidator and EditValidator transaction"
+          );
         const txnType = checkTransactionType(transaction);
         const res = await sendAsyncMessageToContentScript({
           hostname: window.location.hostname,
@@ -88,28 +92,53 @@ class WalletProvider {
           if (res.message) return reject(res.message);
           return reject(SIGN_REJECT);
         }
-
-        const privateKey: any = await decryptKeyStore(
-          res.password,
-          res.keystore
-        );
-        const signer: Account = new Account(privateKey, transaction.messenger);
         let signedTransaction: any;
-        if (txnType == FACTORYTYPE.TRANSACTION) {
-          signedTransaction = await signer.signTransaction(
-            transaction as Transaction,
-            updateNonce,
-            encodeMode,
-            blockNumber
+        if (res.isLedger) {
+          if (txnType == FACTORYTYPE.TRANSACTION) {
+            const { txParams } = res;
+            signedTransaction = transaction as Transaction;
+            signedTransaction.setParams({
+              ...signedTransaction.txParams,
+              from: txParams.from,
+              nonce: txParams.nonce,
+              signature: txParams.signature,
+              rawTransaction: txParams.rawTransaction,
+              unsignedRawTransaction: txParams.unsignedRawTransaction,
+            });
+          } else {
+            const { txParams } = res;
+            signedTransaction = transaction as StakingTransaction;
+            signedTransaction.setFromAddress(txParams.from);
+            signedTransaction.setNonce(txParams.nonce);
+            signedTransaction.setUnsigned(txParams.unsignedRawTransaction);
+            signedTransaction.setSignature(txParams.signature);
+            signedTransaction.setRawTransaction(txParams.rawTransaction);
+          }
+        } else {
+          const privateKey: any = await decryptKeyStore(
+            res.password,
+            res.keystore
           );
-        } else if (txnType == FACTORYTYPE.STAKINGTRANSACTION) {
-          signedTransaction = await signer.signStaking(
-            transaction as StakingTransaction,
-            updateNonce,
-            encodeMode,
-            blockNumber,
-            shardID
+          const signer: Account = new Account(
+            privateKey,
+            transaction.messenger
           );
+          if (txnType == FACTORYTYPE.TRANSACTION) {
+            signedTransaction = await signer.signTransaction(
+              transaction as Transaction,
+              updateNonce,
+              encodeMode,
+              blockNumber
+            );
+          } else if (txnType == FACTORYTYPE.STAKINGTRANSACTION) {
+            signedTransaction = await signer.signStaking(
+              transaction as StakingTransaction,
+              updateNonce,
+              encodeMode,
+              blockNumber,
+              shardID
+            );
+          }
         }
         resolve(signedTransaction);
       } catch (err) {

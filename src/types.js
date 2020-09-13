@@ -1,11 +1,6 @@
 export const HARMONY_REQUEST_TYPE = "TO_ONEWALLET_EXTENSION";
 export const HARMONY_RESPONSE_TYPE = "FROM_ONEWALLET_EXTENSION";
 
-export const STAKINGTYPE = {
-  DELEGATE: 2,
-  UNDELEGATE: 3,
-  WITHDRAWREWARD: 4,
-};
 export const FACTORYTYPE = {
   TRANSACTION: "TRANSACTION",
   STAKINGTRANSACTION: "STAKINGTRANSACTION",
@@ -69,3 +64,6 @@ export const LEDGER_LOCKED =
   "Ledger wallet is locked or Harmony app is not opened.";
 export const WALLET_LOCKED =
   "The wallet is locked. You should unlock it first in the extension.";
+export const NO_ACCOUNTS_ERROR =
+  "No accounts. You should create the account first in the extension.";
+export const UNKNOWN_ERROR = "Request failed. Something went wrong.";

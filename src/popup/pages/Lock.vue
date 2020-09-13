@@ -25,16 +25,12 @@
         ref="pincodeInput"
       />
     </div>
-    <div class="pin-caption" :class="{ 'failed-caption': attempts < 5 }">
-      {{ statusCaption }}
-    </div>
+    <div class="pin-caption" :class="{ 'failed-caption': attempts < 5 }">{{ statusCaption }}</div>
     <div v-if="lastOpened">
-      <div class="lastopen-fromnow-caption">
-        Last accessed {{ lastOpenedFromNow }}
-      </div>
+      <div class="lastopen-fromnow-caption">Last accessed {{ lastOpenedFromNow }}</div>
       <div class="lastopen-time-caption">{{ lastOpened }}</div>
     </div>
-    <div class="footer">
+    <div class="footer credit-title">
       <span>Developed by Harmony Team</span>
     </div>
   </div>
