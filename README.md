@@ -13,12 +13,12 @@
 - [x] Lock the wallet with the 4/6 digits PIN Code
 - [x] Auto lock the wallet after timeout
 - [x] Set the pin code, pin digits and lock timer on the settings
-- [ ] Support the ledger wallet to communicate between onewallet and staking.harmony.one
+- [x] Support the ledger wallet to communicate between onewallet and staking.harmony.one
+- [x] View the HRC20 token transaction amount in the history page
 - [ ] Add/Delete/Edit the contacts
 - [ ] View and revoke the accounts connected to the third-party website
 - [ ] View the USD balance on the main page
 - [ ] View the recent transaction history on the home page
-- [ ] View the HRC20 token transaction amount in the history page
 
 ## Development 
 
