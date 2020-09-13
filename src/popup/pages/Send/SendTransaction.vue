@@ -61,12 +61,16 @@
                 type="number"
                 name="amount"
                 ref="amount"
+                step="any"
                 placeholder="Amount"
                 v-model="amount"
-                step="any"
                 v-on:keyup.enter="showConfirmDialog"
               />
-              <div class="maximum-label" v-show="!loading">
+              <div
+                class="maximum-label"
+                v-show="!loading"
+                @click="setMaxBalance"
+              >
                 Maximum: {{ getMaxBalance + " " + selectedToken.symbol }}
               </div>
             </label>
@@ -137,9 +141,9 @@
         <h3 class="center">Approve Transaction</h3>
         <p class="addressRow">
           From
-          <span class="address__name">{{
-            compressAddress(getFromAddress)
-          }}</span>
+          <span class="address__name">
+            {{ compressAddress(getFromAddress) }}
+          </span>
           of Shard
           <b>{{ fromShard }}</b>
         </p>
@@ -203,9 +207,7 @@
           <button v-if="ledgerError" @click="onBackClick()" class="flex">
             Retry
           </button>
-          <button v-else @click="onBackClick()" class="flex">
-            Back
-          </button>
+          <button v-else @click="onBackClick()" class="flex">Back</button>
         </div>
       </div>
       <notifications
@@ -293,16 +295,16 @@ export default {
     },
     getTotal() {
       if (!this.isHRCToken)
-        return new BigNumber(this.amount).plus(this.getGasFee).toFixed(6);
+        return new BigNumber(this.amount).plus(this.getGasFee).toFixed(8);
       else return this.amount;
     },
     getOneBalance() {
-      return new BigNumber(this.account.balance).toFixed(6);
+      return new BigNumber(this.account.balance).toFixed(8);
     },
     getMaxBalance() {
       let max;
       if (!this.isHRCToken)
-        max = new BigNumber(this.account.balance).toFixed(6);
+        max = new BigNumber(this.account.balance).toFixed(8);
       else {
         max = this.getTokenBalance(this.selectedToken);
       }
@@ -331,8 +333,21 @@ export default {
       this.toShard = 0;
       this.setGasLimit();
     },
+    amount() {
+      if (
+        !RegExp(
+          `^[0-9]*[.]?[0-9]{0,${Math.min(8, this.selectedToken.decimals)}}$`,
+          "g"
+        ).test(this.amount)
+      )
+        this.amount = this.amount.slice(0, this.amount.length - 1);
+    },
   },
   methods: {
+    setMaxBalance(e) {
+      e.preventDefault();
+      this.amount = this.getMaxBalance;
+    },
     setGasLimit() {
       if (!this.isHRCToken) this.gasLimit = 25000;
       else this.gasLimit = 250000;
@@ -530,7 +545,7 @@ export default {
           1 /
           Math.pow(
             10,
-            this.selectedToken.decimals >= 6 ? 6 : this.selectedToken.decimals
+            this.selectedToken.decimals >= 8 ? 8 : this.selectedToken.decimals
           );
         if (new BigNumber(this.amount).isLessThan(new BigNumber(minAmount))) {
           this.showErrMessage(

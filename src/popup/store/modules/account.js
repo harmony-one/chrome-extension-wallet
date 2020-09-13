@@ -28,5 +28,9 @@ export default {
     pushHistory(state, history) {
       state.history.push(...history);
     },
+
+    initHistory(state) {
+      state.history = [];
+    },
   },
 };

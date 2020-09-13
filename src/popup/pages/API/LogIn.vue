@@ -48,7 +48,7 @@
         <button :disabled="selected < 0" @click="accept">Accept</button>
       </div>
       <div v-else>
-        <button class="flex mt-20" @click="lockReject">OK</button>
+        <button class="flex mt-20" @click="reject">OK</button>
       </div>
     </main>
   </div>
@@ -62,6 +62,8 @@ import {
   THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
   WALLET_LOCKED,
+  UNKNOWN_ERROR,
+  NO_ACCOUNTS_ERROR,
 } from "../../../types";
 export default {
   data: () => ({
@@ -102,11 +104,16 @@ export default {
     deny() {
       window.close();
     },
-    lockReject() {
+    reject() {
+      const message = this.getLockState
+        ? WALLET_LOCKED
+        : !this.wallets.accounts.length
+        ? NO_ACCOUNTS_ERROR
+        : UNKNOWN_ERROR;
       chrome.runtime.sendMessage({
         action: THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
         payload: {
-          message: WALLET_LOCKED,
+          message,
         },
       });
     },

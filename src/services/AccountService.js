@@ -255,7 +255,6 @@ export async function getTransfers(
     harmony.messenger.chainPrefix,
     harmony.messenger.getCurrentShardID()
   );
-
   return ret.result;
 }
 

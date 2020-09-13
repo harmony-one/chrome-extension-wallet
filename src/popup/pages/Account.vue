@@ -13,7 +13,11 @@
         >
       </div>
       <div class="container">
-        <div class="account-box" @click="onClickAccount()">
+        <div
+          class="account-box"
+          @click="onClickAccount()"
+          v-tooltip.top="'Click to copy'"
+        >
           <h2 class="name-label">{{ compressName(wallets.active.name) }}</h2>
           <div class="box-address">{{ compressAddress(address, 20, 5) }}</div>
         </div>
@@ -38,10 +42,16 @@
           </select>
         </div>
         <div class="button-group">
-          <button class="outline" @click="$router.push('/deposit')">
+          <button
+            class="outline"
+            @click="$router.push('/deposit')"
+            v-tooltip.top="'Deposit token'"
+          >
             Deposit
           </button>
-          <button @click="$router.push('/send')">Send</button>
+          <button @click="$router.push('/send')" v-tooltip.top="'Send token'">
+            Send
+          </button>
         </div>
         <div class="divider"></div>
       </div>
@@ -101,7 +111,7 @@ export default {
 
   methods: {
     formatBalance(balance) {
-      return new BigNumber(balance).toFormat(6);
+      return new BigNumber(balance).toFormat(4);
     },
     onClickAccount() {
       this.$copyText(this.address).then(() => {

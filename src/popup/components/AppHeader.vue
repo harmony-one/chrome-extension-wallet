@@ -5,13 +5,15 @@
         <img src="images/harmony-small.png" alt="Harmony" />
         <span>Harmony</span>
       </router-link>
-      <a
-        class="header-lock"
-        v-if="wallets.accounts.length > 0"
-        @click="lockWallet"
-      >
-        <i class="material-icons">lock</i>
-      </a>
+      <div class="header-lock">
+        <a
+          v-if="wallets.accounts.length > 0"
+          @click="lockWallet"
+          v-tooltip.bottom="'Lock wallet'"
+        >
+          <i class="material-icons">lock</i>
+        </a>
+      </div>
 
       <div class="network" v-click-outside="hideNetworkDropdown">
         <a
@@ -87,7 +89,12 @@
         </div>
       </div>
 
-      <a class="refresh-toggle" @click.prevent="refreshData" href="#">
+      <a
+        class="refresh-toggle"
+        @click.prevent="refreshData"
+        href="#"
+        v-tooltip.bottom="'Refresh'"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
@@ -104,6 +111,7 @@
           class="dropdown-menu-toggle"
           @click.prevent="toggleDropdownMenu"
           href="#"
+          v-tooltip.bottom="'Menu'"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -360,11 +368,10 @@ export default {
   display: flex;
   flex-direction: row;
   position: relative;
+  align-items: center;
   i {
     position: absolute;
     color: #757575;
-    top: 50%;
-    transform: translate(0, -50%);
     left: 8px;
   }
   &.disabled {
@@ -407,10 +414,12 @@ export default {
   }
 }
 .header-lock {
-  color: black;
   margin: auto;
   flex: 1;
   margin-left: 15px;
+  a {
+    color: black;
+  }
 }
 .network {
   margin: -0.2rem 0.75rem 0;
