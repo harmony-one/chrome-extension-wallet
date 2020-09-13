@@ -121,21 +121,11 @@ export default {
   }),
 
   async mounted() {
-    if (!this.history.length) this.$store.commit("loading", true);
+    this.$store.commit("loading", true);
     await this.loadHistory();
   },
 
   methods: {
-    async isHrc20Transaction(transfer) {
-      try {
-        const instance = getContractInstance(fromBech32(transfer.to));
-        const symbol = await instance.methods.symbol().call();
-        if (!symbol) return [false, "ONE"];
-        return [true, symbol];
-      } catch (err) {
-        return [false, "ONE"];
-      }
-    },
     async pushHistory(transactions) {
       let txns = [];
       for (const txn of removeDups(transactions)) {

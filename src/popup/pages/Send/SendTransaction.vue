@@ -16,9 +16,9 @@
             :class="[message.type]"
             @click="onMessageClick"
           >
-            <span
-              v-if="message.type === 'success'"
-            >Transaction Succeed: Click here to see the transaction</span>
+            <span v-if="message.type === 'success'"
+              >Transaction Succeed: Click here to see the transaction</span
+            >
             <span v-else>{{ message.text }}</span>
           </div>
           <div :class="{ row: !isToken }">
@@ -33,14 +33,23 @@
                 v-model="recipient"
               />
             </label>
-            <label v-if="!isToken" class="input-label shard" :class="{ disabled: isHRCToken }">
+            <label
+              v-if="!isToken"
+              class="input-label shard"
+              :class="{ disabled: isHRCToken }"
+            >
               To Shard
-              <select class="input-field" v-model="toShard" :disabled="isHRCToken">
+              <select
+                class="input-field"
+                v-model="toShard"
+                :disabled="isHRCToken"
+              >
                 <option
                   v-for="shard in account.shardArray"
                   :key="shard.shardID"
                   :value="shard.shardID"
-                >{{ shard.shardID }}</option>
+                  >{{ shard.shardID }}</option
+                >
               </select>
             </label>
           </div>
@@ -61,7 +70,9 @@
                 class="maximum-label"
                 v-show="!loading"
                 @click="setMaxBalance"
-              >Maximum: {{ getMaxBalance + " " + selectedToken.symbol }}</div>
+              >
+                Maximum: {{ getMaxBalance + " " + selectedToken.symbol }}
+              </div>
             </label>
             <label v-if="!isToken" class="input-label token">
               Token
@@ -70,7 +81,8 @@
                   v-for="(token, index) in tokenList"
                   :key="index"
                   :value="token"
-                >{{ token.symbol }}</option>
+                  >{{ token.symbol }}</option
+                >
               </select>
             </label>
           </div>
@@ -130,9 +142,7 @@
         <p class="addressRow">
           From
           <span class="address__name">
-            {{
-            compressAddress(getFromAddress)
-            }}
+            {{ compressAddress(getFromAddress) }}
           </span>
           of Shard
           <b>{{ fromShard }}</b>
@@ -194,11 +204,18 @@
           <button @click="sendPayment" :disabled="!password">Approve</button>
         </div>
         <div v-else class="footer">
-          <button v-if="ledgerError" @click="onBackClick()" class="flex">Retry</button>
+          <button v-if="ledgerError" @click="onBackClick()" class="flex">
+            Retry
+          </button>
           <button v-else @click="onBackClick()" class="flex">Back</button>
         </div>
       </div>
-      <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="4"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
