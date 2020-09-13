@@ -2,7 +2,9 @@
   <div>
     <app-header @refresh="refreshHistory" headerTab="main-tab" />
     <main class="main">
-      <div v-if="history.length === 0" class="message-empty">No transactions yet</div>
+      <div v-if="history.length === 0" class="message-empty">
+        No transactions yet
+      </div>
 
       <div v-else>
         <div>
@@ -45,16 +47,23 @@
               <span
                 v-if="isOutgoingTransfer(transfer)"
                 class="transfer-address"
-              >{{ compressAddress(transfer.to, 15, 10) }}</span>
-              <span v-else class="transfer-address">{{ compressAddress(transfer.from, 20, 10) }}</span>
-              <span
-                v-if="isOutgoingTransfer(transfer)"
-                class="transfer-amount"
-              >- {{ formatTokenAmount(transfer) }}</span>
-              <span v-else class="transfer-amount incoming">+ {{ formatTokenAmount(transfer) }}</span>
+                v-tooltip.top="transfer.to"
+                >{{ compressAddress(transfer.to, 15, 10) }}</span
+              >
+              <span v-else class="transfer-address">{{
+                compressAddress(transfer.from, 20, 10)
+              }}</span>
+              <span v-if="isOutgoingTransfer(transfer)" class="transfer-amount"
+                >- {{ formatTokenAmount(transfer) }}</span
+              >
+              <span v-else class="transfer-amount incoming"
+                >+ {{ formatTokenAmount(transfer) }}</span
+              >
               <div class="transfer-footer">
                 <span class="transfer-shard">{{ formatShard(transfer) }}</span>
-                <span class="transfer-date">{{ formatTimestamp(Number(transfer.timestamp) * 1000) }}</span>
+                <span class="transfer-date">{{
+                  formatTimestamp(Number(transfer.timestamp) * 1000)
+                }}</span>
               </div>
             </span>
           </external-link>
@@ -64,8 +73,13 @@
             v-show="history.length < txCount && !loadMoreLoading"
             href="#"
             @click="loadMore"
-          >Load More</a>
-          <scale-loader :loading="loadMoreLoading" color="#0a93eb" size="26px" />
+            >Load More</a
+          >
+          <scale-loader
+            :loading="loadMoreLoading"
+            color="#0a93eb"
+            size="26px"
+          />
         </div>
       </div>
     </main>
@@ -134,7 +148,10 @@ export default {
           to: params ? params.to : txn.to,
           amount: params
             ? params.amount
-            : new Unit(txn.value).asWei().toEther().toString(),
+            : new Unit(txn.value)
+                .asWei()
+                .toEther()
+                .toString(),
           hash: txn.hash,
           symbol: params ? params.symbol : "ONE",
           timestamp: txn.timestamp,
@@ -195,7 +212,9 @@ export default {
     formatTimestamp(timestamp) {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      return moment(timestamp).tz(timezone).format("MM/DD/YYYY HH:mm:ss z");
+      return moment(timestamp)
+        .tz(timezone)
+        .format("MM/DD/YYYY HH:mm:ss z");
     },
     formatTokenAmount(transfer) {
       return transfer.amount + " " + transfer.symbol;

@@ -696,3 +696,12 @@ input.vue-pincode-input:focus {
 .vld-overlay {
   position: absolute !important;
 }
+
+.vue-tooltip {
+  font-size: 10px;
+  z-index: 1000;
+  background: #454545;
+  .tooltip-arrow {
+    border-color: #454545 !important;
+  }
+}
