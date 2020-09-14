@@ -3,10 +3,10 @@
 ## Table of Contents
 
 - [Display the HRC20 token symbol and balance](#display-the-hrc20-token-symbol-and-balance)
-  - [Get the HRC20 token Symbol](get-the-hrc20-token-symbol)
-  - [Display the HRC20 token balance](display-the-hrc20-token-balance)
+  - [Get the HRC20 token Symbol](#get-the-hrc20-token-symbol)
+  - [Display the HRC20 token balance](#display-the-hrc20-token-balance)
 - [Send the HRC20 token](#send-the-hrc20-token)
-- [Read the HRC20 token transfer amount in the harmony network](read-the-hrc20-token-transfer-amount-in-the-harmony-network)
+- [Read the HRC20 token transfer amount in the harmony network](#read-the-hrc20-token-transfer-amount-in-the-harmony-network)
 
 ---
 
