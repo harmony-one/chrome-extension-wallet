@@ -21,7 +21,7 @@
         <span>From</span>
         <span class="address__name">{{ txnParams.from }}</span>
       </p>
-      <p class="txRow" v-if="!isWithdrawal">
+      <p class="txRow" v-if="!isWithdrawal && txnParams.to !== '0x'">
         <span>To</span>
         <span class="address__name">{{ txnParams.to }}</span>
       </p>
