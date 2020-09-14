@@ -47,7 +47,7 @@ There are 9 smart contract functions in the HRC20 Contract.
 - symbol
 - allowance
 
-We need only `symbol`, `balanceOf`, `decimals`, `transfer` functions for hrc20 wallet.
+We need only `symbol`, `balanceOf`, `decimals`, and `transfer` function for hrc20 wallet.
 
 ### Get the hrc20 token symbol
 
