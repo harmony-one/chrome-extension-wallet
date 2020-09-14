@@ -33,7 +33,7 @@ window.addEventListener(
 // Listen message from extension background page/popup and re-send to current window (dashboard page)
 chrome.runtime.onMessage.addListener(async (message) => {
   if (!message || !message.type || message.type !== HARMONY_RESPONSE_TYPE) {
-    return true;
+    return false;
   }
   window.dispatchEvent(
     new CustomEvent(ONEWALLET_SERVICE_EVENT_RESPONSE, {

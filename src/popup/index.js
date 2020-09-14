@@ -137,7 +137,7 @@ storage.getValue("meta").then(({ meta }) => {
 });
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  const { type, action, payload } = message;
+  const { type, action } = message;
   if (!type || type !== FROM_BACK_TO_POPUP) {
     return false;
   }

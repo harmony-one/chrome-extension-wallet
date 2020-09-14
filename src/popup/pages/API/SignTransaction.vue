@@ -12,10 +12,10 @@
       <div class="sign__address">{{ wallet.address }}</div>
       <p class="txRow">
         <span class="action_caption">{{ displayAction }}</span>
-        <span v-if="type === 'SEND'"
-          >{{ txnParams.fromShard }} Shard ->
-          {{ txnParams.toShard }} Shard</span
-        >
+        <span v-if="type === 'SEND'">
+          {{ txnParams.fromShard }} Shard ->
+          {{ txnParams.toShard }} Shard
+        </span>
       </p>
       <p class="txRow">
         <span>From</span>
@@ -81,12 +81,7 @@
       </div>
       <button class="flex mt-20" @click="lockReject">OK</button>
     </div>
-    <notifications
-      group="notify"
-      width="250"
-      :max="4"
-      class="notifiaction-container"
-    />
+    <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
   </main>
 </template>
 <script>
@@ -100,7 +95,7 @@ import {
 } from "../../../services/APIService";
 import { Unit } from "@harmony-js/utils";
 import { Account } from "@harmony-js/account";
-import { getHarmonyApp, isLedgerLocked } from "../../../services/LedgerService";
+import { getHarmonyApp } from "../../../services/LedgerService";
 import _ from "lodash";
 import {
   TRANSACTIONTYPE,
@@ -110,7 +105,6 @@ import {
   THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
   THIRDPARTY_SIGNATURE_KEY_REJECT_RESPONSE,
   WALLET_LOCKED,
-  LEDGER_LOCKED,
   LEDGER_CONFIRM_PREPARE,
 } from "../../../types";
 
