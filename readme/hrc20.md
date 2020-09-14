@@ -85,6 +85,117 @@ let balance = BigNumber(weiBalance)
 
 ## Send the HRC20 token
 
-Call the `transfer` function to send the hrc20 tokens
+1. Convert the amount to wei amount and sign the transaction
 
-1.
+```javascript
+harmony.wallet.addByPrivateKey(privateKey); //privateKey is your wallet's privatekey
+const weiAmount = new BN(
+  new BigNumber(amount).multipliedBy(Math.pow(10, decimals)).toFixed(),
+  10
+);
+```
+
+2. Call the `transfer` function to send the hrc20 tokens
+
+```javascript
+await instance.methods
+  .transfer(toHex, weiAmount)
+  .send({
+    from,
+    gasLimit, //default gaslimit for Hrc20 transaction is 250000
+    gasPrice: new harmony.utils.Unit(gasPrice).asGwei().toWei(),
+  })
+  .on("transactionHash", (_hash) => {
+    //_hash: transaction hash
+  })
+  .on("receipt", (_receipt) => {
+    //_receipt: transaction receipt
+  })
+  .on("confirmation", (confirmation) => {
+    if (confirmation !== "CONFIRMED") {
+      reject("Gas fee is too low or something is wrong."); //transaction failed
+    }
+  })
+  .on("error", (error) => {
+    reject(error); //transaction failed
+  });
+```
+
+---
+
+## Read the HRC20 token transfer amount in the harmony network
+
+1. Call the rpc api [hmy_getTransactionsHistory](https://docs.harmony.one/home/developers/api/methods/transaction-related-methods/hmy_gettransactionshistory) to read the transaction history. You can see the sample response of the api in the [docs.harmony.one](https://docs.harmony.one/home/developers/api/methods/transaction-related-methods/hmy_gettransactionshistoryharmony)
+
+```javascript
+const ret = await harmony.messenger.send(
+  "hmy_getTransactionsHistory",
+  [
+    {
+      address, //your wallet's address
+      pageIndex, //e.g, 0
+      pageSize, //e.g, 100
+      fullTx: true,
+      txType: "ALL",
+      order, //e.g, "DESC"
+    },
+  ],
+  harmony.messenger.chainPrefix,
+  harmony.messenger.getCurrentShardID()
+);
+return ret.result; //transaction list
+```
+
+2. Decode the transaction data and display the amount
+
+- Read the smart contract from `to` address
+
+```javascript
+import { fromBech32 } from "@harmony-js/crypto";
+
+const instance = harmony.contracts.createContract(abi, to); //to address of transaction
+```
+
+- Decode the transaction data
+
+```javascript
+export async function decodeInput(contract, hexData) {
+  try {
+    let decodeParameters = (inputs, data) => {
+      if (0 == inputs.length) return [];
+      let params = contract.abiCoder.decodeParameters(inputs, data);
+      params.length = inputs.length;
+      return Array.from(params);
+    };
+
+    const no0x = hexData.startsWith("0x") ? hexData.slice(2) : hexData;
+    const sig = no0x.slice(0, 8).toLowerCase();
+    const method = contract.abiModel.getMethod("0x" + sig);
+    if (!method) return false;
+
+    const params = decodeParameters(method.inputs, "0x" + no0x.slice(8));
+    const decimals = await contract.methods.decimals().call();
+    const symbol = await contract.methods.symbol().call();
+    return {
+      to: toBech32(params[0]),
+      amount: new BigNumber(params[1])
+        .dividedBy(Math.pow(10, new BN(decimals, 16).toNumber()))
+        .toString(),
+      symbol,
+    };
+  } catch (err) {
+    return false;
+  }
+}
+```
+
+```javascript
+const params = await decodeInput(
+  instance,
+  txn.input //txn.input is data of transaction
+);
+```
+
+`decodeInput` function returns `to`, `amount` //weiAmount, `symbol` if it is a hrc20 transaction, otherwise it returns `false`.
+
+You can display the transaction history with these values.
