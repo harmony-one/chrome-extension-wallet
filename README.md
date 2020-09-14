@@ -1,4 +1,4 @@
-# Features
+## Features
 
 - [x] Create/Import the wallet with Mnemonic, Private Key and Harmony keystore
 - [x] Deposit with the QR code.
@@ -20,7 +20,7 @@
 - [ ] View the USD balance on the main page
 - [ ] View the recent transaction history on the home page
 
-# Development
+## Development
 
 - Install [node.js](https://nodejs.org/) and npm
 - Install dependencies :
@@ -49,9 +49,9 @@
 - Go to Chrome Extensions page and activate the Developer Mode.
 - Click `Load Unpacked` button and point it to `/dist` folder.
 
-# Documentation
+---
 
-## Table of Contents
+## Documentation
 
 - [Onewallet API documentation](/readme/api.md)
 - [HRC20 documentation](/readme/hrc20.md)
