@@ -1,4 +1,4 @@
-import HRCTokens from "../../../services/hrc20/config";
+import HRCTokens from "services/hrc20/config";
 import _ from "lodash";
 
 export default {

@@ -1,5 +1,5 @@
 import { arrayify, hexlify, stripZeros, encode } from "@harmony-js/crypto";
-import { LEDGER_CONFIRM_REJECT, LEDGER_LOCKED } from "../../types";
+import { LEDGER_CONFIRM_REJECT, LEDGER_LOCKED } from "~/types";
 const { hexToNumber } = require("@harmony-js/utils");
 
 const CLA = 0xe0;

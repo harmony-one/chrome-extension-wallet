@@ -1,4 +1,4 @@
-import { decryptString } from "../../services/CryptoService";
+import { decryptString } from "services/CryptoService";
 export const getPinCode = (state, getters) => {
   try {
     const { auth } = state.settings;

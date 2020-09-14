@@ -37,7 +37,7 @@
         </div>
         <div class="invoice__row">
           <span>Gas Limit</span>
-          <span>{{ txnParams.gasLimit }} Wei</span>
+          <span>{{ txnParams.gasLimit }}</span>
         </div>
         <div v-if="isDataExist">
           <p class="data_caption">Data</p>
@@ -85,17 +85,17 @@
   </main>
 </template>
 <script>
-import { decryptKeyStore } from "../../../services/AccountService";
+import { decryptKeyStore } from "services/AccountService";
 import { mapState, mapGetters } from "vuex";
 import {
   createTransaction,
   createDelegateTransaction,
   createUndelegateTransaction,
   createRewardsTransaction,
-} from "../../../services/APIService";
+} from "services/APIService";
 import { Unit } from "@harmony-js/utils";
 import { Account } from "@harmony-js/account";
-import { getHarmonyApp } from "../../../services/LedgerService";
+import { getHarmonyApp } from "services/LedgerService";
 import _ from "lodash";
 import {
   TRANSACTIONTYPE,
@@ -106,7 +106,7 @@ import {
   THIRDPARTY_SIGNATURE_KEY_REJECT_RESPONSE,
   WALLET_LOCKED,
   LEDGER_CONFIRM_PREPARE,
-} from "../../../types";
+} from "~/types";
 
 export default {
   data: () => ({

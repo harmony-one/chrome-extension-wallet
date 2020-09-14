@@ -1,5 +1,5 @@
 import { mapState } from "vuex";
-import { getTokenBalance } from "../../services/Hrc20Service";
+import { getTokenBalance } from "services/Hrc20Service";
 import BigNumber from "bignumber.js";
 import _ from "lodash";
 

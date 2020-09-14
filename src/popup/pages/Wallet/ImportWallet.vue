@@ -55,15 +55,8 @@
             v-show="wallets.accounts.length > 0"
             class="outline"
             @click="$router.push('/home')"
-          >
-            Cancel
-          </button>
-          <button
-            @click="importKey"
-            :class="!wallets.accounts.length ? 'flex' : ''"
-          >
-            Import
-          </button>
+          >Cancel</button>
+          <button @click="importKey" :class="!wallets.accounts.length ? 'flex' : ''">Import</button>
         </div>
       </div>
       <div v-else-if="scene === 2">
@@ -123,20 +116,13 @@
         </div>
         <div class="button-group">
           <button class="outline" @click="() => (scene = 1)">Back</button>
-          <button @click="importAcc" :disabled="!name || !password">
-            Next
-          </button>
+          <button @click="importAcc" :disabled="!name || !password">Next</button>
         </div>
       </div>
       <div v-else>
         <pincode-modal @success="addAcc" :onBack="() => (scene = 2)" />
       </div>
-      <notifications
-        group="notify"
-        width="250"
-        :max="2"
-        class="notifiaction-container"
-      />
+      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
     </main>
   </div>
 </template>
@@ -151,7 +137,7 @@ import {
   createAccountFromMnemonic,
   decryptKeyStoreFromFile,
   validateMnemonic,
-} from "../../../services/AccountService";
+} from "services/AccountService";
 
 export default {
   data: () => ({
@@ -208,7 +194,7 @@ export default {
           const _this = this;
           await new Promise((resolve, reject) => {
             let reader = new window.FileReader();
-            reader.onload = function(event) {
+            reader.onload = function (event) {
               try {
                 _this.keyFromFile = JSON.parse(event.target.result);
                 resolve();
@@ -232,8 +218,8 @@ export default {
       alert(
         "Your account is imported successfully. To continue, close this tab and use the extension."
       );
-      chrome.tabs.getCurrent(function(tab) {
-        chrome.tabs.remove(tab.id, function() {});
+      chrome.tabs.getCurrent(function (tab) {
+        chrome.tabs.remove(tab.id, function () {});
       });
     },
     async importAcc() {

@@ -38,9 +38,9 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import * as storage from "../../services/StorageService";
+import * as storage from "services/StorageService";
 import moment from "moment-timezone";
-const AppInfo = require("../../app.json");
+const AppInfo = require("~/app.json");
 export default {
   data: () => ({
     pin: "",

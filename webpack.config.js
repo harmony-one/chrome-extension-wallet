@@ -119,6 +119,11 @@ const config = {
   resolve: {
     alias: {
       vue$: "vue/dist/vue.esm.js",
+      "~": path.resolve("./src"),
+      mixins: path.resolve("./src/popup/mixins"),
+      services: path.resolve("./src/services"),
+      components: path.resolve("./src/popup/components"),
+      popup: path.resolve("./src/popup"),
     },
     extensions: ["*", ".js", ".ts", ".tsx", ".vue", ".json"],
   },

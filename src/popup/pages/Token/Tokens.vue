@@ -6,42 +6,30 @@
         <div
           v-if="!tokenArrayOfNetwork.length || account.shard"
           class="message-empty"
-        >
-          No tokens found
-        </div>
+        >No tokens found</div>
 
         <div v-else>
-          <div
-            class="token-row"
-            v-for="(token, index) in tokenArrayOfNetwork"
-            :key="index"
-          >
+          <div class="token-row" v-for="(token, index) in tokenArrayOfNetwork" :key="index">
             <span class="token-name">{{ compressSymbol(token.symbol) }}</span>
             <div v-if="!editing">
-              <moon-loader
-                :loading="token.isLoading"
-                color="#0a93eb"
-                size="26px"
-              />
+              <moon-loader :loading="token.isLoading" color="#0a93eb" size="26px" />
               <div class="token-box" v-if="!token.isLoading">
-                <span class="token-balance">{{
+                <span class="token-balance">
+                  {{
                   formatBalance(token.balance, token.decimals)
-                }}</span>
+                  }}
+                </span>
                 <button
                   class="token_send_but"
                   :disabled="token.balance <= 0"
                   @click="sendToken(token)"
                   v-tooltip.top="'Send token'"
-                >
-                  Send
-                </button>
+                >Send</button>
               </div>
             </div>
             <div v-else class="token-edit-box">
               <button class="edit_but" @click="editToken(token)">Edit</button>
-              <button class="delete_but" @click="deleteToken(token)">
-                Delete
-              </button>
+              <button class="delete_but" @click="deleteToken(token)">Delete</button>
             </div>
           </div>
         </div>
@@ -65,18 +53,10 @@
           </button>
         </div>
         <div v-else>
-          <button @click="editStop" v-tooltip.top="'Finish editing'">
-            Done
-          </button>
+          <button @click="editStop" v-tooltip.top="'Finish editing'">Done</button>
         </div>
       </div>
-      <modal
-        name="modal-token-edit"
-        :adaptive="true"
-        transition="scale"
-        :width="250"
-        height="auto"
-      >
+      <modal name="modal-token-edit" :adaptive="true" transition="scale" :width="250" height="auto">
         <div class="modal-header">Change the token symbol</div>
         <div class="modal-body">
           <input
@@ -87,9 +67,7 @@
           />
         </div>
         <div class="modal-footer">
-          <div class="secondary" @click="$modal.hide('modal-token-edit')">
-            CLOSE
-          </div>
+          <div class="secondary" @click="$modal.hide('modal-token-edit')">CLOSE</div>
           <div class="primary" @click="saveTokenSymbol">SAVE</div>
         </div>
       </modal>
@@ -98,8 +76,8 @@
 </template>
 
 <script>
-import account from "../../mixins/account";
-import helper from "../../mixins/helper";
+import account from "mixins/account";
+import helper from "mixins/helper";
 import { mapState } from "vuex";
 import BigNumber from "bignumber.js";
 export default {

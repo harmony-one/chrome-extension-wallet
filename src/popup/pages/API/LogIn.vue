@@ -64,7 +64,7 @@ import {
   WALLET_LOCKED,
   UNKNOWN_ERROR,
   NO_ACCOUNTS_ERROR,
-} from "../../../types";
+} from "~/types";
 export default {
   data: () => ({
     selected: -1,

@@ -54,7 +54,7 @@
 
 <script>
 import { mapState } from "vuex";
-import { connectLedgerApp } from "../../../services/LedgerService";
+import { connectLedgerApp } from "services/LedgerService";
 
 export default {
   data: () => ({
@@ -63,11 +63,11 @@ export default {
     address: "",
     error: {
       show: false,
-      message: ""
-    }
+      message: "",
+    },
   }),
   computed: {
-    ...mapState(["wallets"])
+    ...mapState(["wallets"]),
   },
   methods: {
     nextToPincode() {
@@ -78,32 +78,32 @@ export default {
         isLedger: true,
         name: this.name,
         address: this.address,
-        keystore: ""
+        keystore: "",
       };
 
       this.$store.commit("wallets/addAccount", wallet);
       alert(
         "Your ledger account is loaded. To continue, close this tab and use the extension."
       );
-      chrome.tabs.getCurrent(function(tab) {
-        chrome.tabs.remove(tab.id, function() {});
+      chrome.tabs.getCurrent(function (tab) {
+        chrome.tabs.remove(tab.id, function () {});
       });
     },
     connect() {
       connectLedgerApp()
-        .then(address => {
+        .then((address) => {
           this.address = address;
           this.scene = 2;
         })
-        .catch(err => {
+        .catch((err) => {
           this.$notify({
             group: "notify",
             type: "error",
-            text: err
+            text: err,
           });
         });
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>

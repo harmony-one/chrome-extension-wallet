@@ -1,4 +1,4 @@
-import store from "../popup/store";
+import store from "popup/store";
 import {
   encryptPhrase,
   getAddress,

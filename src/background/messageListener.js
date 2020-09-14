@@ -1,6 +1,6 @@
-import apiService from "../services/APIService";
-import { msgToContentScript } from "../services/APIService";
-import * as storage from "../services/StorageService";
+import apiService from "services/APIService";
+import { msgToContentScript } from "services/APIService";
+import * as storage from "services/StorageService";
 import {
   HARMONY_REQUEST_TYPE,
   HARMONY_RESPONSE_TYPE,
@@ -17,7 +17,7 @@ import {
   THIRDPARTY_SIGN_REQUEST_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
-} from "../types";
+} from "~/types";
 
 function externalMessageListener(message, sender, sendResponse) {
   const { messageSource, payload } = message;

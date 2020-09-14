@@ -19,7 +19,7 @@
 import { mapState } from "vuex";
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
-import { APP_CONNECT } from "../types";
+import { APP_CONNECT } from "~/types";
 export default {
   data: () => ({
     transitionName: "none",

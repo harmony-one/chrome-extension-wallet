@@ -5,10 +5,10 @@ import {
   HARMONY_RESPONSE_TYPE,
   FROM_BACK_TO_POPUP,
   CLOSE_WINDOW,
-} from "../types";
+} from "~/types";
 import * as storage from "./StorageService";
 import _ from "lodash";
-import Config from "../config";
+import Config from "~/config";
 import { Harmony } from "@harmony-js/core";
 import { Unit } from "@harmony-js/utils";
 
