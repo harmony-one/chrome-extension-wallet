@@ -19,12 +19,12 @@ import Tooltip from "vue-directive-tooltip";
 import "vue-directive-tooltip/dist/vueDirectiveTooltip.css";
 
 import BigNumber from "bignumber.js";
-import Config from "../config";
+import Config from "~/config";
 
-import * as storage from "../services/StorageService";
-import AppInfo from "../app.json";
+import * as storage from "services/StorageService";
+import AppInfo from "~/app.json";
 
-import { CLOSE_WINDOW, FROM_BACK_TO_POPUP } from "../types";
+import { CLOSE_WINDOW, FROM_BACK_TO_POPUP } from "~/types";
 
 import "./css/icons.less";
 import "./css/normalize.scss";

@@ -65,8 +65,8 @@ import {
   getTokenSymbol,
   getTokenDecimals,
   getContractInstance,
-} from "../../../services/Hrc20Service";
-import token from "../../mixins/token";
+} from "services/Hrc20Service";
+import token from "mixins/token";
 export default {
   data: () => ({
     symbol: "",

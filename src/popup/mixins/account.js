@@ -1,5 +1,5 @@
 import { mapState } from "vuex";
-import { getBalance, getShardInfo } from "../../services/AccountService";
+import { getBalance, getShardInfo } from "services/AccountService";
 import { Unit } from "@harmony-js/utils";
 import token from "./token";
 export default {

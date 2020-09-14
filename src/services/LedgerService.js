@@ -2,8 +2,8 @@ import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import HarmonyApp, { SW_ERR } from "./ledger/LedgerSDK";
 import { getHarmony } from "./AccountService";
 import { getContractInstance, oneToHexAddress } from "./Hrc20Service";
-import store from "../popup/store";
-import { LEDGER_LOCKED } from "../types";
+import store from "popup/store";
+import { LEDGER_LOCKED } from "~/types";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import { stringToHex } from "./CryptoService";
 

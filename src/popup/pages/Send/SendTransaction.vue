@@ -207,21 +207,21 @@ import {
   transferOne,
   getNetworkLink,
   sendTransction,
-} from "../../../services/AccountService";
-import { sendToken } from "../../../services/Hrc20Service";
+} from "services/AccountService";
+import { sendToken } from "services/Hrc20Service";
 import { isValidAddress } from "@harmony-js/utils";
-import account from "../../mixins/account";
-import helper from "../../mixins/helper";
+import account from "mixins/account";
+import helper from "mixins/helper";
 import {
   signTransactionWithLedger,
   signHRCTransactionWithLedger,
-} from "../../../services/LedgerService";
+} from "services/LedgerService";
 import {
   LEDGER_CONFIRM_PREPARE,
   LEDGER_CONFIRM_SUCCESS,
   LEDGER_CONFIRM_REJECT,
   LEDGER_LOCKED,
-} from "../../../types";
+} from "~/types";
 
 export default {
   name: "send-transaction",

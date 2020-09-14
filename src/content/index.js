@@ -3,7 +3,7 @@ import {
   HARMONY_RESPONSE_TYPE,
   ONEWALLET_SERVICE_EVENT_REQUEST,
   ONEWALLET_SERVICE_EVENT_RESPONSE,
-} from "../types";
+} from "~/types";
 
 window.onerror = function(message, error) {
   console.error("One Wallet service call failed,", message, ", error: ", error);

@@ -7,7 +7,7 @@
 <script>
 import SendTransaction from "./SendTransaction";
 import _ from "lodash";
-import token from "../../mixins/token";
+import token from "mixins/token";
 export default {
   name: "send-token",
   data: () => ({

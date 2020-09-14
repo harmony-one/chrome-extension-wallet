@@ -3,7 +3,7 @@
 </template>
 <script>
 import { mapState, mapGetters } from "vuex";
-import * as storage from "../services/StorageService";
+import * as storage from "~/services/StorageService";
 export default {
   computed: {
     ...mapGetters(["getPinCode"]),
