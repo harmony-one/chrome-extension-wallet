@@ -20,13 +20,6 @@
 - [ ] View the USD balance on the main page
 - [ ] View the recent transaction history on the home page
 
-# Documentation
-
-## Table of Contents
-
-- [Onewallet API documentation](/readme/api.md)
-- [HRC20 documentation](/readme/hrc20.md)
-
 # Development
 
 - Install [node.js](https://nodejs.org/) and npm
@@ -55,3 +48,10 @@
 - Uncompressed build can be found in `/dist` folder, compressed build is `onewallet.zip`.
 - Go to Chrome Extensions page and activate the Developer Mode.
 - Click `Load Unpacked` button and point it to `/dist` folder.
+
+# Documentation
+
+## Table of Contents
+
+- [Onewallet API documentation](/readme/api.md)
+- [HRC20 documentation](/readme/hrc20.md)
