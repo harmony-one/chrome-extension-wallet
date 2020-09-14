@@ -196,6 +196,6 @@ const params = await decodeInput(
 );
 ```
 
-`decodeInput` function returns `to`, `amount` //weiAmount, `symbol` if it is a hrc20 transaction, otherwise it returns `false`.
+`decodeInput` function returns `to`, `amount` //weiAmount, and `symbol` if it is a hrc20 transaction, otherwise it returns `false`.
 
 You can display the transaction history with these values.
