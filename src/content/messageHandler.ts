@@ -66,7 +66,7 @@ export const getTxnInfo = (transaction: any) =>
           type: TRANSACTIONTYPE.SEND,
           txnInfo: {
             from: new HarmonyAddress(txnParams.from).bech32,
-            to: new HarmonyAddress(txnParams.to).bech32,
+            to: txnParams.to === "0x"? "0x": new HarmonyAddress(txnParams.to).bech32,
             amount: Unit.Wei(txnParams.value).toEther(),
             gasLimit: Unit.Wei(txnParams.gasLimit).toWeiString(),
             gasPrice: Unit.Wei(txnParams.gasPrice).toGwei(),
