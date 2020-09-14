@@ -28,7 +28,7 @@ interface Network {
 }
 
 class WalletProvider {
-  isOneWallet: Boolean;
+  isOneWallet: boolean;
   version: string;
   network: Network;
   constructor() {

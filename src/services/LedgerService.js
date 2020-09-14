@@ -98,37 +98,7 @@ export async function connectLedgerApp() {
 
   return response.one_address.toString();
 }
-export async function isLedgerLocked() {
-  try {
-    const app = await getHarmonyApp();
-    let response = await app.publicKey(true);
-    if (response.return_code === SW_ERR) return true;
-    return false;
-  } catch (err) {
-    console.error(err);
-    return true;
-  }
-}
-/*
-export async function showLedgerAddress() {
-  const app = await getHarmonyApp();
-  let response = await app.publicKey(false);
 
-  if (response.return_code === SW_ERR) {
-    throw new Error("Address Rejected");
-  }
-
-  if (!response.one_address) {
-    throw new Error("Address Not Found");
-  }
-
-  if (response.one_address.indexOf(`1`) === -1) {
-    throw new Error("Not A Valid Bech32 Address");
-  }
-
-  return response.one_address.toString();
-}
-*/
 function isWindows(platform) {
   return platform.indexOf("Win") > -1;
 }
