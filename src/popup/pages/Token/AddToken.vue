@@ -117,6 +117,14 @@ export default {
     },
     async createToken() {
       try {
+        if (this.precision < 0 || this.precision > 36) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Decimals must be at least 0, and not over 36",
+          });
+          return;
+        }
         if (!this.isValidAddress(this.contractAddress)) {
           this.$notify({
             group: "notify",

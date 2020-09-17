@@ -24,6 +24,8 @@ module.exports = {
     {
       matches: ["file://*/*", "http://*/*", "https://*/*"],
       js: ["content-script.js"],
+      run_at: "document_start",
+      all_frames: true,
     },
   ],
   manifest_version: 2,

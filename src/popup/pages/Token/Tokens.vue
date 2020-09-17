@@ -16,7 +16,7 @@
               <div class="token-box" v-if="!token.isLoading">
                 <span class="token-balance">
                   {{
-                  formatBalance(token.balance, token.decimals)
+                  formatBalance(token.balance, Math.min(4, token.decimals))
                   }}
                 </span>
                 <button
@@ -99,9 +99,6 @@ export default {
     this.$forceUpdate();
   },
   methods: {
-    formatBalance(balance, decimals) {
-      return new BigNumber(balance).toFormat(Math.min(4, decimals));
-    },
     saveTokenSymbol() {
       this.$modal.hide("modal-token-edit");
       this.$store.dispatch("hrc20/editToken", {
