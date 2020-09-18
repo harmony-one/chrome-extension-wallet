@@ -61,7 +61,7 @@
                 class="maximum-label"
                 v-show="!loading"
                 @click="setMaxBalance"
-              >Maximum: {{ getMaxBalance + " " + selectedToken.symbol }}</div>
+              >Max: {{ formatBalance(getMaxBalance, selectedToken.decimals) + " " + selectedToken.symbol }}</div>
             </label>
             <label v-if="!isToken" class="input-label token">
               Token
@@ -273,16 +273,19 @@ export default {
     },
     getTotal() {
       if (!this.isHRCToken)
-        return new BigNumber(this.amount).plus(this.getGasFee).toFixed(8);
+        return new BigNumber(this.amount)
+          .plus(this.getGasFee)
+          .toFixed(this.selectedToken.decimals);
       else return this.amount;
     },
     getOneBalance() {
-      return new BigNumber(this.account.balance).toFixed(8);
+      return new BigNumber(this.account.balance).toFixed(
+        this.selectedToken.decimals
+      );
     },
     getMaxBalance() {
       let max;
-      if (!this.isHRCToken)
-        max = new BigNumber(this.account.balance).toFixed(8);
+      if (!this.isHRCToken) max = this.account.balance;
       else {
         max = this.getTokenBalance(this.selectedToken);
       }
@@ -314,7 +317,7 @@ export default {
     amount() {
       if (
         !RegExp(
-          `^[0-9]*[.]?[0-9]{0,${Math.min(8, this.selectedToken.decimals)}}$`,
+          `^[0-9]*[.]?[0-9]{0,${this.selectedToken.decimals}}$`,
           "g"
         ).test(this.amount)
       )

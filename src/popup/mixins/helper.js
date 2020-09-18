@@ -1,3 +1,4 @@
+import BigNumber from "bignumber.js";
 export default {
   computed: {
     isExtendedView() {
@@ -14,6 +15,9 @@ export default {
       } else {
         this.$router.push(route);
       }
+    },
+    formatBalance(balance, decimal) {
+      return new BigNumber(balance).toFormat(Math.min(decimal, 36));
     },
     compressAddress(address, leftOffset = 15, RightOffet = 5) {
       return (

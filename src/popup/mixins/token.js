@@ -49,7 +49,7 @@ export default {
       if (weiBalance === null) return;
       let balance = BigNumber(weiBalance)
         .dividedBy(Math.pow(10, decimals))
-        .toFixed(8);
+        .toFixed();
       this.$store.dispatch("hrc20/loadTokenBalance", {
         network: this.network.name,
         token,

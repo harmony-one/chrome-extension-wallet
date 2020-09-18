@@ -17,7 +17,7 @@
         <div class="box-label">Account Balance</div>
 
         <div class="box-balance">
-          {{ formatBalance(account.balance) }}
+          {{ formatBalance(account.balance, 4) }}
           <span class="box-balance-code">ONE</span>
         </div>
 
@@ -92,9 +92,6 @@ export default {
   },
 
   methods: {
-    formatBalance(balance) {
-      return new BigNumber(balance).toFormat(4);
-    },
     onClickAccount() {
       this.$copyText(this.address).then(() => {
         this.$notify({

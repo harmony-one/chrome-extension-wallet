@@ -44,7 +44,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
 });
 
 try {
-  const node = document.getElementsByTagName("body")[0];
+  const node = document.head || document.documentElement;
   const script = document.createElement("script");
   script.setAttribute("type", "text/javascript");
   script.setAttribute("src", chrome.extension.getURL("inject-script.js"));
