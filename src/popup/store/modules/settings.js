@@ -16,6 +16,24 @@ export default {
       attempts: 5,
       countdown: 60, //sec, delay 1min when auth fails
     },
+    contacts: [
+      {
+        name: "Derek",
+        address: "one1dpqtyseafx7uspdpf66mgtr3zvhxm3z220egay",
+      },
+      {
+        name: "mxc",
+        address: "one1crz0g3jmphanhzught52pq0uak7v5yhdn8axr9",
+      },
+      {
+        name: "h20 minter",
+        address: "one18t4yj4fuutj83uwqckkvxp9gfa0568uc48ggj7",
+      },
+      {
+        name: "busd minter",
+        address: "one1p6wcwnajxc208uxpdlx9sqktt6t8kk8nw9hshf",
+      },
+    ],
   },
   mutations: {
     setPincode(state, payload) {
@@ -40,8 +58,30 @@ export default {
       state.auth.attempts = 5;
       state.auth.countdown = 60;
     },
+    setContacts(state, payload) {
+      state.contacts = [...payload];
+    },
   },
   actions: {
+    addContact({ commit, state }, payload) {
+      const contactsArray = state.contacts;
+      contactsArray.push(payload);
+      commit("setContacts", contactsArray);
+    },
+    editContact({ commit, state }, payload) {
+      const contactsArray = state.contacts;
+      const index = _.findIndex(contactsArray, {
+        address: payload.address,
+      });
+      if (index < 0) return;
+      contactsArray[index] = { ...payload };
+      commit("setContacts", contactsArray);
+    },
+    deleteContact({ commit, state }, payload) {
+      const contactsArray = state.contacts;
+      _.remove(contactsArray, { aaddress: payload.address });
+      commit("setContacts", contactsArray);
+    },
     setPincode({ commit }, payload) {
       try {
         const salt = uuidv4().replace(/-/g, "");
