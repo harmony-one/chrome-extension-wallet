@@ -24,12 +24,17 @@
             v-show="wallets.accounts.length > 0"
             class="outline"
             @click="$router.push('/home')"
-          >Cancel</button>
+          >
+            Cancel
+          </button>
           <button
             @click="createName"
+            class="primary"
             :class="!wallets.accounts.length ? 'flex' : ''"
             :disabled="!name"
-          >Create</button>
+          >
+            Create
+          </button>
         </div>
       </div>
       <div v-else-if="scene === 2">
@@ -57,7 +62,9 @@
         </label>
         <label class="input-label">
           Seed Phrase
-          <a class="copy-tag" @click.prevent="copyToClipboard">(Click here to copy)</a>
+          <a class="copy-tag" @click.prevent="copyToClipboard"
+            >(Click here to copy)</a
+          >
           <textarea
             class="input-field"
             name="seed_phrase"
@@ -67,10 +74,14 @@
           />
         </label>
         <input type="checkbox" id="seedcheck" :value="agree" v-model="agree" />
-        <label class="check-label" for="seedcheck">I understand that lost seeds cannot be recovered.</label>
+        <label class="check-label" for="seedcheck"
+          >I understand that lost seeds cannot be recovered.</label
+        >
         <div class="button-group">
           <button class="outline" @click="() => (scene = 1)">Back</button>
-          <button @click="confirmPassword" :disabled="!agree">Next</button>
+          <button class="primary" @click="confirmPassword" :disabled="!agree">
+            Next
+          </button>
         </div>
       </div>
       <div v-else-if="scene === 3">
@@ -79,7 +90,12 @@
       <div v-else>
         <pincode-modal @success="addAccount" :onBack="() => (scene = 3)" />
       </div>
-      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -115,8 +131,8 @@ export default {
       alert(
         "Your account is created successfully. To continue, close this tab and use the extension."
       );
-      chrome.tabs.getCurrent(function (tab) {
-        chrome.tabs.remove(tab.id, function () {});
+      chrome.tabs.getCurrent(function(tab) {
+        chrome.tabs.remove(tab.id, function() {});
       });
     },
     async confirmPassword() {

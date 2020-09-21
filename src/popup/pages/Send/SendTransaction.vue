@@ -16,31 +16,48 @@
             :class="[message.type]"
             @click="onMessageClick"
           >
-            <span
-              v-if="message.type === 'success'"
-            >Transaction Succeed: Click here to see the transaction</span>
+            <span v-if="message.type === 'success'"
+              >Transaction Succeed: Click here to see the transaction</span
+            >
             <span v-else>{{ message.text }}</span>
           </div>
           <div :class="{ row: !isToken }">
             <label class="input-label" :class="{ recipient: !isToken }">
               Recipient Address
-              <input
-                class="input-field"
-                type="text"
-                name="address"
-                ref="address"
-                placeholder="Recipient Address"
+              <v-select
+                taggable
                 v-model="recipient"
+                placeholder="Select the recipient"
+                :getOptionLabel="
+                  (option) => `${option.name ? option.name : option.address}`
+                "
+                :options="contacts"
+                :create-option="
+                  (address) => ({
+                    name: '',
+                    address,
+                  })
+                "
+                :reduce="(item) => ({ name: item.name, address: item.address })"
               />
             </label>
-            <label v-if="!isToken" class="input-label shard" :class="{ disabled: isHRCToken }">
+            <label
+              v-if="!isToken"
+              class="input-label shard"
+              :class="{ disabled: isHRCToken }"
+            >
               To Shard
-              <select class="input-field" v-model="toShard" :disabled="isHRCToken">
+              <select
+                class="input-field"
+                v-model="toShard"
+                :disabled="isHRCToken"
+              >
                 <option
                   v-for="shard in account.shardArray"
                   :key="shard.shardID"
                   :value="shard.shardID"
-                >{{ shard.shardID }}</option>
+                  >{{ shard.shardID }}</option
+                >
               </select>
             </label>
           </div>
@@ -61,7 +78,14 @@
                 class="maximum-label"
                 v-show="!loading"
                 @click="setMaxBalance"
-              >Max: {{ formatBalance(getMaxBalance, selectedToken.decimals) + " " + selectedToken.symbol }}</div>
+              >
+                Max:
+                {{
+                  formatBalance(getMaxBalance, selectedToken.decimals) +
+                    " " +
+                    selectedToken.symbol
+                }}
+              </div>
             </label>
             <label v-if="!isToken" class="input-label token">
               Token
@@ -70,7 +94,8 @@
                   v-for="(token, index) in tokenList"
                   :key="index"
                   :value="token"
-                >{{ token.symbol }}</option>
+                  >{{ token.symbol }}</option
+                >
               </select>
             </label>
           </div>
@@ -121,7 +146,7 @@
               :disabled="isHRCToken"
             />
           </label>
-          <button class="flex" type="submit">Send</button>
+          <button class="primary flex" type="submit">Send</button>
         </form>
       </div>
       <!-- Approve Transaction Dialog -->
@@ -129,7 +154,9 @@
         <h3 class="center">Approve Transaction</h3>
         <p class="addressRow">
           From
-          <span class="address__name">{{ compressAddress(getFromAddress) }}</span>
+          <span class="address__name">{{
+            compressAddress(getFromAddress)
+          }}</span>
           of Shard
           <b>{{ fromShard }}</b>
         </p>
@@ -145,7 +172,9 @@
           </div>
           <div class="transaction__information">
             To
-            <span class="address__name">{{ compressAddress(recipient) }}</span>
+            <span class="address__name">{{
+              compressAddress(recipient.address)
+            }}</span>
             of Shard
             <b>{{ toShard }}</b>
           </div>
@@ -187,14 +216,29 @@
         </div>
         <div v-if="!wallet.isLedger" class="button-group">
           <button class="outline" @click="onBackClick()">Back</button>
-          <button @click="sendPayment" :disabled="!password">Approve</button>
+          <button class="primary" @click="sendPayment" :disabled="!password">
+            Approve
+          </button>
         </div>
         <div v-else class="footer">
-          <button v-if="ledgerError" @click="onBackClick()" class="flex">Retry</button>
-          <button v-else @click="onBackClick()" class="flex">Back</button>
+          <button
+            v-if="ledgerError"
+            @click="onBackClick()"
+            class="primary flex"
+          >
+            Retry
+          </button>
+          <button v-else @click="onBackClick()" class="primary flex">
+            Back
+          </button>
         </div>
       </div>
-      <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="4"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -242,7 +286,7 @@ export default {
     fromShard: 0,
     toShard: 0,
     tokenList: [],
-    recipient: "",
+    recipient: null,
     gasPrice: 1,
     gasLimit: 25000,
     inputData: "",
@@ -261,6 +305,7 @@ export default {
     ...mapState({
       wallet: (state) => state.wallets.active,
       loading: (state) => state.loading,
+      contacts: (state) => state.settings.contacts,
     }),
     getFromAddress() {
       return this.wallet.address;
@@ -325,6 +370,9 @@ export default {
     },
   },
   methods: {
+    nameWithAddress({ name, address }) {
+      return `${name} - ${address}`;
+    },
     setMaxBalance(e) {
       e.preventDefault();
       this.amount = this.getMaxBalance;
@@ -363,7 +411,7 @@ export default {
     initScene() {
       this.scene = 1;
       this.amount = 0;
-      this.recipient = "";
+      this.recipient = null;
       this.toShard = 0;
       this.password = "";
       this.ledgerError = false;
@@ -375,7 +423,7 @@ export default {
         if (this.isHRCToken) {
           signedRes = await signHRCTransactionWithLedger(
             this.address,
-            this.recipient,
+            this.recipient.address,
             this.amount,
             this.gasLimit,
             this.gasPrice,
@@ -384,7 +432,7 @@ export default {
           );
         } else {
           signedRes = await signTransactionWithLedger(
-            this.recipient,
+            this.recipient.address,
             this.fromShard,
             this.toShard,
             this.amount,
@@ -453,7 +501,7 @@ export default {
         let ret;
         if (!this.isHRCToken) {
           ret = await transferOne(
-            this.recipient,
+            this.recipient.address,
             this.fromShard,
             this.toShard,
             this.amount,
@@ -466,7 +514,7 @@ export default {
           //token transfer part
           ret = await sendToken(
             this.address,
-            this.recipient,
+            this.recipient.address,
             this.amount,
             privateKey,
             this.gasLimit,
@@ -508,7 +556,7 @@ export default {
     async showConfirmDialog() {
       this.message.show = false;
 
-      if (!isValidAddress(this.recipient)) {
+      if (!isValidAddress(this.recipient.address)) {
         this.showErrMessage("Invalid recipient address");
         return false;
       }

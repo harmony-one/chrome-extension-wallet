@@ -11,7 +11,9 @@
       </div>
       <div v-if="scene === 1">
         <h3>Connect a hardware wallet</h3>
-        <span class="form-label">Please plug in your Ledger Nano S and open the Harmony App.</span>
+        <span class="form-label"
+          >Please plug in your Ledger Nano S and open the Harmony App.</span
+        >
         <div class="wallet-group">
           <button class="but-ledger" @click="connect">
             <img src="images/ledger.svg" alt="Ledger" />
@@ -22,8 +24,16 @@
             v-show="wallets.accounts.length > 0"
             class="outline"
             @click="$router.push('/home')"
-          >Cancel</button>
-          <button :class="!wallets.accounts.length ? 'flex' : ''" @click="connect">Connect</button>
+          >
+            Cancel
+          </button>
+          <button
+            class="primary"
+            :class="!wallets.accounts.length ? 'flex' : ''"
+            @click="connect"
+          >
+            Connect
+          </button>
         </div>
       </div>
       <div v-else-if="scene === 2">
@@ -42,12 +52,23 @@
             v-on:keyup.enter="nextToPincode"
           />
         </label>
-        <button class="flex mt-20" :disabled="!name" @click="nextToPincode">Next</button>
+        <button
+          class="primary flex mt-20"
+          :disabled="!name"
+          @click="nextToPincode"
+        >
+          Next
+        </button>
       </div>
       <div v-else>
         <pincode-modal @success="createAccount" :onBack="() => (scene = 2)" />
       </div>
-      <notifications group="notify" width="250" :max="2" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -85,8 +106,8 @@ export default {
       alert(
         "Your ledger account is loaded. To continue, close this tab and use the extension."
       );
-      chrome.tabs.getCurrent(function (tab) {
-        chrome.tabs.remove(tab.id, function () {});
+      chrome.tabs.getCurrent(function(tab) {
+        chrome.tabs.remove(tab.id, function() {});
       });
     },
     connect() {

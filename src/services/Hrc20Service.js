@@ -2,7 +2,7 @@ import artifact from "./hrc20/artifacts/artifact.json";
 import { getNetworkLink, getHarmony } from "./AccountService";
 import BN from "bn.js";
 import BigNumber from "bignumber.js";
-import { toBech32 } from "@harmony-js/crypto";
+import { toBech32, fromBech32 } from "@harmony-js/crypto";
 
 export const oneToHexAddress = (address) =>
   getHarmony().crypto.getAddress(address).basicHex;
@@ -89,8 +89,9 @@ export async function sendToken(
   }
 }
 
-export async function decodeInput(contract, hexData) {
+export async function decodeInput(to, hexData) {
   try {
+    const contract = getContractInstance(fromBech32(to));
     let decodeParameters = (inputs, data) => {
       if (0 == inputs.length) return [];
       let params = contract.abiCoder.decodeParameters(inputs, data);

@@ -3,10 +3,14 @@
     <app-header subtitle="Contacts" backRoute="/settings" />
     <main class="main contact-page">
       <div class="contact-header">
-        <button class="contact-but" @click="showAddModal">Add</button>
+        <button class="primary contact-but" @click="showAddModal">Add</button>
         <div class="import-header">
-          <button class="contact-but" @click="importContact">Import</button>
-          <button class="contact-but" @click="exportContact">Export</button>
+          <button class="primary contact-but" @click="importContact">
+            Import
+          </button>
+          <button class="primary contact-but" @click="exportContact">
+            Export
+          </button>
         </div>
       </div>
       <div class="contact-body">
@@ -47,8 +51,16 @@
           />
         </div>
         <div class="modal-footer">
-          <div class="secondary" @click="$modal.hide('modal-contact-add')">CLOSE</div>
-          <div class="primary" @click="addContact" :class="{disabled: !newName || !newAddress}">ADD</div>
+          <div class="secondary" @click="$modal.hide('modal-contact-add')">
+            CLOSE
+          </div>
+          <div
+            class="primary"
+            @click="addContact"
+            :class="{ disabled: !newName || !newAddress }"
+          >
+            ADD
+          </div>
         </div>
       </modal>
       <modal
@@ -76,15 +88,24 @@
           />
         </div>
         <div class="modal-footer">
-          <div class="secondary" @click="$modal.hide('modal-contact-edit')">CLOSE</div>
+          <div class="secondary" @click="$modal.hide('modal-contact-edit')">
+            CLOSE
+          </div>
           <div
             class="primary"
             @click="saveContact"
-            :class="{disabled: !newName || !newAddress}"
-          >SAVE</div>
+            :class="{ disabled: !newName || !newAddress }"
+          >
+            SAVE
+          </div>
         </div>
       </modal>
-      <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
+      <notifications
+        group="notify"
+        width="250"
+        :max="4"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
