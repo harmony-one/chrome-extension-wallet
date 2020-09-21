@@ -19,19 +19,7 @@ export default {
     contacts: [
       {
         name: "Derek",
-        address: "one1dpqtyseafx7uspdpf66mgtr3zvhxm3z220egay",
-      },
-      {
-        name: "mxc",
-        address: "one1crz0g3jmphanhzught52pq0uak7v5yhdn8axr9",
-      },
-      {
-        name: "h20 minter",
-        address: "one18t4yj4fuutj83uwqckkvxp9gfa0568uc48ggj7",
-      },
-      {
-        name: "busd minter",
-        address: "one1p6wcwnajxc208uxpdlx9sqktt6t8kk8nw9hshf",
+        address: "one18xfcqu7jf0cq5apweyu5jxr30x9cvetegwqfss",
       },
     ],
   },

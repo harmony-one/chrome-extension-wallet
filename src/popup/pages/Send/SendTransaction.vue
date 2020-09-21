@@ -26,6 +26,7 @@
               Recipient Address
               <v-select
                 taggable
+                v-tooltip.top="'Press Enter to Select'"
                 v-model="recipient"
                 placeholder="Select the recipient"
                 :getOptionLabel="
@@ -233,6 +234,43 @@
           </button>
         </div>
       </div>
+      <modal
+        name="modal-contact-add"
+        :adaptive="true"
+        transition="scale"
+        :width="330"
+        height="auto"
+      >
+        <div class="modal-header">Add the Contact</div>
+        <div class="modal-body">
+          <input
+            type="text"
+            name="name"
+            v-model="newName"
+            ref="addName"
+            placeholder="Input the name"
+          />
+          <input
+            type="text"
+            name="address"
+            v-model="newAddress"
+            ref="addAddress"
+            placeholder="Input the address"
+          />
+        </div>
+        <div class="modal-footer">
+          <div class="secondary" @click="$modal.hide('modal-contact-add')">
+            CLOSE
+          </div>
+          <div
+            class="primary"
+            @click="addContact"
+            :class="{ disabled: !newName || !newAddress }"
+          >
+            ADD
+          </div>
+        </div>
+      </modal>
       <notifications
         group="notify"
         width="250"
@@ -286,6 +324,8 @@ export default {
     fromShard: 0,
     toShard: 0,
     tokenList: [],
+    newName: "",
+    newAddress: "",
     recipient: null,
     gasPrice: 1,
     gasLimit: 25000,
@@ -318,9 +358,7 @@ export default {
     },
     getTotal() {
       if (!this.isHRCToken)
-        return new BigNumber(this.amount)
-          .plus(this.getGasFee)
-          .toFixed(this.selectedToken.decimals);
+        return new BigNumber(this.amount).plus(this.getGasFee).toString();
       else return this.amount;
     },
     getOneBalance() {
@@ -370,9 +408,7 @@ export default {
     },
   },
   methods: {
-    nameWithAddress({ name, address }) {
-      return `${name} - ${address}`;
-    },
+    addContact() {},
     setMaxBalance(e) {
       e.preventDefault();
       this.amount = this.getMaxBalance;
@@ -555,7 +591,28 @@ export default {
     },
     async showConfirmDialog() {
       this.message.show = false;
-
+      if (!this.recipient.name) {
+        this.$modal.show("dialog", {
+          text:
+            "The address is not found in the contacts. Do you want to add this contact?",
+          buttons: [
+            {
+              title: "Cancel",
+              default: true,
+              handler: () => {
+                this.$modal.hide("dialog");
+              },
+            },
+            {
+              title: "Add",
+              handler: () => {
+                this.$modal.hide("dialog");
+                this.$modal.show("modal-contact-add");
+              },
+            },
+          ],
+        });
+      }
       if (!isValidAddress(this.recipient.address)) {
         this.showErrMessage("Invalid recipient address");
         return false;

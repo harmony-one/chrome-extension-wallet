@@ -59,6 +59,7 @@ export default {
   .contact-item-content {
     & > div:first-child {
       font-size: 16px;
+      word-break: break-all;
     }
     & > div:last-child {
       color: #aaa;
