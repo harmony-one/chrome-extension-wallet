@@ -65,21 +65,22 @@ export default {
   actions: {
     addContact({ commit, state }, payload) {
       const contactsArray = state.contacts;
-      contactsArray.push(payload);
+      const { name, address } = payload;
+      contactsArray.push({ name, address });
       commit("setContacts", contactsArray);
     },
     editContact({ commit, state }, payload) {
       const contactsArray = state.contacts;
-      const index = _.findIndex(contactsArray, {
-        address: payload.address,
-      });
+      const { index, name, address } = payload;
       if (index < 0) return;
-      contactsArray[index] = { ...payload };
+      contactsArray[index] = { name, address };
       commit("setContacts", contactsArray);
     },
     deleteContact({ commit, state }, payload) {
       const contactsArray = state.contacts;
-      _.remove(contactsArray, { aaddress: payload.address });
+      const index = payload;
+      if (index < 0) return;
+      contactsArray.splice(payload, 1);
       commit("setContacts", contactsArray);
     },
     setPincode({ commit }, payload) {

@@ -10,12 +10,15 @@
         </div>
       </div>
       <div class="contact-body">
-        <div v-for="item in contacts" :key="item.address">
+        <div v-if="!contacts.length" class="center-container">
+          <span>No contacts available</span>
+        </div>
+        <div v-for="(item, index) in contacts" :key="index">
           <ContactItem
             :name="item.name"
             :address="item.address"
-            :onEdit="() => editContact(item)"
-            :onDelete="() => deleteContact(item)"
+            :onEdit="() => editContact(index, item)"
+            :onDelete="() => deleteContact(index, item)"
           />
         </div>
       </div>
@@ -23,36 +26,65 @@
         name="modal-contact-add"
         :adaptive="true"
         transition="scale"
-        :width="250"
+        :width="330"
         height="auto"
       >
         <div class="modal-header">Add the Contact</div>
         <div class="modal-body">
-          <input type="text" name="name" v-model="newName" placeholder="Input the name" />
-          <input type="text" name="address" v-model="newAddress" placeholder="Input the address" />
+          <input
+            type="text"
+            name="name"
+            v-model="newName"
+            ref="addName"
+            placeholder="Input the name"
+          />
+          <input
+            type="text"
+            name="address"
+            v-model="newAddress"
+            ref="addAddress"
+            placeholder="Input the address"
+          />
         </div>
         <div class="modal-footer">
           <div class="secondary" @click="$modal.hide('modal-contact-add')">CLOSE</div>
-          <div class="primary" @click="addContact">ADD</div>
+          <div class="primary" @click="addContact" :class="{disabled: !newName || !newAddress}">ADD</div>
         </div>
       </modal>
       <modal
         name="modal-contact-edit"
         :adaptive="true"
         transition="scale"
-        :width="250"
+        :width="330"
         height="auto"
       >
         <div class="modal-header">Edit the Contact</div>
         <div class="modal-body">
-          <input type="text" name="name" v-model="newName" placeholder="Input the name" />
-          <input type="text" name="address" v-model="newAddress" placeholder="Input the address" />
+          <input
+            type="text"
+            name="name"
+            v-model="newName"
+            ref="editName"
+            placeholder="Input the name"
+          />
+          <input
+            type="text"
+            name="address"
+            v-model="newAddress"
+            ref="editAddress"
+            placeholder="Input the address"
+          />
         </div>
         <div class="modal-footer">
           <div class="secondary" @click="$modal.hide('modal-contact-edit')">CLOSE</div>
-          <div class="primary" @click="saveContact">SAVE</div>
+          <div
+            class="primary"
+            @click="saveContact"
+            :class="{disabled: !newName || !newAddress}"
+          >SAVE</div>
         </div>
       </modal>
+      <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
     </main>
   </div>
 </template>
@@ -60,8 +92,10 @@
 <script>
 import { mapState } from "vuex";
 import ContactItem from "./ContactItem";
+import { HarmonyAddress } from "@harmony-js/crypto";
 export default {
   data: () => ({
+    editIndex: -1,
     newName: "",
     newAddress: "",
   }),
@@ -74,21 +108,22 @@ export default {
     }),
   },
   methods: {
-    editContact(item) {
+    editContact(index, item) {
+      this.editIndex = index;
       this.newName = item.name;
       this.newAddress = item.address;
       this.$modal.show("modal-contact-edit");
     },
     saveContact() {
+      if (!this.isValidContact()) return;
       this.$modal.hide("modal-contact-edit");
       this.$store.dispatch("settings/editContact", {
+        index: this.editIndex,
         name: this.newName,
         address: this.newAddress,
       });
-      this.newName = "";
-      this.newAddress = "";
     },
-    deleteContact(item) {
+    deleteContact(index, item) {
       this.$modal.show("dialog", {
         text: "Are you sure you want to delete this contact?",
         buttons: [
@@ -103,34 +138,77 @@ export default {
             title: "Delete",
             handler: () => {
               this.$modal.hide("dialog");
-              this.$store.dispatch("settings/deleteContact", { ...item });
+              this.$store.dispatch("settings/deleteContact", index);
             },
           },
         ],
       });
     },
     showAddModal() {
+      this.editIndex = -1;
+      this.newName = "";
+      this.newAddress = "";
       this.$modal.show("modal-contact-add");
     },
+    renameIfExist(newName) {
+      const findContactbyName = _.find(this.contacts, { name: newName });
+      if (!findContactbyName) return newName;
+      return this.renameIfExist(newName + " (2)");
+    },
+    isValidContact() {
+      try {
+        if (!HarmonyAddress.isValidBech32(this.newAddress)) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Address is not valid",
+          });
+          return false;
+        }
+        const findContactIndexbyAddress = _.findIndex(this.contacts, {
+          address: this.newAddress,
+        });
+        if (
+          findContactIndexbyAddress > 0 &&
+          findContactIndexbyAddress !== this.editIndex
+        ) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Contact is already added",
+          });
+          return false;
+        }
+        this.newName = this.renameIfExist(this.newName);
+        return true;
+      } catch (err) {
+        this.$notify({
+          group: "notify",
+          type: "error",
+          text: err.message,
+        });
+        return false;
+      }
+    },
     addContact() {
+      if (!this.isValidContact()) return;
       this.$modal.hide("modal-contact-add");
       this.$store.dispatch("settings/addContact", {
         name: this.newName,
         address: this.newAddress,
       });
-      this.newName = "";
-      this.newAddress = "";
     },
     importContact() {},
     exportContact() {},
   },
 };
 </script>
-<style>
+<style scoped>
 .contact-but {
   padding: 5px;
 }
 .contact-body {
+  position: relative;
   height: 460px;
   overflow: auto;
   margin: 0 -1rem -1rem -1rem;
@@ -140,5 +218,8 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-bottom: 16px;
+}
+.modal-body > input:last-child {
+  font-size: 11px;
 }
 </style>

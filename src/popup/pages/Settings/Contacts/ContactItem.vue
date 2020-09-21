@@ -45,13 +45,6 @@ export default {
   i {
     font-size: 25px !important;
   }
-  &:hover,
-  &:focus {
-    background: #ddd;
-  }
-  &:active {
-    background: #f5f5f5;
-  }
 }
 .contact-item {
   display: flex;
@@ -59,7 +52,7 @@ export default {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   background: #ffffff;
   border-radius: 5px;
-  padding: 17px 10px 17px 10px;
+  padding: 17px 10px 17px 20px;
   margin-bottom: 10px;
   align-items: center;
   color: black;

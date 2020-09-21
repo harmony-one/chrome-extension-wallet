@@ -648,6 +648,14 @@ input.vue-pincode-input:focus {
 .failed-caption {
   color: red;
 }
+
+.center-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 @keyframes miss {
   0% {
     transform: translate(0, 0);

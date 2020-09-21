@@ -76,7 +76,7 @@
 <script>
 import { mapState } from "vuex";
 import { decryptKeyStore } from "services/AccountService";
-
+import _ from "lodash";
 export default {
   data: () => ({
     name: "",
@@ -135,9 +135,9 @@ export default {
     },
   },
   mounted() {
-    const index = this.accounts.findIndex(
-      (acc) => acc.address === this.active.address
-    );
+    const index = _.findIndex(this.accounts, {
+      address: this.active.address,
+    });
     this.selectedIndex = index;
   },
 };
