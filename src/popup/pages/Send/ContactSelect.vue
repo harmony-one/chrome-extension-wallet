@@ -10,7 +10,7 @@
         v-model="recipient"
         @input="onInput"
         v-on:keydown="onKeyDown"
-        @focusin.self="showList"
+        @focusin.stop="showList"
         @blur="onBlur"
       />
       <div
@@ -30,6 +30,7 @@
         v-for="(item, index) in filteredContacts"
         :key="index"
         :class="{ active: index === searchedIndex }"
+        @mouseover="() => (searchedIndex = index)"
         @click="selectItem($event, item)"
       >
         <span>{{ item.name }}</span>
@@ -192,10 +193,6 @@ export default {
   flex-direction: column;
   padding: 4px;
   justify-content: space-between;
-  &:hover,
-  &.active {
-    background: #ccc;
-  }
   & > span:first-child {
     font-size: 12px;
     color: black;
@@ -203,6 +200,12 @@ export default {
   & > span:last-child {
     font-size: 9px;
     color: #888;
+  }
+  &.active {
+    background: #0a93eb;
+    span {
+      color: white !important;
+    }
   }
 }
 @keyframes spinning {

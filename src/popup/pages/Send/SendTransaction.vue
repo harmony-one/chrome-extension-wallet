@@ -18,6 +18,9 @@
           <label class="input-label" :class="{ recipient: !isToken }">
             Recipient Address
             <ContactSelect :onSelected="onContactSelect" />
+            <div v-if="recipient && recipient.name" class="recipient-name">
+              {{ recipient.name }}
+            </div>
           </label>
           <label
             v-if="!isToken"
@@ -50,7 +53,6 @@
               step="any"
               placeholder="Amount"
               v-model="amount"
-              v-on:keyup.enter="showConfirmDialog"
             />
             <div class="maximum-label" v-show="!loading" @click="setMaxBalance">
               Max:
@@ -120,7 +122,7 @@
             :disabled="isHRCToken"
           />
         </label>
-        <button class="primary flex" @click="showConfirmDialog">Send</button>
+        <button class="primary flex" @click="checkContactExist">Send</button>
       </div>
       <!-- Approve Transaction Dialog -->
       <div v-else>
@@ -145,7 +147,14 @@
           </div>
           <div class="transaction__information">
             To
-            <span class="address__name">{{ compressAddress(recipient) }}</span>
+            <span class="to_recipient_name" v-if="recipient.name">{{
+              recipient.name
+            }}</span>
+            <span v-if="recipient.name">(</span>
+            <span class="address__name">{{
+              compressAddress(recipient.address)
+            }}</span>
+            <span v-if="recipient.name">)</span>
             of Shard
             <b>{{ toShard }}</b>
           </div>
@@ -216,20 +225,24 @@
           <input
             type="text"
             name="name"
+            class="modal-input-name"
             v-model="newName"
             ref="addName"
             placeholder="Input the name"
+            v-on:keydown.enter="addContact"
           />
           <input
             type="text"
             name="address"
+            class="modal-input-address"
+            readonly
             v-model="newAddress"
             ref="addAddress"
             placeholder="Input the address"
           />
         </div>
         <div class="modal-footer">
-          <div class="secondary" @click="$modal.hide('modal-contact-add')">
+          <div class="secondary" @click="onCloseModal">
             CLOSE
           </div>
           <div
@@ -299,7 +312,7 @@ export default {
     tokenList: [],
     newName: "",
     newAddress: "",
-    recipient: "",
+    recipient: null,
     gasPrice: 1,
     gasLimit: 25000,
     inputData: "",
@@ -380,9 +393,30 @@ export default {
   },
   methods: {
     onContactSelect(recipient) {
-      this.recipient = recipient;
+      const address = recipient;
+      const findByAddress = _.find(this.contacts, { address });
+      let name = "";
+      if (findByAddress) name = findByAddress.name;
+      this.recipient = { name, address };
     },
-    addContact() {},
+    renameIfExist(newName) {
+      const findContactbyName = _.find(this.contacts, { name: newName });
+      if (!findContactbyName) return newName;
+      return this.renameIfExist(newName + " (2)");
+    },
+    onCloseModal() {
+      this.$modal.hide("modal-contact-add");
+      this.showConfirmDialog();
+    },
+    addContact() {
+      this.newName = this.renameIfExist(this.newName);
+      this.$modal.hide("modal-contact-add");
+      this.$store.dispatch("settings/addContact", {
+        name: this.newName,
+        address: this.newAddress,
+      });
+      this.showConfirmDialog();
+    },
     setMaxBalance(e) {
       e.preventDefault();
       this.amount = this.getMaxBalance;
@@ -421,7 +455,7 @@ export default {
     initScene() {
       this.scene = 1;
       this.amount = 0;
-      this.recipient = "";
+      this.recipient = null;
       this.toShard = 0;
       this.password = "";
       this.ledgerError = false;
@@ -433,7 +467,7 @@ export default {
         if (this.isHRCToken) {
           signedRes = await signHRCTransactionWithLedger(
             this.address,
-            this.recipient,
+            this.recipient.address,
             this.amount,
             this.gasLimit,
             this.gasPrice,
@@ -442,7 +476,7 @@ export default {
           );
         } else {
           signedRes = await signTransactionWithLedger(
-            this.recipient,
+            this.recipient.address,
             this.fromShard,
             this.toShard,
             this.amount,
@@ -501,7 +535,7 @@ export default {
             type: "error",
             text: "Password is not correct",
           });
-          return false;
+          return;
         }
       }
 
@@ -511,7 +545,7 @@ export default {
         let ret;
         if (!this.isHRCToken) {
           ret = await transferOne(
-            this.recipient,
+            this.recipient.address,
             this.fromShard,
             this.toShard,
             this.amount,
@@ -524,7 +558,7 @@ export default {
           //token transfer part
           ret = await sendToken(
             this.address,
-            this.recipient,
+            this.recipient.address,
             this.amount,
             privateKey,
             this.gasLimit,
@@ -563,44 +597,22 @@ export default {
       this.message.type = "error";
       this.message.text = err;
     },
-    async showConfirmDialog() {
+    checkContactExist(e) {
+      e.preventDefault();
       this.message.show = false;
-      const findByAddress = _.find(this.contacts, { address: this.recipient });
-      if (!findByAddress) {
-        this.$modal.show("dialog", {
-          text:
-            "The address is not found in the contacts. Do you want to add this contact?",
-          buttons: [
-            {
-              title: "Cancel",
-              default: true,
-              handler: () => {
-                this.$modal.hide("dialog");
-              },
-            },
-            {
-              title: "Add",
-              handler: () => {
-                this.$modal.hide("dialog");
-                this.$modal.show("modal-contact-add");
-              },
-            },
-          ],
-        });
-      }
-      if (!isValidAddress(this.recipient)) {
+      if (!isValidAddress(this.recipient.address)) {
         this.showErrMessage("Invalid recipient address");
-        return false;
+        return;
       }
 
       if (!this.selectedToken) {
         this.showErrMessage("Please select token that you want to send");
-        return false;
+        return;
       }
 
       if (this.amount <= 0) {
         this.showErrMessage("Invalid token amount");
-        return false;
+        return;
       } else {
         const minAmount =
           1 /
@@ -612,7 +624,7 @@ export default {
           this.showErrMessage(
             `Minimum send amount is ${minAmount} ${this.selectedToken.symbol}`
           );
-          return false;
+          return;
         }
       }
 
@@ -623,7 +635,7 @@ export default {
           )
         ) {
           this.showErrMessage("Your balance is not enough");
-          return false;
+          return;
         }
       } else {
         if (
@@ -632,7 +644,7 @@ export default {
           )
         ) {
           this.showErrMessage("Your ONE balance is not enough");
-          return false;
+          return;
         }
         if (
           new BigNumber(this.getTotal).isGreaterThan(
@@ -641,9 +653,37 @@ export default {
           )
         ) {
           this.showErrMessage("Your token balance is not enough");
-          return false;
+          return;
         }
       }
+      if (!this.recipient.name) {
+        this.$modal.show("dialog", {
+          text:
+            "The address is not found in the contacts. Do you want to add this contact?",
+          buttons: [
+            {
+              title: "Cancel",
+              default: true,
+              handler: () => {
+                this.$modal.hide("dialog");
+                this.showConfirmDialog();
+              },
+            },
+            {
+              title: "Add",
+              handler: () => {
+                this.$modal.hide("dialog");
+                this.newAddress = this.recipient.address;
+                this.$modal.show("modal-contact-add");
+              },
+            },
+          ],
+        });
+        return;
+      }
+      this.showConfirmDialog();
+    },
+    showConfirmDialog() {
       this.amount = new BigNumber(this.amount)
         .decimalPlaces(
           Number(this.selectedToken.decimals),
@@ -716,5 +756,18 @@ h3 {
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   font-size: 14px;
+}
+.recipient-name {
+  position: absolute;
+  left: 1.25rem;
+  z-index: -1;
+  color: #1f6bb7;
+  font-style: italic;
+  word-break: break-all;
+  right: 1.25rem;
+}
+.to_recipient_name {
+  font-weight: 700;
+  color: black;
 }
 </style>

@@ -38,6 +38,7 @@
           <input
             type="text"
             name="name"
+            class="modal-input-name"
             v-model="newName"
             ref="addName"
             placeholder="Input the name"
@@ -45,6 +46,7 @@
           <input
             type="text"
             name="address"
+            class="modal-input-address"
             v-model="newAddress"
             ref="addAddress"
             placeholder="Input the address"
@@ -75,6 +77,7 @@
           <input
             type="text"
             name="name"
+            class="modal-input-name"
             v-model="newName"
             ref="editName"
             placeholder="Input the name"
@@ -82,6 +85,7 @@
           <input
             type="text"
             name="address"
+            class="modal-input-address"
             v-model="newAddress"
             ref="editAddress"
             placeholder="Input the address"
@@ -113,7 +117,7 @@
 <script>
 import { mapState } from "vuex";
 import ContactItem from "./ContactItem";
-import { HarmonyAddress } from "@harmony-js/crypto";
+import { isValidAddress } from "@harmony-js/utils";
 export default {
   data: () => ({
     editIndex: -1,
@@ -178,7 +182,7 @@ export default {
     },
     isValidContact() {
       try {
-        if (!HarmonyAddress.isValidBech32(this.newAddress)) {
+        if (!isValidAddress(this.newAddress)) {
           this.$notify({
             group: "notify",
             type: "error",
@@ -239,8 +243,5 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-bottom: 16px;
-}
-.modal-body > input:last-child {
-  font-size: 11px;
 }
 </style>
