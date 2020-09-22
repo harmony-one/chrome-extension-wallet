@@ -127,7 +127,6 @@ export default {
   methods: {
     async pushHistory(transactions) {
       let txns = [];
-      console.log(transactions);
       for (const txn of removeDups(transactions)) {
         const params = await decodeInput(txn.to, txn.input);
         const result = {

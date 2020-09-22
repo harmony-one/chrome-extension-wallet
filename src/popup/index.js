@@ -16,8 +16,6 @@ import MoonLoader from "vue-spinner/src/MoonLoader";
 import ScaleLoader from "vue-spinner/src/ScaleLoader";
 import ClipLoader from "vue-spinner/src/ClipLoader";
 import Tooltip from "vue-directive-tooltip";
-import vSelect from "vue-select";
-import "vue-select/src/scss/vue-select.scss";
 import "vue-directive-tooltip/dist/vueDirectiveTooltip.css";
 
 import BigNumber from "bignumber.js";
@@ -38,7 +36,6 @@ Vue.config.productionTip = false;
 
 sync(store, router);
 
-Vue.component("v-select", vSelect);
 Vue.component("MoonLoader", MoonLoader);
 Vue.component("ClipLoader", ClipLoader);
 Vue.component("ScaleLoader", ScaleLoader);

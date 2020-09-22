@@ -21,6 +21,18 @@ export default {
         name: "Derek",
         address: "one18xfcqu7jf0cq5apweyu5jxr30x9cvetegwqfss",
       },
+      {
+        name: "test",
+        address: "one1qs0qqldpqzuhv45ktklg0dw7p5wex9mxku7t6j",
+      },
+      {
+        name: "h20minter",
+        address: "one18t4yj4fuutj83uwqckkvxp9gfa0568uc48ggj7",
+      },
+      {
+        name: "busd minter",
+        address: "one1p6wcwnajxc208uxpdlx9sqktt6t8kk8nw9hshf",
+      },
     ],
   },
   mutations: {

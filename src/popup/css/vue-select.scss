@@ -23,4 +23,10 @@
     width: 165px;
     display: inline-block;
   }
+  .vs__dropdown-menu {
+    li {
+      overflow: hidden;
+      padding-left: 12px;
+    }
+  }
 }
