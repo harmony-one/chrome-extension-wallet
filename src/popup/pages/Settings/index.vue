@@ -1,6 +1,6 @@
 <template>
   <div>
-    <app-header subtitle="Settings" backRoute="/" />
+    <app-header subtitle="Settings" backRoute="/home" />
     <main class="main">
       <div class="list-container">
         <div

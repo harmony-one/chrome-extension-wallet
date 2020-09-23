@@ -220,7 +220,7 @@
         :width="330"
         height="auto"
       >
-        <div class="modal-header">Add the Contact</div>
+        <div class="modal-header">Add a contact</div>
         <div class="modal-body">
           <input
             type="text"
