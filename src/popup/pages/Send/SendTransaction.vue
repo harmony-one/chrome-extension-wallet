@@ -37,8 +37,9 @@
                 v-for="shard in account.shardArray"
                 :key="shard.shardID"
                 :value="shard.shardID"
-                >{{ shard.shardID }}</option
               >
+                {{ shard.shardID }}
+              </option>
             </select>
           </label>
         </div>
@@ -58,8 +59,8 @@
               Max:
               {{
                 formatBalance(getMaxBalance, selectedToken.decimals) +
-                  " " +
-                  selectedToken.symbol
+                " " +
+                selectedToken.symbol
               }}
             </div>
           </label>
@@ -70,8 +71,9 @@
                 v-for="(token, index) in tokenList"
                 :key="index"
                 :value="token"
-                >{{ token.symbol }}</option
               >
+                {{ token.symbol }}
+              </option>
             </select>
           </label>
         </div>
@@ -242,9 +244,7 @@
           />
         </div>
         <div class="modal-footer">
-          <div class="secondary" @click="onCloseModal">
-            CLOSE
-          </div>
+          <div class="secondary" @click="onCloseModal">CLOSE</div>
           <div
             class="primary"
             @click="addContact"
@@ -352,7 +352,10 @@ export default {
     },
     getMaxBalance() {
       let max;
-      if (!this.isHRCToken) max = this.account.balance;
+      if (!this.isHRCToken)
+        max = new BigNumber(this.account.balance)
+          .minus(this.getGasFee)
+          .toFixed();
       else {
         max = this.getTokenBalance(this.selectedToken);
       }
