@@ -6,10 +6,18 @@
         <div class="main-logo">
           <img src="images/harmony-big.png" class="logo-img" alt="Harmony" />
         </div>
-        <span v-if="wallets.active.isLedger" class="ledger-badge big account-badge">Ledger</span>
+        <span
+          v-if="wallets.active.isLedger"
+          class="ledger-badge big account-badge"
+          >Ledger</span
+        >
       </div>
       <div class="container">
-        <div class="account-box" @click="onClickAccount()" v-tooltip.top="'Click to copy'">
+        <div
+          class="account-box"
+          @click="onClickAccount()"
+          v-tooltip.top="'Click to copy'"
+        >
           <h2 class="name-label">{{ compressName(wallets.active.name) }}</h2>
           <div class="box-address">{{ compressAddress(address, 20, 5) }}</div>
         </div>
@@ -29,7 +37,9 @@
               v-for="item in account.shardArray"
               :value="item.shardID"
               :key="item.shardID"
-            >{{ item.shardID }}</option>
+            >
+              {{ item.shardID }}
+            </option>
           </select>
         </div>
         <div class="button-group">
@@ -37,12 +47,21 @@
             class="outline"
             @click="$router.push('/deposit')"
             v-tooltip.top="'Deposit token'"
-          >Deposit</button>
-          <button @click="$router.push('/send')" v-tooltip.top="'Send token'">Send</button>
+          >
+            Deposit
+          </button>
+          <button @click="onSendClick()" v-tooltip.top="'Send token'">
+            Send
+          </button>
         </div>
         <div class="divider"></div>
       </div>
-      <notifications group="copied" width="180" :max="2" class="notifiaction-container" />
+      <notifications
+        group="copied"
+        width="180"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -92,6 +111,10 @@ export default {
   },
 
   methods: {
+    onSendClick() {
+      if (this.wallets.active.isLedger) this.openExpandPopup("/send");
+      else this.$router.push("/send");
+    },
     onClickAccount() {
       this.$copyText(this.address).then(() => {
         this.$notify({
