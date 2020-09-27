@@ -240,6 +240,7 @@ export async function getTransfers(
   order = "DESC"
 ) {
   let harmony = getHarmony();
+
   const ret = await harmony.messenger.send(
     "hmy_getTransactionsHistory",
     [
@@ -253,7 +254,7 @@ export async function getTransfers(
       },
     ],
     harmony.messenger.chainPrefix,
-    harmony.messenger.getCurrentShardID()
+    harmony.defaultShardID
   );
   return ret.result;
 }
