@@ -75,6 +75,7 @@
                 class="maximum-label"
                 v-show="!loading"
                 @click="setMaxBalance"
+                v-tooltip.bottom="'Maxmimum balance to send'"
               >
                 Max:
                 {{
@@ -139,7 +140,7 @@
               class="input-field input-data"
               type="textarea"
               name="inputdata"
-              placeholder="Please enter hexadecimal data (optional)"
+              placeholder="Please enter hexadecimal or ascii data (optional)"
               v-model="inputData"
               :disabled="isHRCToken"
             />
