@@ -88,6 +88,7 @@ export async function sendToken(
     };
   }
 }
+
 export async function decodeInput(to, hexData) {
   try {
     const contract = getContractInstance(fromBech32(to));

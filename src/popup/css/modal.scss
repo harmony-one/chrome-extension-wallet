@@ -28,6 +28,11 @@
     &:active {
       background: #ddd;
     }
+    &.disabled {
+      pointer-events: none;
+      background: #e0e0e0;
+      color: #888;
+    }
   }
   .secondary {
     padding: 8px 0;
@@ -45,4 +50,8 @@
       background: #ddd;
     }
   }
+}
+
+.modal-body > input.modal-input-address {
+  font-size: 11px;
 }

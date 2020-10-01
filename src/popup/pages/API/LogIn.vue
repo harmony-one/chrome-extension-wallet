@@ -12,7 +12,9 @@
       <div class="login-container">
         <div v-if="!getLockState">
           <div v-if="!wallets.accounts.length">
-            <p>No accounts. You should create the account first in the extension.</p>
+            <p>
+              No accounts. You should create the account first in the extension.
+            </p>
           </div>
           <div v-else>
             <div
@@ -40,15 +42,15 @@
       </div>
       <div
         class="button-group footer"
-        v-if="
-          wallets.accounts.length && !getLockState
-        "
+        v-if="wallets.accounts.length && !getLockState"
       >
         <button class="outline" @click="deny">Deny</button>
-        <button :disabled="selected < 0" @click="accept">Accept</button>
+        <button class="primary" :disabled="selected < 0" @click="accept">
+          Accept
+        </button>
       </div>
       <div v-else>
-        <button class="flex mt-20" @click="reject">OK</button>
+        <button class="primary flex mt-20" @click="reject">OK</button>
       </div>
     </main>
   </div>

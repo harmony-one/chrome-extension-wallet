@@ -29,6 +29,7 @@
           </button>
           <button
             @click="createName"
+            class="primary"
             :class="!wallets.accounts.length ? 'flex' : ''"
             :disabled="!name"
           >
@@ -78,7 +79,9 @@
         >
         <div class="button-group">
           <button class="outline" @click="() => (scene = 1)">Back</button>
-          <button @click="confirmPassword" :disabled="!agree">Next</button>
+          <button class="primary" @click="confirmPassword" :disabled="!agree">
+            Next
+          </button>
         </div>
       </div>
       <div v-else-if="scene === 3">
@@ -128,8 +131,8 @@ export default {
       alert(
         "Your account is created successfully. To continue, close this tab and use the extension."
       );
-      chrome.tabs.getCurrent(function (tab) {
-        chrome.tabs.remove(tab.id, function () {});
+      chrome.tabs.getCurrent(function(tab) {
+        chrome.tabs.remove(tab.id, function() {});
       });
     },
     async confirmPassword() {

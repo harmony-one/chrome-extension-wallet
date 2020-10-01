@@ -40,8 +40,10 @@
               </div>
             </div>
             <div v-else class="token-edit-box">
-              <button class="edit_but" @click="editToken(token)">Edit</button>
-              <button class="delete_but" @click="deleteToken(token)">
+              <button class="primary edit_but" @click="editToken(token)">
+                Edit
+              </button>
+              <button class="primary delete_but" @click="deleteToken(token)">
                 Delete
               </button>
             </div>
@@ -51,7 +53,7 @@
       <div class="token-button-footer">
         <div class="token-button-group" v-if="!editing">
           <button
-            class="round add_token"
+            class="round"
             @click="$router.push('/tokens/add')"
             v-tooltip.top="'Add token'"
           >
@@ -59,7 +61,7 @@
           </button>
           <button
             v-if="tokenArrayOfNetwork.length > 0"
-            class="round green-but"
+            class="round green"
             @click="editStart"
             v-tooltip.top="'Edit token'"
           >
@@ -67,7 +69,11 @@
           </button>
         </div>
         <div v-else>
-          <button @click="editStop" v-tooltip.top="'Finish editing'">
+          <button
+            class="primary"
+            @click="editStop"
+            v-tooltip.top="'Finish editing'"
+          >
             Done
           </button>
         </div>
@@ -214,6 +220,7 @@ export default {
   }
 }
 .token-edit-box {
+  outline: none;
   .edit_but {
     border: none;
     border: 1px solid #0a93eb;
@@ -257,6 +264,12 @@ export default {
 button.token_send_but {
   border-radius: 5px;
   color: black;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 400;
+  min-width: 60px;
+  white-space: nowrap;
+  outline: none;
   width: 60px;
   background: white;
   border: 1px solid #aaa;
@@ -270,6 +283,7 @@ button.token_send_but {
   &:disabled {
     cursor: default;
     color: #ddd;
+    background: white;
     border: 1px solid #ddd;
   }
 }

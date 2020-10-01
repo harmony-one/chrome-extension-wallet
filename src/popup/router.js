@@ -22,7 +22,8 @@ import Lock from "./pages/Lock.vue";
 import ExportPrivateKey from "./pages/ExportPrivateKey.vue";
 import About from "./pages/About.vue";
 import Settings from "./pages/Settings/index.vue";
-import Security from "./pages/Settings/Security.vue";
+import Security from "./pages/Settings/Security/index.vue";
+import Contacts from "./pages/Settings/Contacts/index.vue";
 import PincodeModal from "./pages/Settings/Security/PincodeModal.vue";
 
 import store from "./store";
@@ -181,6 +182,15 @@ const router = new Router({
       path: "/settings/security",
       name: "security",
       component: Security,
+      meta: {
+        requiredAccount: true,
+        authenticate: true,
+      },
+    },
+    {
+      path: "/settings/contacts",
+      name: "contacts",
+      component: Contacts,
       meta: {
         requiredAccount: true,
         authenticate: true,

@@ -50,7 +50,11 @@
           >
             Deposit
           </button>
-          <button @click="onSendClick()" v-tooltip.top="'Send token'">
+          <button
+            class="primary"
+            @click="$router.push('/send')"
+            v-tooltip.top="'Send token'"
+          >
             Send
           </button>
         </div>

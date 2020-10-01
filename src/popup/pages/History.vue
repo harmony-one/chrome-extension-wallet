@@ -129,13 +129,15 @@ export default {
       let txns = [];
       for (const txn of removeDups(transactions)) {
         const params = await decodeInput(txn.to, txn.input);
-
         const result = {
           from: txn.from,
           to: params ? params.to : txn.to,
           amount: params
             ? params.amount
-            : new Unit(txn.value).asWei().toEther().toString(),
+            : new Unit(txn.value)
+                .asWei()
+                .toEther()
+                .toString(),
           hash: txn.hash,
           symbol: params ? params.symbol : "ONE",
           timestamp: txn.timestamp,
@@ -196,7 +198,9 @@ export default {
     formatTimestamp(timestamp) {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      return moment(timestamp).tz(timezone).format("MM/DD/YYYY HH:mm:ss z");
+      return moment(timestamp)
+        .tz(timezone)
+        .format("MM/DD/YYYY HH:mm:ss z");
     },
     formatTokenAmount(transfer) {
       return transfer.amount + " " + transfer.symbol;
