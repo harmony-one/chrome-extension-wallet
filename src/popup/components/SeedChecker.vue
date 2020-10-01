@@ -7,7 +7,7 @@
       <div v-else>
         <h4>Please select the seeds in Sequence Order</h4>
       </div>
-      <button class="clear-but" v-if="!isMatched" @click="clearPhrase">
+      <button class="primary clear-but" v-if="!isMatched" @click="clearPhrase">
         Clear
       </button>
     </div>
@@ -30,7 +30,11 @@
       >
         {{ item }}
       </button>
-      <button class="flex mt-20" :disabled="!isMatched" @click="confirm">
+      <button
+        class="primary flex mt-20"
+        :disabled="!isMatched"
+        @click="confirm"
+      >
         Next
       </button>
     </div>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <app-header subtitle="Settings" backRoute="/" />
+    <app-header subtitle="Settings" backRoute="/home" />
     <main class="main">
       <div class="list-container">
         <div
@@ -9,7 +9,9 @@
           :key="item.route"
           @click="$router.push(item.route)"
         >
-          <i class="material-icons">{{ item.icon }}</i>
+          <div class="setting-icon">
+            <i class="material-icons">{{ item.icon }}</i>
+          </div>
           <div class="list-item-content">
             <div>{{ item.name }}</div>
             <div>{{ item.description }}</div>
@@ -31,6 +33,12 @@ export default {
         description:
           "Change the security settings (PIN Code, PIN digits and Lock timer)",
         route: "/settings/security",
+      },
+      {
+        icon: "contacts",
+        name: "Contacts",
+        description: "Add, edit and remove your contacts",
+        route: "/settings/contacts",
       },
     ],
   }),

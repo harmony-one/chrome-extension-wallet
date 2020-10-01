@@ -30,6 +30,7 @@ import "./css/icons.less";
 import "./css/normalize.scss";
 import "./css/style.scss";
 import "./css/modal.scss";
+import "./css/vue-select.scss";
 
 Vue.config.productionTip = false;
 

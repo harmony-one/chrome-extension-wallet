@@ -13,8 +13,7 @@
       <p class="txRow">
         <span class="action_caption">{{ displayAction }}</span>
         <span v-if="type === 'SEND'">
-          {{ txnParams.fromShard }} Shard ->
-          {{ txnParams.toShard }} Shard
+          {{ txnParams.fromShard }} Shard -> {{ txnParams.toShard }} Shard
         </span>
       </p>
       <p class="txRow">
@@ -64,11 +63,15 @@
       <div class="footer">
         <div class="button-group" v-if="!wallet.isLedger">
           <button class="outline" @click="reject">Reject</button>
-          <button @click="approve" :disabled="!password">Approve</button>
+          <button class="primary" @click="approve" :disabled="!password">
+            Approve
+          </button>
         </div>
         <div class="button-group" v-else>
-          <button v-if="!hasError" @click="reject">Close</button>
-          <button v-else @click="signwithLedger">Retry</button>
+          <button class="primary" v-if="!hasError" @click="reject">
+            Close
+          </button>
+          <button class="primary" v-else @click="signwithLedger">Retry</button>
         </div>
       </div>
     </div>
@@ -79,9 +82,14 @@
           extension.
         </p>
       </div>
-      <button class="flex mt-20" @click="lockReject">OK</button>
+      <button class="primary flex mt-20" @click="lockReject">OK</button>
     </div>
-    <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
+    <notifications
+      group="notify"
+      width="250"
+      :max="4"
+      class="notifiaction-container"
+    />
   </main>
 </template>
 <script>
