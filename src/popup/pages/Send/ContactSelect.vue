@@ -44,7 +44,7 @@
 import { mapState } from "vuex";
 export default {
   name: "ContactSelect",
-  props: ["onSelected"],
+  props: ["onSelected", "value"],
   data: () => ({
     recipient: "",
     searchedIndex: -1,
@@ -58,6 +58,7 @@ export default {
   },
   mounted() {
     this.filteredContacts = this.contacts;
+    if (this.value && this.value.address) this.recipient = this.value.address;
   },
   watch: {
     recipient() {

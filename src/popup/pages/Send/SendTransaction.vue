@@ -18,10 +18,10 @@
           >
           <span v-else>{{ message.text }}</span>
         </div>
-        <div :class="{ row: !isToken }">
+        <div :class="{ row: !isToken, 'token-row': isToken }">
           <label class="input-label" :class="{ recipient: !isToken }">
             Recipient Address
-            <ContactSelect :onSelected="onContactSelect" />
+            <ContactSelect :onSelected="onContactSelect" :value="recipient" />
             <div v-if="recipient && recipient.name" class="recipient-name">
               {{ recipient.name }}
             </div>
@@ -47,7 +47,7 @@
             </select>
           </label>
         </div>
-        <div :class="{ row: !isToken }">
+        <div :class="{ row: !isToken, 'token-row': isToken }">
           <label class="input-label" :class="{ amount: !isToken }">
             Amount
             <input
@@ -58,13 +58,14 @@
               step="any"
               placeholder="Amount"
               v-model="amount"
+              v-on:keyup.enter="checkContactExist"
             />
             <div class="maximum-label" v-show="!loading" @click="setMaxBalance">
               Max:
               {{
                 formatBalance(getMaxBalance, selectedToken.decimals) +
-                " " +
-                selectedToken.symbol
+                  " " +
+                  selectedToken.symbol
               }}
             </div>
           </label>
@@ -610,6 +611,7 @@ export default {
     },
     checkContactExist(e) {
       e.preventDefault();
+      console.log("checkcontactexist");
       this.message.show = false;
       if (!isValidAddress(this.recipient.address)) {
         this.showErrMessage("Invalid recipient address");
@@ -665,13 +667,13 @@ export default {
         }
       }
       if (!this.recipient.name) {
+        console.log("showing modal");
         this.$modal.show("dialog", {
           text:
-            "The address is not found in the contacts. Do you want to add this contact?",
+            "This address is not found in the contacts. Do you want to add this address?",
           buttons: [
             {
               title: "Cancel",
-              default: true,
               handler: () => {
                 this.$modal.hide("dialog");
                 this.showConfirmDialog();
@@ -715,7 +717,7 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style lang="scss" scoped>
 h3 {
   margin-top: 0px;
 }
@@ -777,5 +779,11 @@ h3 {
 .to_recipient_name {
   font-weight: 700;
   color: black;
+}
+.token-row {
+  display: flex;
+  & > label {
+    flex: 1;
+  }
 }
 </style>

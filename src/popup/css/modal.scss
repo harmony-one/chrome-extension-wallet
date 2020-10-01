@@ -55,3 +55,8 @@
 .modal-body > input.modal-input-address {
   font-size: 11px;
 }
+.vue-dialog-buttons {
+  & > button:nth-child(2) {
+    color: #f44336;
+  }
+}
