@@ -52,7 +52,7 @@
           </button>
           <button
             class="primary"
-            @click="$router.push('/send')"
+            @click="onSendClick"
             v-tooltip.top="'Send token'"
           >
             Send
@@ -116,6 +116,7 @@ export default {
 
   methods: {
     onSendClick() {
+      console.log(this.wallets.active.isLedger);
       if (this.wallets.active.isLedger) this.openExpandPopup("/send");
       else this.$router.push("/send");
     },
