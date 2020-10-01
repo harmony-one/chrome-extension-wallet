@@ -37,8 +37,9 @@
               v-for="item in account.shardArray"
               :value="item.shardID"
               :key="item.shardID"
-              >{{ item.shardID }}</option
             >
+              {{ item.shardID }}
+            </option>
           </select>
         </div>
         <div class="button-group">
@@ -114,6 +115,10 @@ export default {
   },
 
   methods: {
+    onSendClick() {
+      if (this.wallets.active.isLedger) this.openExpandPopup("/send");
+      else this.$router.push("/send");
+    },
     onClickAccount() {
       this.$copyText(this.address).then(() => {
         this.$notify({

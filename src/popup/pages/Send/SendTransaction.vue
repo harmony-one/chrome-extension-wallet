@@ -1,6 +1,10 @@
 <template>
   <div>
-    <app-header :subtitle="getHeaderName" @refresh="refreshData" />
+    <app-header
+      :subtitle="getHeaderName"
+      @refresh="refreshData"
+      backRoute="/home"
+    />
     <main class="main">
       <div v-if="scene === 1">
         <div
@@ -352,11 +356,12 @@ export default {
     },
     getMaxBalance() {
       let max;
-      if (!this.isHRCToken)
-        max = new BigNumber(this.account.balance)
-          .minus(this.getGasFee)
-          .toFixed();
-      else {
+      if (!this.isHRCToken) {
+        max = BigNumber.maximum(
+          new BigNumber(this.account.balance).minus(this.getGasFee),
+          0
+        ).toFixed();
+      } else {
         max = this.getTokenBalance(this.selectedToken);
       }
       if (max === undefined) return Number(0);
@@ -370,8 +375,11 @@ export default {
 
   async mounted() {
     this.fromShard = this.account.shard;
-    this.initSelectedToken();
-    await this.loadBalance();
+    if (this.wallet.isLedger) await this.refreshData();
+    else {
+      this.initSelectedToken();
+      await this.loadBalance();
+    }
   },
 
   updated() {
@@ -617,12 +625,9 @@ export default {
         this.showErrMessage("Invalid token amount");
         return;
       } else {
-        const minAmount =
-          1 /
-          Math.pow(
-            10,
-            this.selectedToken.decimals >= 8 ? 8 : this.selectedToken.decimals
-          );
+        const minAmount = new BigNumber(1)
+          .dividedBy(Math.pow(10, this.selectedToken.decimals))
+          .toFixed();
         if (new BigNumber(this.amount).isLessThan(new BigNumber(minAmount))) {
           this.showErrMessage(
             `Minimum send amount is ${minAmount} ${this.selectedToken.symbol}`
@@ -650,7 +655,7 @@ export default {
           return;
         }
         if (
-          new BigNumber(this.getTotal).isGreaterThan(
+          new BigNumber(this.amount).isGreaterThan(
             new BigNumber(this.getMaxBalance),
             10
           )

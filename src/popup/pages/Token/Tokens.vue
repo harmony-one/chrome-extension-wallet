@@ -189,7 +189,9 @@ export default {
       await this.loadOneBalance();
     },
     sendToken(token) {
-      this.$router.push(`/send-token/${token.address}`);
+      if (this.activeAcc.isLedger)
+        this.openExpandPopup(`/send-token/${token.address}`);
+      else this.$router.push(`/send-token/${token.address}`);
     },
   },
 };
