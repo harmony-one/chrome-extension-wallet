@@ -107,7 +107,7 @@
             />
           </label>
           <label class="input-label gas-one">
-            Gas Fee
+            Network Fee
             <input
               class="input-field"
               type="text"

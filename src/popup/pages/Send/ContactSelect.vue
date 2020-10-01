@@ -9,7 +9,8 @@
         placeholder="Select the recipient"
         v-model="recipient"
         @input="onInput"
-        v-on:keydown="onKeyDown"
+        v-on:keyup.prevent="onKeyUp"
+        v-on:keydown.prevent="onKeyDown"
         @focusin.stop="showList"
         @blur="onBlur"
       />
@@ -24,13 +25,15 @@
     <div
       v-show="filteredContacts.length && listVisible"
       class="contact-select-list"
+      ref="contact-select-list"
+      v-on:keydown.capture="onKeyDown"
     >
       <div
         class="contact-select-item"
         v-for="(item, index) in filteredContacts"
         :key="index"
         :class="{ active: index === searchedIndex }"
-        @mouseover="() => (searchedIndex = index)"
+        @mouseover.prevent="onItemOver(index)"
         @click="selectItem($event, item)"
       >
         <span>{{ item.name }}</span>
@@ -50,6 +53,7 @@ export default {
     searchedIndex: -1,
     listVisible: false,
     filteredContacts: [],
+    keyPressed: false,
   }),
   computed: {
     ...mapState({
@@ -89,11 +93,35 @@ export default {
     hideList() {
       this.listVisible = false;
     },
+    onItemOver(index) {
+      if (!this.keyPressed) this.searchedIndex = index;
+    },
+    onKeyUp(e) {
+      this.keyPressed = false;
+    },
     onKeyDown(e) {
+      this.keyPressed = true;
+      const offset =
+        this.$refs["contact-select-list"].scrollHeight /
+        this.filteredContacts.length;
       if (e.key === "ArrowDown") {
         e.preventDefault();
         this.searchedIndex =
           (this.searchedIndex + 1) % this.filteredContacts.length;
+        this.$nextTick(() => {
+          if (this.searchedIndex === 0)
+            this.$refs["contact-select-list"].scrollTop = 0;
+          else if (
+            (this.searchedIndex + 1) * offset >
+            this.$refs["contact-select-list"].scrollTop +
+              this.$refs["contact-select-list"].clientHeight
+          ) {
+            this.$refs["contact-select-list"].scrollTop = Math.min(
+              this.$refs["contact-select-list"].scrollTop + offset,
+              this.$refs["contact-select-list"].scrollHeight
+            );
+          }
+        });
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         this.searchedIndex =
@@ -101,6 +129,20 @@ export default {
             ? this.filteredContacts.length - 1
             : (this.searchedIndex + (this.filteredContacts.length - 1)) %
               this.filteredContacts.length;
+        this.$nextTick(() => {
+          if (this.searchedIndex === this.filteredContacts.length - 1)
+            this.$refs["contact-select-list"].scrollTop = this.$refs[
+              "contact-select-list"
+            ].scrollHeight;
+          else if (
+            this.searchedIndex * offset <
+            this.$refs["contact-select-list"].scrollTop
+          )
+            this.$refs["contact-select-list"].scrollTop = Math.max(
+              this.$refs["contact-select-list"].scrollTop - offset,
+              0
+            );
+        });
       } else if (e.key === "Enter") {
         e.preventDefault();
         this.recipient = this.filteredContacts[this.searchedIndex].address;
