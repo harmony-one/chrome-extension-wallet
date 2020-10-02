@@ -60,7 +60,12 @@
               v-model="amount"
               v-on:keyup.enter="checkContactExist"
             />
-            <div class="maximum-label" v-show="!loading" @click="setMaxBalance">
+            <div
+              class="maximum-label"
+              v-show="!loading"
+              @click="setMaxBalance"
+              v-tooltip.bottom="'Max amount to send excluding network fee'"
+            >
               Max:
               {{
                 formatBalance(getMaxBalance, selectedToken.decimals) +

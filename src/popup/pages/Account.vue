@@ -37,7 +37,7 @@
         <!-- Shard -->
         <div class="shard-box">
           <div>Shard</div>
-          <select v-model="shard">
+          <select v-model="shard" v-tooltip.top="'Select the shards'">
             <option
               v-for="item in account.shardArray"
               :value="item.shardID"
@@ -65,7 +65,7 @@
         </div>
         <div class="divider"></div>
         <div class="footer price-bar" v-if="tokenPrice">
-          <marquee-text :duration="10">
+          <marquee-text :duration="20">
             <span class="token-symbol-indicator">Harmony:</span>
             <span class="token-price-indicator"
               >{{ tokenPrice["one"] }} USD</span
@@ -231,6 +231,12 @@ export default {
 .price-bar {
   left: 0;
   right: 0;
+  font-size: 14px;
+  opacity: 1;
+  animation-name: fadeInOpacity;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in;
+  animation-duration: 2s;
 }
 
 .token-symbol-indicator {
@@ -240,5 +246,13 @@ export default {
 .token-price-indicator {
   font-weight: 600;
   margin-right: 2rem;
+}
+@keyframes fadeInOpacity {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 </style>

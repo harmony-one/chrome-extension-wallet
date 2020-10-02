@@ -16,7 +16,7 @@ import MoonLoader from "vue-spinner/src/MoonLoader";
 import ScaleLoader from "vue-spinner/src/ScaleLoader";
 import ClipLoader from "vue-spinner/src/ClipLoader";
 import MarqueeText from "vue-marquee-text-component";
-
+import ToggleButton from "vue-js-toggle-button";
 import Tooltip from "vue-directive-tooltip";
 import "vue-directive-tooltip/dist/vueDirectiveTooltip.css";
 
@@ -38,6 +38,7 @@ Vue.config.productionTip = false;
 
 sync(store, router);
 
+Vue.use(ToggleButton);
 Vue.component("marquee-text", MarqueeText);
 Vue.component("MoonLoader", MoonLoader);
 Vue.component("ClipLoader", ClipLoader);

@@ -16,9 +16,13 @@ export default {
       attempts: 5,
       countdown: 60, //sec, delay 1min when auth fails
     },
+    hideLowBalance: false,
     contacts: [],
   },
   mutations: {
+    setHideLowBalance(state, payload) {
+      state.hideLowBalance = payload;
+    },
     setPincode(state, payload) {
       state.auth.pincode = { ...payload };
     },
