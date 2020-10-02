@@ -28,6 +28,11 @@
           {{ formatBalance(account.balance, 4) }}
           <span class="box-balance-code">ONE</span>
         </div>
+        <div class="box-usd-balance">
+          <span v-if="!tokenPrice">---</span>
+          <span v-else>≈ {{ formatBalance(getUSDBalance, 4) }}</span>
+          <span class="box-usd-balance-code">USD</span>
+        </div>
 
         <!-- Shard -->
         <div class="shard-box">
@@ -59,6 +64,22 @@
           </button>
         </div>
         <div class="divider"></div>
+        <div class="footer price-bar" v-if="tokenPrice">
+          <marquee-text :duration="10">
+            <span class="token-symbol-indicator">Harmony:</span>
+            <span class="token-price-indicator"
+              >{{ tokenPrice["one"] }} USD</span
+            >
+            <span class="token-symbol-indicator">Bitcoin:</span>
+            <span class="token-price-indicator"
+              >{{ tokenPrice["btc"] }} USD</span
+            >
+            <span class="token-symbol-indicator">Ethereum:</span>
+            <span class="token-price-indicator"
+              >{{ tokenPrice["eth"] }} USD</span
+            >
+          </marquee-text>
+        </div>
       </div>
       <notifications
         group="copied"
@@ -77,6 +98,8 @@ import MainTab from "components/MainTab.vue";
 import { mapState } from "vuex";
 import BigNumber from "bignumber.js";
 
+import axios from "axios";
+
 export default {
   mixins: [account, helper],
 
@@ -86,10 +109,16 @@ export default {
 
   data: () => ({
     shard: 0,
+    tokenPrice: null,
   }),
 
   computed: {
     ...mapState(["wallets"]),
+    getUSDBalance() {
+      return new BigNumber(this.account.balance)
+        .multipliedBy(this.tokenPrice["one"])
+        .toFixed();
+    },
   },
 
   mounted() {
@@ -105,6 +134,7 @@ export default {
 
     this.loadShardingInfo();
     this.loadOneBalance();
+    this.fetchTokenPrice();
   },
 
   watch: {
@@ -115,8 +145,20 @@ export default {
   },
 
   methods: {
+    async fetchTokenPrice() {
+      const {
+        data: {
+          bitcoin: { usd: btcUSD },
+          ethereum: { usd: ethUSD },
+          harmony: { usd: hmyUSD },
+        },
+      } = await axios.get(
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,harmony&vs_currencies=usd"
+      );
+      this.tokenPrice = { btc: btcUSD, eth: ethUSD, one: hmyUSD };
+      setTimeout(this.fetchTokenPrice, 30000);
+    },
     onSendClick() {
-      console.log(this.wallets.active.isLedger);
       if (this.wallets.active.isLedger) this.openExpandPopup("/send");
       else this.$router.push("/send");
     },
@@ -185,5 +227,18 @@ export default {
 .relative {
   position: relative;
   z-index: -1;
+}
+.price-bar {
+  left: 0;
+  right: 0;
+}
+
+.token-symbol-indicator {
+  color: black;
+}
+
+.token-price-indicator {
+  font-weight: 600;
+  margin-right: 2rem;
 }
 </style>
