@@ -18,7 +18,6 @@
 - [ ] Add/Delete/Edit the contacts
 - [ ] View and revoke the accounts connected to the third-party website
 - [ ] View the USD balance on the main page
-- [ ] View the recent transaction history on the home page
 
 ## Development
 
