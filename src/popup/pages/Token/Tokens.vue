@@ -2,9 +2,19 @@
   <div>
     <app-header @refresh="refreshData" headerTab="main-tab" />
     <main class="main" :style="{ 'padding-right': '0px' }">
+      <div class="token-header">
+        <span class="hide-label">Hide low balances</span>
+        <toggle-button
+          :value="hideLowBalance"
+          color="#0a93eb"
+          :sync="true"
+          :labels="false"
+          @change="onChangeHideButton"
+        />
+      </div>
       <div class="token-container">
         <div
-          v-if="!tokenArrayOfNetwork.length || account.shard"
+          v-if="!filteredTokens.length || account.shard"
           class="message-empty"
         >
           No tokens found
@@ -13,7 +23,7 @@
         <div v-else>
           <div
             class="token-row"
-            v-for="(token, index) in tokenArrayOfNetwork"
+            v-for="(token, index) in filteredTokens"
             :key="index"
           >
             <span class="token-name">{{ compressSymbol(token.symbol) }}</span>
@@ -60,7 +70,7 @@
             <i class="material-icons">add</i>
           </button>
           <button
-            v-if="tokenArrayOfNetwork.length > 0"
+            v-if="filteredTokens.length > 0"
             class="round green"
             @click="editStart"
             v-tooltip.top="'Edit token'"
@@ -110,6 +120,7 @@ import account from "mixins/account";
 import helper from "mixins/helper";
 import { mapState } from "vuex";
 import BigNumber from "bignumber.js";
+import _ from "lodash";
 export default {
   data: () => ({
     editing: false,
@@ -122,13 +133,24 @@ export default {
       activeAcc: (state) => state.wallets.active,
       account: (state) => state.account,
       network: (state) => state.network,
+      hideLowBalance: (state) => state.settings.hideLowBalance,
     }),
+    filteredTokens() {
+      if (this.hideLowBalance)
+        return _.filter(this.tokenArrayOfNetwork, (item) =>
+          new BigNumber(item.balance).isGreaterThan(0)
+        );
+      return this.tokenArrayOfNetwork;
+    },
   },
   async mounted() {
     await this.loadAllTokenBalance();
     this.$forceUpdate();
   },
   methods: {
+    onChangeHideButton(e) {
+      this.$store.commit("settings/setHideLowBalance", e.value);
+    },
     saveTokenSymbol() {
       this.$modal.hide("modal-token-edit");
       this.$store.dispatch("hrc20/editToken", {
@@ -163,7 +185,7 @@ export default {
                 network: this.network.name,
                 token,
               });
-              if (!this.tokenArrayOfNetwork.length) this.editStop();
+              if (!this.filteredTokens.length) this.editStop();
             },
           },
         ],
@@ -261,6 +283,13 @@ export default {
   word-break: break-all;
   padding-left: 1rem;
 }
+.hide-label {
+  font-size: 14px;
+  margin-right: 0.5rem;
+}
+.token-header {
+  margin-bottom: 1rem;
+}
 button.token_send_but {
   border-radius: 5px;
   color: black;
@@ -291,7 +320,7 @@ button.token_send_but {
 .token-container {
   padding-right: 1rem;
   overflow: auto;
-  height: calc(100% - 40px);
+  height: calc(100% - 85px);
 }
 .token-button-group {
   display: flex;

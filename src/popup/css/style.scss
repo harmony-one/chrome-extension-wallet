@@ -442,7 +442,18 @@ button {
 .box-balance {
   font-size: 2rem;
   font-weight: 600;
-  word-wrap: break-word;
+  word-break: break-all;
+}
+.box-usd-balance {
+  font-size: 1.5rem;
+  font-weight: 600;
+  word-break: break-all;
+}
+.box-usd-balance-code {
+  color: #666;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  padding: 0 0 1rem;
 }
 .box-balance-code {
   color: #666;
