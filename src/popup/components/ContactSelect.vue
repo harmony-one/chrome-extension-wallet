@@ -26,6 +26,7 @@
       v-show="filteredContacts.length && listVisible"
       class="contact-select-list"
       ref="contact-select-list"
+      v-on:keyup.capture="onKeyUp"
       v-on:keydown.capture="onKeyDown"
     >
       <div
@@ -86,6 +87,7 @@ export default {
     toggleList(e) {
       e.preventDefault();
       this.listVisible = !this.listVisible;
+      if (this.listVisible) this.$refs.recipient.focus();
     },
     onBlur(e) {
       this.onSelected(this.recipient);

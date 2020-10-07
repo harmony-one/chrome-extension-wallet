@@ -47,7 +47,10 @@
             </select>
           </label>
         </div>
-        <div :class="{ row: !isToken, 'token-row': isToken }">
+        <div
+          :class="{ row: !isToken, 'token-row': isToken }"
+          class="amount-row"
+        >
           <label class="input-label" :class="{ amount: !isToken }">
             Amount
             <input
@@ -60,19 +63,6 @@
               v-model="amount"
               v-on:keyup.enter="checkContactExist"
             />
-            <div
-              class="maximum-label"
-              v-show="!loading"
-              @click="setMaxBalance"
-              v-tooltip.bottom="'Max amount to send excluding network fee'"
-            >
-              Max:
-              {{
-                formatBalance(getMaxBalance, selectedToken.decimals) +
-                  " " +
-                  selectedToken.symbol
-              }}
-            </div>
           </label>
           <label v-if="!isToken" class="input-label token">
             Token
@@ -86,6 +76,19 @@
               </option>
             </select>
           </label>
+        </div>
+        <div
+          class="maximum-label"
+          v-show="!loading"
+          @click="setMaxBalance"
+          v-tooltip.bottom="'Max amount to send excluding network fee'"
+        >
+          Max:
+          {{
+            formatBalance(getMaxBalance, selectedToken.decimals) +
+              " " +
+              selectedToken.symbol
+          }}
         </div>
         <div class="row">
           <label class="input-label gas-price">
@@ -287,7 +290,7 @@ import { sendToken } from "services/Hrc20Service";
 import { isValidAddress } from "@harmony-js/utils";
 import account from "mixins/account";
 import helper from "mixins/helper";
-import ContactSelect from "./ContactSelect";
+import ContactSelect from "components/ContactSelect";
 import {
   signTransactionWithLedger,
   signHRCTransactionWithLedger,
@@ -758,6 +761,7 @@ h3 {
 }
 .maximum-label {
   color: red;
+  cursor: pointer;
   font-size: 12px;
   font-style: italic;
   margin-top: 3px;
@@ -765,6 +769,9 @@ h3 {
 }
 .gray {
   color: #bbb;
+}
+.amount-row {
+  margin-bottom: -13px;
 }
 
 .invoice-content {
