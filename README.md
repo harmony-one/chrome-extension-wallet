@@ -15,9 +15,9 @@
 - [x] Set the pin code, pin digits and lock timer on the settings
 - [x] Support the ledger wallet to communicate between onewallet and staking.harmony.one
 - [x] View the HRC20 token transaction amount in the history page
-- [ ] Add/Delete/Edit the contacts
+- [x] Add/Delete/Edit the contacts
 - [ ] View and revoke the accounts connected to the third-party website
-- [ ] View the USD balance on the main page
+- [x] View the USD balance on the main page
 
 ## Development
 
