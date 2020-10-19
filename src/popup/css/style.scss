@@ -36,6 +36,7 @@ html {
 
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
   background-color: transparent;
 }
 
@@ -250,80 +251,93 @@ textarea.input-field:read-only {
     flex: 1;
   }
 }
-button,
-a.button {
-  text-align: center;
-  font-size: 13px;
-  padding: 10px;
-  font-weight: 400;
-  min-width: 60px;
-  color: white;
-  border-radius: 0.3rem;
-  cursor: pointer;
-  background: #0a93eb;
-  /* transition: all 0.2s ease; */
-  white-space: nowrap;
-  outline: none;
-  border: none;
-  border: 2px solid #0a93eb;
-}
-button:hover {
-  background-color: #0987d7;
-}
-button:active {
-  background-color: #1f6bb7;
-}
-button.outline {
-  background: #f7f7ff;
-  border: 2px solid #0a93eb;
-  color: black;
-  &:hover {
-    background-color: #c7e7fc;
-  }
-  &:active {
-    background-color: #c5dbf7;
-  }
-}
-
-button.outline:disabled,
-button:disabled {
-  background: #e0e0e0;
-  border: 2px solid #e0e0e0;
-  color: #888;
-}
-
-button.round {
-  background-color: #0987d7;
-  width: 40px;
-  height: 40px;
-  color: white;
-  border-radius: 20px;
-  padding: 0px;
-  min-width: 40px;
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.6);
-  border: none;
-  &:hover {
-    background-color: #3b9ddb;
-  }
-  &:active {
-    background-color: #1d7ab5;
-  }
-  i {
-    font-size: 24px;
-    line-height: 40px;
+button {
+  &.primary {
+    text-align: center;
+    font-size: 13px;
+    padding: 10px;
+    font-weight: 400;
+    min-width: 60px;
     color: white;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    background: #0a93eb;
+    /* transition: all 0.2s ease; */
+    white-space: nowrap;
+    outline: none;
+    border: 2px solid #0a93eb;
+    &:hover {
+      background-color: #0987d7;
+    }
+    &:active {
+      background-color: #1f6bb7;
+    }
+    &:disabled {
+      background: #e0e0e0;
+      border: 2px solid #e0e0e0;
+      color: #888;
+    }
+  }
+  &.outline {
+    background: #f7f7ff;
+    border: 2px solid #0a93eb;
+    color: black;
+    text-align: center;
+    font-size: 13px;
+    padding: 10px;
+    font-weight: 400;
+    min-width: 60px;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    white-space: nowrap;
+    outline: none;
+    &:hover {
+      background-color: #c7e7fc;
+    }
+    &:active {
+      background-color: #c5dbf7;
+    }
+    &:disabled {
+      background: #e0e0e0;
+      border: 2px solid #e0e0e0;
+      color: #888;
+    }
+  }
+  &.round {
+    background-color: #0987d7;
+    width: 40px;
+    height: 40px;
+    outline: none;
+    cursor: pointer;
+    color: white;
+    border-radius: 20px;
+    padding: 0px;
+    min-width: 40px;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.6);
+    border: none;
+    &:hover {
+      background-color: #3b9ddb;
+    }
+    &:active {
+      background-color: #1d7ab5;
+    }
+    i {
+      font-size: 24px;
+      line-height: 40px;
+      color: white;
+    }
+  }
+  &.green {
+    background-color: #0ac993;
+    &:hover {
+      background-color: #15ebae;
+    }
+    &:active {
+      background-color: #0aab7d;
+    }
   }
 }
 
-button.green-but {
-  background-color: #0ac993;
-  &:hover {
-    background-color: #15ebae;
-  }
-  &:active {
-    background-color: #0aab7d;
-  }
-}
 .flex {
   width: 100%;
 }
@@ -338,25 +352,29 @@ button.green-but {
   border-bottom-right-radius: 0;
   margin: 0;
 }
-.input-group .button {
+.input-group button {
   width: auto;
+  cursor: pointer;
+  min-width: 60px;
+  border-radius: 0.3rem;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border: 1px solid #d9d9d9;
   background: #ddd;
+  outline: none;
   color: black;
   box-shadow: none;
   font-size: 1rem;
   margin: 0;
   padding: 0.5rem 0.75rem;
-}
-.input-group .button:hover,
-.input-group .button:focus {
-  background: #fafafa;
-}
-.input-group .button:active {
-  transform: none;
-  background: #f5f5f5;
+  &:hover,
+  &:focus {
+    background: #fafafa;
+  }
+  &:active {
+    transform: none;
+    background: #f5f5f5;
+  }
 }
 
 .form-info {
@@ -424,7 +442,18 @@ button.green-but {
 .box-balance {
   font-size: 2rem;
   font-weight: 600;
-  word-wrap: break-word;
+  word-break: break-all;
+}
+.box-usd-balance {
+  font-size: 1.5rem;
+  font-weight: 600;
+  word-break: break-all;
+}
+.box-usd-balance-code {
+  color: #666;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  padding: 0 0 1rem;
 }
 .box-balance-code {
   color: #666;
@@ -558,14 +587,12 @@ button.green-but {
   flex-direction: column;
 }
 .list-item {
-  position: relative;
   display: flex;
-  justify-content: space-between;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.5s ease;
   background: #ffffff;
   border-radius: 5px;
-  padding: 15px 10px 15px 20px;
+  padding: 15px 10px 15px 10px;
   margin-bottom: 10px;
   align-items: center;
   font-size: 15px;
@@ -578,21 +605,23 @@ button.green-but {
   &:active {
     background: #f5f5f5;
   }
-  i {
-    position: absolute;
-    color: black;
-    left: 10px;
-    font-size: 36px;
-  }
   .list-item-content {
-    margin-left: 36px;
     & > div:first-child {
-      font-size: 20px;
+      font-size: 16px;
     }
     & > div:last-child {
       color: #aaa;
       font-size: 11px;
     }
+  }
+}
+
+.setting-icon {
+  display: flex;
+  i {
+    color: black;
+    font-size: 30px;
+    margin-right: 10px;
   }
 }
 
@@ -648,6 +677,14 @@ input.vue-pincode-input:focus {
 .failed-caption {
   color: red;
 }
+
+.center-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 @keyframes miss {
   0% {
     transform: translate(0, 0);

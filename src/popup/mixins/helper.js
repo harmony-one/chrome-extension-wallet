@@ -17,7 +17,9 @@ export default {
       }
     },
     formatBalance(balance, decimal) {
-      return new BigNumber(balance).toFormat(Math.min(decimal, 36));
+      return new BigNumber(balance).isEqualTo(0)
+        ? 0
+        : new BigNumber(balance).toFormat(Math.min(decimal, 36));
     },
     compressAddress(address, leftOffset = 15, RightOffet = 5) {
       return (

@@ -141,7 +141,7 @@ const ret = await harmony.messenger.send(
     },
   ],
   harmony.messenger.chainPrefix,
-  harmony.messenger.getCurrentShardID()
+  harmony.defaultShardID
 );
 return ret.result; //transaction list
 ```

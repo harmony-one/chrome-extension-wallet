@@ -2,21 +2,41 @@
   <div>
     <app-header @refresh="refreshData" headerTab="main-tab" />
     <main class="main" :style="{ 'padding-right': '0px' }">
+      <div class="token-header">
+        <span class="hide-label">Hide low balances</span>
+        <toggle-button
+          :value="hideLowBalance"
+          color="#0a93eb"
+          :sync="true"
+          :labels="false"
+          @change="onChangeHideButton"
+        />
+      </div>
       <div class="token-container">
         <div
-          v-if="!tokenArrayOfNetwork.length || account.shard"
+          v-if="!filteredTokens.length || account.shard"
           class="message-empty"
-        >No tokens found</div>
+        >
+          No tokens found
+        </div>
 
         <div v-else>
-          <div class="token-row" v-for="(token, index) in tokenArrayOfNetwork" :key="index">
+          <div
+            class="token-row"
+            v-for="(token, index) in filteredTokens"
+            :key="index"
+          >
             <span class="token-name">{{ compressSymbol(token.symbol) }}</span>
             <div v-if="!editing">
-              <moon-loader :loading="token.isLoading" color="#0a93eb" size="26px" />
+              <moon-loader
+                :loading="token.isLoading"
+                color="#0a93eb"
+                size="26px"
+              />
               <div class="token-box" v-if="!token.isLoading">
                 <span class="token-balance">
                   {{
-                  formatBalance(token.balance, Math.min(4, token.decimals))
+                    formatBalance(token.balance, Math.min(4, token.decimals))
                   }}
                 </span>
                 <button
@@ -24,12 +44,18 @@
                   :disabled="token.balance <= 0"
                   @click="sendToken(token)"
                   v-tooltip.top="'Send token'"
-                >Send</button>
+                >
+                  Send
+                </button>
               </div>
             </div>
             <div v-else class="token-edit-box">
-              <button class="edit_but" @click="editToken(token)">Edit</button>
-              <button class="delete_but" @click="deleteToken(token)">Delete</button>
+              <button class="primary edit_but" @click="editToken(token)">
+                Edit
+              </button>
+              <button class="primary delete_but" @click="deleteToken(token)">
+                Delete
+              </button>
             </div>
           </div>
         </div>
@@ -37,15 +63,15 @@
       <div class="token-button-footer">
         <div class="token-button-group" v-if="!editing">
           <button
-            class="round add_token"
+            class="round"
             @click="$router.push('/tokens/add')"
             v-tooltip.top="'Add token'"
           >
             <i class="material-icons">add</i>
           </button>
           <button
-            v-if="tokenArrayOfNetwork.length > 0"
-            class="round green-but"
+            v-if="filteredTokens.length > 0"
+            class="round green"
             @click="editStart"
             v-tooltip.top="'Edit token'"
           >
@@ -53,10 +79,22 @@
           </button>
         </div>
         <div v-else>
-          <button @click="editStop" v-tooltip.top="'Finish editing'">Done</button>
+          <button
+            class="primary"
+            @click="editStop"
+            v-tooltip.top="'Finish editing'"
+          >
+            Done
+          </button>
         </div>
       </div>
-      <modal name="modal-token-edit" :adaptive="true" transition="scale" :width="250" height="auto">
+      <modal
+        name="modal-token-edit"
+        :adaptive="true"
+        transition="scale"
+        :width="250"
+        height="auto"
+      >
         <div class="modal-header">Change the token symbol</div>
         <div class="modal-body">
           <input
@@ -67,7 +105,9 @@
           />
         </div>
         <div class="modal-footer">
-          <div class="secondary" @click="$modal.hide('modal-token-edit')">CLOSE</div>
+          <div class="secondary" @click="$modal.hide('modal-token-edit')">
+            CLOSE
+          </div>
           <div class="primary" @click="saveTokenSymbol">SAVE</div>
         </div>
       </modal>
@@ -80,6 +120,7 @@ import account from "mixins/account";
 import helper from "mixins/helper";
 import { mapState } from "vuex";
 import BigNumber from "bignumber.js";
+import _ from "lodash";
 export default {
   data: () => ({
     editing: false,
@@ -92,13 +133,24 @@ export default {
       activeAcc: (state) => state.wallets.active,
       account: (state) => state.account,
       network: (state) => state.network,
+      hideLowBalance: (state) => state.settings.hideLowBalance,
     }),
+    filteredTokens() {
+      if (this.hideLowBalance)
+        return _.filter(this.tokenArrayOfNetwork, (item) =>
+          new BigNumber(item.balance).isGreaterThan(0)
+        );
+      return this.tokenArrayOfNetwork;
+    },
   },
   async mounted() {
     await this.loadAllTokenBalance();
     this.$forceUpdate();
   },
   methods: {
+    onChangeHideButton(e) {
+      this.$store.commit("settings/setHideLowBalance", e.value);
+    },
     saveTokenSymbol() {
       this.$modal.hide("modal-token-edit");
       this.$store.dispatch("hrc20/editToken", {
@@ -133,7 +185,7 @@ export default {
                 network: this.network.name,
                 token,
               });
-              if (!this.tokenArrayOfNetwork.length) this.editStop();
+              if (!this.filteredTokens.length) this.editStop();
             },
           },
         ],
@@ -159,7 +211,9 @@ export default {
       await this.loadOneBalance();
     },
     sendToken(token) {
-      this.$router.push(`/send-token/${token.address}`);
+      if (this.activeAcc.isLedger)
+        this.openExpandPopup(`/send-token/${token.address}`);
+      else this.$router.push(`/send-token/${token.address}`);
     },
   },
 };
@@ -188,6 +242,7 @@ export default {
   }
 }
 .token-edit-box {
+  outline: none;
   .edit_but {
     border: none;
     border: 1px solid #0a93eb;
@@ -228,9 +283,22 @@ export default {
   word-break: break-all;
   padding-left: 1rem;
 }
+.hide-label {
+  font-size: 14px;
+  margin-right: 0.5rem;
+}
+.token-header {
+  margin-bottom: 1rem;
+}
 button.token_send_but {
   border-radius: 5px;
   color: black;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 400;
+  min-width: 60px;
+  white-space: nowrap;
+  outline: none;
   width: 60px;
   background: white;
   border: 1px solid #aaa;
@@ -244,6 +312,7 @@ button.token_send_but {
   &:disabled {
     cursor: default;
     color: #ddd;
+    background: white;
     border: 1px solid #ddd;
   }
 }
@@ -251,7 +320,7 @@ button.token_send_but {
 .token-container {
   padding-right: 1rem;
   overflow: auto;
-  height: calc(100% - 40px);
+  height: calc(100% - 85px);
 }
 .token-button-group {
   display: flex;

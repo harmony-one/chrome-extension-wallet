@@ -24,7 +24,9 @@
             ref="oldpincodeInput"
           />
         </div>
-        <div class="pin-caption" :class="{ 'failed-caption': errorcode === 1 }">{{ statusCaption }}</div>
+        <div class="pin-caption" :class="{ 'failed-caption': errorcode === 1 }">
+          {{ statusCaption }}
+        </div>
       </div>
       <div v-else-if="scene === 1">
         <div class="pin-label">Set up a New PIN Code</div>
@@ -63,11 +65,17 @@
             :disabled="!attempts"
           />
         </div>
-        <div class="pin-caption" :class="{ 'failed-caption': errorcode === 2 }">{{ statusCaption }}</div>
+        <div class="pin-caption" :class="{ 'failed-caption': errorcode === 2 }">
+          {{ statusCaption }}
+        </div>
       </div>
       <div class="footer">
-        <button class="flex mt-20" v-if="!attempts" @click="onRetry">Retry</button>
-        <button class="flex mt-20" v-else @click="onBackClicked">Back</button>
+        <button class="primary flex mt-20" v-if="!attempts" @click="onRetry">
+          Retry
+        </button>
+        <button class="primary flex mt-20" v-else @click="onBackClicked">
+          Back
+        </button>
       </div>
     </div>
   </div>

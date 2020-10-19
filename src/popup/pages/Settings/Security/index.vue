@@ -16,8 +16,8 @@
 
 <script>
 import { mapState } from "vuex";
-import PindigitsModal from "./Security/PindigitsModal";
-import LocktimerModal from "./Security/LocktimerModal";
+import PindigitsModal from "./PindigitsModal";
+import LocktimerModal from "./LocktimerModal";
 export default {
   data() {
     return {

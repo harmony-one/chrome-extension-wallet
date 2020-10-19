@@ -6,10 +6,18 @@
         <div class="main-logo">
           <img src="images/harmony-big.png" class="logo-img" alt="Harmony" />
         </div>
-        <span v-if="wallets.active.isLedger" class="ledger-badge big account-badge">Ledger</span>
+        <span
+          v-if="wallets.active.isLedger"
+          class="ledger-badge big account-badge"
+          >Ledger</span
+        >
       </div>
       <div class="container">
-        <div class="account-box" @click="onClickAccount()" v-tooltip.top="'Click to copy'">
+        <div
+          class="account-box"
+          @click="onClickAccount()"
+          v-tooltip.top="'Click to copy'"
+        >
           <h2 class="name-label">{{ compressName(wallets.active.name) }}</h2>
           <div class="box-address">{{ compressAddress(address, 20, 5) }}</div>
         </div>
@@ -20,16 +28,23 @@
           {{ formatBalance(account.balance, 4) }}
           <span class="box-balance-code">ONE</span>
         </div>
+        <div class="box-usd-balance">
+          <span v-if="!tokenPrice">---</span>
+          <span v-else>≈ {{ formatBalance(getUSDBalance, 4) }}</span>
+          <span class="box-usd-balance-code">USD</span>
+        </div>
 
         <!-- Shard -->
         <div class="shard-box">
           <div>Shard</div>
-          <select v-model="shard">
+          <select v-model="shard" v-tooltip.top="'Select the shards'">
             <option
               v-for="item in account.shardArray"
               :value="item.shardID"
               :key="item.shardID"
-            >{{ item.shardID }}</option>
+            >
+              {{ item.shardID }}
+            </option>
           </select>
         </div>
         <div class="button-group">
@@ -37,12 +52,41 @@
             class="outline"
             @click="$router.push('/deposit')"
             v-tooltip.top="'Deposit token'"
-          >Deposit</button>
-          <button @click="$router.push('/send')" v-tooltip.top="'Send token'">Send</button>
+          >
+            Deposit
+          </button>
+          <button
+            class="primary"
+            @click="onSendClick"
+            v-tooltip.top="'Send token'"
+          >
+            Send
+          </button>
         </div>
         <div class="divider"></div>
+        <div class="footer price-bar" v-if="tokenPrice">
+          <marquee-text :duration="20">
+            <span class="token-symbol-indicator">Harmony:</span>
+            <span class="token-price-indicator"
+              >{{ tokenPrice["one"] }} USD</span
+            >
+            <span class="token-symbol-indicator">Bitcoin:</span>
+            <span class="token-price-indicator"
+              >{{ tokenPrice["btc"] }} USD</span
+            >
+            <span class="token-symbol-indicator">Ethereum:</span>
+            <span class="token-price-indicator"
+              >{{ tokenPrice["eth"] }} USD</span
+            >
+          </marquee-text>
+        </div>
       </div>
-      <notifications group="copied" width="180" :max="2" class="notifiaction-container" />
+      <notifications
+        group="copied"
+        width="180"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -54,6 +98,8 @@ import MainTab from "components/MainTab.vue";
 import { mapState } from "vuex";
 import BigNumber from "bignumber.js";
 
+import axios from "axios";
+
 export default {
   mixins: [account, helper],
 
@@ -63,10 +109,16 @@ export default {
 
   data: () => ({
     shard: 0,
+    tokenPrice: null,
   }),
 
   computed: {
     ...mapState(["wallets"]),
+    getUSDBalance() {
+      return new BigNumber(this.account.balance)
+        .multipliedBy(this.tokenPrice["one"])
+        .toFixed();
+    },
   },
 
   mounted() {
@@ -82,6 +134,7 @@ export default {
 
     this.loadShardingInfo();
     this.loadOneBalance();
+    this.fetchTokenPrice();
   },
 
   watch: {
@@ -92,6 +145,23 @@ export default {
   },
 
   methods: {
+    async fetchTokenPrice() {
+      const {
+        data: {
+          bitcoin: { usd: btcUSD },
+          ethereum: { usd: ethUSD },
+          harmony: { usd: hmyUSD },
+        },
+      } = await axios.get(
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,harmony&vs_currencies=usd"
+      );
+      this.tokenPrice = { btc: btcUSD, eth: ethUSD, one: hmyUSD };
+      setTimeout(this.fetchTokenPrice, 30000);
+    },
+    onSendClick() {
+      if (this.wallets.active.isLedger) this.openExpandPopup("/send");
+      else this.$router.push("/send");
+    },
     onClickAccount() {
       this.$copyText(this.address).then(() => {
         this.$notify({
@@ -157,5 +227,32 @@ export default {
 .relative {
   position: relative;
   z-index: -1;
+}
+.price-bar {
+  left: 0;
+  right: 0;
+  font-size: 14px;
+  opacity: 1;
+  animation-name: fadeInOpacity;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in;
+  animation-duration: 2s;
+}
+
+.token-symbol-indicator {
+  color: black;
+}
+
+.token-price-indicator {
+  font-weight: 600;
+  margin-right: 2rem;
+}
+@keyframes fadeInOpacity {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 </style>
