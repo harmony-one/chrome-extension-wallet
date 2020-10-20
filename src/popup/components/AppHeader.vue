@@ -324,21 +324,21 @@ export default {
       this.openExpandPopup("/connect-hardware-wallet");
     },
     lockWallet() {
-      // if (!this.getPassword) {
-      //   this.$modal.show("dialog", {
-      //     text:
-      //       "You haven't set the password yet. Please set the password  on the <b>Settings</b>",
-      //     buttons: [
-      //       {
-      //         title: "CLOSE",
-      //         handler: () => {
-      //           this.$modal.hide("dialog");
-      //         },
-      //       },
-      //     ],
-      //   });
-      //   return;
-      // }
+      if (!this.getPassword) {
+        this.$modal.show("dialog", {
+          text:
+            "You haven't set the password yet. Please set the password on the <b>Settings/Security</b>",
+          buttons: [
+            {
+              title: "CLOSE",
+              handler: () => {
+                this.$modal.hide("dialog");
+              },
+            },
+          ],
+        });
+        return;
+      }
       this.$store.dispatch("settings/setLockState", true);
       this.$router.push("/lock");
     },

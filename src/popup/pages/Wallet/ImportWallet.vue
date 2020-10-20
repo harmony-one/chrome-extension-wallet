@@ -89,52 +89,19 @@
               ref="keystorepass"
               v-model="keystorepass"
               placeholder="Enter the keystore file password"
-            />
-          </label>
-        </div>
-        <label class="input-label">
-          <span v-if="selectType !== 'keystore'">Password</span>
-          <span v-else>Enter your account password</span>
-          <input
-            class="input-field"
-            type="password"
-            name="password"
-            ref="password"
-            v-model="password"
-            :placeholder="
-              selectType !== 'keystore'
-                ? 'Input the password'
-                : 'Enter your account password'
-            "
-          />
-        </label>
-        <div>
-          <label class="input-label">
-            Confirm the password
-            <input
-              class="input-field"
-              type="password"
-              name="password_confirm"
-              ref="password_confirm"
-              v-model="password_confirm"
-              placeholder="Confirm the password"
               v-on:keyup.enter="importAcc"
             />
           </label>
         </div>
         <div class="button-group">
           <button class="outline" @click="() => (scene = 1)">Back</button>
-          <button
-            class="primary"
-            @click="importAcc"
-            :disabled="!name || !password"
-          >
+          <button class="primary" @click="importAcc" :disabled="!name">
             Next
           </button>
         </div>
       </div>
       <div v-else>
-        <pincode-modal @success="addAcc" :onBack="() => (scene = 2)" />
+        <create-password @success="addAcc" :onBack="() => (scene = 2)" />
       </div>
       <notifications
         group="notify"
@@ -147,7 +114,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import _ from "lodash";
 import {
   encryptKeyStore,
@@ -161,19 +128,19 @@ import {
 export default {
   data: () => ({
     name: "",
-    password: "",
     keystorepass: "",
-    password_confirm: "",
     privateKey: "",
     keyFromFile: "",
     mnemonic: "",
     scene: 1,
     selectType: "key",
+    decryptResult: null,
     file: null,
     wallet: null,
   }),
   computed: {
     ...mapState(["wallets"]),
+    ...mapGetters(["getPassword"]),
   },
 
   methods: {
@@ -232,50 +199,11 @@ export default {
       }
       this.scene = 2;
     },
-    addAcc() {
-      this.$store.commit("wallets/addAccount", this.wallet);
-      alert(
-        "Your account is imported successfully. To continue, close this tab and use the extension."
-      );
-      chrome.tabs.getCurrent(function(tab) {
-        chrome.tabs.remove(tab.id, function() {});
-      });
-    },
-    async importAcc() {
-      if (!this.password) {
-        this.$notify({
-          group: "notify",
-          text: "Password is required",
-        });
-        return false;
-      }
-      if (!this.name) {
-        this.$notify({
-          group: "notify",
-          text: "Account name is required",
-        });
-        return false;
-      }
-      if (this.password.length < 8) {
-        this.$notify({
-          group: "notify",
-          type: "warn",
-          text: "Password must be longer than 8 characters",
-        });
-        return false;
-      } else if (this.password !== this.password_confirm) {
-        this.$notify({
-          group: "notify",
-          type: "error",
-          text: "Password doesn't match",
-        });
-        return false;
-      }
-
+    async addAcc(password) {
       if (this.selectType === "key") {
         const oneAddr = getAddressFromPrivateKey(this.privateKey);
 
-        const keystore = await encryptKeyStore(this.password, this.privateKey);
+        const keystore = await encryptKeyStore(password, this.privateKey);
         this.wallet = {
           name: this.name,
           address: oneAddr,
@@ -286,30 +214,18 @@ export default {
         this.wallet = await createAccountFromMnemonic(
           this.name,
           this.mnemonic,
-          this.password
+          password
         );
         this.wallet = { ...this.wallet, isLedger: false };
       } else {
-        const decryptResult = await decryptKeyStoreFromFile(
-          this.keystorepass,
-          this.keyFromFile
-        );
-        if (!decryptResult) {
-          this.$notify({
-            group: "notify",
-            type: "error",
-            text: "Keystore password is incorrect or file is invalid",
-          });
-          return false;
-        }
         const encryptedKeyStore = await encryptKeyStore(
-          this.password,
-          decryptResult.privateKey
+          password,
+          this.decryptResult.privateKey
         );
 
         this.wallet = {
           name: this.name,
-          address: decryptResult.address,
+          address: this.decryptResult.address,
           keystore: encryptedKeyStore,
           isLedger: false,
         };
@@ -325,7 +241,38 @@ export default {
         });
         return false;
       }
-      this.scene = 3;
+      this.$store.commit("wallets/addAccount", this.wallet);
+      alert(
+        "Your account is imported successfully. To continue, close this tab and use the extension."
+      );
+      chrome.tabs.getCurrent(function(tab) {
+        chrome.tabs.remove(tab.id, function() {});
+      });
+    },
+    async importAcc() {
+      if (!this.name) {
+        this.$notify({
+          group: "notify",
+          text: "Account name is required",
+        });
+        return false;
+      }
+      if (this.selectType == "keystore") {
+        this.decryptResult = await decryptKeyStoreFromFile(
+          this.keystorepass,
+          this.keyFromFile
+        );
+        if (!this.decryptResult) {
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Keystore password is incorrect or file is invalid",
+          });
+          return false;
+        }
+      }
+      if (this.getPassword) await this.addAcc(this.getPassword);
+      else this.scene = 3;
     },
   },
 };

@@ -2,7 +2,7 @@
   <div>
     <app-header headerTab="create-tab" />
     <main class="main">
-      <div class="main-logo" v-if="scene === 1 || scene === 4">
+      <div class="main-logo" v-if="scene === 1 || scene === 2">
         <img src="images/harmony.png" alt="Harmony" />
       </div>
       <div v-if="scene === 1">
@@ -39,28 +39,6 @@
       </div>
       <div v-else-if="scene === 2">
         <label class="input-label">
-          Password
-          <input
-            class="input-field"
-            type="password"
-            name="password"
-            ref="password"
-            v-model="password"
-            placeholder="Input the password"
-          />
-        </label>
-        <label class="input-label">
-          Confirm the password
-          <input
-            class="input-field"
-            type="password"
-            name="password_confirm"
-            ref="password_confirm"
-            v-model="password_confirm"
-            placeholder="Confirm the password"
-          />
-        </label>
-        <label class="input-label">
           Seed Phrase
           <a class="copy-tag" @click.prevent="copyToClipboard"
             >(Click here to copy)</a
@@ -79,13 +57,13 @@
         >
         <div class="button-group">
           <button class="outline" @click="() => (scene = 1)">Back</button>
-          <button class="primary" @click="confirmPassword" :disabled="!agree">
+          <button class="primary" @click="confirmSeed" :disabled="!agree">
             Next
           </button>
         </div>
       </div>
       <div v-else-if="scene === 3">
-        <seed-checker :phrase="seed_phrase" :confirm="() => (scene = 4)" />
+        <seed-checker :phrase="seed_phrase" :confirm="seedConfirmed" />
       </div>
       <div v-else>
         <create-password @success="addAccount" :onBack="() => (scene = 3)" />
@@ -106,24 +84,40 @@ import {
   generatePhrase,
   createAccountFromMnemonic,
 } from "services/AccountService";
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 
 export default {
   mixins: [account],
   data: () => ({
     name: "",
-    password: "",
     agree: false,
-    password_confirm: "",
     seed_phrase: "",
     scene: 1,
     wallet: null,
   }),
   computed: {
     ...mapState(["wallets"]),
+    ...mapGetters(["getPassword"]),
   },
   methods: {
-    addAccount(password) {
+    async seedConfirmed() {
+      if (this.getPassword) await this.addAccount(this.getPassword);
+      else this.scene = 4;
+    },
+    async addAccount(password) {
+      this.wallet = await createAccountFromMnemonic(
+        this.name,
+        this.seed_phrase,
+        password
+      );
+      if (!this.wallet) {
+        this.$notify({
+          group: "notify",
+          type: "error",
+          text: "Password or mnemonic is invalid",
+        });
+        return;
+      }
       this.$store.commit("wallets/addAccount", {
         ...this.wallet,
         isLedger: false,
@@ -135,35 +129,7 @@ export default {
         chrome.tabs.remove(tab.id, function() {});
       });
     },
-    async confirmPassword() {
-      if (this.password.length < 8) {
-        this.$notify({
-          group: "notify",
-          type: "warn",
-          text: "Password must be longer than 8 characters",
-        });
-        return;
-      } else if (this.password !== this.password_confirm) {
-        this.$notify({
-          group: "notify",
-          type: "error",
-          text: "Password doesn't match",
-        });
-        return;
-      }
-      this.wallet = await createAccountFromMnemonic(
-        this.name,
-        this.seed_phrase,
-        this.password
-      );
-      if (!this.wallet) {
-        this.$notify({
-          group: "notify",
-          type: "error",
-          text: "Password is incorrect or mnemonic is incorrect",
-        });
-        return;
-      }
+    confirmSeed() {
       this.scene = 3;
     },
     copyToClipboard() {

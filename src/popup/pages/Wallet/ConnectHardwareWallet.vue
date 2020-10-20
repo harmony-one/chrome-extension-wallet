@@ -61,7 +61,7 @@
         </button>
       </div>
       <div v-else>
-        <pincode-modal @success="createAccount" :onBack="() => (scene = 2)" />
+        <create-password @success="createAccount" :onBack="() => (scene = 2)" />
       </div>
       <notifications
         group="notify"
