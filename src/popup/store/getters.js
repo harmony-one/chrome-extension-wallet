@@ -1,20 +1,4 @@
 import { decryptString } from "services/CryptoService";
-export const getPinCode = (state) => {
-  try {
-    const { auth } = state.settings;
-    const { data, digits } = auth.pincode;
-    if (data) {
-      const pincode = decryptString(data.payload, data.salt);
-      return {
-        pin: pincode,
-        digits,
-      };
-    }
-    return false;
-  } catch (err) {
-    return false;
-  }
-};
 
 export const getLockState = (state) => {
   try {

@@ -63,17 +63,14 @@ export default {
       contactsArray.splice(payload, 1);
       commit("setContacts", contactsArray);
     },
-    setPincode({ commit }, payload) {
+    setPassword({ commit }, payload) {
       try {
         const salt = uuidv4().replace(/-/g, "");
         const data = {
           payload: encryptString(payload, salt),
           salt,
         };
-        commit("setPincode", {
-          data,
-          digits: payload.length,
-        });
+        commit("setPassword", data);
       } catch (err) {
         console.error(err);
       }

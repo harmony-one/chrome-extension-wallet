@@ -136,7 +136,7 @@
                   class="material-icons"
                   v-show="
                     account.address === wallets.active.address &&
-                    ((selectedIndex = index) || 1)
+                      ((selectedIndex = index) || 1)
                   "
                   >check</i
                 >
@@ -257,7 +257,7 @@ export default {
   }),
 
   computed: {
-    ...mapGetters(["getPinCode"]),
+    ...mapGetters(["getPassword"]),
     ...mapState({
       wallets: (state) => state.wallets,
       myroute: (state) => state.route,
@@ -324,21 +324,21 @@ export default {
       this.openExpandPopup("/connect-hardware-wallet");
     },
     lockWallet() {
-      if (!this.getPinCode) {
-        this.$modal.show("dialog", {
-          text:
-            "You haven't set the PIN Code yet. Please set the PIN Code on the <b>Settings</b>",
-          buttons: [
-            {
-              title: "CLOSE",
-              handler: () => {
-                this.$modal.hide("dialog");
-              },
-            },
-          ],
-        });
-        return;
-      }
+      // if (!this.getPassword) {
+      //   this.$modal.show("dialog", {
+      //     text:
+      //       "You haven't set the password yet. Please set the password  on the <b>Settings</b>",
+      //     buttons: [
+      //       {
+      //         title: "CLOSE",
+      //         handler: () => {
+      //           this.$modal.hide("dialog");
+      //         },
+      //       },
+      //     ],
+      //   });
+      //   return;
+      // }
       this.$store.dispatch("settings/setLockState", true);
       this.$router.push("/lock");
     },

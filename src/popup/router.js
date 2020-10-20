@@ -25,7 +25,7 @@ import Settings from "./pages/Settings/index.vue";
 import Security from "./pages/Settings/Security/index.vue";
 import Contacts from "./pages/Settings/Contacts/index.vue";
 import PincodeModal from "./pages/Settings/Security/PincodeModal.vue";
-import CreatePassword from "./pages/Settings/Security/CreatePassword.vue";
+import MigrateAccounts from "./pages/Settings/Security/MigrateAccounts.vue";
 
 import store from "./store";
 
@@ -46,9 +46,9 @@ const router = new Router({
     },
     //end
     {
-      path: "/create-password",
-      name: "create-apssword",
-      component: CreatePassword,
+      path: "/migrate-accounts",
+      name: "migrate-accounts",
+      component: MigrateAccounts,
     },
     {
       path: "/",
@@ -219,11 +219,8 @@ const router = new Router({
 });
 router.beforeEach(async (to, from, next) => {
   if (to.matched.some((record) => record.meta.authenticate)) {
-    if (!store.getters.getPassword) {
-      chrome.tabs.create({
-        url: "popup.html#/create-password",
-      });
-      return;
+    if (!store.getters.getPassword && store.state.wallets.accounts.length) {
+      next({ path: "/migrate-accounts" });
     }
   }
 
