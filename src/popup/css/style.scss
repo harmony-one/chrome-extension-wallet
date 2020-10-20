@@ -215,7 +215,6 @@ textarea.input-field:read-only {
 }
 .input-field:disabled {
   position: relative;
-  z-index: -1;
   background: #eeeeee;
 }
 
@@ -267,10 +266,10 @@ button {
     outline: none;
     border: 2px solid #0a93eb;
     &:hover {
-      background-color: #0987d7;
+      background: #0987d7;
     }
     &:active {
-      background-color: #1f6bb7;
+      background: #1f6bb7;
     }
     &:disabled {
       background: #e0e0e0;
@@ -292,10 +291,10 @@ button {
     white-space: nowrap;
     outline: none;
     &:hover {
-      background-color: #c7e7fc;
+      background: #c7e7fc;
     }
     &:active {
-      background-color: #c5dbf7;
+      background: #c5dbf7;
     }
     &:disabled {
       background: #e0e0e0;
@@ -316,10 +315,16 @@ button {
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.6);
     border: none;
     &:hover {
-      background-color: #3b9ddb;
+      background: #3b9ddb;
     }
     &:active {
-      background-color: #1d7ab5;
+      background: #1d7ab5;
+    }
+    &:disabled {
+      background: #e0e0e0;
+      i {
+        color: #888;
+      }
     }
     i {
       font-size: 24px;
@@ -645,7 +650,7 @@ button {
   }
 }
 
-.pin-fail {
+.fail-animate {
   animation: miss 0.8s ease-out 1;
 }
 
@@ -673,7 +678,7 @@ input.vue-pincode-input:focus {
   font-size: 16px;
   margin-bottom: 20px;
 }
-.pin-caption {
+.password-caption {
   margin-top: 10px;
   font-size: 14px;
   color: grey;

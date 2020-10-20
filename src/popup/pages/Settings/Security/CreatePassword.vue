@@ -182,8 +182,7 @@ export default {
         return;
       }
       this.index = 0;
-      if (this.accounts.length > 0) this.scene = 2;
-      else this.scene = 3;
+      this.scene = 2;
     },
   },
   mounted() {

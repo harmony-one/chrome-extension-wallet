@@ -7,8 +7,9 @@
         v-for="item in options"
         :key="item.title"
         @click="item.handler"
-      >{{ item.title }}</div>
-      <pindigits-modal />
+      >
+        {{ item.title }}
+      </div>
       <locktimer-modal />
     </main>
   </div>
@@ -16,7 +17,6 @@
 
 <script>
 import { mapState } from "vuex";
-import PindigitsModal from "./PindigitsModal";
 import LocktimerModal from "./LocktimerModal";
 export default {
   data() {
@@ -35,7 +35,6 @@ export default {
     };
   },
   components: {
-    PindigitsModal,
     LocktimerModal,
   },
   methods: {

@@ -24,7 +24,7 @@ import About from "./pages/About.vue";
 import Settings from "./pages/Settings/index.vue";
 import Security from "./pages/Settings/Security/index.vue";
 import Contacts from "./pages/Settings/Contacts/index.vue";
-import PincodeModal from "./pages/Settings/Security/PincodeModal.vue";
+import CreatePassword from "./pages/Settings/Security/CreatePassword.vue";
 import MigrateAccounts from "./pages/Settings/Security/MigrateAccounts.vue";
 
 import store from "./store";
@@ -203,9 +203,9 @@ const router = new Router({
       },
     },
     {
-      path: "/settings/security/pincode",
-      name: "pincode",
-      component: PincodeModal,
+      path: "/settings/security/create-password",
+      name: "create-password",
+      component: CreatePassword,
       props: {
         method: "update",
         subModule: false,
