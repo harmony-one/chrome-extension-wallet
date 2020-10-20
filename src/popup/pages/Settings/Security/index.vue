@@ -22,11 +22,7 @@ export default {
   data() {
     return {
       options: [
-        { title: "Change the PIN Code", handler: () => this.changePincode() },
-        {
-          title: "Change the PIN Code digits",
-          handler: () => this.showPindigitsModal(),
-        },
+        { title: "Change the password", handler: () => this.changePassword() },
         {
           title: "Set the lock timer",
           handler: () => this.showLockTimerModal(),
@@ -38,11 +34,8 @@ export default {
     LocktimerModal,
   },
   methods: {
-    changePincode() {
-      this.$router.push("/settings/security/pincode");
-    },
-    showPindigitsModal() {
-      this.$modal.show("modal-pindigits");
+    changePassword() {
+      this.$router.push("/settings/security/create-password");
     },
     showLockTimerModal() {
       this.$modal.show("modal-locktimer");

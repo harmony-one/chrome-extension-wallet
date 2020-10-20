@@ -3,7 +3,7 @@
     <div class="main-logo">
       <img
         src="images/harmony-big.png"
-        class="create-password-logo"
+        class="migrate-account-logo"
         alt="Harmony"
       />
     </div>
@@ -32,6 +32,7 @@
           ref="password_confirm"
           v-model="password_confirm"
           placeholder="Confirm the password"
+          v-on:keyup.enter="nextToMigrate"
         />
       </label>
       <button class="primary flex mt-20" @click="nextToMigrate">
@@ -108,7 +109,6 @@ export default {
     accPassword: "",
   }),
   computed: {
-    ...mapGetters(["getPassword"]),
     ...mapState({
       accounts: (state) => state.wallets.accounts,
       active: (state) => state.wallets.active,
@@ -218,7 +218,7 @@ export default {
     ),
     url("images/harmony.png");
 }
-.create-password-logo {
+.migrate-account-logo {
   width: 200px;
   height: 200px;
 }

@@ -88,7 +88,7 @@
         <seed-checker :phrase="seed_phrase" :confirm="() => (scene = 4)" />
       </div>
       <div v-else>
-        <pincode-modal @success="addAccount" :onBack="() => (scene = 3)" />
+        <create-password @success="addAccount" :onBack="() => (scene = 3)" />
       </div>
       <notifications
         group="notify"
@@ -123,7 +123,7 @@ export default {
     ...mapState(["wallets"]),
   },
   methods: {
-    addAccount() {
+    addAccount(password) {
       this.$store.commit("wallets/addAccount", {
         ...this.wallet,
         isLedger: false,
