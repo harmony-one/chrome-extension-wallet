@@ -1,5 +1,5 @@
 import { decryptString } from "services/CryptoService";
-export const getPinCode = (state, getters) => {
+export const getPinCode = (state) => {
   try {
     const { auth } = state.settings;
     const { data, digits } = auth.pincode;
@@ -16,7 +16,7 @@ export const getPinCode = (state, getters) => {
   }
 };
 
-export const getLockState = (state, getters) => {
+export const getLockState = (state) => {
   try {
     const { auth } = state.settings;
     const { lockState } = auth;
@@ -27,5 +27,18 @@ export const getLockState = (state, getters) => {
     return false;
   } catch (err) {
     return true;
+  }
+};
+
+export const getPassword = (state) => {
+  try {
+    const { auth } = state.settings;
+    const { password } = auth;
+    if (password) {
+      return decryptString(password.payload, password.salt);
+    }
+    return false;
+  } catch (err) {
+    return false;
   }
 };

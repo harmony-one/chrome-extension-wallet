@@ -7,11 +7,7 @@ export default {
   state: {
     auth: {
       lockState: null,
-      pincode: {
-        data: null,
-        digits: 4,
-      },
-      pindigits: 4,
+      password: null,
       timeout: 30 * 60 * 1000, //milisec, default 30min
       attempts: 5,
       countdown: 60, //sec, delay 1min when auth fails
@@ -23,11 +19,8 @@ export default {
     setHideLowBalance(state, payload) {
       state.hideLowBalance = payload;
     },
-    setPincode(state, payload) {
-      state.auth.pincode = { ...payload };
-    },
-    setPindigits(state, payload) {
-      state.auth.pindigits = payload;
+    setPassword(state, payload) {
+      state.auth.password = { ...payload };
     },
     setLockState(state, payload) {
       state.auth.lockState = { ...payload };

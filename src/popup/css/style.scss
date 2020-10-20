@@ -665,6 +665,10 @@ input.vue-pincode-input:focus {
   font-size: 20px;
   margin-bottom: 20px;
 }
+.create-caption {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
 .pin-label {
   font-size: 16px;
   margin-bottom: 20px;
@@ -719,6 +723,7 @@ input.vue-pincode-input:focus {
 }
 
 .credit-title {
+  text-align: center;
   font-size: 14px;
   color: #555;
 }
