@@ -10,18 +10,19 @@
     <div class="modal-body">
       <div v-if="!connected">Onewallet is not connected to this site.</div>
       <div v-else>
-        You have connected to this site.
-        <div class="site-container">
-          <div
-            class="site-item"
-            v-for="(site, index) in sites"
-            :key="index"
-            :class="{ active: site === domain }"
-          >
-            <span>{{ site }}</span>
-            <div class="delete-but" @click="revoke(site, index)">
-              <i class="material-icons">delete</i>
-            </div>
+        Onewallet is connected to this site.
+      </div>
+      <div v-if="sites.length" class="site-container">
+        <div class="session-title">All sessions</div>
+        <div
+          class="site-item"
+          v-for="(site, index) in sites"
+          :key="index"
+          :class="{ active: site === domain }"
+        >
+          <span>{{ site }}</span>
+          <div class="delete-but" @click="revoke(site, index)">
+            <i class="material-icons">delete</i>
           </div>
         </div>
       </div>
@@ -65,8 +66,9 @@ export default {
     },
     revoke(site, index) {
       const text =
-        (site === this.domain ? "This session is currently active.<br>" : "") +
-        "Are you sure you want to revoke this session?";
+        (site === this.domain
+          ? "This session is currently <b>active</b>.<br>"
+          : "") + "Are you sure you want to revoke this session?";
       this.$modal.show("dialog", {
         text: text,
         buttons: [
@@ -133,19 +135,24 @@ export default {
   justify-content: space-between;
   gap: 10px;
   padding: 5px;
-  margin: 5px 0;
+  padding-left: 0px;
   border: none;
-  border-bottom: 1px solid #d0d0d0;
   word-break: break-all;
   align-items: center;
   &.active {
     span {
-      color: #4cd964;
+      color: #2bb743;
     }
   }
 }
+.session-title {
+  padding: 5px 5px 5px 0;
+  font-weight: 700;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 5px;
+}
 .site-container {
-  margin: 10px 0;
+  margin-bottom: 5px;
 }
 .delete-but {
   cursor: pointer;

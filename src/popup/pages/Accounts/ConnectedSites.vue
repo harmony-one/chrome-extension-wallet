@@ -73,7 +73,7 @@ export default {
     font-size: 15px;
   }
   &.connected {
-    color: #4cd964;
+    color: #2bb743;
   }
   &:hover {
     box-shadow: 0px 0px 8px #00000033;
