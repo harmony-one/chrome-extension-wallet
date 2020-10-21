@@ -15,7 +15,7 @@ import AddToken from "./pages/Token/AddToken.vue";
 import SendOne from "./pages/Send/SendOne.vue";
 import SendToken from "./pages/Send/SendToken.vue";
 
-import Account from "./pages/Account.vue";
+import Account from "./pages/Accounts/Account.vue";
 import History from "./pages/History.vue";
 import Deposit from "./pages/Deposit.vue";
 import Lock from "./pages/Lock.vue";

@@ -3,6 +3,7 @@
     <app-header @refresh="refreshAccount" headerTab="main-tab" />
     <main class="main">
       <div class="relative">
+        <ConnectedSites v-if="!isExtendedView" />
         <div class="main-logo">
           <img src="images/harmony-big.png" class="logo-img" alt="Harmony" />
         </div>
@@ -97,7 +98,7 @@ import account from "mixins/account";
 import MainTab from "components/MainTab.vue";
 import { mapState } from "vuex";
 import BigNumber from "bignumber.js";
-
+import ConnectedSites from "./ConnectedSites";
 import axios from "axios";
 
 export default {
@@ -105,6 +106,7 @@ export default {
 
   components: {
     MainTab,
+    ConnectedSites,
   },
 
   data: () => ({
@@ -226,7 +228,6 @@ export default {
 }
 .relative {
   position: relative;
-  z-index: -1;
 }
 .price-bar {
   left: 0;
@@ -237,6 +238,7 @@ export default {
   animation-iteration-count: 1;
   animation-timing-function: ease-in;
   animation-duration: 2s;
+  margin-bottom: -1rem;
 }
 
 .token-symbol-indicator {
