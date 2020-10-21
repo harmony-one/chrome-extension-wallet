@@ -3,6 +3,7 @@ import { Transaction } from "@harmony-js/transaction";
 import { StakingTransaction } from "@harmony-js/staking";
 import { Account } from "@harmony-js/account";
 import { decryptKeyStore } from "../services/AccountService";
+import { TypedEmitter } from "tiny-typed-emitter";
 import {
   THIRDPARTY_FORGET_IDENTITY_REQUEST,
   THIRDPARTY_GET_ACCOUNT_REQUEST,
@@ -11,6 +12,8 @@ import {
   LOGIN_REJECT,
   SIGN_REJECT,
   SIGNOUT_SUCCEED,
+  SESSION_REVOKED,
+  ONEWALLETPROVIDER_MESSAGE_LISTENER,
 } from "../types";
 import networkConfig from "../config";
 import {
@@ -27,11 +30,15 @@ interface Network {
   chain_id: number;
 }
 
-class WalletProvider {
+interface WalletProviderEvents {
+  sessionRevoked: (host: string) => void;
+}
+class WalletProvider extends TypedEmitter<WalletProviderEvents> {
   isOneWallet: boolean;
   version: string;
   network: Network;
   constructor() {
+    super();
     const mainnet = networkConfig.networks[0];
     this.version = AppInfo.version;
     this.isOneWallet = true;
@@ -41,6 +48,24 @@ class WalletProvider {
       chain_id: mainnet.chainId,
       net_version: 1,
     };
+    this.setupEventListener();
+  }
+  setupEventListener() {
+    window.addEventListener(
+      ONEWALLETPROVIDER_MESSAGE_LISTENER,
+      (event: any) => {
+        const { detail } = event;
+        if (!detail) return;
+        const { type, payload } = detail;
+        if (!type) return;
+        this.processEvent(type, payload);
+      }
+    );
+  }
+  processEvent(type: any, payload: any) {
+    if (type === SESSION_REVOKED) {
+      this.emit("sessionRevoked", payload);
+    }
   }
   async forgetIdentity() {
     return new Promise(async (resolve) => {
@@ -149,4 +174,5 @@ class WalletProvider {
 }
 
 const walletProvider = new WalletProvider();
+
 export default walletProvider;

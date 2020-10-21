@@ -6,12 +6,23 @@
     :width="300"
     height="auto"
   >
-    <div class="modal-header">Connected sites</div>
+    <div class="modal-header">Connected Sites</div>
     <div class="modal-body">
-      <div v-if="!connected">Onewallet is not connected this site.</div>
+      <div v-if="!connected">Onewallet is not connected to this site.</div>
       <div v-else>
-        <div v-for="(site, index) in sites" :key="index">
-          {{ site }}
+        You have connected to this site.
+        <div class="site-container">
+          <div
+            class="site-item"
+            v-for="(site, index) in sites"
+            :key="index"
+            :class="{ active: site === domain }"
+          >
+            <span>{{ site }}</span>
+            <div class="delete-but" @click="revoke(site, index)">
+              <i class="material-icons">delete</i>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -23,15 +34,122 @@
 
 <script>
 import { mapState } from "vuex";
+import apiService from "services/APIService";
+import * as storage from "services/StorageService";
+import { sendEventToContentScript } from "services/APIService";
+import helper from "mixins/helper";
+import { SESSION_REVOKED } from "~/types.js";
 export default {
-  props: ["connected", "sites"],
-  data: () => ({}),
-  computed: {},
-  mounted() {},
+  data: () => ({
+    connected: false,
+    sites: [],
+    domain: "",
+  }),
+  mixins: [helper],
+  computed: {
+    ...mapState({
+      active: (state) => state.wallets.active,
+    }),
+  },
+  async mounted() {
+    await this.loadSession();
+  },
   methods: {
+    async loadSession() {
+      const { sites, domain, connected } = await this.checkSession(
+        this.active.address
+      );
+      this.sites = sites;
+      this.domain = domain;
+      this.connected = connected;
+    },
+    revoke(site, index) {
+      const text =
+        (site === this.domain ? "This session is currently active.<br>" : "") +
+        "Are you sure you want to revoke this session?";
+      this.$modal.show("dialog", {
+        text: text,
+        buttons: [
+          {
+            title: "Cancel",
+            default: true,
+            handler: () => {
+              this.$modal.hide("dialog");
+            },
+          },
+          {
+            title: "Revoke",
+            handler: async () => {
+              this.$modal.hide("dialog");
+
+              let sessionList = await apiService.getHostSessions();
+              const existIndex = sessionList.findIndex(
+                (elem) =>
+                  elem.host === site &&
+                  elem.account.address === this.active.address
+              );
+              if (existIndex >= 0) {
+                const expireSession = sessionList[existIndex];
+                sessionList.splice(existIndex, 1);
+                await storage.saveValue({
+                  session: sessionList,
+                });
+                this.$notify({
+                  group: "notify",
+                  type: "success",
+                  text: "Session revoked",
+                });
+                await this.loadSession();
+                this.$emit("refresh");
+                chrome.tabs.query({}, (tabs) => {
+                  tabs.forEach((tab) => {
+                    chrome.tabs.sendMessage(
+                      tab.id,
+                      sendEventToContentScript(SESSION_REVOKED, expireSession)
+                    );
+                  });
+                });
+              } else {
+                this.$notify({
+                  group: "notify",
+                  type: "error",
+                  text: "Session is not found",
+                });
+              }
+            },
+          },
+        ],
+      });
+    },
     accept() {
       this.$modal.hide("modal-connected-sites");
     },
   },
 };
 </script>
+<style lang="scss" scoped>
+.site-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px;
+  margin: 5px 0;
+  border: none;
+  border-bottom: 1px solid #d0d0d0;
+  word-break: break-all;
+  align-items: center;
+  &.active {
+    span {
+      color: #4cd964;
+    }
+  }
+}
+.site-container {
+  margin: 10px 0;
+}
+.delete-but {
+  cursor: pointer;
+  align-items: center;
+  display: flex;
+}
+</style>

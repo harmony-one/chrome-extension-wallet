@@ -4,6 +4,7 @@ import {
   THIRDPARTY_SIGN_REQUEST_RESPONSE,
   HARMONY_RESPONSE_TYPE,
   FROM_BACK_TO_POPUP,
+  ONEWALLETPROVIDER_MESSAGE_LISTENER,
   CLOSE_WINDOW,
 } from "~/types";
 import * as storage from "./StorageService";
@@ -136,6 +137,13 @@ export const msgToContentScript = (type, payload) => ({
   },
 });
 
+export const sendEventToContentScript = (type, payload) => ({
+  type: ONEWALLETPROVIDER_MESSAGE_LISTENER,
+  message: {
+    type,
+    payload,
+  },
+});
 class APIService {
   constructor() {
     this.params = null;

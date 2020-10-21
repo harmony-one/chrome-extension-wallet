@@ -14,9 +14,7 @@
       <span v-if="connected">Connected</span>
       <span v-else>Not connected</span>
     </div>
-    <div v-if="loaded">
-      <ConnectedModal :connected="connected" :sites="sites" />
-    </div>
+    <ConnectedModal @refresh="loadSession" />
   </section>
 </template>
 
@@ -25,12 +23,13 @@ import apiService from "services/APIService";
 import ConnectedModal from "./ConnectedModal";
 import _ from "lodash";
 import { mapState } from "vuex";
+import helper from "mixins/helper";
 export default {
   data: () => ({
-    sites: [],
-    loaded: false,
     connected: false,
+    domain: "",
   }),
+  mixins: [helper],
   components: {
     ConnectedModal,
   },
@@ -40,21 +39,13 @@ export default {
     }),
   },
   async mounted() {
-    const sessions = await apiService.getHostSessions();
-    const findbyAddress = _.filter(sessions, {
-      account: { address: this.active.address },
-    });
-    this.sites = findbyAddress.map((elem) => elem.host);
-    const _this = this;
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-      const tab = tabs[0];
-      if (!tab) return;
-      const domain = new URL(tab.url).hostname;
-      if (_this.sites.includes(domain)) _this.connected = true;
-      _this.loaded = true;
-    });
+    await this.loadSession();
   },
   methods: {
+    async loadSession() {
+      const res = await this.checkSession(this.active.address);
+      this.connected = res.connected;
+    },
     showConnectedSite() {
       this.$modal.show("modal-connected-sites");
     },

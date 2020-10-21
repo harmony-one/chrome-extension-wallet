@@ -83,8 +83,8 @@
         </div>
       </div>
       <notifications
-        group="copied"
-        width="180"
+        group="notify"
+        :width="180"
         :max="2"
         class="notifiaction-container"
       />
@@ -167,7 +167,7 @@ export default {
     onClickAccount() {
       this.$copyText(this.address).then(() => {
         this.$notify({
-          group: "copied",
+          group: "notify",
           type: "info",
           text: "Copied to Clipboard",
         });

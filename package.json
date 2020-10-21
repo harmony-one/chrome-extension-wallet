@@ -39,6 +39,7 @@
     "sass-loader": "^9.0.3",
     "source-map-loader": "^1.0.1",
     "style-loader": "^1.2.1",
+    "tiny-typed-emitter": "^2.0.3",
     "ts-loader": "^7.0.5",
     "tslib": "^1.13.0",
     "typescript-is": "^0.16.3",
