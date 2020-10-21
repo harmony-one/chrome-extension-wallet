@@ -101,7 +101,7 @@ export default {
       if (this.onBack) this.onBack();
       else this.$router.go(-1);
     },
-    createPassword() {
+    async createPassword() {
       if (this.method === "update" && this.oldPassword !== this.getPassword) {
         this.$notify({
           group: "notify",
@@ -125,28 +125,29 @@ export default {
         });
         return;
       }
-
-      this.$store.commit("loading", true);
+      if (this.method === "update" && this.accounts.length > 0) {
+        this.$store.commit("loading", true);
+        let newAccounts = [];
+        await new Promise((resolve, reject) => {
+          this.accounts.forEach(async (acc, index) => {
+            if (!acc.isLedger) {
+              const privateKey = await decryptKeyStore(
+                this.oldPassword,
+                acc.keystore
+              );
+              const keystore = await encryptKeyStore(this.password, privateKey);
+              newAccounts.push({ ...acc, keystore });
+            } else {
+              newAccounts.push(acc);
+            }
+            if (index === this.accounts.length - 1) resolve();
+          });
+        });
+        this.$store.commit("wallets/setAccount", newAccounts);
+        this.$store.commit("wallets/setActive", this.active.address);
+        this.$store.commit("loading", false);
+      }
       this.$store.dispatch("settings/setPassword", this.password);
-      let newAccounts = [];
-      this.accounts.forEach(async (acc) => {
-        if (!acc.isLedger) {
-          console.log(acc);
-          const privateKey = await decryptKeyStore(
-            this.getPassword,
-            acc.keystore
-          );
-          const keystore = await encryptKeyStore(this.password, privateKey);
-          newAccounts.push({ ...acc, keystore });
-        } else {
-          newAccounts.push(acc);
-        }
-      });
-
-      this.$store.commit("wallets/setAccount", newAccounts);
-      this.$store.commit("wallets/setActive", this.active.address);
-      this.$store.commit("loading", false);
-
       if (!this.subModule) {
         this.$router.push("/settings/security");
       } else {

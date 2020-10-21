@@ -20,9 +20,9 @@
     </div>
     <div class="modal-footer">
       <div class="secondary" @click="cancel">
-        CANCEL
+        No
       </div>
-      <div class="primary" @click="accept">YES</div>
+      <div class="primary" @click="accept">Yes</div>
     </div>
   </modal>
 </template>

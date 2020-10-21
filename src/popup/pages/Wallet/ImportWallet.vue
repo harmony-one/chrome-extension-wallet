@@ -2,7 +2,7 @@
   <div>
     <app-header headerTab="create-tab" />
     <main class="main">
-      <div class="main-logo">
+      <div class="main-logo" v-if="scene !== 3">
         <img
           src="images/harmony.png"
           alt="Harmony"
