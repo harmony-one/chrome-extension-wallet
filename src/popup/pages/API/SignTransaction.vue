@@ -43,27 +43,13 @@
           <div class="data_content">{{ txnParams.data }}</div>
         </div>
       </div>
-      <div v-if="!wallet.isLedger" class="password-content">
-        <label class="input-label">
-          Password
-          <input
-            class="input-field"
-            type="password"
-            name="password"
-            ref="password"
-            v-model="password"
-            placeholder="Input your password"
-            v-on:keyup.enter="approve"
-          />
-        </label>
-      </div>
-      <div class="ledger-content" v-else>
+      <div class="ledger-content" v-if="wallet.isLedger">
         <b>{{ caption }}</b>
       </div>
       <div class="footer">
         <div class="button-group" v-if="!wallet.isLedger">
           <button class="outline" @click="reject">Reject</button>
-          <button class="primary" @click="approve" :disabled="!password">
+          <button class="primary" ref="approve" @click="approve">
             Approve
           </button>
         </div>
@@ -139,7 +125,6 @@ export default {
       shardID: 0,
     },
     host: "",
-    password: "",
     type: "Send",
     hasError: false,
     caption: LEDGER_CONFIRM_PREPARE,
@@ -150,7 +135,7 @@ export default {
     },
   }),
   computed: {
-    ...mapGetters(["getLockState"]),
+    ...mapGetters(["getLockState", "getPassword"]),
     ...mapState({
       wallets: (state) => state.wallets,
     }),
@@ -247,8 +232,6 @@ export default {
       }
     },
     async approve() {
-      let privateKey;
-      if (!this.password) return;
       if (!this.wallet) {
         this.$notify({
           group: "notify",
@@ -257,22 +240,12 @@ export default {
         });
         return false;
       }
-      privateKey = await decryptKeyStore(this.password, this.wallet.keystore);
-
-      if (!privateKey) {
-        this.$notify({
-          group: "notify",
-          type: "error",
-          text: "Password is not correct",
-        });
-        return false;
-      }
       chrome.runtime.sendMessage({
         action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
         payload: {
           isLedger: false,
           keystore: this.wallet.keystore,
-          password: this.password,
+          password: this.getPassword,
         },
       });
     },
@@ -288,9 +261,6 @@ export default {
         },
       });
     },
-  },
-  updated() {
-    if (this.$refs.password) this.$refs.password.focus();
   },
   mounted() {
     chrome.runtime.sendMessage(
@@ -325,6 +295,7 @@ export default {
       }
     );
     chrome.runtime.connect({ name: THIRDPARTY_SIGN_CONNECT });
+    this.$nextTick(() => this.$refs.approve.focus());
   },
 };
 </script>
@@ -339,9 +310,6 @@ export default {
 h3 {
   margin-top: 0px;
   margin-bottom: 0px;
-}
-.password-content {
-  margin-bottom: 10px;
 }
 .center {
   text-align: center;

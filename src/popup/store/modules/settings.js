@@ -12,12 +12,16 @@ export default {
       attempts: 5,
       countdown: 60, //sec, delay 1min when auth fails
     },
+    dontShowContactsModal: false,
     hideLowBalance: false,
     contacts: [],
   },
   mutations: {
     setHideLowBalance(state, payload) {
       state.hideLowBalance = payload;
+    },
+    setDontShowContactsModal(state, payload) {
+      state.dontShowContactsModal = payload;
     },
     setPassword(state, payload) {
       state.auth.password = { ...payload };

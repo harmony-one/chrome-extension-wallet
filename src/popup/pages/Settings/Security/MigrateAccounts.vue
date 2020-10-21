@@ -159,9 +159,7 @@ export default {
         this.$store.dispatch("settings/setPassword", this.password);
         this.$store.dispatch("settings/setLockState", false);
         this.$store.commit("wallets/setAccount", this.newAccounts);
-        this.$nextTick(() =>
-          this.$store.commit("wallets/setActive", this.active.address)
-        );
+        this.$store.commit("wallets/setActive", this.active.address);
         this.scene = 3;
       }
     },

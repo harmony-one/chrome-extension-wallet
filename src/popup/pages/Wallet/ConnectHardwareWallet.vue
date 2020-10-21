@@ -49,13 +49,13 @@
             ref="name"
             v-model="name"
             placeholder="Input the account name"
-            v-on:keyup.enter="nextToPincode"
+            v-on:keyup.enter="nextToPassword"
           />
         </label>
         <button
           class="primary flex mt-20"
           :disabled="!name"
-          @click="nextToPincode"
+          @click="nextToPassword"
         >
           Next
         </button>
@@ -74,7 +74,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import { connectLedgerApp } from "services/LedgerService";
 
 export default {
@@ -89,10 +89,12 @@ export default {
   }),
   computed: {
     ...mapState(["wallets"]),
+    ...mapGetters(["getPassword"]),
   },
   methods: {
-    nextToPincode() {
-      this.scene = 3;
+    async nextToPassword() {
+      if (this.getPassword) await this.addAcc(this.getPassword);
+      else this.scene = 3;
     },
     createAccount() {
       const wallet = {

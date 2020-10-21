@@ -674,10 +674,6 @@ input.vue-pincode-input:focus {
   font-size: 20px;
   margin-bottom: 20px;
 }
-.pin-label {
-  font-size: 16px;
-  margin-bottom: 20px;
-}
 .password-caption {
   margin-top: 10px;
   font-size: 14px;
@@ -731,12 +727,13 @@ input.vue-pincode-input:focus {
   text-align: center;
   font-size: 14px;
   color: #555;
+  margin-bottom: -1rem;
 }
 
 .footer {
   position: absolute;
   left: 1rem;
-  bottom: 1rem;
+  bottom: 2rem;
   right: 1rem;
 }
 

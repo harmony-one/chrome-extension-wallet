@@ -77,6 +77,7 @@
             ref="name"
             v-model="name"
             placeholder="Input the account name"
+            v-on:keyup.enter="importAcc"
           />
         </label>
         <div v-if="selectType === 'keystore'">
@@ -198,6 +199,7 @@ export default {
         }
       }
       this.scene = 2;
+      this.$nextTick(() => this.$refs.name.focus());
     },
     async addAcc(password) {
       if (this.selectType === "key") {

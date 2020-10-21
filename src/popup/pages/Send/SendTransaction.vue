@@ -192,26 +192,12 @@
           </div>
         </div>
 
-        <div v-if="!wallet.isLedger" class="password-content">
-          <label class="input-label">
-            Password
-            <input
-              class="input-field"
-              type="password"
-              name="password"
-              ref="password"
-              v-model="password"
-              placeholder="Input your password"
-              v-on:keyup.enter="sendPayment"
-            />
-          </label>
-        </div>
-        <div class="ledger-content" v-else>
+        <div class="ledger-content" v-if="wallet.isLedger">
           <b>{{ ledgerConfirmTxt }}</b>
         </div>
-        <div v-if="!wallet.isLedger" class="button-group">
+        <div v-if="!wallet.isLedger" class="footer button-group">
           <button class="outline" @click="onBackClick()">Back</button>
-          <button class="primary" @click="sendPayment" :disabled="!password">
+          <button class="primary" ref="approve" @click="sendPayment">
             Approve
           </button>
         </div>
@@ -228,6 +214,10 @@
           </button>
         </div>
       </div>
+      <check-modal
+        @accept="showAddContactModal"
+        @cancel="() => showConfirmDialog()"
+      />
       <modal
         name="modal-contact-add"
         :adaptive="true"
@@ -278,7 +268,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import BigNumber from "bignumber.js";
 import {
   decryptKeyStore,
@@ -291,6 +281,7 @@ import { isValidAddress } from "@harmony-js/utils";
 import account from "mixins/account";
 import helper from "mixins/helper";
 import ContactSelect from "components/ContactSelect";
+import CheckModal from "./CheckModal";
 import {
   signTransactionWithLedger,
   signHRCTransactionWithLedger,
@@ -307,6 +298,7 @@ export default {
   mixins: [account, helper],
   components: {
     ContactSelect,
+    CheckModal,
   },
   props: {
     isToken: {
@@ -330,7 +322,6 @@ export default {
     gasLimit: 25000,
     inputData: "",
     selectedToken: { symbol: "ONE", decimals: 18, isMainToken: true },
-    password: "",
     ledgerError: false,
     message: {
       show: false,
@@ -345,7 +336,9 @@ export default {
       wallet: (state) => state.wallets.active,
       loading: (state) => state.loading,
       contacts: (state) => state.settings.contacts,
+      dontShowContactsModal: (state) => state.settings.dontShowContactsModal,
     }),
+    ...mapGetters(["getPassword"]),
     getFromAddress() {
       return this.wallet.address;
     },
@@ -391,11 +384,6 @@ export default {
     }
   },
 
-  updated() {
-    if (this.scene == 2) {
-      if (!this.wallet.isLedger) this.$refs.password.focus();
-    }
-  },
   watch: {
     selectedToken() {
       this.toShard = 0;
@@ -470,14 +458,12 @@ export default {
       this.scene = 1;
       this.ledgerError = false;
       this.ledgerConfirmTxt = LEDGER_CONFIRM_PREPARE;
-      this.password = "";
     },
     initScene() {
       this.scene = 1;
       this.amount = 0;
       this.recipient = null;
       this.toShard = 0;
-      this.password = "";
       this.ledgerError = false;
       this.ledgerConfirmTxt = LEDGER_CONFIRM_PREPARE;
     },
@@ -544,20 +530,10 @@ export default {
       }
     },
     async sendPayment() {
-      let privateKey;
-      if (!this.wallet.isLedger) {
-        if (!this.password) return;
-        privateKey = await decryptKeyStore(this.password, this.wallet.keystore);
-
-        if (!privateKey) {
-          this.$notify({
-            group: "notify",
-            type: "error",
-            text: "Password is not correct",
-          });
-          return;
-        }
-      }
+      const privateKey = await decryptKeyStore(
+        this.getPassword,
+        this.wallet.keystore
+      );
 
       this.$store.commit("loading", true);
       try {
@@ -619,7 +595,6 @@ export default {
     },
     checkContactExist(e) {
       e.preventDefault();
-      console.log("checkcontactexist");
       this.message.show = false;
       if (!isValidAddress(this.recipient.address)) {
         this.showErrMessage("Invalid recipient address");
@@ -674,32 +649,15 @@ export default {
           return;
         }
       }
-      if (!this.recipient.name) {
-        console.log("showing modal");
-        this.$modal.show("dialog", {
-          text:
-            "This address is not found in the contacts. Do you want to add this address?",
-          buttons: [
-            {
-              title: "Cancel",
-              handler: () => {
-                this.$modal.hide("dialog");
-                this.showConfirmDialog();
-              },
-            },
-            {
-              title: "Add",
-              handler: () => {
-                this.$modal.hide("dialog");
-                this.newAddress = this.recipient.address;
-                this.$modal.show("modal-contact-add");
-              },
-            },
-          ],
-        });
+      if (!this.dontShowContactsModal && !this.recipient.name) {
+        this.$modal.show("modal-check-contact");
         return;
       }
       this.showConfirmDialog();
+    },
+    showAddContactModal() {
+      this.newAddress = this.recipient.address;
+      this.$modal.show("modal-contact-add");
     },
     showConfirmDialog() {
       this.amount = new BigNumber(this.amount)
@@ -711,6 +669,7 @@ export default {
       if (this.wallet.isLedger) {
         this.processLedgerTransfer();
       }
+      this.$nextTick(() => this.$refs.approve.focus());
       this.scene = 2;
     },
 

@@ -69,6 +69,7 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
+import { decryptKeyStore, encryptKeyStore } from "services/AccountService";
 export default {
   props: {
     method: {
@@ -90,6 +91,10 @@ export default {
   }),
   computed: {
     ...mapGetters(["getPassword"]),
+    ...mapState({
+      accounts: (state) => state.wallets.accounts,
+      active: (state) => state.wallets.active,
+    }),
   },
   methods: {
     onBackClicked() {
@@ -121,14 +126,32 @@ export default {
         return;
       }
 
+      this.$store.commit("loading", true);
       this.$store.dispatch("settings/setPassword", this.password);
-      setTimeout(() => {
-        if (!this.subModule) {
-          this.$router.push("/settings/security");
+      let newAccounts = [];
+      this.accounts.forEach(async (acc) => {
+        if (!acc.isLedger) {
+          console.log(acc);
+          const privateKey = await decryptKeyStore(
+            this.getPassword,
+            acc.keystore
+          );
+          const keystore = await encryptKeyStore(this.password, privateKey);
+          newAccounts.push({ ...acc, keystore });
         } else {
-          this.$emit("success", this.password);
+          newAccounts.push(acc);
         }
-      }, 200);
+      });
+
+      this.$store.commit("wallets/setAccount", newAccounts);
+      this.$store.commit("wallets/setActive", this.active.address);
+      this.$store.commit("loading", false);
+
+      if (!this.subModule) {
+        this.$router.push("/settings/security");
+      } else {
+        this.$emit("success", this.password);
+      }
     },
   },
 };

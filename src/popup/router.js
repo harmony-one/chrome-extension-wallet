@@ -174,6 +174,7 @@ const router = new Router({
       },
     },
     //end
+
     //settings route
     {
       path: "/settings",
