@@ -6,23 +6,25 @@
     :width="300"
     height="auto"
   >
-    <div class="modal-header">Connected Sites</div>
+    <div class="modal-header">{{ domain }}</div>
     <div class="modal-body">
-      <div v-if="!connected">Onewallet is not connected to this site.</div>
+      <div v-if="!connected">Account is not connected to this site.</div>
       <div v-else>
-        Onewallet is connected to this site.
+        Account is connected to this site.
       </div>
       <div v-if="sites.length" class="site-container">
         <div class="session-title">All sessions</div>
-        <div
-          class="site-item"
-          v-for="(site, index) in sites"
-          :key="index"
-          :class="{ active: site === domain }"
-        >
-          <span>{{ site }}</span>
-          <div class="delete-but" @click="revoke(site, index)">
-            <i class="material-icons">delete</i>
+        <div class="site-list">
+          <div
+            class="site-item"
+            v-for="(site, index) in sites"
+            :key="index"
+            :class="{ active: site === domain }"
+          >
+            <span>{{ site }}</span>
+            <div class="delete-but" @click="revoke(site, index)">
+              <i class="material-icons">delete</i>
+            </div>
           </div>
         </div>
       </div>
@@ -158,5 +160,9 @@ export default {
   cursor: pointer;
   align-items: center;
   display: flex;
+}
+.site-list {
+  max-height: 250px;
+  overflow: auto;
 }
 </style>

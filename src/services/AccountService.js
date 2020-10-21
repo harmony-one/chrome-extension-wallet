@@ -21,7 +21,6 @@ var harmony = new Harmony(
 export function getHarmony() {
   if (currentNetwork != store.state.network.name) {
     currentNetwork = store.state.network.name;
-    console.log("current network changed to", store.state.network.name);
     harmony = new Harmony(
       // rpc url
       store.state.network.apiUrl,
@@ -67,7 +66,7 @@ export async function decryptKeyStoreFromFile(password, keystore) {
     }
     return false;
   } catch (err) {
-    console.error("decryptKeyStoreFromFile--->", err);
+    console.error("decryptKeyStoreFromFile", err);
     return false;
   }
 }
