@@ -119,6 +119,7 @@ export default {
       ).padStart(2, "0")}`;
     },
     async checkPassword() {
+      if (!this.password) return;
       if (this.password === this.getPassword) {
         this.$store.dispatch("settings/setLockState", false);
         this.$store.commit("settings/resetFailedTimer");
