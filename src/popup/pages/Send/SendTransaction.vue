@@ -319,7 +319,7 @@ export default {
     newAddress: "",
     recipient: null,
     gasPrice: 1,
-    gasLimit: 25000,
+    gasLimit: 21000,
     inputData: "",
     selectedToken: { symbol: "ONE", decimals: 18, isMainToken: true },
     ledgerError: false,
@@ -430,7 +430,7 @@ export default {
       this.amount = this.getMaxBalance;
     },
     setGasLimit() {
-      if (!this.isHRCToken) this.gasLimit = 25000;
+      if (!this.isHRCToken) this.gasLimit = 21000;
       else this.gasLimit = 250000;
     },
     initSelectedToken() {
