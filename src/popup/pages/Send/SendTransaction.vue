@@ -90,7 +90,7 @@
               selectedToken.symbol
           }}
         </div>
-        <div class="row">
+        <div class="row gasfee-row">
           <label class="input-label gas-price">
             Gas Price
             <input
@@ -103,7 +103,10 @@
               step="any"
             />
           </label>
-          <label class="input-label gas-limit">
+          <label
+            class="input-label gas-limit"
+            :class="{ error: gasLimit < estimateGasLimit }"
+          >
             Gas Limit
             <input
               class="input-field"
@@ -114,7 +117,10 @@
               placeholder="Gas Limit"
             />
           </label>
-          <label class="input-label gas-one">
+          <label
+            class="input-label gas-one"
+            :class="{ error: gasLimit < estimateGasLimit }"
+          >
             Network Fee
             <input
               class="input-field"
@@ -126,6 +132,19 @@
             />
           </label>
         </div>
+        <div
+          class="estimategas-label"
+          v-if="!isHRCToken"
+          v-show="!loading"
+          @click="setNetworkFee"
+          v-tooltip.bottom="
+            'Estimate gas fee for this transaction. Click to set the enough gas limit.'
+          "
+        >
+          Estimate Gas Fee:
+          {{ estimateGasFee }} ONE
+        </div>
+
         <label class="input-label" :class="{ disabled: isHRCToken }">
           Input Data
           <textarea
@@ -275,6 +294,7 @@ import {
   transferOne,
   getNetworkLink,
   sendTransction,
+  estimateGas,
 } from "services/AccountService";
 import { sendToken } from "services/Hrc20Service";
 import { isValidAddress } from "@harmony-js/utils";
@@ -293,6 +313,7 @@ import {
   LEDGER_LOCKED,
 } from "~/types";
 
+import { Unit } from "@harmony-js/utils";
 export default {
   name: "send-transaction",
   mixins: [account, helper],
@@ -311,6 +332,7 @@ export default {
   },
   data: () => ({
     scene: 1,
+    estimateGasLimit: 21000,
     amount: 0,
     fromShard: 0,
     toShard: 0,
@@ -373,6 +395,9 @@ export default {
       if (this.isHRCToken) return `Send ${this.selectedToken.symbol} Token`;
       return "Send Payment";
     },
+    estimateGasFee() {
+      return new Unit.Wei(this.estimateGasLimit).toGwei();
+    },
   },
 
   async mounted() {
@@ -385,6 +410,13 @@ export default {
   },
 
   watch: {
+    async recipient() {
+      if (this.recipient.address) await this.calculateEstimateGas();
+    },
+    async inputData() {
+      if (this.recipient.address) await this.calculateEstimateGas();
+    },
+
     selectedToken() {
       this.toShard = 0;
       this.setGasLimit();
@@ -400,6 +432,17 @@ export default {
     },
   },
   methods: {
+    async calculateEstimateGas() {
+      this.estimateGasLimit = await estimateGas(
+        this.getFromAddress,
+        this.recipient.address,
+        this.gasLimit,
+        this.gasPrice,
+        this.amount,
+        this.inputData,
+        this.fromShard
+      );
+    },
     onContactSelect(recipient) {
       const address = recipient;
       const findByAddress = _.find(this.contacts, { address });
@@ -425,6 +468,12 @@ export default {
       });
       this.showConfirmDialog();
     },
+    setNetworkFee(e) {
+      e.preventDefault();
+      if (!this.estimateGasLimit) return;
+      this.gasLimit = this.estimateGasLimit;
+    },
+
     setMaxBalance(e) {
       e.preventDefault();
       this.amount = this.getMaxBalance;
@@ -623,6 +672,16 @@ export default {
 
       if (!this.isHRCToken) {
         if (
+          new BigNumber(this.estimateGasFee).isGreaterThan(
+            new BigNumber(this.getGasFee)
+          )
+        ) {
+          this.showErrMessage(
+            "The network fee is not enough. It should be bigger then estimate gas fee"
+          );
+          return;
+        }
+        if (
           new BigNumber(this.getTotal).isGreaterThan(
             new BigNumber(this.getOneBalance)
           )
@@ -699,9 +758,19 @@ h3 {
 .gas-price,
 .gas-limit {
   width: 32%;
+  &.error {
+    input {
+      border: 1px solid red;
+    }
+  }
 }
 .gas-one {
   width: 36%;
+  &.error {
+    input {
+      border: 1px solid red;
+    }
+  }
 }
 .input-data {
   height: 100px;
@@ -756,5 +825,16 @@ h3 {
   & > label {
     flex: 1;
   }
+}
+.gasfee-row {
+  margin-bottom: -13px;
+}
+.estimategas-label {
+  color: #113df0;
+  cursor: pointer;
+  font-size: 12px;
+  font-style: italic;
+  margin-top: 3px;
+  margin-left: 5px;
 }
 </style>
