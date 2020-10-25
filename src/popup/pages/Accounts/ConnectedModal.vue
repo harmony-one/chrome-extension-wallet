@@ -93,7 +93,7 @@ export default {
                   elem.account.address === this.active.address
               );
               if (existIndex >= 0) {
-                const expireSession = sessionList[existIndex];
+                const expiredSession = sessionList[existIndex];
                 sessionList.splice(existIndex, 1);
                 await storage.saveValue({
                   session: sessionList,
@@ -105,14 +105,7 @@ export default {
                 });
                 await this.loadSession();
                 this.$emit("refresh");
-                chrome.tabs.query({}, (tabs) => {
-                  tabs.forEach((tab) => {
-                    chrome.tabs.sendMessage(
-                      tab.id,
-                      sendEventToContentScript(SESSION_REVOKED, expireSession)
-                    );
-                  });
-                });
+                sendEventToContentScript(SESSION_REVOKED, expiredSession);
               } else {
                 this.$notify({
                   group: "notify",

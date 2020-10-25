@@ -132,7 +132,7 @@ const config = {
 };
 
 function getPerformance(isProd) {
-  if (isProduction) {
+  if (isProd) {
     return {
       hints: false,
       maxEntrypointSize: 512000,

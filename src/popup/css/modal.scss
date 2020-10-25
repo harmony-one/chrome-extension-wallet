@@ -5,10 +5,11 @@
   z-index: 1500;
 }
 .modal-header {
-  padding: 10px 0;
+  padding: 10px 5px;
   font-size: 14px;
   font-weight: 600;
   text-align: center;
+  word-break: break-all;
   border-bottom: 1px solid #eee;
 }
 .modal-footer {

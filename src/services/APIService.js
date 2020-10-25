@@ -137,13 +137,19 @@ export const msgToContentScript = (type, payload) => ({
   },
 });
 
-export const sendEventToContentScript = (type, payload) => ({
-  type: ONEWALLETPROVIDER_MESSAGE_LISTENER,
-  message: {
-    type,
-    payload,
-  },
-});
+export const sendEventToContentScript = (type, payload) => {
+  chrome.tabs.query({}, (tabs) => {
+    tabs.forEach((tab) => {
+      chrome.tabs.sendMessage(tab.id, {
+        type: ONEWALLETPROVIDER_MESSAGE_LISTENER,
+        message: {
+          type,
+          payload,
+        },
+      });
+    });
+  });
+};
 class APIService {
   constructor() {
     this.params = null;
