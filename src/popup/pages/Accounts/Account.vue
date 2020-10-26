@@ -49,18 +49,10 @@
           </select>
         </div>
         <div class="button-group">
-          <button
-            class="outline"
-            @click="$router.push('/deposit')"
-            v-tooltip.top="'Deposit token'"
-          >
+          <button class="outline" @click="$router.push('/deposit')">
             Deposit
           </button>
-          <button
-            class="primary"
-            @click="onSendClick"
-            v-tooltip.top="'Send token'"
-          >
+          <button class="primary" @click="onSendClick">
             Send
           </button>
         </div>

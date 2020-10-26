@@ -46,6 +46,9 @@
           ><i>{{ accounts[index].name }}</i></b
         >
       </div>
+      <div class="address-caption">
+        {{ accounts[index].address }}
+      </div>
       <div v-if="!accounts[index].isLedger">
         <label class="input-label">
           Input the account password
@@ -223,8 +226,13 @@ export default {
 .migration-caption {
   text-align: center;
   margin-top: 10px;
-  margin-bottom: 40px;
+  margin-bottom: 10px;
   font-size: 1.5rem;
+}
+.address-caption {
+  text-align: center;
+  font-size: 0.8rem;
+  margin-bottom: 40px;
 }
 .title {
   text-align: center;

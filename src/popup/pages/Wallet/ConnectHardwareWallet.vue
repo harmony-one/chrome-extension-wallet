@@ -93,7 +93,7 @@ export default {
   },
   methods: {
     async nextToPassword() {
-      if (this.getPassword) await this.addAcc(this.getPassword);
+      if (this.getPassword) await this.createAccount();
       else this.scene = 3;
     },
     createAccount() {

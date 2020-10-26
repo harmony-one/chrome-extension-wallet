@@ -411,10 +411,12 @@ export default {
 
   watch: {
     async recipient() {
-      if (this.recipient.address) await this.calculateEstimateGas();
+      if (this.recipient && this.recipient.address)
+        await this.calculateEstimateGas();
     },
     async inputData() {
-      if (this.recipient.address) await this.calculateEstimateGas();
+      if (this.recipient && this.recipient.address)
+        await this.calculateEstimateGas();
     },
 
     selectedToken() {
@@ -728,8 +730,9 @@ export default {
       if (this.wallet.isLedger) {
         this.processLedgerTransfer();
       }
-      this.$nextTick(() => this.$refs.approve.focus());
       this.scene = 2;
+      if (!this.wallet.isLedger)
+        this.$nextTick(() => this.$refs.approve.focus());
     },
 
     async refreshData() {

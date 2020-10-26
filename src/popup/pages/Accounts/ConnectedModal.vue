@@ -54,6 +54,11 @@ export default {
       active: (state) => state.wallets.active,
     }),
   },
+  watch: {
+    async active() {
+      await this.loadSession();
+    },
+  },
   async mounted() {
     await this.loadSession();
   },
