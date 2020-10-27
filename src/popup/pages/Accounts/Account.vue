@@ -3,6 +3,7 @@
     <app-header @refresh="refreshAccount" headerTab="main-tab" />
     <main class="main">
       <div class="relative">
+        <!-- <ConnectedSites v-if="!isExtendedView" /> -->
         <div class="main-logo">
           <img src="images/harmony-big.png" class="logo-img" alt="Harmony" />
         </div>
@@ -48,18 +49,10 @@
           </select>
         </div>
         <div class="button-group">
-          <button
-            class="outline"
-            @click="$router.push('/deposit')"
-            v-tooltip.top="'Deposit token'"
-          >
+          <button class="outline" @click="$router.push('/deposit')">
             Deposit
           </button>
-          <button
-            class="primary"
-            @click="onSendClick"
-            v-tooltip.top="'Send token'"
-          >
+          <button class="primary" @click="onSendClick">
             Send
           </button>
         </div>
@@ -82,8 +75,8 @@
         </div>
       </div>
       <notifications
-        group="copied"
-        width="180"
+        group="notify"
+        :width="180"
         :max="2"
         class="notifiaction-container"
       />
@@ -97,7 +90,7 @@ import account from "mixins/account";
 import MainTab from "components/MainTab.vue";
 import { mapState } from "vuex";
 import BigNumber from "bignumber.js";
-
+import ConnectedSites from "./ConnectedSites";
 import axios from "axios";
 
 export default {
@@ -105,6 +98,7 @@ export default {
 
   components: {
     MainTab,
+    ConnectedSites,
   },
 
   data: () => ({
@@ -165,7 +159,7 @@ export default {
     onClickAccount() {
       this.$copyText(this.address).then(() => {
         this.$notify({
-          group: "copied",
+          group: "notify",
           type: "info",
           text: "Copied to Clipboard",
         });
@@ -226,7 +220,6 @@ export default {
 }
 .relative {
   position: relative;
-  z-index: -1;
 }
 .price-bar {
   left: 0;
@@ -237,6 +230,7 @@ export default {
   animation-iteration-count: 1;
   animation-timing-function: ease-in;
   animation-duration: 2s;
+  margin-bottom: -1rem;
 }
 
 .token-symbol-indicator {

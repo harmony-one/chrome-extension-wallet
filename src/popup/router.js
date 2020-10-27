@@ -15,7 +15,7 @@ import AddToken from "./pages/Token/AddToken.vue";
 import SendOne from "./pages/Send/SendOne.vue";
 import SendToken from "./pages/Send/SendToken.vue";
 
-import Account from "./pages/Account.vue";
+import Account from "./pages/Accounts/Account.vue";
 import History from "./pages/History.vue";
 import Deposit from "./pages/Deposit.vue";
 import Lock from "./pages/Lock.vue";
@@ -24,7 +24,8 @@ import About from "./pages/About.vue";
 import Settings from "./pages/Settings/index.vue";
 import Security from "./pages/Settings/Security/index.vue";
 import Contacts from "./pages/Settings/Contacts/index.vue";
-import PincodeModal from "./pages/Settings/Security/PincodeModal.vue";
+import CreatePassword from "./pages/Settings/Security/CreatePassword.vue";
+import MigrateAccounts from "./pages/Settings/Security/MigrateAccounts.vue";
 
 import store from "./store";
 
@@ -44,6 +45,11 @@ const router = new Router({
       component: SignTransaction,
     },
     //end
+    {
+      path: "/migrate-accounts",
+      name: "migrate-accounts",
+      component: MigrateAccounts,
+    },
     {
       path: "/",
       name: "auth",
@@ -168,6 +174,7 @@ const router = new Router({
       },
     },
     //end
+
     //settings route
     {
       path: "/settings",
@@ -197,9 +204,9 @@ const router = new Router({
       },
     },
     {
-      path: "/settings/security/pincode",
-      name: "pincode",
-      component: PincodeModal,
+      path: "/settings/security/create-password",
+      name: "create-password",
+      component: CreatePassword,
       props: {
         method: "update",
         subModule: false,
@@ -212,6 +219,12 @@ const router = new Router({
   ],
 });
 router.beforeEach(async (to, from, next) => {
+  if (to.matched.some((record) => record.meta.authenticate)) {
+    if (!store.getters.getPassword && store.state.wallets.accounts.length) {
+      next({ path: "/migrate-accounts" });
+    }
+  }
+
   if (to.matched.some((record) => record.meta.authenticate)) {
     if (store.getters.getLockState) {
       next({ path: "/lock" });

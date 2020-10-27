@@ -7,8 +7,9 @@
         v-for="item in options"
         :key="item.title"
         @click="item.handler"
-      >{{ item.title }}</div>
-      <pindigits-modal />
+      >
+        {{ item.title }}
+      </div>
       <locktimer-modal />
     </main>
   </div>
@@ -16,17 +17,12 @@
 
 <script>
 import { mapState } from "vuex";
-import PindigitsModal from "./PindigitsModal";
 import LocktimerModal from "./LocktimerModal";
 export default {
   data() {
     return {
       options: [
-        { title: "Change the PIN Code", handler: () => this.changePincode() },
-        {
-          title: "Change the PIN Code digits",
-          handler: () => this.showPindigitsModal(),
-        },
+        { title: "Change the password", handler: () => this.changePassword() },
         {
           title: "Set the lock timer",
           handler: () => this.showLockTimerModal(),
@@ -35,15 +31,11 @@ export default {
     };
   },
   components: {
-    PindigitsModal,
     LocktimerModal,
   },
   methods: {
-    changePincode() {
-      this.$router.push("/settings/security/pincode");
-    },
-    showPindigitsModal() {
-      this.$modal.show("modal-pindigits");
+    changePassword() {
+      this.$router.push("/settings/security/create-password");
     },
     showLockTimerModal() {
       this.$modal.show("modal-locktimer");

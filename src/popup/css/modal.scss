@@ -1,11 +1,15 @@
 .vue-dialog-button {
   border-radius: 0;
 }
-
+.v__dialog {
+  z-index: 1500;
+}
 .modal-header {
-  padding: 10px 0;
+  padding: 10px 5px;
   font-size: 14px;
+  font-weight: 600;
   text-align: center;
+  word-break: break-all;
   border-bottom: 1px solid #eee;
 }
 .modal-footer {
@@ -13,7 +17,7 @@
   text-align: center;
   font-size: 12px;
   .primary {
-    padding: 8px 0;
+    padding: 10px 0;
     color: #f44336;
     cursor: pointer;
     flex: 1;
@@ -35,7 +39,7 @@
     }
   }
   .secondary {
-    padding: 8px 0;
+    padding: 10px 0;
     color: black;
     cursor: pointer;
     flex: 1;
@@ -52,6 +56,25 @@
   }
 }
 
+.modal-body {
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  gap: 10px;
+  input {
+    border: none;
+    border-bottom: 1px solid #ccc;
+    border-radius: 0;
+    padding: 5px;
+    outline: none;
+    &:focus {
+      border-bottom: 1px solid rgba(0, 123, 255);
+    }
+  }
+}
 .modal-body > input.modal-input-address {
   font-size: 11px;
 }

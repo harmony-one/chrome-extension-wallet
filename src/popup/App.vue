@@ -8,7 +8,7 @@
       :width="55"
       :z-index="500"
     ></loading>
-    <v-dialog transition="scale" :width="250" />
+    <v-dialog transition="scale" class="v__dialog" :width="250" />
     <transition :name="transitionName" mode="out-in">
       <router-view />
     </transition>

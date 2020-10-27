@@ -90,7 +90,7 @@
               selectedToken.symbol
           }}
         </div>
-        <div class="row">
+        <div class="row gasfee-row">
           <label class="input-label gas-price">
             Gas Price
             <input
@@ -103,7 +103,10 @@
               step="any"
             />
           </label>
-          <label class="input-label gas-limit">
+          <label
+            class="input-label gas-limit"
+            :class="{ error: gasLimit < estimateGasLimit }"
+          >
             Gas Limit
             <input
               class="input-field"
@@ -114,7 +117,10 @@
               placeholder="Gas Limit"
             />
           </label>
-          <label class="input-label gas-one">
+          <label
+            class="input-label gas-one"
+            :class="{ error: gasLimit < estimateGasLimit }"
+          >
             Network Fee
             <input
               class="input-field"
@@ -126,6 +132,19 @@
             />
           </label>
         </div>
+        <div
+          class="estimategas-label"
+          v-if="!isHRCToken"
+          v-show="!loading"
+          @click="setNetworkFee"
+          v-tooltip.bottom="
+            'Estimate gas fee for this transaction. Click to set the enough gas limit.'
+          "
+        >
+          Estimate Gas Fee:
+          {{ estimateGasFee }} ONE
+        </div>
+
         <label class="input-label" :class="{ disabled: isHRCToken }">
           Input Data
           <textarea
@@ -192,26 +211,12 @@
           </div>
         </div>
 
-        <div v-if="!wallet.isLedger" class="password-content">
-          <label class="input-label">
-            Password
-            <input
-              class="input-field"
-              type="password"
-              name="password"
-              ref="password"
-              v-model="password"
-              placeholder="Input your password"
-              v-on:keyup.enter="sendPayment"
-            />
-          </label>
-        </div>
-        <div class="ledger-content" v-else>
+        <div class="ledger-content" v-if="wallet.isLedger">
           <b>{{ ledgerConfirmTxt }}</b>
         </div>
-        <div v-if="!wallet.isLedger" class="button-group">
+        <div v-if="!wallet.isLedger" class="footer button-group">
           <button class="outline" @click="onBackClick()">Back</button>
-          <button class="primary" @click="sendPayment" :disabled="!password">
+          <button class="primary" ref="approve" @click="sendPayment">
             Approve
           </button>
         </div>
@@ -228,6 +233,10 @@
           </button>
         </div>
       </div>
+      <check-modal
+        @accept="showAddContactModal"
+        @cancel="() => showConfirmDialog()"
+      />
       <modal
         name="modal-contact-add"
         :adaptive="true"
@@ -278,19 +287,21 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import BigNumber from "bignumber.js";
 import {
   decryptKeyStore,
   transferOne,
   getNetworkLink,
   sendTransction,
+  estimateGas,
 } from "services/AccountService";
 import { sendToken } from "services/Hrc20Service";
 import { isValidAddress } from "@harmony-js/utils";
 import account from "mixins/account";
 import helper from "mixins/helper";
 import ContactSelect from "components/ContactSelect";
+import CheckModal from "./CheckModal";
 import {
   signTransactionWithLedger,
   signHRCTransactionWithLedger,
@@ -302,11 +313,13 @@ import {
   LEDGER_LOCKED,
 } from "~/types";
 
+import { Unit } from "@harmony-js/utils";
 export default {
   name: "send-transaction",
   mixins: [account, helper],
   components: {
     ContactSelect,
+    CheckModal,
   },
   props: {
     isToken: {
@@ -319,6 +332,7 @@ export default {
   },
   data: () => ({
     scene: 1,
+    estimateGasLimit: 21000,
     amount: 0,
     fromShard: 0,
     toShard: 0,
@@ -327,10 +341,9 @@ export default {
     newAddress: "",
     recipient: null,
     gasPrice: 1,
-    gasLimit: 25000,
+    gasLimit: 21000,
     inputData: "",
     selectedToken: { symbol: "ONE", decimals: 18, isMainToken: true },
-    password: "",
     ledgerError: false,
     message: {
       show: false,
@@ -345,7 +358,9 @@ export default {
       wallet: (state) => state.wallets.active,
       loading: (state) => state.loading,
       contacts: (state) => state.settings.contacts,
+      dontShowContactsModal: (state) => state.settings.dontShowContactsModal,
     }),
+    ...mapGetters(["getPassword"]),
     getFromAddress() {
       return this.wallet.address;
     },
@@ -380,6 +395,9 @@ export default {
       if (this.isHRCToken) return `Send ${this.selectedToken.symbol} Token`;
       return "Send Payment";
     },
+    estimateGasFee() {
+      return new Unit.Wei(this.estimateGasLimit).toGwei();
+    },
   },
 
   async mounted() {
@@ -391,12 +409,16 @@ export default {
     }
   },
 
-  updated() {
-    if (this.scene == 2) {
-      if (!this.wallet.isLedger) this.$refs.password.focus();
-    }
-  },
   watch: {
+    async recipient() {
+      if (this.recipient && this.recipient.address)
+        await this.calculateEstimateGas();
+    },
+    async inputData() {
+      if (this.recipient && this.recipient.address)
+        await this.calculateEstimateGas();
+    },
+
     selectedToken() {
       this.toShard = 0;
       this.setGasLimit();
@@ -412,6 +434,17 @@ export default {
     },
   },
   methods: {
+    async calculateEstimateGas() {
+      this.estimateGasLimit = await estimateGas(
+        this.getFromAddress,
+        this.recipient.address,
+        this.gasLimit,
+        this.gasPrice,
+        this.amount,
+        this.inputData,
+        this.fromShard
+      );
+    },
     onContactSelect(recipient) {
       const address = recipient;
       const findByAddress = _.find(this.contacts, { address });
@@ -437,12 +470,18 @@ export default {
       });
       this.showConfirmDialog();
     },
+    setNetworkFee(e) {
+      e.preventDefault();
+      if (!this.estimateGasLimit) return;
+      this.gasLimit = this.estimateGasLimit;
+    },
+
     setMaxBalance(e) {
       e.preventDefault();
       this.amount = this.getMaxBalance;
     },
     setGasLimit() {
-      if (!this.isHRCToken) this.gasLimit = 25000;
+      if (!this.isHRCToken) this.gasLimit = 21000;
       else this.gasLimit = 250000;
     },
     initSelectedToken() {
@@ -470,14 +509,12 @@ export default {
       this.scene = 1;
       this.ledgerError = false;
       this.ledgerConfirmTxt = LEDGER_CONFIRM_PREPARE;
-      this.password = "";
     },
     initScene() {
       this.scene = 1;
       this.amount = 0;
       this.recipient = null;
       this.toShard = 0;
-      this.password = "";
       this.ledgerError = false;
       this.ledgerConfirmTxt = LEDGER_CONFIRM_PREPARE;
     },
@@ -544,20 +581,10 @@ export default {
       }
     },
     async sendPayment() {
-      let privateKey;
-      if (!this.wallet.isLedger) {
-        if (!this.password) return;
-        privateKey = await decryptKeyStore(this.password, this.wallet.keystore);
-
-        if (!privateKey) {
-          this.$notify({
-            group: "notify",
-            type: "error",
-            text: "Password is not correct",
-          });
-          return;
-        }
-      }
+      const privateKey = await decryptKeyStore(
+        this.getPassword,
+        this.wallet.keystore
+      );
 
       this.$store.commit("loading", true);
       try {
@@ -619,7 +646,6 @@ export default {
     },
     checkContactExist(e) {
       e.preventDefault();
-      console.log("checkcontactexist");
       this.message.show = false;
       if (!isValidAddress(this.recipient.address)) {
         this.showErrMessage("Invalid recipient address");
@@ -648,6 +674,16 @@ export default {
 
       if (!this.isHRCToken) {
         if (
+          new BigNumber(this.estimateGasFee).isGreaterThan(
+            new BigNumber(this.getGasFee)
+          )
+        ) {
+          this.showErrMessage(
+            "The network fee is not enough. It should be bigger then estimate gas fee"
+          );
+          return;
+        }
+        if (
           new BigNumber(this.getTotal).isGreaterThan(
             new BigNumber(this.getOneBalance)
           )
@@ -674,32 +710,15 @@ export default {
           return;
         }
       }
-      if (!this.recipient.name) {
-        console.log("showing modal");
-        this.$modal.show("dialog", {
-          text:
-            "This address is not found in the contacts. Do you want to add this address?",
-          buttons: [
-            {
-              title: "Cancel",
-              handler: () => {
-                this.$modal.hide("dialog");
-                this.showConfirmDialog();
-              },
-            },
-            {
-              title: "Add",
-              handler: () => {
-                this.$modal.hide("dialog");
-                this.newAddress = this.recipient.address;
-                this.$modal.show("modal-contact-add");
-              },
-            },
-          ],
-        });
+      if (!this.dontShowContactsModal && !this.recipient.name) {
+        this.$modal.show("modal-check-contact");
         return;
       }
       this.showConfirmDialog();
+    },
+    showAddContactModal() {
+      this.newAddress = this.recipient.address;
+      this.$modal.show("modal-contact-add");
     },
     showConfirmDialog() {
       this.amount = new BigNumber(this.amount)
@@ -712,6 +731,8 @@ export default {
         this.processLedgerTransfer();
       }
       this.scene = 2;
+      if (!this.wallet.isLedger)
+        this.$nextTick(() => this.$refs.approve.focus());
     },
 
     async refreshData() {
@@ -740,9 +761,19 @@ h3 {
 .gas-price,
 .gas-limit {
   width: 32%;
+  &.error {
+    input {
+      border: 1px solid red;
+    }
+  }
 }
 .gas-one {
   width: 36%;
+  &.error {
+    input {
+      border: 1px solid red;
+    }
+  }
 }
 .input-data {
   height: 100px;
@@ -797,5 +828,16 @@ h3 {
   & > label {
     flex: 1;
   }
+}
+.gasfee-row {
+  margin-bottom: -13px;
+}
+.estimategas-label {
+  color: #113df0;
+  cursor: pointer;
+  font-size: 12px;
+  font-style: italic;
+  margin-top: 3px;
+  margin-left: 5px;
 }
 </style>

@@ -9,25 +9,30 @@
     </div>
     <div class="unlock-caption">Unlock your wallet</div>
     <div
-      class="pin-container"
-      :class="{ 'pin-fail': pincodeError ? true : false }"
-      :style="{
-        'margin-left': getPinMargin(getPinCode.digits),
-        'margin-right': getPinMargin(getPinCode.digits),
-      }"
+      class="password-container"
+      :class="{ 'fail-animate': failed ? true : false }"
     >
-      <PincodeInput
-        v-model="pin"
-        :length="getPinCode.digits"
-        :secure="true"
-        :characterPreview="false"
+      <input
+        class="input-field"
+        type="password"
+        name="password"
+        ref="password"
+        v-model="password"
         :disabled="!attempts"
-        ref="pincodeInput"
+        placeholder="Input the password"
+        v-on:keyup.enter="checkPassword"
       />
+      <button class="round" :disabled="!attempts" @click="checkPassword">
+        <i class="material-icons">arrow_forward</i>
+      </button>
     </div>
-    <div class="pin-caption" :class="{ 'failed-caption': attempts < 5 }">{{ statusCaption }}</div>
+    <div class="password-caption" :class="{ 'failed-caption': attempts < 5 }">
+      {{ statusCaption }}
+    </div>
     <div v-if="lastOpened">
-      <div class="lastopen-fromnow-caption">Last accessed {{ lastOpenedFromNow }}</div>
+      <div class="lastopen-fromnow-caption">
+        Last accessed {{ lastOpenedFromNow }}
+      </div>
       <div class="lastopen-time-caption">{{ lastOpened }}</div>
     </div>
     <div class="footer credit-title">
@@ -43,13 +48,13 @@ import moment from "moment-timezone";
 const AppInfo = require("~/app.json");
 export default {
   data: () => ({
-    pin: "",
-    pincodeError: false,
+    failed: false,
     lastOpened: "",
+    password: "",
     lastOpenedFromNow: "",
   }),
   computed: {
-    ...mapGetters(["getPinCode"]),
+    ...mapGetters(["getPassword"]),
     ...mapState({
       attempts: (state) => state.settings.auth.attempts,
       countdown: (state) => state.settings.auth.countdown,
@@ -58,8 +63,7 @@ export default {
       return "v" + AppInfo.version;
     },
     statusCaption() {
-      if (this.attempts === 5)
-        return `Input the ${this.getPinCode.digits} digits PIN Code`;
+      if (this.attempts === 5) return ``;
       else if (this.attempts > 0)
         return `${this.attempts} ${
           this.attempts > 1 ? "attempts" : "attempt"
@@ -68,13 +72,6 @@ export default {
         return `Authentication failed. Try again after ${this.formatTime(
           this.countdown
         )}`;
-      }
-    },
-  },
-  watch: {
-    pin() {
-      if (this.pin.length === this.getPinCode.digits) {
-        this.pinCodeComplete();
       }
     },
   },
@@ -102,16 +99,16 @@ export default {
       }
     }
   },
+  mounted() {
+    this.$refs.password.focus();
+  },
   methods: {
-    getPinMargin(digits) {
-      return digits === 4 ? "50px" : "15px";
-    },
     startCountDown() {
       const timerID = setInterval(() => {
         const count = this.countdown - 1;
         if (count <= 0) {
           this.$store.commit("settings/resetFailedTimer");
-          this.$nextTick(() => this.$refs.pincodeInput.$el.children[0].focus());
+          this.$nextTick(() => this.$refs.password.focus());
           clearInterval(timerID);
         } else this.$store.commit("settings/setCountdown", count);
       }, 1000);
@@ -121,8 +118,9 @@ export default {
         parseInt(count % 60)
       ).padStart(2, "0")}`;
     },
-    async pinCodeComplete() {
-      if (this.pin === this.getPinCode.pin) {
+    async checkPassword() {
+      if (!this.password) return;
+      if (this.password === this.getPassword) {
         this.$store.dispatch("settings/setLockState", false);
         this.$store.commit("settings/resetFailedTimer");
         const { AppState } = await storage.getValue("AppState");
@@ -131,8 +129,8 @@ export default {
         });
         this.$router.push("/home");
       } else {
-        this.pincodeError = true;
-        this.pin = "";
+        this.failed = true;
+        this.password = "";
         if (this.attempts === 1) {
           this.startCountDown();
         }
@@ -141,7 +139,7 @@ export default {
           Math.max(this.attempts - 1, 0)
         );
         setTimeout(() => {
-          this.pincodeError = false;
+          this.failed = false;
         }, 800);
       }
     },
@@ -161,6 +159,12 @@ export default {
       rgba(247, 247, 255, 0.96)
     ),
     url("images/harmony.png");
+}
+.password-container {
+  margin: 0 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 .lock-logo {
   width: 200px;

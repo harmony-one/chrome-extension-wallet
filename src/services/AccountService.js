@@ -5,8 +5,10 @@ import {
   decryptPhrase,
   HarmonyAddress,
 } from "@harmony-js/crypto";
+import { RPCMethod } from "@harmony-js/network";
 import { stringToHex } from "./CryptoService";
-const { isValidAddress } = require("@harmony-js/utils");
+import { isValidAddress, Unit, hexToBN, ChainType } from "@harmony-js/utils";
+
 import { Harmony } from "@harmony-js/core";
 var currentNetwork = "";
 
@@ -21,7 +23,6 @@ var harmony = new Harmony(
 export function getHarmony() {
   if (currentNetwork != store.state.network.name) {
     currentNetwork = store.state.network.name;
-    console.log("current network changed to", store.state.network.name);
     harmony = new Harmony(
       // rpc url
       store.state.network.apiUrl,
@@ -67,7 +68,7 @@ export async function decryptKeyStoreFromFile(password, keystore) {
     }
     return false;
   } catch (err) {
-    console.error("decryptKeyStoreFromFile--->", err);
+    console.error("decryptKeyStoreFromFile", err);
     return false;
   }
 }
@@ -303,4 +304,35 @@ export function removeDups(myList) {
   });
 
   return newList;
+}
+
+export async function estimateGas(
+  from,
+  to,
+  gas,
+  gasPrice,
+  value,
+  inputData,
+  shardID = 0
+) {
+  const harmony = getHarmony();
+  const data = !inputData.match(/^0x([a-f0-9])*$/)
+    ? stringToHex(inputData)
+    : inputData;
+  const res = await harmony.messenger.send(
+    RPCMethod.EstimateGas,
+    [
+      {
+        from: getAddress(from).checksum,
+        to: getAddress(to).checksum,
+        gas: new Unit.Gwei(gas).toHex(),
+        gasPrice: new Unit.Gwei(gasPrice).asGwei().toHex(),
+        value: new Unit.Wei(value).toHex(),
+        data,
+      },
+    ],
+    ChainType.Harmony,
+    shardID
+  );
+  return hexToBN(res.result).toNumber();
 }

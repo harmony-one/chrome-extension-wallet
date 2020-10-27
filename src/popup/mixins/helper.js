@@ -1,4 +1,6 @@
 import BigNumber from "bignumber.js";
+import apiService from "services/APIService";
+import _ from "lodash";
 export default {
   computed: {
     isExtendedView() {
@@ -27,6 +29,24 @@ export default {
         "..." +
         address.substr(address.length - RightOffet, address.length)
       );
+    },
+    async checkSession(address) {
+      return await new Promise(async (resolve, reject) => {
+        const sessions = await apiService.getHostSessions();
+        const findbyAddress = _.filter(sessions, {
+          account: { address },
+        });
+        const sites = findbyAddress.map((elem) => elem.host);
+        chrome.tabs.query({ active: true, currentWindow: true }, function(
+          tabs
+        ) {
+          const tab = tabs[0];
+          const domain = new URL(tab.url).hostname;
+          let connected = false;
+          if (sites.includes(domain)) connected = true;
+          resolve({ sites, domain, connected });
+        });
+      });
     },
   },
 };
