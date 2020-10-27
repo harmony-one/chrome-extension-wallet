@@ -10,8 +10,7 @@ import Notifications from "vue-notification";
 import AppHeader from "./components/AppHeader.vue";
 import SeedChecker from "./components/SeedChecker";
 import RadioButton from "./components/RadioButton";
-import PincodeInput from "vue-pincode-input";
-import PincodeModal from "./pages/Settings/Security/PincodeModal.vue";
+import CreatePassword from "./pages/Settings/Security/CreatePassword.vue";
 import MoonLoader from "vue-spinner/src/MoonLoader";
 import ScaleLoader from "vue-spinner/src/ScaleLoader";
 import ClipLoader from "vue-spinner/src/ClipLoader";
@@ -45,9 +44,8 @@ Vue.component("ClipLoader", ClipLoader);
 Vue.component("ScaleLoader", ScaleLoader);
 Vue.component("AppHeader", AppHeader);
 Vue.component("SeedChecker", SeedChecker);
-Vue.component("PincodeInput", PincodeInput);
 Vue.component("RadioButton", RadioButton);
-Vue.component("PincodeModal", PincodeModal);
+Vue.component("CreatePassword", CreatePassword);
 Vue.use(Notifications);
 Vue.use(vClickOutside);
 Vue.use(VueClipboard);
@@ -88,48 +86,6 @@ BigNumber.config({
   },
 });
 //change the state
-
-const HRCTokens = store.state.hrc20.tokens;
-const isPreviousVersion = HRCTokens["1"] && !Array.isArray(HRCTokens["1"]);
-if (isPreviousVersion) {
-  const networkKeys = ["1", "2"];
-  let newTokenArray = {
-    Mainnet: [],
-    Testnet: [],
-  };
-  networkKeys.forEach((network) => {
-    const tokenArray = Object.keys(HRCTokens[network]);
-    tokenArray.forEach((token) => {
-      if (network === "1") {
-        newTokenArray["Mainnet"].push({
-          symbol: token,
-          address: HRCTokens[network][token].address,
-          decimals: HRCTokens[network][token].decimals,
-          balance: 0,
-        });
-      } else if (network === "2") {
-        newTokenArray["Testnet"].push({
-          symbol: token,
-          address: HRCTokens[network][token].address,
-          decimals: HRCTokens[network][token].decimals,
-          balance: 0,
-        });
-      }
-    });
-  });
-
-  store.commit("hrc20/resetTokens");
-
-  store.commit("hrc20/setTokenArray", {
-    network: "Mainnet",
-    tokenArray: newTokenArray["Mainnet"],
-  });
-  store.commit("hrc20/setTokenArray", {
-    network: "Testnet",
-    tokenArray: newTokenArray["Testnet"],
-  });
-}
-///
 
 //save the version info
 storage.getValue("meta").then(({ meta }) => {

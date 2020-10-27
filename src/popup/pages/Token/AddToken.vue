@@ -155,7 +155,11 @@ export default {
           });
           return;
         }
-        if (this.getContractAddressList.includes(this.contractAddress)) {
+        if (
+          this.getContractAddressList.includes(
+            new HarmonyAddress(this.contractAddress).bech32
+          )
+        ) {
           this.$notify({
             group: "notify",
             type: "error",

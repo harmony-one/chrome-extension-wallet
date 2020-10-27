@@ -67,3 +67,6 @@ export const WALLET_LOCKED =
 export const NO_ACCOUNTS_ERROR =
   "No accounts. You should create the account first in the extension.";
 export const UNKNOWN_ERROR = "Request failed. Something went wrong.";
+export const ONEWALLETPROVIDER_MESSAGE_LISTENER =
+  "ONEWALLETPROVIDER_MESSAGE_LISTENER";
+export const SESSION_REVOKED = "SESSION_REVOKED";

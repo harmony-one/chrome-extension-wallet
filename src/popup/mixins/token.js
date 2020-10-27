@@ -2,6 +2,7 @@ import { mapState } from "vuex";
 import { getTokenBalance } from "services/Hrc20Service";
 import BigNumber from "bignumber.js";
 import _ from "lodash";
+import { HarmonyAddress } from "@harmony-js/crypto";
 
 export default {
   computed: {
@@ -18,7 +19,7 @@ export default {
       let addressList = [];
       networkList.forEach((network) => {
         this.tokens[network].forEach((token) => {
-          addressList.push(token.address);
+          addressList.push(new HarmonyAddress(token.address).bech32);
         });
       });
       return addressList;

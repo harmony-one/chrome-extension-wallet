@@ -32,6 +32,9 @@ export default {
       state.accounts.push(payload);
       state.active = payload;
     },
+    setAccount(state, payload) {
+      state.accounts = payload;
+    },
 
     setActive(state, payload) {
       //set active account when you select the account in the menu

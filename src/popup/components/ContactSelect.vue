@@ -9,8 +9,8 @@
         placeholder="Select the recipient"
         v-model="recipient"
         @input="onInput"
-        v-on:keyup.capture="onKeyUp"
-        v-on:keydown.capture="onKeyDown"
+        v-on:keyup="onKeyUp"
+        v-on:keydown="onKeyDown"
         @focusin.stop="showList"
         @blur="onBlur"
       />

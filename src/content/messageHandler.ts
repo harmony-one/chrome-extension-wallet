@@ -32,7 +32,7 @@ const waitForResponse = (type: any) => {
   });
 };
 
-const sendMessageToContentScript = (payload: any) => {
+export const sendMessageToContentScript = (payload: any) => {
   window.dispatchEvent(
     new CustomEvent(ONEWALLET_SERVICE_EVENT_REQUEST, {
       detail: {

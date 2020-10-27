@@ -3,6 +3,7 @@ import {
   HARMONY_RESPONSE_TYPE,
   ONEWALLET_SERVICE_EVENT_REQUEST,
   ONEWALLET_SERVICE_EVENT_RESPONSE,
+  ONEWALLETPROVIDER_MESSAGE_LISTENER,
 } from "~/types";
 
 window.onerror = function(message, error) {
@@ -37,6 +38,35 @@ chrome.runtime.onMessage.addListener(async (message) => {
   }
   window.dispatchEvent(
     new CustomEvent(ONEWALLET_SERVICE_EVENT_RESPONSE, {
+      detail: message,
+    })
+  );
+  return true;
+});
+chrome.runtime.onMessage.addListener(async (event) => {
+  if (!event || !event.type || event.type !== HARMONY_RESPONSE_TYPE) {
+    return false;
+  }
+  window.dispatchEvent(
+    new CustomEvent(ONEWALLET_SERVICE_EVENT_RESPONSE, {
+      detail: event,
+    })
+  );
+  return true;
+});
+//wallet provider event listener
+chrome.runtime.onMessage.addListener(async (event) => {
+  if (
+    !event ||
+    !event.type ||
+    event.type !== ONEWALLETPROVIDER_MESSAGE_LISTENER
+  ) {
+    return false;
+  }
+  const { message } = event;
+  if (!message) return true;
+  window.dispatchEvent(
+    new CustomEvent(ONEWALLETPROVIDER_MESSAGE_LISTENER, {
       detail: message,
     })
   );
