@@ -3,7 +3,7 @@
     <app-header @refresh="refreshAccount" headerTab="main-tab" />
     <main class="main">
       <div class="relative">
-        <ConnectedSites v-if="!isExtendedView" />
+        <!-- <ConnectedSites v-if="!isExtendedView" /> -->
         <div class="main-logo">
           <img src="images/harmony-big.png" class="logo-img" alt="Harmony" />
         </div>
