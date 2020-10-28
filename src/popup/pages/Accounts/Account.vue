@@ -3,7 +3,7 @@
     <app-header @refresh="refreshAccount" headerTab="main-tab" />
     <main class="main">
       <div class="relative">
-        <!-- <ConnectedSites v-if="!isExtendedView" /> -->
+        <ConnectedSites v-if="!isExtendedView" />
         <div class="main-logo">
           <img src="images/harmony-big.png" class="logo-img" alt="Harmony" />
         </div>
@@ -14,15 +14,17 @@
         >
       </div>
       <div class="container">
-        <div
-          class="account-box"
-          @click="onClickAccount()"
-          v-tooltip.top="'Click to copy'"
-        >
-          <h2 class="name-label">{{ compressName(wallets.active.name) }}</h2>
-          <div class="box-address">{{ compressAddress(address, 20, 5) }}</div>
+        <div class="account-container">
+          <div
+            class="account-box"
+            @click="onClickAccount()"
+            v-tooltip.top="'Click to copy'"
+          >
+            <h2 class="name-label">{{ compressName(wallets.active.name) }}</h2>
+            <div class="box-address">{{ compressAddress(address, 20, 5) }}</div>
+          </div>
+          <AccountMenu />
         </div>
-
         <div class="box-label">Account Balance</div>
 
         <div class="box-balance">
@@ -92,13 +94,14 @@ import { mapState } from "vuex";
 import BigNumber from "bignumber.js";
 import ConnectedSites from "./ConnectedSites";
 import axios from "axios";
-
+import AccountMenu from "./AccountMenu";
 export default {
   mixins: [account, helper],
 
   components: {
     MainTab,
     ConnectedSites,
+    AccountMenu,
   },
 
   data: () => ({
@@ -175,7 +178,7 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style lang="scss" scoped>
 .shard-box {
   display: flex;
   flex-direction: row;
@@ -190,6 +193,9 @@ export default {
 }
 .name-label {
   margin: 0.5rem;
+}
+.account-container {
+  position: relative;
 }
 .account-box {
   border-radius: 10px;
