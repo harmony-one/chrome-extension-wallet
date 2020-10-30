@@ -6,27 +6,32 @@
     :width="300"
     height="auto"
   >
-    <div class="modal-header">{{ domain }}</div>
+    <div class="modal-header">Connected Sites</div>
     <div class="modal-body">
-      <div v-if="!connected">Account is not connected to this site.</div>
-      <div v-else>
-        Account is connected to this site.
+      <div class="session-title">
+        <span class="session-name">{{
+          compressAddress(active.name, 10, 5)
+        }}</span>
+        is connected to these sites.
       </div>
-      <div v-if="sites.length" class="site-container">
-        <div class="session-title">All sessions</div>
-        <div class="site-list">
-          <div
-            class="site-item"
-            v-for="(site, index) in sites"
-            :key="index"
-            :class="{ active: site === domain }"
-          >
-            <span>{{ site }}</span>
-            <div class="delete-but" @click="revoke(site, index)">
-              <i class="material-icons">delete</i>
-            </div>
+      <div v-if="sites.length" class="site-list">
+        <div
+          class="site-item"
+          v-for="(site, index) in sites"
+          :key="index"
+          :class="{ active: site === domain }"
+        >
+          <span>{{ site }}</span>
+          <div class="delete-but" @click="revoke(site, index)">
+            <i class="material-icons">delete</i>
           </div>
         </div>
+      </div>
+      <div v-else>
+        {{ compressAddress(active.name, 10, 5) }} is not connected to any sites.
+      </div>
+      <div class="manual-add-but">
+        Manually connect to current site
       </div>
     </div>
     <div class="modal-footer">
@@ -44,7 +49,6 @@ import helper from "mixins/helper";
 import { SESSION_REVOKED } from "~/types.js";
 export default {
   data: () => ({
-    connected: false,
     sites: [],
     domain: "",
   }),
@@ -64,12 +68,9 @@ export default {
   },
   methods: {
     async loadSession() {
-      const { sites, domain, connected } = await this.checkSession(
-        this.active.address
-      );
+      const { sites, domain } = await this.checkSession(this.active.address);
       this.sites = sites;
       this.domain = domain;
-      this.connected = connected;
     },
     revoke(site, index) {
       const text =
@@ -109,7 +110,6 @@ export default {
                   text: "Session revoked",
                 });
                 await this.loadSession();
-                this.$emit("refresh");
                 sendEventToContentScript(SESSION_REVOKED, expiredSession);
               } else {
                 this.$notify({
@@ -145,15 +145,6 @@ export default {
     }
   }
 }
-.session-title {
-  padding: 5px 5px 5px 0;
-  font-weight: 700;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 5px;
-}
-.site-container {
-  margin-bottom: 5px;
-}
 .delete-but {
   cursor: pointer;
   align-items: center;
@@ -162,5 +153,29 @@ export default {
 .site-list {
   max-height: 250px;
   overflow: auto;
+  margin-bottom: 5px;
+  padding: 5px 0px;
+  border-bottom: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+}
+.session-title {
+  padding-bottom: 10px;
+}
+.session-name {
+  color: #0987d7;
+}
+.manual-add-but {
+  padding: 5px 10px;
+  color: #0a93eb;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  &:hover {
+    color: #0987d7;
+  }
+  &:focus,
+  &:active {
+    color: #1f6bb7;
+  }
 }
 </style>

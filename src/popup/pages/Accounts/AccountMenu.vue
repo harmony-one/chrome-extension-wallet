@@ -9,7 +9,11 @@
         <i class="material-icons">more_vert</i>
       </div>
       <div class="account-menu" v-show="menuOpen">
-        <div class="account-menu-item" @click="expandView">
+        <div
+          class="account-menu-item"
+          v-if="!isExtendedView"
+          @click="expandView"
+        >
           <i class="material-icons">zoom_out_map</i>
           <span>Expand View</span>
         </div>
@@ -23,17 +27,24 @@
         </div>
       </div>
     </div>
+    <ConnectedModal />
   </section>
 </template>
 
 <script>
 import _ from "lodash";
 import { mapState } from "vuex";
+import ConnectedModal from "./ConnectedModal";
+import helper from "mixins/helper";
 const { ChainID } = require("@harmony-js/utils");
 export default {
   data: () => ({
     menuOpen: false,
   }),
+  mixins: [helper],
+  components: {
+    ConnectedModal,
+  },
   computed: {
     ...mapState({
       network: (state) => state.network,
@@ -56,7 +67,9 @@ export default {
           url: `https://explorer.pops.one/#/address/${this.active.address}`,
         });
     },
-    connectedSites() {},
+    connectedSites() {
+      this.$modal.show("modal-connected-sites");
+    },
     showMenu() {
       this.menuOpen = !this.menuOpen;
     },
@@ -74,6 +87,9 @@ export default {
 }
 .account-menu-but {
   cursor: pointer;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
   i {
     font-weight: 600;
   }
