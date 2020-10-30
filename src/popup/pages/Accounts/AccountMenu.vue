@@ -111,7 +111,7 @@ export default {
     text-align: left;
     align-items: center;
     &:hover {
-      background: #eee;
+      color: #494dff;
     }
   }
   &:hover {
