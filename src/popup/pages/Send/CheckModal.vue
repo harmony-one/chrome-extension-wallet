@@ -35,6 +35,7 @@ export default {
   }),
   methods: {
     cancel() {
+      this.$store.commit("settings/setDontShowContactsModal", this.checked);
       this.$modal.hide("modal-check-contact");
       this.$emit("cancel");
     },
