@@ -50,10 +50,18 @@
               </div>
             </div>
             <div v-else class="token-edit-box">
-              <button class="primary edit_but" @click="editToken(token)">
+              <button
+                class="primary edit_but"
+                :disabled="!token.editable"
+                @click="editToken(token)"
+              >
                 Edit
               </button>
-              <button class="primary delete_but" @click="deleteToken(token)">
+              <button
+                class="primary delete_but"
+                :disabled="!token.editable"
+                @click="deleteToken(token)"
+              >
                 Delete
               </button>
             </div>
@@ -244,7 +252,6 @@ export default {
 .token-edit-box {
   outline: none;
   .edit_but {
-    border: none;
     border: 1px solid #0a93eb;
     background: #0a93eb;
     &:hover {
@@ -253,9 +260,13 @@ export default {
     &:active {
       background: #1f6bb7;
     }
+    &:disabled {
+      background: #e0e0e0;
+      border: 1px solid #e0e0e0;
+      color: #888;
+    }
   }
   .delete_but {
-    border: none;
     border: 1px solid #d63e4d;
     background: #d63e4d;
     &:hover {
@@ -263,6 +274,11 @@ export default {
     }
     &:active {
       background: #9e1338;
+    }
+    &:disabled {
+      background: #e0e0e0;
+      border: 1px solid #e0e0e0;
+      color: #888;
     }
   }
 }

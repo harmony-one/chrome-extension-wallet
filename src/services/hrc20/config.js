@@ -10,6 +10,7 @@ export default {
       symbol: "BUSD",
       address: "one1u9mwheravgdesjnnqd4emfwcx3q3aae5hw36l2",
       decimals: 18,
+      editable: false,
       balance: 0,
     },
     {
@@ -17,6 +18,7 @@ export default {
       address: "one1yxzn9gf28zdy4yhup30my2gp68qerx929rv2ns",
       decimals: 18,
       balance: 0,
+      editable: false,
     },
   ],
   Testnet: [
@@ -25,12 +27,14 @@ export default {
       address: "0xc4860463c59d59a9afac9fde35dff9da363e8425",
       decimals: 18,
       balance: 0,
+      editable: false,
     },
     {
       symbol: "LINK",
       address: "0xac8bd2b27d45d582a3882e33f626f4e3d3f49c92",
       decimals: 18,
       balance: 0,
+      editable: false,
     },
   ],
   Localnet: [],

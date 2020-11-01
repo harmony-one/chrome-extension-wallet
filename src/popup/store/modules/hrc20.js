@@ -72,6 +72,7 @@ export default {
         symbol,
         address,
         decimals,
+        editable: true,
         balance: 0,
       });
     },
