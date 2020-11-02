@@ -19,6 +19,18 @@ const initArray = {
       decimals: 18,
       balance: 0,
     },
+    {
+      symbol: "1WETH",
+      address: "one17ust0ygvdvhlt0gkw9c6mgs3ugn8gzl7xj9zr8",
+      decimals: 18,
+      balance: 0,
+    },
+    {
+      symbol: "1WBTC",
+      address: "one1xz2uw4tmev5kenrwxc77qxmkpwsrrukel9ucc5",
+      decimals: 8,
+      balance: 0,
+    },
   ],
   Testnet: [
     {
