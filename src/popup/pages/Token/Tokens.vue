@@ -50,18 +50,10 @@
               </div>
             </div>
             <div v-else class="token-edit-box">
-              <button
-                class="primary edit_but"
-                :disabled="!token.editable"
-                @click="editToken(token)"
-              >
+              <button class="primary edit_but" @click="editToken(token)">
                 Edit
               </button>
-              <button
-                class="primary delete_but"
-                :disabled="!token.editable"
-                @click="deleteToken(token)"
-              >
+              <button class="primary delete_but" @click="deleteToken(token)">
                 Delete
               </button>
             </div>

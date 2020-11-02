@@ -203,7 +203,7 @@ class APIService {
       this.sender = tabid;
       this.host = hostname;
       const session = await this.getSession(hostname);
-      if (session.exist) {
+      if (store && session.exist) {
         const findAcc = _.find(store.wallets.accounts, {
           address: session.account.address,
         });
@@ -239,6 +239,7 @@ class APIService {
       return vuex;
     } catch (err) {
       console.error(err);
+      return false;
     }
   };
   prepareSignTransaction = async (tabid, hostname, payload) => {
@@ -250,7 +251,7 @@ class APIService {
       this.params = payload.params;
       this.txnInfo = payload.txnInfo;
       const session = await this.getSession(hostname);
-      if (session.exist) {
+      if (store && session.exist) {
         const findAcc = _.find(store.wallets.accounts, {
           address: session.account.address,
         });
