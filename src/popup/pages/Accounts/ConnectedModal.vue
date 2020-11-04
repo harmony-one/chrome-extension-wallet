@@ -10,7 +10,7 @@
     <div class="modal-body">
       <div class="session-title">
         <span class="session-name">{{
-          compressAddress(active.name, 10, 5)
+          compressString(active.name, 10, 5)
         }}</span>
         is connected to these sites.
       </div>
@@ -28,7 +28,7 @@
         </div>
       </div>
       <div v-else>
-        {{ compressAddress(active.name, 10, 5) }} is not connected to any sites.
+        {{ compressString(active.name, 10, 5) }} is not connected to any sites.
       </div>
       <div class="manual-add-but">
         Manually connect to current site

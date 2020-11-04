@@ -25,6 +25,7 @@ import Config from "~/config";
 import * as storage from "services/StorageService";
 import AppInfo from "~/app.json";
 
+import { initHRC20Tokens } from "services/hrc20/init.js";
 import { CLOSE_WINDOW, FROM_BACK_TO_POPUP } from "~/types";
 
 import "./css/icons.less";
@@ -108,3 +109,5 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   sendResponse();
   return true;
 });
+
+initHRC20Tokens(store);
