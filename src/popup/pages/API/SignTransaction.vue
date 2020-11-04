@@ -4,7 +4,7 @@
     <div class="hostrow">
       <span class="host_label">{{ host }}</span>
     </div>
-    <div v-if="!getLockState">
+    <div v-if="!getLockState && getPassword">
       <div>
         <span class="action_caption">Signing by</span>
         <span class="sign__name">{{ wallet.name }}</span>
@@ -62,10 +62,19 @@
       </div>
     </div>
     <div v-else>
-      <div class="error-container">
+      <div class="error-container" v-if="getLockState">
         <p>
           Sorry. The wallet is locked. You should unlock it first in the
           extension.
+        </p>
+      </div>
+      <div class="error-container" v-else-if="!getPassword">
+        <p>
+          Important Updates. Harmony One Wallet recently removes the password
+          for <i><b>each account</b></i> and allows you to have only a
+          <b>Global password</b> like Metamask. <br />You need to migrate all of
+          your accounts in the previous version to the new version.<br />First,
+          open your extension and follow the steps.
         </p>
       </div>
       <button class="primary flex mt-20" @click="lockReject">OK</button>
