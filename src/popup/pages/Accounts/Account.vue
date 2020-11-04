@@ -20,8 +20,10 @@
             @click="onClickAccount()"
             v-tooltip.top="'Click to copy'"
           >
-            <h2 class="name-label">{{ compressName(wallets.active.name) }}</h2>
-            <div class="box-address">{{ compressAddress(address, 20, 5) }}</div>
+            <h2 class="name-label">
+              {{ compressString(wallets.active.name, 10, 5) }}
+            </h2>
+            <div class="box-address">{{ compressString(address, 20, 5) }}</div>
           </div>
           <AccountMenu />
         </div>
@@ -167,13 +169,6 @@ export default {
           text: "Copied to Clipboard",
         });
       });
-    },
-    compressName(str) {
-      if (str.length > 15)
-        return (
-          str.substr(0, 10) + "..." + str.substr(str.length - 5, str.length)
-        );
-      return str;
     },
   },
 };

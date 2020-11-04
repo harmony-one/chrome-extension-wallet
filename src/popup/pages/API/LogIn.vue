@@ -25,7 +25,7 @@
             >
               <div class="card-item" :class="{ active: selected === index }">
                 <div class="card-item-name-box">
-                  <div>{{ compressName(account.name) }}</div>
+                  <div>{{ compressString(account.name, 10, 10) }}</div>
                   <div v-if="account.isLedger" class="ledger-badge">Ledger</div>
                 </div>
                 <div class="account-address">{{ account.address }}</div>
@@ -92,14 +92,6 @@ export default {
     chrome.runtime.connect({ name: THIRDPARTY_GET_ACCOUNT_CONNECT });
   },
   methods: {
-    compressName(str) {
-      if (str.length > 20)
-        return (
-          str.substr(0, 10) + "..." + str.substr(str.length - 10, str.length)
-        );
-      return str;
-    },
-
     selectAccount(index) {
       this.selected = index;
     },

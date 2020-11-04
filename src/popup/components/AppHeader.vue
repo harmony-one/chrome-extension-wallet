@@ -152,7 +152,7 @@
                         selectAccount(account.address);
                       }
                     "
-                    >{{ compressName(account.name) }}</a
+                    >{{ compressString(account.name, 10, 5) }}</a
                   >
                   <span v-if="account.isLedger" class="ledger-badge"
                     >Ledger</span
@@ -270,13 +270,6 @@ export default {
   },
 
   methods: {
-    compressName(str) {
-      if (str.length > 15)
-        return (
-          str.substr(0, 10) + "..." + str.substr(str.length - 5, str.length)
-        );
-      return str;
-    },
     backClicked() {
       if (!this.backRoute) this.$router.go(-1);
       else this.$router.push(this.backRoute);

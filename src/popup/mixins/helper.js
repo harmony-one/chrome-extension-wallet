@@ -23,12 +23,14 @@ export default {
         ? 0
         : new BigNumber(balance).toFormat(Math.min(decimal, 36));
     },
-    compressAddress(address, leftOffset = 15, RightOffet = 5) {
-      return (
-        address.substr(0, leftOffset) +
-        "..." +
-        address.substr(address.length - RightOffet, address.length)
-      );
+    compressString(str, leftOffset = 15, RightOffet = 5) {
+      if (str.length > leftOffset + RightOffet + 3)
+        return (
+          str.substr(0, leftOffset) +
+          "..." +
+          str.substr(str.length - RightOffet, str.length)
+        );
+      return str;
     },
     async checkSession(address) {
       return await new Promise(async (resolve, reject) => {
