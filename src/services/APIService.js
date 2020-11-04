@@ -6,6 +6,7 @@ import {
   FROM_BACK_TO_POPUP,
   ONEWALLETPROVIDER_MESSAGE_LISTENER,
   CLOSE_WINDOW,
+  SESSION_REVOKED,
 } from "~/types";
 import * as storage from "./StorageService";
 import _ from "lodash";
@@ -293,6 +294,15 @@ class APIService {
       message,
     });
     this.closeWindow();
+  };
+  revokeSession = async (site, index) => {
+    let sessionList = await this.getHostSessions();
+    const expiredSession = sessionList[index];
+    sessionList.splice(index, 1);
+    await storage.saveValue({
+      session: sessionList,
+    });
+    sendEventToContentScript(SESSION_REVOKED, expiredSession);
   };
   getHostSessions = async () => {
     let currentSession = await storage.getValue("session");

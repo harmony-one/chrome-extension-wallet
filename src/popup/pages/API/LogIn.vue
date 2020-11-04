@@ -58,6 +58,7 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
+import helper from "mixins/helper";
 import {
   THIRDPARTY_GET_ACCOUNT_CONNECT,
   GET_WALLET_SERVICE_STATE,
@@ -72,6 +73,7 @@ export default {
     selected: -1,
     host: "",
   }),
+  mixins: [helper],
   computed: {
     ...mapGetters(["getLockState"]),
     ...mapState({

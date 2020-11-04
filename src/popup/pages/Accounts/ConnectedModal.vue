@@ -8,29 +8,34 @@
   >
     <div class="modal-header">Connected Sites</div>
     <div class="modal-body">
-      <div class="session-title">
-        <span class="session-name">{{
-          compressString(active.name, 10, 5)
-        }}</span>
-        is connected to these sites.
-      </div>
-      <div v-if="sites.length" class="site-list">
-        <div
-          class="site-item"
-          v-for="(site, index) in sites"
-          :key="index"
-          :class="{ active: site === domain }"
-        >
-          <span>{{ site }}</span>
-          <div class="delete-but" @click="revoke(site, index)">
-            <i class="material-icons">delete</i>
+      <div v-if="sites.length">
+        <div class="session-title">
+          <span class="session-name">{{
+            compressString(active.name, 10, 5)
+          }}</span>
+          is connected to these sites.
+        </div>
+        <div class="site-list">
+          <div
+            class="site-item"
+            v-for="(site, index) in sites"
+            :key="index"
+            :class="{ active: site === domain }"
+          >
+            <span>{{ site }}</span>
+            <div class="delete-but" @click="revoke(site, index)">
+              <i class="material-icons">delete</i>
+            </div>
           </div>
         </div>
       </div>
       <div v-else>
-        {{ compressString(active.name, 10, 5) }} is not connected to any sites.
+        <span class="session-name">{{
+          compressString(active.name, 10, 5)
+        }}</span>
+        is not connected to any sites.
       </div>
-      <div class="manual-add-but">
+      <div v-if="!connected" class="manual-add-but" @click="manualConnect">
         Manually connect to current site
       </div>
     </div>
@@ -46,11 +51,12 @@ import apiService from "services/APIService";
 import * as storage from "services/StorageService";
 import { sendEventToContentScript } from "services/APIService";
 import helper from "mixins/helper";
-import { SESSION_REVOKED } from "~/types.js";
+
 export default {
   data: () => ({
     sites: [],
     domain: "",
+    connected: false,
   }),
   mixins: [helper],
   computed: {
@@ -67,11 +73,18 @@ export default {
     await this.loadSession();
   },
   methods: {
+    manualConnect() {
+      console.log("manualConnect");
+    },
     async loadSession() {
-      const { sites, domain } = await this.checkSession(this.active.address);
+      const { sites, domain, connected } = await this.checkSession(
+        this.active.address
+      );
       this.sites = sites;
       this.domain = domain;
+      this.connected = connected;
     },
+
     revoke(site, index) {
       const text =
         (site === this.domain
@@ -91,33 +104,13 @@ export default {
             title: "Revoke",
             handler: async () => {
               this.$modal.hide("dialog");
-
-              let sessionList = await apiService.getHostSessions();
-              const existIndex = sessionList.findIndex(
-                (elem) =>
-                  elem.host === site &&
-                  elem.account.address === this.active.address
-              );
-              if (existIndex >= 0) {
-                const expiredSession = sessionList[existIndex];
-                sessionList.splice(existIndex, 1);
-                await storage.saveValue({
-                  session: sessionList,
-                });
-                this.$notify({
-                  group: "notify",
-                  type: "success",
-                  text: "Session revoked",
-                });
-                await this.loadSession();
-                sendEventToContentScript(SESSION_REVOKED, expiredSession);
-              } else {
-                this.$notify({
-                  group: "notify",
-                  type: "error",
-                  text: "Session is not found",
-                });
-              }
+              await apiService.revokeSession(site, index);
+              this.$notify({
+                group: "notify",
+                type: "success",
+                text: "Session revoked",
+              });
+              await this.loadSession();
             },
           },
         ],
