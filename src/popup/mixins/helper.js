@@ -32,22 +32,35 @@ export default {
         );
       return str;
     },
+    async getCurrentTabUrl() {
+      return await new Promise(async (resolve) => {
+        chrome.tabs.query({ active: true, currentWindow: true }, function(
+          tabs
+        ) {
+          const tab = tabs[0];
+          if (tab.url) {
+            resolve(new URL(tab.url).host);
+            return;
+          }
+          resolve(false);
+        });
+      });
+    },
     async checkSession(address) {
-      return await new Promise(async (resolve, reject) => {
+      return await new Promise(async (resolve) => {
         const sessions = await apiService.getHostSessions();
         const findbyAddress = _.filter(sessions, {
           account: { address },
         });
         const sites = findbyAddress.map((elem) => elem.host);
-        chrome.tabs.query({ active: true, currentWindow: true }, function(
-          tabs
-        ) {
-          const tab = tabs[0];
-          const domain = new URL(tab.url).hostname;
-          let connected = false;
-          if (sites.includes(domain)) connected = true;
-          resolve({ sites, domain, connected });
-        });
+        const domain = await this.getCurrentTabUrl();
+        if (!domain) {
+          resolve({ sites, domain, connected: false });
+          return;
+        }
+        let connected = false;
+        if (sites.includes(domain)) connected = true;
+        resolve({ sites, domain, connected });
       });
     },
   },

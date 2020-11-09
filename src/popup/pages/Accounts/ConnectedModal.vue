@@ -35,21 +35,25 @@
         }}</span>
         is not connected to any sites.
       </div>
-      <div v-if="!connected" class="manual-add-but" @click="manualConnect">
+      <div
+        v-if="!sessionExist && domain"
+        class="manual-add-but"
+        @click="manualConnect"
+      >
         Manually connect to current site
       </div>
     </div>
     <div class="modal-footer">
       <div class="primary" @click="accept">OK</div>
     </div>
+    <ManualConnect />
   </modal>
 </template>
 
 <script>
 import { mapState } from "vuex";
 import apiService from "services/APIService";
-import * as storage from "services/StorageService";
-import { sendEventToContentScript } from "services/APIService";
+import ManualConnect from "./ManualConnect";
 import helper from "mixins/helper";
 
 export default {
@@ -57,8 +61,12 @@ export default {
     sites: [],
     domain: "",
     connected: false,
+    sessionExist: false,
   }),
   mixins: [helper],
+  components: {
+    ManualConnect,
+  },
   computed: {
     ...mapState({
       active: (state) => state.wallets.active,
@@ -74,7 +82,7 @@ export default {
   },
   methods: {
     manualConnect() {
-      console.log("manualConnect");
+      this.$modal.show("modal-connect-accounts");
     },
     async loadSession() {
       const { sites, domain, connected } = await this.checkSession(
@@ -83,6 +91,7 @@ export default {
       this.sites = sites;
       this.domain = domain;
       this.connected = connected;
+      this.sessionExist = await apiService.isSessionExist(domain);
     },
 
     revoke(site, index) {

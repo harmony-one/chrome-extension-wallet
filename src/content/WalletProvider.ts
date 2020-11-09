@@ -70,7 +70,7 @@ class WalletProvider extends TypedEmitter<WalletProviderEvents> {
   async forgetIdentity() {
     return new Promise(async (resolve) => {
       await sendAsyncMessageToContentScript({
-        hostname: window.location.hostname,
+        hostname: window.location.host,
         type: THIRDPARTY_FORGET_IDENTITY_REQUEST,
       });
       resolve(SIGNOUT_SUCCEED);
@@ -80,7 +80,7 @@ class WalletProvider extends TypedEmitter<WalletProviderEvents> {
     return new Promise(async (resolve, reject) => {
       try {
         const res = await sendAsyncMessageToContentScript({
-          hostname: window.location.hostname,
+          hostname: window.location.host,
           type: THIRDPARTY_GET_ACCOUNT_REQUEST,
         });
         if (res.rejected) {
@@ -109,7 +109,7 @@ class WalletProvider extends TypedEmitter<WalletProviderEvents> {
           );
         const txnType = checkTransactionType(transaction);
         const res = await sendAsyncMessageToContentScript({
-          hostname: window.location.hostname,
+          hostname: window.location.host,
           type: THIRDPARTY_SIGN_REQUEST,
           payload: parsedTxn,
         });

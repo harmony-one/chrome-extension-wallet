@@ -31,7 +31,7 @@ export default {
         icon: "security",
         name: "Security",
         description:
-          "Change the security settings (PIN Code, PIN digits and Lock timer)",
+          "Change the security settings (Master password and Lock timer)",
         route: "/settings/security",
       },
       {

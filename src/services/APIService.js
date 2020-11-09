@@ -189,7 +189,7 @@ class APIService {
     this.host = hostname;
 
     let sessionList = await this.getHostSessions();
-    const existIndex = sessionList.findIndex((elem) => elem.host === hostname);
+    const existIndex = _.findIndex(sessionList, { host: hostname });
     if (existIndex >= 0) {
       sessionList.splice(existIndex, 1);
       await storage.saveValue({
@@ -205,8 +205,11 @@ class APIService {
       this.host = hostname;
       const session = await this.getSession(hostname);
       if (store && session.exist) {
+        const account = session.accounts
+          ? session.accounts[0]
+          : session.account;
         const findAcc = _.find(store.wallets.accounts, {
-          address: session.account.address,
+          address: account.address,
         });
         if (!findAcc) {
           this.sendMessageToInjectScript(
@@ -214,14 +217,14 @@ class APIService {
             {
               rejected: true,
               message:
-                "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out",
+                "The account is found in the session but not in the extension. Please use window.onewallet.forgetIdentity() first to sign out",
             }
           );
           return;
         }
         this.sendMessageToInjectScript(
           THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
-          session.account
+          account
         );
       } else this.openPopup("login", 400, 600);
     } catch (err) {
@@ -253,14 +256,17 @@ class APIService {
       this.txnInfo = payload.txnInfo;
       const session = await this.getSession(hostname);
       if (store && session.exist) {
+        const account = session.accounts
+          ? session.accounts[0]
+          : session.account;
         const findAcc = _.find(store.wallets.accounts, {
-          address: session.account.address,
+          address: account.address,
         });
         if (!findAcc) {
           this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
             rejected: true,
             message:
-              "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out",
+              "The account is found in the session but not in the extension. Please use window.onewallet.forgetIdentity() first to sign out",
           });
           return;
         }
@@ -271,7 +277,7 @@ class APIService {
         this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
           rejected: true,
           message:
-            "The account is not selected. Please use getAccount first to sign the transaction",
+            "The account is not selected. Please use window.onewallet.getAccount() first to sign the transaction",
         });
       }
     } catch (err) {
@@ -295,6 +301,18 @@ class APIService {
     });
     this.closeWindow();
   };
+
+  isSessionExist = async (host) => {
+    try {
+      let sessionList = await this.getHostSessions();
+      const findByHost = _.find(sessionList, { host });
+      if (findByHost) return true;
+      return false;
+    } catch (error) {
+      return false;
+    }
+  };
+
   revokeSession = async (site, index) => {
     let sessionList = await this.getHostSessions();
     const expiredSession = sessionList[index];
@@ -304,6 +322,7 @@ class APIService {
     });
     sendEventToContentScript(SESSION_REVOKED, expiredSession);
   };
+
   getHostSessions = async () => {
     let currentSession = await storage.getValue("session");
     let sessionList = [];
@@ -327,17 +346,18 @@ class APIService {
 
   onGetAccountSuccess = async (payload) => {
     let sessionList = await this.getHostSessions();
-    const newHost = {
-      host: this.host,
-      account: payload,
-    };
-    sessionList.push(newHost);
+    const findIndexByHost = _.findIndex(sessionList, { host: this.host });
+    if (findIndexByHost < 0)
+      sessionList.push({
+        host: this.host,
+        accounts: [...payload],
+      });
     await storage.saveValue({
       session: sessionList,
     });
     this.sendMessageToInjectScript(
       THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
-      payload
+      payload[0]
     );
     this.closeWindow();
   };

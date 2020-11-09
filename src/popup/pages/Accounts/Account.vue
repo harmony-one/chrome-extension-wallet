@@ -3,7 +3,7 @@
     <app-header @refresh="refreshAccount" headerTab="main-tab" />
     <main class="main">
       <div class="relative">
-        <ConnectedSites v-if="!isExtendedView" />
+        <connected-status v-if="!isExtendedView" />
         <div class="main-logo">
           <img src="images/harmony-big.png" class="logo-img" alt="Harmony" />
         </div>
@@ -94,7 +94,7 @@ import account from "mixins/account";
 import MainTab from "components/MainTab.vue";
 import { mapState } from "vuex";
 import BigNumber from "bignumber.js";
-import ConnectedSites from "./ConnectedSites";
+import ConnectedStatus from "./ConnectedStatus";
 import axios from "axios";
 import AccountMenu from "./AccountMenu";
 export default {
@@ -102,7 +102,7 @@ export default {
 
   components: {
     MainTab,
-    ConnectedSites,
+    ConnectedStatus,
     AccountMenu,
   },
 

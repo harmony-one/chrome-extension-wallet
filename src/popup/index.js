@@ -22,6 +22,7 @@ import "vue-directive-tooltip/dist/vueDirectiveTooltip.css";
 import BigNumber from "bignumber.js";
 import Config from "~/config";
 
+import apiService from "services/APIService";
 import * as storage from "services/StorageService";
 import AppInfo from "~/app.json";
 

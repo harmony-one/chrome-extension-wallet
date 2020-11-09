@@ -11,7 +11,7 @@
       </div>
       <div class="login-container">
         <div v-if="!getLockState">
-          <div v-if="!wallets.accounts.length">
+          <div v-if="!accounts.length">
             <p>
               No accounts. You should create the account first in the extension.
             </p>
@@ -19,11 +19,11 @@
           <div v-else>
             <div
               class="card"
-              v-for="(account, index) in wallets.accounts"
+              v-for="(account, index) in accounts"
               :key="index"
               @click="selectAccount(index)"
             >
-              <div class="card-item" :class="{ active: selected === index }">
+              <div class="card-item" :class="{ active: selected[index] }">
                 <div class="card-item-name-box">
                   <div>{{ compressString(account.name, 10, 10) }}</div>
                   <div v-if="account.isLedger" class="ledger-badge">Ledger</div>
@@ -40,10 +40,7 @@
           </p>
         </div>
       </div>
-      <div
-        class="button-group footer"
-        v-if="wallets.accounts.length && !getLockState"
-      >
+      <div class="button-group footer" v-if="accounts.length && !getLockState">
         <button class="outline" @click="deny">Deny</button>
         <button class="primary" :disabled="selected < 0" @click="accept">
           Accept
@@ -58,6 +55,7 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
+import Vue from "vue";
 import helper from "mixins/helper";
 import {
   THIRDPARTY_GET_ACCOUNT_CONNECT,
@@ -70,14 +68,14 @@ import {
 } from "~/types";
 export default {
   data: () => ({
-    selected: -1,
+    selected: [],
     host: "",
   }),
   mixins: [helper],
   computed: {
     ...mapGetters(["getLockState"]),
     ...mapState({
-      wallets: (state) => state.wallets,
+      accounts: (state) => state.wallets.accounts,
     }),
   },
   mounted() {
@@ -93,9 +91,12 @@ export default {
     );
     chrome.runtime.connect({ name: THIRDPARTY_GET_ACCOUNT_CONNECT });
   },
+  created() {
+    this.selected = new Array(this.accounts.length).fill(false);
+  },
   methods: {
     selectAccount(index) {
-      this.selected = index;
+      Vue.set(this.selected, index, !this.selected[index]);
     },
     deny() {
       window.close();
@@ -103,7 +104,7 @@ export default {
     reject() {
       const message = this.getLockState
         ? WALLET_LOCKED
-        : !this.wallets.accounts.length
+        : !this.accounts.length
         ? NO_ACCOUNTS_ERROR
         : UNKNOWN_ERROR;
       chrome.runtime.sendMessage({
@@ -114,13 +115,17 @@ export default {
       });
     },
     accept() {
-      const account = this.wallets.accounts[this.selected];
+      let accounts = [];
+      this.accounts.forEach((acc, index) => {
+        if (this.selected[index])
+          accounts.push({
+            address: acc.address,
+            name: acc.name,
+          });
+      });
       chrome.runtime.sendMessage({
         action: THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
-        payload: {
-          name: account.name,
-          address: account.address,
-        },
+        payload: accounts,
       });
     },
   },

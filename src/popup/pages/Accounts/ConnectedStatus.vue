@@ -3,7 +3,7 @@
     <div
       class="connected-sites-container"
       :class="{ connected: connected }"
-      @click="showConnectedSite"
+      @click="showSwitchAccounts"
     >
       <div v-if="connected" class="wifi-icon">
         <img src="images/wifi.svg" alt="connected" />
@@ -14,13 +14,13 @@
       <span v-if="connected">Connected</span>
       <span v-else>Not connected</span>
     </div>
-    <ConnectedModal @refresh="loadSession" />
+    <switch-account />
   </section>
 </template>
 
 <script>
 import apiService from "services/APIService";
-import ConnectedModal from "./ConnectedModal";
+import SwitchAccount from "./SwitchAccount";
 import _ from "lodash";
 import { mapState } from "vuex";
 import helper from "mixins/helper";
@@ -31,7 +31,7 @@ export default {
   }),
   mixins: [helper],
   components: {
-    ConnectedModal,
+    SwitchAccount,
   },
   computed: {
     ...mapState({
@@ -51,8 +51,8 @@ export default {
       const res = await this.checkSession(this.active.address);
       this.connected = res.connected;
     },
-    showConnectedSite() {
-      this.$modal.show("modal-connected-sites");
+    showSwitchAccounts() {
+      this.$modal.show("modal-switch-account");
     },
   },
 };
