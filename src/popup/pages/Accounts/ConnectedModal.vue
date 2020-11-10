@@ -53,6 +53,8 @@
 <script>
 import { mapState } from "vuex";
 import apiService from "services/APIService";
+import { sendEventToContentScript } from "services/APIService";
+import { SESSION_REVOKED } from "~/types";
 import ManualConnect from "./ManualConnect";
 import helper from "mixins/helper";
 
@@ -73,6 +75,9 @@ export default {
     }),
   },
   watch: {
+    sessions() {
+      console.log("connected modal session changed");
+    },
     async active() {
       await this.loadSession();
     },
@@ -91,7 +96,7 @@ export default {
       this.sites = sites;
       this.domain = domain;
       this.connected = connected;
-      this.sessionExist = await apiService.isSessionExist(domain);
+      this.sessionExist = this.isSessionExist(domain);
     },
 
     revoke(site, index) {
@@ -113,7 +118,8 @@ export default {
             title: "Revoke",
             handler: async () => {
               this.$modal.hide("dialog");
-              await apiService.revokeSession(site, index);
+              this.$store.dispatch("provider/revokeSession", index);
+              //sendEventToContentScript(SESSION_REVOKED, expiredSession);
               this.$notify({
                 group: "notify",
                 type: "success",

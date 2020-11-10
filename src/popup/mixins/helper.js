@@ -1,8 +1,12 @@
 import BigNumber from "bignumber.js";
 import apiService from "services/APIService";
 import _ from "lodash";
+import { mapState } from "vuex";
 export default {
   computed: {
+    ...mapState({
+      sessions: (state) => state.provider.sessions,
+    }),
     isExtendedView() {
       if (window.innerWidth > 370) return true;
       return false;
@@ -32,32 +36,38 @@ export default {
         );
       return str;
     },
+    isSessionExist(host) {
+      const findByHost = this.getSessionByHost(host);
+      if (!findByHost || !findByHost.accounts || !findByHost.accounts.length)
+        return false;
+      return true;
+    },
+    getSessionByHost(host) {
+      return _.find(this.sessions, { host });
+    },
+    getSessionIndexByHost(host) {
+      return _.findIndex(this.sessions, { host });
+    },
     async getCurrentTabUrl() {
-      return await new Promise(async (resolve) => {
-        chrome.tabs.query({ active: true, currentWindow: true }, function(
-          tabs
-        ) {
-          const tab = tabs[0];
-          if (tab.url) {
-            resolve(new URL(tab.url).host);
-            return;
-          }
-          resolve(false);
-        });
+      const tabs = await window.browser.tabs.query({
+        active: true,
+        currentWindow: true,
       });
+      const activeTab = tabs[0];
+      if (activeTab && activeTab.url) {
+        return new URL(activeTab.url).host;
+      }
+      return false;
     },
     async checkSession(address) {
-      return await new Promise(async (resolve) => {
-        const sessions = await apiService.getHostSessions();
-        const findbyAddress = sessions.filter(
-          (session) => session.accounts && session.accounts.includes(address)
-        );
-        const sites = findbyAddress.map((elem) => elem.host);
-        const domain = await this.getCurrentTabUrl();
-        let connected = false;
-        if (domain && sites.includes(domain)) connected = true;
-        resolve({ sites, domain, connected });
-      });
+      const findbyAddress = this.sessions.filter(
+        (session) => session.accounts && session.accounts.includes(address)
+      );
+      const sites = findbyAddress.map((elem) => elem.host);
+      const domain = await this.getCurrentTabUrl();
+      let connected = false;
+      if (domain && sites.includes(domain)) connected = true;
+      return { sites, domain, connected };
     },
   },
 };

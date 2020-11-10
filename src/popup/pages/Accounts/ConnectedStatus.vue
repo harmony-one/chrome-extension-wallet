@@ -2,6 +2,7 @@
   <section>
     <div
       class="connected-sites-container"
+      v-if="domain"
       :class="{ connected: connected }"
       @click="showSwitchAccounts"
     >
@@ -14,12 +15,11 @@
       <span v-if="connected">Connected</span>
       <span v-else>Not connected</span>
     </div>
-    <switch-account />
+    <switch-account v-if="domain" />
   </section>
 </template>
 
 <script>
-import apiService from "services/APIService";
 import SwitchAccount from "./SwitchAccount";
 import _ from "lodash";
 import { mapState } from "vuex";
@@ -39,6 +39,9 @@ export default {
     }),
   },
   watch: {
+    sessions() {
+      console.log("session changed");
+    },
     async active() {
       await this.loadSession();
     },
@@ -48,8 +51,12 @@ export default {
   },
   methods: {
     async loadSession() {
-      const res = await this.checkSession(this.active.address);
-      this.connected = res.connected;
+      const { domain, connected } = await this.checkSession(
+        this.active.address
+      );
+      console.log("connectedstatus======>", this.domain);
+      this.connected = connected;
+      this.domain = domain;
     },
     showSwitchAccounts() {
       this.$modal.show("modal-switch-account");

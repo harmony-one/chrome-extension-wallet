@@ -14,13 +14,9 @@
       </div>
       <div v-else>
         <div class="count-caption">
-          {{ `You have ${sessions.length} accounts connected to this site.` }}
+          {{ `You have ${accountLength} accounts connected to this site.` }}
         </div>
-        <AccountList
-          :sessions="sessions"
-          :host="domain"
-          @refresh="loadSession"
-        />
+        <AccountList :host="domain" @refresh="loadSession" />
       </div>
     </div>
     <div class="modal-footer">
@@ -39,7 +35,7 @@ export default {
   data: () => ({
     domain: "",
     connected: false,
-    sessions: [],
+    accountLength: 0,
   }),
   components: {
     AccountList,
@@ -51,14 +47,9 @@ export default {
   methods: {
     async loadSession() {
       this.domain = await this.getCurrentTabUrl();
-      const sessions = await apiService.getHostSessions();
-      const findByHost = _.find(sessions, { host: this.domain });
-      if (!findByHost || !findByHost.accounts || !findByHost.accounts.length)
-        this.connected = false;
-      else {
-        this.connected = true;
-        this.sessions = findByHost.accounts;
-      }
+      this.connected = this.isSessionExist(this.domain);
+      if (this.connected)
+        this.accountLength = this.getSessionByHost(this.domain).accounts.length;
     },
     accept() {
       this.$modal.hide("modal-switch-account");

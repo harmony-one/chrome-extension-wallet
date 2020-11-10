@@ -7,32 +7,38 @@
       :class="{ 'high-light': !isConnected(acc) }"
     >
       <div class="account-item-left">
-        <div>
-          <span class="account-indicator">
-            {{
-              compressString(acc.name, 4, 5) +
-                "(" +
-                compressString(acc.address, 4, 4) +
-                ")"
-            }}</span
-          >
-          <span class="connect-string">{{ connectedString(acc) }}</span>
+        <div class="avatar-left">
+          <avatar :size="30" :username="acc.name" />
         </div>
-        <div v-if="isConnected(acc)">
-          <span class="connect-but" @click="switchAcc(acc)"
-            >Switch to this account</span
-          >
-        </div>
-        <div v-else>
-          <span class="connect-but" @click="connect(acc)">Connect</span>
+        <div class="avatar-right">
+          <div>
+            <span class="account-indicator">
+              {{
+                compressString(acc.name, 3, 3) +
+                  "(" +
+                  compressString(acc.address, 0, 5) +
+                  ")"
+              }}</span
+            >
+            <span class="connect-string">{{ connectedString(acc) }}</span>
+          </div>
+          <div v-if="isConnected(acc)">
+            <span
+              class="connect-but"
+              v-if="!isActiveAddress(acc)"
+              @click="switchAcc(acc, isConnected(active) ? index : index - 1)"
+              >Switch to this account</span
+            >
+          </div>
+          <div v-else>
+            <span class="connect-but" @click="connect(acc)">Connect</span>
+          </div>
         </div>
       </div>
       <div
         class="delete-but"
         v-if="isConnected(acc)"
-        @click="
-          disconnect(acc, sessions.includes(active.address) ? index : index - 1)
-        "
+        @click="disconnect(acc, isConnected(active) ? index : index - 1)"
       >
         <i class="material-icons">delete</i>
       </div>
@@ -45,26 +51,30 @@ import apiService from "services/APIService";
 import { mapState } from "vuex";
 import helper from "mixins/helper";
 export default {
-  props: ["sessions", "host"],
-  data: () => ({}),
+  props: ["host"],
+  data: () => ({
+    sessionAddresses: [],
+  }),
+  mixins: [helper],
   computed: {
     ...mapState({
       active: (state) => state.wallets.active,
       accounts: (state) => state.wallets.accounts,
     }),
     filteredAccounts() {
-      let accounts = [];
-      this.sessions.forEach((session) => {
+      let newArray = [];
+      console.log(this.sessionAddresses);
+      this.sessionAddresses.forEach((session) => {
         const findByAddress = _.find(this.accounts, { address: session });
-        accounts.push({
+        newArray.push({
           address: findByAddress.address,
           name: findByAddress.name,
         });
       });
-      return accounts;
+      return newArray;
     },
     allAccounts() {
-      if (!this.sessions.includes(this.active.address)) {
+      if (!this.sessionAddresses.includes(this.active.address)) {
         return [
           { address: this.active.address, name: this.active.name },
           ...this.filteredAccounts,
@@ -73,8 +83,9 @@ export default {
       return this.filteredAccounts;
     },
   },
-  mixins: [helper],
-  mounted() {},
+  mounted() {
+    this.sessionAddresses = this.getSessionByHost(this.host).accounts;
+  },
   methods: {
     disconnect(acc, index) {
       this.$modal.show("dialog", {
@@ -91,21 +102,38 @@ export default {
             title: "Disconnect",
             handler: async () => {
               this.$modal.hide("dialog");
-              await apiService.disconnectAccount(this.host, acc, index);
+              this.$store.dispatch("provider/disconnectAccount", {
+                host: this.host,
+                account: acc,
+                index,
+              });
               this.$emit("refresh");
             },
           },
         ],
       });
     },
-    switchAcc(acc) {},
-    connect(acc) {},
+    switchAcc(acc, index) {
+      this.$store.dispatch("provider/switchAccount", {
+        host: this.host,
+        index,
+      });
+    },
+    connect(acc) {
+      this.$store.dispatch("provider/addAccount", {
+        host: this.host,
+        address: acc.address,
+      });
+    },
     isConnected(acc) {
-      if (!this.sessions.includes(acc.address)) return false;
+      if (!this.sessionAddresses.includes(acc.address)) return false;
       return true;
     },
+    isActiveAddress(acc) {
+      return acc.address === this.sessionAddresses[0];
+    },
     connectedString(acc) {
-      if (acc.address === this.sessions[0]) return "Active";
+      if (this.isActiveAddress(acc)) return "Active";
       else if (!this.isConnected(acc) && acc.address === this.active.address)
         return "Not connected";
       return "";
@@ -128,7 +156,13 @@ export default {
 }
 .account-item-left {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  .avatar-right {
+    display: flex;
+    flex-direction: column;
+  }
 }
 .account-indicator {
   font-weight: 700;

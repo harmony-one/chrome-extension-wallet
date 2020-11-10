@@ -8,11 +8,11 @@ import {
   CLOSE_WINDOW,
   SESSION_REVOKED,
 } from "~/types";
-import * as storage from "./StorageService";
 import _ from "lodash";
 import Config from "~/config";
 import { Harmony } from "@harmony-js/core";
 import { Unit } from "@harmony-js/utils";
+import store from "../popup/store";
 
 const getHarmony = (chainId) => {
   const network = _.find(Config.networks, { chainId });
@@ -188,27 +188,20 @@ class APIService {
     this.sender = tabid;
     this.host = hostname;
 
-    let sessionList = await this.getHostSessions();
-    const existIndex = _.findIndex(sessionList, { host: hostname });
-    if (existIndex >= 0) {
-      sessionList.splice(existIndex, 1);
-      await storage.saveValue({
-        session: sessionList,
-      });
+    if (this.getSessionByHost(hostname)) {
+      store.dispatch("provider/revokeSession", this.getSessionIndex(hostname));
     }
     this.sendMessageToInjectScript(THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE);
   };
   getAccount = async (tabid, hostname) => {
     try {
-      const store = this.getVuexStore();
+      const storefromLocal = this.getVuexState(); //vuex store from localstorage, it's not syncing correctly
       this.sender = tabid;
       this.host = hostname;
-      const session = await this.getSession(hostname);
-      if (store && session.exist) {
-        const address = session.accounts
-          ? session.accounts[0]
-          : session.account.address;
-        const findAcc = _.find(store.wallets.accounts, {
+      const session = this.getSessionByHost(hostname);
+      if (storefromLocal && session) {
+        const address = session.accounts[0];
+        const findAcc = _.find(storefromLocal.wallets.accounts, {
           address,
         });
         if (!findAcc) {
@@ -234,7 +227,7 @@ class APIService {
       });
     }
   };
-  getVuexStore = () => {
+  getVuexState = () => {
     try {
       if (!window.localStorage.vuex) throw new Error("Vuex Store is not found");
       const vuex = JSON.parse(window.localStorage.vuex);
@@ -248,18 +241,16 @@ class APIService {
   };
   prepareSignTransaction = async (tabid, hostname, payload) => {
     try {
-      const store = this.getVuexStore();
+      const storefromLocal = this.getVuexState();
       this.sender = tabid;
       this.host = hostname;
       this.type = payload.type;
       this.params = payload.params;
       this.txnInfo = payload.txnInfo;
-      const session = await this.getSession(hostname);
-      if (store && session.exist) {
-        const address = session.accounts
-          ? session.accounts[0]
-          : session.account.address;
-        const findAcc = _.find(store.wallets.accounts, {
+      const session = this.getSessionByHost(hostname);
+      if (storefromLocal && session) {
+        const address = session.accounts[0];
+        const findAcc = _.find(storefromLocal.wallets.accounts, {
           address,
         });
         if (!findAcc) {
@@ -302,83 +293,39 @@ class APIService {
     this.closeWindow();
   };
 
-  isSessionExist = async (host) => {
-    try {
-      let sessionList = await this.getHostSessions();
-      const findByHost = _.find(sessionList, { host });
-      if (!findByHost || !findByHost.accounts || !findByHost.accounts.length)
-        return false;
-      return true;
-    } catch (error) {
+  getSessionIndex = (hostname) => {
+    const storefromLocal = this.getVuexState();
+    return _.findIndex(storefromLocal.provider.sessions, { host: hostname });
+  };
+
+  getAllSession = () => {
+    const storefromLocal = this.getVuexState();
+    const { sessions } = storefromLocal.provider;
+    if (!sessions) return false;
+    return sessions;
+  };
+
+  getSessionByHost = (hostname) => {
+    const storefromLocal = this.getVuexState();
+    let sessionList = storefromLocal.provider.sessions;
+    const session = _.find(sessionList, { host: hostname });
+    if (!session) {
       return false;
     }
-  };
-
-  saveSessionList = async (sessionlist) => {
-    await storage.saveValue({
-      session: sessionlist,
-    });
-  };
-
-  revokeSession = async (site, index) => {
-    let sessionList = await this.getHostSessions();
-    const expiredSession = sessionList[index];
-    sessionList.splice(index, 1);
-    await this.saveSessionList(sessionList);
-    sendEventToContentScript(SESSION_REVOKED, expiredSession);
-  };
-
-  manualConnect = async (host, accs) => {
-    let sessionList = await this.getHostSessions();
-    const findIndexByHost = _.findIndex(sessionList, { host });
-    if (findIndexByHost < 0) {
-      console.error("manualConnect ===> session not found");
-      return;
-    }
-    sessionList[findIndexByHost].accounts = [...accs];
-    await this.saveSessionList(sessionList);
-  };
-  disconnectAccount = async (host, acc, index) => {
-    let sessionList = await this.getHostSessions();
-    const findIndexByHost = _.findIndex(sessionList, { host });
-    if (findIndexByHost < 0) {
-      console.error("disconnectAccount ===> session not found");
-      return;
-    }
-    sessionList[findIndexByHost].accounts.splice(index, 1);
-    await this.saveSessionList(sessionList);
-  };
-
-  getHostSessions = async () => {
-    let currentSession = await storage.getValue("session");
-    let sessionList = [];
-    if (currentSession && Array.isArray(currentSession.session))
-      sessionList = currentSession.session;
-    return sessionList;
-  };
-  getSession = async (hostname) => {
-    let sessionList = await this.getHostSessions();
-    const existIndex = _.findIndex(sessionList, { host: hostname });
-    if (existIndex >= 0) {
-      return {
-        exist: true,
-        ...sessionList[existIndex],
-      };
-    }
-    return {
-      exist: false,
-    };
+    return session;
   };
 
   onGetAccountSuccess = async (payload) => {
-    let sessionList = await this.getHostSessions();
-    const findIndexByHost = _.findIndex(sessionList, { host: this.host });
-    if (findIndexByHost < 0)
-      sessionList.push({
+    if (!this.getSessionByHost(this.host)) {
+      console.log({
         host: this.host,
         accounts: [...payload],
       });
-    await this.saveSessionList(sessionList);
+      store.commit("provider/addSession", {
+        host: this.host,
+        accounts: [...payload],
+      });
+    }
     this.sendMessageToInjectScript(
       THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
       payload[0]

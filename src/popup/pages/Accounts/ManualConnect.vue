@@ -56,9 +56,12 @@ export default {
       this.accounts.forEach((acc, index) => {
         if (this.checked[index]) accounts.push(acc.address);
       });
-      await apiService.manualConnect(this.currentTab, accounts);
+      console.log("accunts", accounts);
+      this.$store.dispatch("provider/setAccounts", {
+        host: this.currentTab,
+        accounts,
+      });
       this.$emit("refresh");
-      this.$forceUpdate();
     },
   },
 };

@@ -3,8 +3,16 @@ import apiService from "services/APIService";
 import * as storage from "services/StorageService";
 setupExtensionMessageListeners();
 
+const getHostSessions = async () => {
+  let currentSession = await storage.getValue("session");
+  let sessionList = [];
+  if (currentSession && Array.isArray(currentSession.session))
+    sessionList = currentSession.session;
+  return sessionList;
+};
+
 const updateSessionStorage = async () => {
-  let sessionList = await apiService.getHostSessions();
+  let sessionList = await getHostSessions();
   let newSessionList = [];
   sessionList.forEach((session) => {
     let newSession = {};
@@ -16,8 +24,8 @@ const updateSessionStorage = async () => {
       });
     } else newSessionList.push(session);
   });
-  await storage.saveValue({
-    session: newSessionList,
-  });
+  // await storage.saveValue({
+  //   session: newSessionList,
+  // });
 };
 updateSessionStorage();
