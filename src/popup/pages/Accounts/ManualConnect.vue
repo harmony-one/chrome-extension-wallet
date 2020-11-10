@@ -8,11 +8,7 @@
   >
     <div class="modal-header">{{ currentTab }}</div>
     <div class="modal-body">
-      <div
-        class="account-item"
-        v-for="(account, index) in accounts"
-        :key="index"
-      >
+      <div v-for="(account, index) in accounts" :key="index">
         <input type="checkbox" :id="index" v-model="checked[index]" />
         <label :for="index"
           >{{ compressString(account.name, 5, 5) }}
@@ -31,6 +27,7 @@
 
 <script>
 import { mapState } from "vuex";
+import apiService from "services/APIService";
 import helper from "mixins/helper";
 export default {
   data: () => ({
@@ -53,8 +50,15 @@ export default {
     deny() {
       this.$modal.hide("modal-connect-accounts");
     },
-    accept() {
+    async accept() {
       this.$modal.hide("modal-connect-accounts");
+      let accounts = [];
+      this.accounts.forEach((acc, index) => {
+        if (this.checked[index]) accounts.push(acc.address);
+      });
+      await apiService.manualConnect(this.currentTab, accounts);
+      this.$emit("refresh");
+      this.$forceUpdate();
     },
   },
 };

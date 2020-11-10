@@ -12,7 +12,7 @@ const updateSessionStorage = async () => {
     if (session.account) {
       newSessionList.push({
         host: session.host,
-        accounts: [{ ...session.account }],
+        accounts: [session.account.address],
       });
     } else newSessionList.push(session);
   });

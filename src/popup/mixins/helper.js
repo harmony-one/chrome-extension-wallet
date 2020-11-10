@@ -49,17 +49,13 @@ export default {
     async checkSession(address) {
       return await new Promise(async (resolve) => {
         const sessions = await apiService.getHostSessions();
-        const findbyAddress = _.filter(sessions, {
-          account: { address },
-        });
+        const findbyAddress = sessions.filter(
+          (session) => session.accounts && session.accounts.includes(address)
+        );
         const sites = findbyAddress.map((elem) => elem.host);
         const domain = await this.getCurrentTabUrl();
-        if (!domain) {
-          resolve({ sites, domain, connected: false });
-          return;
-        }
         let connected = false;
-        if (sites.includes(domain)) connected = true;
+        if (domain && sites.includes(domain)) connected = true;
         resolve({ sites, domain, connected });
       });
     },

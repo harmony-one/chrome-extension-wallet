@@ -46,7 +46,7 @@
     <div class="modal-footer">
       <div class="primary" @click="accept">OK</div>
     </div>
-    <ManualConnect />
+    <ManualConnect @refresh="loadSession" />
   </modal>
 </template>
 
@@ -146,11 +146,6 @@ export default {
       color: #2bb743;
     }
   }
-}
-.delete-but {
-  cursor: pointer;
-  align-items: center;
-  display: flex;
 }
 .site-list {
   max-height: 250px;

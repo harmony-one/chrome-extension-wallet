@@ -3,7 +3,7 @@
     name="modal-switch-account"
     :adaptive="true"
     transition="scale"
-    :width="300"
+    :width="340"
     height="auto"
   >
     <div class="modal-header">{{ domain }}</div>
@@ -13,7 +13,14 @@
         the connect button on their website.
       </div>
       <div v-else>
-        <AccountList :accounts="accounts" />
+        <div class="count-caption">
+          {{ `You have ${sessions.length} accounts connected to this site.` }}
+        </div>
+        <AccountList
+          :sessions="sessions"
+          :host="domain"
+          @refresh="loadSession"
+        />
       </div>
     </div>
     <div class="modal-footer">
@@ -32,22 +39,12 @@ export default {
   data: () => ({
     domain: "",
     connected: false,
-    accounts: [],
+    sessions: [],
   }),
   components: {
     AccountList,
   },
   mixins: [helper],
-  computed: {
-    ...mapState({
-      active: (state) => state.wallets.active,
-    }),
-  },
-  watch: {
-    async active() {
-      await this.loadSession();
-    },
-  },
   async mounted() {
     await this.loadSession();
   },
@@ -60,7 +57,7 @@ export default {
         this.connected = false;
       else {
         this.connected = true;
-        this.accounts = findByHost.accounts;
+        this.sessions = findByHost.accounts;
       }
     },
     accept() {
@@ -69,4 +66,8 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.count-caption {
+  margin-bottom: 10px;
+}
+</style>

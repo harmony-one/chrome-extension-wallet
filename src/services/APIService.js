@@ -205,11 +205,11 @@ class APIService {
       this.host = hostname;
       const session = await this.getSession(hostname);
       if (store && session.exist) {
-        const account = session.accounts
+        const address = session.accounts
           ? session.accounts[0]
-          : session.account;
+          : session.account.address;
         const findAcc = _.find(store.wallets.accounts, {
-          address: account.address,
+          address,
         });
         if (!findAcc) {
           this.sendMessageToInjectScript(
@@ -224,7 +224,7 @@ class APIService {
         }
         this.sendMessageToInjectScript(
           THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
-          account
+          address
         );
       } else this.openPopup("login", 400, 600);
     } catch (err) {
@@ -256,11 +256,11 @@ class APIService {
       this.txnInfo = payload.txnInfo;
       const session = await this.getSession(hostname);
       if (store && session.exist) {
-        const account = session.accounts
+        const address = session.accounts
           ? session.accounts[0]
-          : session.account;
+          : session.account.address;
         const findAcc = _.find(store.wallets.accounts, {
-          address: account.address,
+          address,
         });
         if (!findAcc) {
           this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
@@ -306,21 +306,47 @@ class APIService {
     try {
       let sessionList = await this.getHostSessions();
       const findByHost = _.find(sessionList, { host });
-      if (findByHost) return true;
-      return false;
+      if (!findByHost || !findByHost.accounts || !findByHost.accounts.length)
+        return false;
+      return true;
     } catch (error) {
       return false;
     }
+  };
+
+  saveSessionList = async (sessionlist) => {
+    await storage.saveValue({
+      session: sessionlist,
+    });
   };
 
   revokeSession = async (site, index) => {
     let sessionList = await this.getHostSessions();
     const expiredSession = sessionList[index];
     sessionList.splice(index, 1);
-    await storage.saveValue({
-      session: sessionList,
-    });
+    await this.saveSessionList(sessionList);
     sendEventToContentScript(SESSION_REVOKED, expiredSession);
+  };
+
+  manualConnect = async (host, accs) => {
+    let sessionList = await this.getHostSessions();
+    const findIndexByHost = _.findIndex(sessionList, { host });
+    if (findIndexByHost < 0) {
+      console.error("manualConnect ===> session not found");
+      return;
+    }
+    sessionList[findIndexByHost].accounts = [...accs];
+    await this.saveSessionList(sessionList);
+  };
+  disconnectAccount = async (host, acc, index) => {
+    let sessionList = await this.getHostSessions();
+    const findIndexByHost = _.findIndex(sessionList, { host });
+    if (findIndexByHost < 0) {
+      console.error("disconnectAccount ===> session not found");
+      return;
+    }
+    sessionList[findIndexByHost].accounts.splice(index, 1);
+    await this.saveSessionList(sessionList);
   };
 
   getHostSessions = async () => {
@@ -332,7 +358,7 @@ class APIService {
   };
   getSession = async (hostname) => {
     let sessionList = await this.getHostSessions();
-    const existIndex = sessionList.findIndex((elem) => elem.host === hostname);
+    const existIndex = _.findIndex(sessionList, { host: hostname });
     if (existIndex >= 0) {
       return {
         exist: true,
@@ -352,9 +378,7 @@ class APIService {
         host: this.host,
         accounts: [...payload],
       });
-    await storage.saveValue({
-      session: sessionList,
-    });
+    await this.saveSessionList(sessionList);
     this.sendMessageToInjectScript(
       THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
       payload[0]

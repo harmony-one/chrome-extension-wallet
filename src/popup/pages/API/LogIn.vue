@@ -55,7 +55,6 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import Vue from "vue";
 import helper from "mixins/helper";
 import {
   THIRDPARTY_GET_ACCOUNT_CONNECT,
@@ -96,7 +95,7 @@ export default {
   },
   methods: {
     selectAccount(index) {
-      Vue.set(this.selected, index, !this.selected[index]);
+      this.$set(this.selected, index, !this.selected[index]);
     },
     deny() {
       window.close();
@@ -117,11 +116,7 @@ export default {
     accept() {
       let accounts = [];
       this.accounts.forEach((acc, index) => {
-        if (this.selected[index])
-          accounts.push({
-            address: acc.address,
-            name: acc.name,
-          });
+        if (this.selected[index]) accounts.push(acc.address);
       });
       chrome.runtime.sendMessage({
         action: THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,

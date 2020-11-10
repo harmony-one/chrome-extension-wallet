@@ -729,3 +729,9 @@ input.vue-pincode-input:focus {
     border-color: #454545 !important;
   }
 }
+
+.delete-but {
+  cursor: pointer;
+  align-items: center;
+  display: flex;
+}

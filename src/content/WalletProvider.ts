@@ -83,6 +83,7 @@ class WalletProvider extends TypedEmitter<WalletProviderEvents> {
           hostname: window.location.host,
           type: THIRDPARTY_GET_ACCOUNT_REQUEST,
         });
+        console.log(res);
         if (res.rejected) {
           if (res.message) return reject(res.message);
           return reject(LOGIN_REJECT);
