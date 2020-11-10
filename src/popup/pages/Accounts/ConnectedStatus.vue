@@ -26,7 +26,6 @@ import { mapState } from "vuex";
 import helper from "mixins/helper";
 export default {
   data: () => ({
-    connected: false,
     domain: "",
   }),
   mixins: [helper],
@@ -37,27 +36,21 @@ export default {
     ...mapState({
       active: (state) => state.wallets.active,
     }),
-  },
-  watch: {
-    sessions() {
-      console.log("session changed");
-    },
-    async active() {
-      await this.loadSession();
+    connected() {
+      if (!this.domain) return false;
+      const findbyAddress = this.sessions.filter(
+        (session) =>
+          session.accounts && session.accounts.includes(this.active.address)
+      );
+      const sites = findbyAddress.map((elem) => elem.host);
+      if (this.domain && sites.includes(this.domain)) return true;
+      return false;
     },
   },
   async mounted() {
-    await this.loadSession();
+    this.domain = await this.getCurrentTabUrl();
   },
   methods: {
-    async loadSession() {
-      const { domain, connected } = await this.checkSession(
-        this.active.address
-      );
-      console.log("connectedstatus======>", this.domain);
-      this.connected = connected;
-      this.domain = domain;
-    },
     showSwitchAccounts() {
       this.$modal.show("modal-switch-account");
     },

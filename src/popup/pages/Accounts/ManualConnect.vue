@@ -56,7 +56,6 @@ export default {
       this.accounts.forEach((acc, index) => {
         if (this.checked[index]) accounts.push(acc.address);
       });
-      console.log("accunts", accounts);
       this.$store.dispatch("provider/setAccounts", {
         host: this.currentTab,
         accounts,

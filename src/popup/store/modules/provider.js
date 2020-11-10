@@ -47,7 +47,7 @@ export default {
       const { sessions } = state;
       const findIndexByHost = _.findIndex(sessions, { host });
       if (findIndexByHost < 0) return;
-      sessions[findIndexByHost].accounts.push(address);
+      sessions[findIndexByHost].accounts.unshift(address);
       commit("setSessions", sessions);
     },
   },

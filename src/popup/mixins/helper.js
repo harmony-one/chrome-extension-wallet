@@ -1,5 +1,4 @@
 import BigNumber from "bignumber.js";
-import apiService from "services/APIService";
 import _ from "lodash";
 import { mapState } from "vuex";
 export default {
@@ -37,6 +36,7 @@ export default {
       return str;
     },
     isSessionExist(host) {
+      if (!host) return false;
       const findByHost = this.getSessionByHost(host);
       if (!findByHost || !findByHost.accounts || !findByHost.accounts.length)
         return false;

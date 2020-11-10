@@ -16,7 +16,7 @@
         <div class="count-caption">
           {{ `You have ${accountLength} accounts connected to this site.` }}
         </div>
-        <AccountList :host="domain" @refresh="loadSession" />
+        <AccountList :host="domain" />
       </div>
     </div>
     <div class="modal-footer">
@@ -34,23 +34,26 @@ import _ from "lodash";
 export default {
   data: () => ({
     domain: "",
-    connected: false,
-    accountLength: 0,
   }),
   components: {
     AccountList,
   },
   mixins: [helper],
+  computed: {
+    connected() {
+      if (!this.domain) return false;
+      return this.isSessionExist(this.domain);
+    },
+    accountLength() {
+      if (this.connected)
+        return this.getSessionByHost(this.domain).accounts.length;
+      return 0;
+    },
+  },
   async mounted() {
-    await this.loadSession();
+    this.domain = await this.getCurrentTabUrl();
   },
   methods: {
-    async loadSession() {
-      this.domain = await this.getCurrentTabUrl();
-      this.connected = this.isSessionExist(this.domain);
-      if (this.connected)
-        this.accountLength = this.getSessionByHost(this.domain).accounts.length;
-    },
     accept() {
       this.$modal.hide("modal-switch-account");
     },

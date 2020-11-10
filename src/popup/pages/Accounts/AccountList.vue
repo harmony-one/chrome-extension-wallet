@@ -63,7 +63,6 @@ export default {
     }),
     filteredAccounts() {
       let newArray = [];
-      console.log(this.sessionAddresses);
       this.sessionAddresses.forEach((session) => {
         const findByAddress = _.find(this.accounts, { address: session });
         newArray.push({

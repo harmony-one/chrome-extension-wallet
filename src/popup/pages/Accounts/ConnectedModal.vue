@@ -8,7 +8,7 @@
   >
     <div class="modal-header">Connected Sites</div>
     <div class="modal-body">
-      <div v-if="sites.length">
+      <div v-if="connectedSites.length">
         <div class="session-title">
           <span class="session-name">{{
             compressString(active.name, 10, 5)
@@ -18,7 +18,7 @@
         <div class="site-list">
           <div
             class="site-item"
-            v-for="(site, index) in sites"
+            v-for="(site, index) in connectedSites"
             :key="index"
             :class="{ active: site === domain }"
           >
@@ -36,7 +36,7 @@
         is not connected to any sites.
       </div>
       <div
-        v-if="!sessionExist && domain"
+        v-if="!isSessionExist(domain) && domain"
         class="manual-add-but"
         @click="manualConnect"
       >
@@ -46,7 +46,7 @@
     <div class="modal-footer">
       <div class="primary" @click="accept">OK</div>
     </div>
-    <ManualConnect @refresh="loadSession" />
+    <ManualConnect />
   </modal>
 </template>
 
@@ -60,10 +60,7 @@ import helper from "mixins/helper";
 
 export default {
   data: () => ({
-    sites: [],
     domain: "",
-    connected: false,
-    sessionExist: false,
   }),
   mixins: [helper],
   components: {
@@ -73,30 +70,31 @@ export default {
     ...mapState({
       active: (state) => state.wallets.active,
     }),
-  },
-  watch: {
-    sessions() {
-      console.log("connected modal session changed");
+    connected() {
+      if (!this.domain) return false;
+      const findbyAddress = this.sessions.filter(
+        (session) =>
+          session.accounts && session.accounts.includes(this.active.address)
+      );
+      const sites = findbyAddress.map((elem) => elem.host);
+      if (this.domain && sites.includes(this.domain)) return true;
+      return false;
     },
-    async active() {
-      await this.loadSession();
+    connectedSites() {
+      if (!this.domain) return false;
+      const findbyAddress = this.sessions.filter(
+        (session) =>
+          session.accounts && session.accounts.includes(this.active.address)
+      );
+      return findbyAddress.map((elem) => elem.host);
     },
   },
   async mounted() {
-    await this.loadSession();
+    this.domain = await this.getCurrentTabUrl();
   },
   methods: {
     manualConnect() {
       this.$modal.show("modal-connect-accounts");
-    },
-    async loadSession() {
-      const { sites, domain, connected } = await this.checkSession(
-        this.active.address
-      );
-      this.sites = sites;
-      this.domain = domain;
-      this.connected = connected;
-      this.sessionExist = this.isSessionExist(domain);
     },
 
     revoke(site, index) {
