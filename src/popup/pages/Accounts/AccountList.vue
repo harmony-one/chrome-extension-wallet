@@ -11,15 +11,8 @@
           <avatar :size="30" :username="acc.name" />
         </div>
         <div class="avatar-right">
-          <div>
-            <span class="account-indicator">
-              {{
-                compressString(acc.name, 3, 3) +
-                  "(" +
-                  compressString(acc.address, 0, 5) +
-                  ")"
-              }}</span
-            >
+          <div v-tooltip.top="acc.address">
+            <span class="account-indicator"> {{ acc.name }}</span>
             <span class="connect-string">{{ connectedString(acc) }}</span>
           </div>
           <div v-if="isConnected(acc)">
@@ -103,10 +96,8 @@ export default {
               this.$modal.hide("dialog");
               this.$store.dispatch("provider/disconnectAccount", {
                 host: this.host,
-                account: acc,
                 index,
               });
-              this.$emit("refresh");
             },
           },
         ],
@@ -148,6 +139,7 @@ export default {
   padding: 10px 5px;
   border-bottom: 1px solid #ddd;
   margin-right: 5px;
+  word-break: break-all;
   &.high-light {
     border: 1px solid #9ad7ff;
     background: #eff7ff;

@@ -60,7 +60,6 @@ export default {
         host: this.currentTab,
         accounts,
       });
-      this.$emit("refresh");
     },
   },
 };

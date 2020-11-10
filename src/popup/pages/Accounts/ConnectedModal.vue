@@ -23,7 +23,10 @@
             :class="{ active: site === domain }"
           >
             <span>{{ site }}</span>
-            <div class="delete-but" @click="revoke(site, index)">
+            <div
+              class="delete-but"
+              @click="disconnect(site, index, active.address)"
+            >
               <i class="material-icons">delete</i>
             </div>
           </div>
@@ -57,7 +60,7 @@ import { sendEventToContentScript } from "services/APIService";
 import { SESSION_REVOKED } from "~/types";
 import ManualConnect from "./ManualConnect";
 import helper from "mixins/helper";
-
+import _ from "lodash";
 export default {
   data: () => ({
     domain: "",
@@ -97,7 +100,7 @@ export default {
       this.$modal.show("modal-connect-accounts");
     },
 
-    revoke(site, index) {
+    disconnect(site, index, address) {
       const text =
         (site === this.domain
           ? "This session is currently <b>active</b>.<br>"
@@ -116,14 +119,18 @@ export default {
             title: "Revoke",
             handler: async () => {
               this.$modal.hide("dialog");
-              this.$store.dispatch("provider/revokeSession", index);
-              //sendEventToContentScript(SESSION_REVOKED, expiredSession);
+              this.$store.dispatch("provider/disconnectAccount", {
+                host: site,
+                index: _.findIndex(
+                  this.sessions[index].accounts,
+                  this.active.address
+                ),
+              });
               this.$notify({
                 group: "notify",
                 type: "success",
                 text: "Session revoked",
               });
-              await this.loadSession();
             },
           },
         ],

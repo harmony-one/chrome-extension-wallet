@@ -42,7 +42,7 @@
       </div>
       <div class="button-group footer" v-if="accounts.length && !getLockState">
         <button class="outline" @click="deny">Deny</button>
-        <button class="primary" :disabled="selected < 0" @click="accept">
+        <button class="primary" :disabled="!isSelected" @click="accept">
           Accept
         </button>
       </div>
@@ -76,6 +76,9 @@ export default {
     ...mapState({
       accounts: (state) => state.wallets.accounts,
     }),
+    isSelected() {
+      return this.selected.includes(true);
+    },
   },
   mounted() {
     chrome.runtime.sendMessage(

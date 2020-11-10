@@ -282,7 +282,7 @@ export default {
           this.params = { ...params };
           this.host = session.host;
           this.wallet = _.find(this.wallets.accounts, {
-            address: session.account.address,
+            address: session.accounts[0],
           });
           if (!this.wallet.isLedger) return;
           try {

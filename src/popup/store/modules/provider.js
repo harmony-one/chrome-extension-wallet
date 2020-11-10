@@ -19,11 +19,10 @@ export default {
       const temp = sessions[findIndexByHost].accounts[index];
       sessions[findIndexByHost].accounts.splice(index, 1);
       sessions[findIndexByHost].accounts.unshift(temp);
-      console.log("sessions===>", sessions);
       commit("setSessions", sessions);
     },
     disconnectAccount({ commit, state }, payload) {
-      const { host, account, index } = payload;
+      const { host, index } = payload;
       const { sessions } = state;
       const findIndexByHost = _.findIndex(sessions, { host });
       if (findIndexByHost < 0) return;
@@ -35,8 +34,7 @@ export default {
       const { sessions } = state;
       const findIndexByHost = _.findIndex(sessions, { host });
       if (findIndexByHost < 0) {
-        console.log(payload);
-        commit("setSessions", [payload]);
+        commit("addSession", payload);
         return;
       }
       sessions[findIndexByHost].accounts = [...accounts];

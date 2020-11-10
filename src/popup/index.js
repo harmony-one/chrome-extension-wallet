@@ -27,7 +27,6 @@ import * as storage from "services/StorageService";
 import AppInfo from "~/app.json";
 
 import { initHRC20Tokens } from "services/hrc20/init.js";
-import { CLOSE_WINDOW, FROM_BACK_TO_POPUP } from "~/types";
 
 import "./css/icons.less";
 import "./css/normalize.scss";
@@ -98,18 +97,6 @@ storage.getValue("meta").then(({ meta }) => {
       version: AppInfo.version,
     },
   });
-});
-
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  const { type, action } = message;
-  if (!type || type !== FROM_BACK_TO_POPUP) {
-    return false;
-  }
-  if (action === CLOSE_WINDOW) {
-    window.close();
-  }
-  sendResponse();
-  return true;
 });
 
 initHRC20Tokens(store);

@@ -12,18 +12,19 @@ import * as getters from "./getters";
 Vue.use(Vuex);
 
 const vuexLocal = new VuexPersistence({
-  supportCircular: true,
   storage: window.localStorage,
-  modules: ["wallets", "network", "provider", "hrc20", "settings"],
+  supportCircular: true,
+
+  modules: ["wallets", "network", "hrc20", "provider", "settings"],
 });
 
 export default new Vuex.Store({
   getters,
   modules: {
     wallets,
+    provider,
     network,
     account,
-    provider,
     hrc20,
     settings,
   },
