@@ -31,11 +31,15 @@ export default new Vuex.Store({
 
   state: {
     loading: false,
+    currentTab: "",
   },
 
   mutations: {
     loading(state, loading) {
       state.loading = loading;
+    },
+    currentTab(state, payload) {
+      state.currentTab = payload;
     },
   },
 

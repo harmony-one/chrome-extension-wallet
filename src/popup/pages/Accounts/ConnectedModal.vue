@@ -20,13 +20,10 @@
             class="site-item"
             v-for="(site, index) in connectedSites"
             :key="index"
-            :class="{ active: site === domain }"
+            :class="{ active: site === currentTab }"
           >
             <span>{{ site }}</span>
-            <div
-              class="delete-but"
-              @click="disconnect(site, index, active.address)"
-            >
+            <div class="delete-but" @click="disconnect(site, active.address)">
               <i class="material-icons">delete</i>
             </div>
           </div>
@@ -39,7 +36,7 @@
         is not connected to any sites.
       </div>
       <div
-        v-if="!isSessionExist(domain) && domain"
+        v-if="!isSessionExist(currentTab) && currentTab"
         class="manual-add-but"
         @click="manualConnect"
       >
@@ -60,11 +57,7 @@ import { sendEventToContentScript } from "services/APIService";
 import { SESSION_REVOKED } from "~/types";
 import ManualConnect from "./ManualConnect";
 import helper from "mixins/helper";
-import _ from "lodash";
 export default {
-  data: () => ({
-    domain: "",
-  }),
   mixins: [helper],
   components: {
     ManualConnect,
@@ -74,17 +67,17 @@ export default {
       active: (state) => state.wallets.active,
     }),
     connected() {
-      if (!this.domain) return false;
+      if (!this.currentTab) return false;
       const findbyAddress = this.sessions.filter(
         (session) =>
           session.accounts && session.accounts.includes(this.active.address)
       );
       const sites = findbyAddress.map((elem) => elem.host);
-      if (this.domain && sites.includes(this.domain)) return true;
+      if (this.currentTab && sites.includes(this.currentTab)) return true;
       return false;
     },
     connectedSites() {
-      if (!this.domain) return false;
+      if (!this.currentTab) return false;
       const findbyAddress = this.sessions.filter(
         (session) =>
           session.accounts && session.accounts.includes(this.active.address)
@@ -92,17 +85,14 @@ export default {
       return findbyAddress.map((elem) => elem.host);
     },
   },
-  async mounted() {
-    this.domain = await this.getCurrentTabUrl();
-  },
   methods: {
     manualConnect() {
       this.$modal.show("modal-connect-accounts");
     },
 
-    disconnect(site, index, address) {
+    disconnect(site, address) {
       const text =
-        (site === this.domain
+        (site === this.currentTab
           ? "This session is currently <b>active</b>.<br>"
           : "") + "Are you sure you want to revoke this session?";
       this.$modal.show("dialog", {
@@ -119,11 +109,11 @@ export default {
             title: "Revoke",
             handler: async () => {
               this.$modal.hide("dialog");
+              const index = this.getSessionIndexByHost(site);
               this.$store.dispatch("provider/disconnectAccount", {
                 host: site,
-                index: _.findIndex(
-                  this.sessions[index].accounts,
-                  this.active.address
+                index: this.sessions[index].accounts.findIndex(
+                  (add) => add === this.active.address
                 ),
               });
               this.$notify({

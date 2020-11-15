@@ -7,9 +7,7 @@
         <div class="main-logo">
           <img src="images/harmony-big.png" class="logo-img" alt="Harmony" />
         </div>
-        <span
-          v-if="wallets.active.isLedger"
-          class="ledger-badge big account-badge"
+        <span v-if="active.isLedger" class="badge big account-badge"
           >Ledger</span
         >
       </div>
@@ -21,7 +19,7 @@
             v-tooltip.top="'Click to copy'"
           >
             <h2 class="name-label">
-              {{ compressString(wallets.active.name, 10, 5) }}
+              {{ compressString(active.name, 10, 5) }}
             </h2>
             <div class="box-address">{{ compressString(address, 20, 5) }}</div>
           </div>
@@ -112,7 +110,9 @@ export default {
   }),
 
   computed: {
-    ...mapState(["wallets"]),
+    ...mapState({
+      active: (state) => state.wallets.active,
+    }),
     getUSDBalance() {
       return new BigNumber(this.account.balance)
         .multipliedBy(this.tokenPrice["one"])
@@ -141,6 +141,17 @@ export default {
       this.$store.commit("account/shard", newValue);
       this.loadOneBalance();
     },
+    active(newVal, oldVal) {
+      this.refreshAccount();
+      if (!this.isSessionExist(this.currentTab)) return;
+      const session = this.getSessionByHost(this.currentTab);
+      this.$store.dispatch("provider/updateAllSessions", {
+        newAddr: newVal.address,
+      });
+      if (!session.accounts.includes(newVal.address)) {
+        this.$modal.show("modal-switch-account");
+      }
+    },
   },
 
   methods: {
@@ -158,7 +169,7 @@ export default {
       setTimeout(this.fetchTokenPrice, 30000);
     },
     onSendClick() {
-      if (this.wallets.active.isLedger) this.openExpandPopup("/send");
+      if (this.active.isLedger) this.openExpandPopup("/send");
       else this.$router.push("/send");
     },
     onClickAccount() {

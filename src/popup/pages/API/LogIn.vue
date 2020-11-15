@@ -26,7 +26,7 @@
               <div class="card-item" :class="{ active: selected[index] }">
                 <div class="card-item-name-box">
                   <div>{{ compressString(account.name, 10, 10) }}</div>
-                  <div v-if="account.isLedger" class="ledger-badge">Ledger</div>
+                  <div v-if="account.isLedger" class="badge">Ledger</div>
                 </div>
                 <div class="account-address">{{ account.address }}</div>
               </div>

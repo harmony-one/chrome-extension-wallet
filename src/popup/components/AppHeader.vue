@@ -154,9 +154,15 @@
                     "
                     >{{ compressString(account.name, 10, 5) }}</a
                   >
-                  <span v-if="account.isLedger" class="ledger-badge"
-                    >Ledger</span
-                  >
+                  <div class="badge-area">
+                    <div
+                      v-if="currentTab && isConnected(account.address)"
+                      class="wifi-icon"
+                    >
+                      <img src="images/wifi.svg" alt="connected" />
+                    </div>
+                    <span v-if="account.isLedger" class="badge">Ledger</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -231,6 +237,7 @@ import Config from "~/config";
 import MainTab from "./MainTab";
 import CreateTab from "./CreateTab";
 import helper from "mixins/helper";
+
 export default {
   mixins: [helper],
   props: {
@@ -270,6 +277,13 @@ export default {
   },
 
   methods: {
+    isConnected(address) {
+      if (!this.isSessionExist(this.currentTab)) return;
+      const accounts = this.getSessionByHost(this.currentTab).accounts;
+      const findIndexByAddress = accounts.findIndex((elem) => elem === address);
+      if (findIndexByAddress < 0) return false;
+      return true;
+    },
     backClicked() {
       if (!this.backRoute) this.$router.go(-1);
       else this.$router.push(this.backRoute);
@@ -304,7 +318,6 @@ export default {
     selectAccount(address) {
       this.$store.commit("wallets/setActive", address);
       this.hideDropdownMenu();
-      this.refreshData();
       if (this.$route.name !== "account") this.$router.push("/home");
     },
     createAccount() {
@@ -544,5 +557,11 @@ a.network-toggle:hover {
   font-weight: 600;
   text-align: center;
   padding-right: 30px;
+}
+.badge-area {
+  display: flex;
+  gap: 5px;
+  margin-right: 5px;
+  align-items: center;
 }
 </style>

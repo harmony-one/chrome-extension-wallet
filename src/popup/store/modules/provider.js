@@ -11,6 +11,20 @@ export default {
       sessions.splice(index, 1);
       commit("setSessions", sessions);
     },
+    updateAllSessions({ commit, state }, payload) {
+      const { newAddr } = payload;
+      const { sessions } = state;
+      const newSessions = sessions.map((session) => {
+        const index = session.accounts.findIndex((elem) => elem === newAddr);
+        if (index >= 0) {
+          session.accounts.splice(index, 1);
+          session.accounts.unshift(newAddr);
+          return session;
+        }
+        return session;
+      });
+      commit("setSessions", newSessions);
+    },
     switchAccount({ commit, state }, payload) {
       const { host, index } = payload;
       const { sessions } = state;

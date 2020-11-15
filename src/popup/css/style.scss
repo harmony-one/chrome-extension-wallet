@@ -571,21 +571,22 @@ button {
   margin-top: 20px;
 }
 
-.ledger-badge {
+.badge {
   background: transparent;
-  margin: auto;
-  margin-right: 15px;
-  margin-left: 5px;
   font-size: 0.5rem;
   color: red;
   border: 1px solid red;
   padding: 2px 3px;
 }
 
-.ledger-badge.big {
+.badge.big {
   padding: 0px 8px;
   font-size: 1rem;
   margin: 0;
+}
+.wifi-icon {
+  width: 13px;
+  height: 13px;
 }
 .list-container {
   display: flex;

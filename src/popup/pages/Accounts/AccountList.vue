@@ -18,7 +18,7 @@
           <div v-if="isConnected(acc)">
             <span
               class="connect-but"
-              v-if="!isActiveAddress(acc)"
+              v-if="!isCurrentAddress(acc)"
               @click="switchAcc(acc, isConnected(active) ? index : index - 1)"
               >Switch to this account</span
             >
@@ -104,10 +104,12 @@ export default {
       });
     },
     switchAcc(acc, index) {
+      this.$store.commit("wallets/setActive", acc.address);
       this.$store.dispatch("provider/switchAccount", {
         host: this.host,
         index,
       });
+      this.$modal.hide("modal-switch-account");
     },
     connect(acc) {
       this.$store.dispatch("provider/addAccount", {
@@ -118,6 +120,9 @@ export default {
     isConnected(acc) {
       if (!this.sessionAddresses.includes(acc.address)) return false;
       return true;
+    },
+    isCurrentAddress(acc) {
+      return acc.address === this.active.address;
     },
     isActiveAddress(acc) {
       return acc.address === this.sessionAddresses[0];

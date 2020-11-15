@@ -5,6 +5,7 @@ export default {
   computed: {
     ...mapState({
       sessions: (state) => state.provider.sessions,
+      currentTab: (state) => state.currentTab,
     }),
     isExtendedView() {
       if (window.innerWidth > 370) return true;
@@ -48,23 +49,12 @@ export default {
     getSessionIndexByHost(host) {
       return _.findIndex(this.sessions, { host });
     },
-    async getCurrentTabUrl() {
-      const tabs = await window.browser.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      const activeTab = tabs[0];
-      if (activeTab && activeTab.url) {
-        return new URL(activeTab.url).host;
-      }
-      return false;
-    },
     async checkSession(address) {
       const findbyAddress = this.sessions.filter(
         (session) => session.accounts && session.accounts.includes(address)
       );
       const sites = findbyAddress.map((elem) => elem.host);
-      const domain = await this.getCurrentTabUrl();
+      const domain = this.currentTab;
       let connected = false;
       if (domain && sites.includes(domain)) connected = true;
       return { sites, domain, connected };

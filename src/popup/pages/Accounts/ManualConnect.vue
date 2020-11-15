@@ -31,7 +31,6 @@ import apiService from "services/APIService";
 import helper from "mixins/helper";
 export default {
   data: () => ({
-    currentTab: "",
     checked: [],
   }),
   mixins: [helper],
@@ -42,9 +41,6 @@ export default {
   },
   created() {
     this.checked = new Array(this.accounts.length).fill(false);
-  },
-  async mounted() {
-    this.currentTab = await this.getCurrentTabUrl();
   },
   methods: {
     deny() {
