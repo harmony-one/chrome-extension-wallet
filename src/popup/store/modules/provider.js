@@ -25,16 +25,6 @@ export default {
       });
       commit("setSessions", newSessions);
     },
-    switchAccount({ commit, state }, payload) {
-      const { host, index } = payload;
-      const { sessions } = state;
-      const findIndexByHost = _.findIndex(sessions, { host });
-      if (findIndexByHost < 0) return;
-      const temp = sessions[findIndexByHost].accounts[index];
-      sessions[findIndexByHost].accounts.splice(index, 1);
-      sessions[findIndexByHost].accounts.unshift(temp);
-      commit("setSessions", sessions);
-    },
     disconnectAccount({ commit, state }, payload) {
       const { host, index } = payload;
       const { sessions } = state;

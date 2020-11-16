@@ -105,10 +105,6 @@ export default {
     },
     switchAcc(acc, index) {
       this.$store.commit("wallets/setActive", acc.address);
-      this.$store.dispatch("provider/switchAccount", {
-        host: this.host,
-        index,
-      });
       this.$modal.hide("modal-switch-account");
     },
     connect(acc) {
