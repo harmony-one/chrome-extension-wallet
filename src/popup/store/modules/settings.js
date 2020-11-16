@@ -13,12 +13,16 @@ export default {
       countdown: 60, //sec, delay 1min when auth fails
     },
     dontShowContactsModal: false,
+    dontShowSwitchModal: false,
     hideLowBalance: false,
     contacts: [],
   },
   mutations: {
     setHideLowBalance(state, payload) {
       state.hideLowBalance = payload;
+    },
+    setDontShowSwitchModal(state, payload) {
+      state.dontShowSwitchModal = payload;
     },
     setDontShowContactsModal(state, payload) {
       state.dontShowContactsModal = payload;

@@ -7,6 +7,7 @@ import hrc20 from "./modules/hrc20";
 import account from "./modules/account";
 import provider from "./modules/provider";
 import settings from "./modules/settings";
+import global from "./modules/global";
 import * as getters from "./getters";
 
 Vue.use(Vuex);
@@ -27,6 +28,7 @@ export default new Vuex.Store({
     account,
     hrc20,
     settings,
+    global,
   },
 
   state: {

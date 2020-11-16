@@ -4,6 +4,8 @@
     :adaptive="true"
     transition="scale"
     :width="340"
+    @before-open="onBeforeOpen"
+    @before-close="onBeforeClose"
     height="auto"
   >
     <div class="modal-header">{{ currentTab }}</div>
@@ -18,6 +20,10 @@
         </div>
         <AccountList :host="currentTab" />
       </div>
+      <div class="dontshow-container" v-if="showCheckBox">
+        <input type="checkbox" id="dontshow" v-model="dontshow" />
+        <label for="dontshow">Don't show this again</label>
+      </div>
     </div>
     <div class="modal-footer">
       <div class="primary" @click="accept">OK</div>
@@ -31,11 +37,17 @@ import { mapState } from "vuex";
 import AccountList from "./AccountList";
 import helper from "mixins/helper";
 export default {
+  data: () => ({
+    dontshow: false,
+  }),
   components: {
     AccountList,
   },
   mixins: [helper],
   computed: {
+    ...mapState({
+      showCheckBox: (state) => state.global.showCheckBox,
+    }),
     connected() {
       if (!this.currentTab) return false;
       return this.isSessionExist(this.currentTab);
@@ -47,8 +59,12 @@ export default {
     },
   },
   methods: {
+    onBeforeClose(e) {
+      this.$store.commit("global/showCheckBox", false);
+    },
     accept() {
       this.$modal.hide("modal-switch-account");
+      this.$store.commit("settings/setDontShowSwitchModal", this.dontshow);
     },
   },
 };

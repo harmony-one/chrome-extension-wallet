@@ -112,6 +112,7 @@ export default {
   computed: {
     ...mapState({
       active: (state) => state.wallets.active,
+      dontShowSwitchModal: (state) => state.settings.dontShowSwitchModal,
     }),
     getUSDBalance() {
       return new BigNumber(this.account.balance)
@@ -148,8 +149,12 @@ export default {
       this.$store.dispatch("provider/updateAllSessions", {
         newAddr: newVal.address,
       });
-      if (!session.accounts.includes(newVal.address)) {
+      if (
+        !this.dontShowSwitchModal &&
+        !session.accounts.includes(newVal.address)
+      ) {
         this.$modal.show("modal-switch-account");
+        this.$store.commit("global/showCheckBox", true);
       }
     },
   },
