@@ -4,7 +4,6 @@
     :adaptive="true"
     transition="scale"
     :width="340"
-    @before-open="onBeforeOpen"
     @before-close="onBeforeClose"
     height="auto"
   >

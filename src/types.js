@@ -65,5 +65,3 @@ export const NO_ACCOUNTS_ERROR =
 export const UNKNOWN_ERROR = "Request failed. Something went wrong.";
 export const ONEWALLETPROVIDER_MESSAGE_LISTENER =
   "ONEWALLETPROVIDER_MESSAGE_LISTENER";
-export const SESSION_REVOKED = "SESSION_REVOKED";
-export const ACCOUNT_CHANGED = "ACCOUNT_CHANGED";

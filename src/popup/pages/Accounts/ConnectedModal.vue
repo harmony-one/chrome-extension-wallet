@@ -54,7 +54,6 @@
 import { mapState } from "vuex";
 import apiService from "services/APIService";
 import { sendEventToContentScript } from "services/APIService";
-import { SESSION_REVOKED } from "~/types";
 import ManualConnect from "./ManualConnect";
 import helper from "mixins/helper";
 export default {

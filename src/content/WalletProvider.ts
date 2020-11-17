@@ -12,7 +12,6 @@ import {
   LOGIN_REJECT,
   SIGN_REJECT,
   SIGNOUT_SUCCEED,
-  SESSION_REVOKED,
   ONEWALLETPROVIDER_MESSAGE_LISTENER,
 } from "../types";
 import networkConfig from "../config";
@@ -31,7 +30,7 @@ interface Network {
 }
 
 interface WalletProviderEvents {
-  sessionRevoked: (host: string) => void;
+  accountChanged: (address: string) => void;
 }
 class WalletProvider extends TypedEmitter<WalletProviderEvents> {
   isOneWallet: boolean;
@@ -63,8 +62,12 @@ class WalletProvider extends TypedEmitter<WalletProviderEvents> {
     );
   }
   processEvent(type: any, payload: any) {
-    if (type === SESSION_REVOKED) {
-      this.emit("sessionRevoked", payload);
+    const { hosts, accounts } = payload;
+    if (type === "accountChanged") {
+      if (hosts.includes(window.location.host)) {
+        console.log(hosts, accounts);
+        this.emit("accountChanged", accounts);
+      }
     }
   }
   async forgetIdentity() {

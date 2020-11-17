@@ -37,6 +37,7 @@ export default {
   computed: {
     ...mapState({
       accounts: (state) => state.wallets.accounts,
+      active: (state) => state.wallets.active,
     }),
   },
   created() {
@@ -55,6 +56,7 @@ export default {
       this.$store.dispatch("provider/setAccounts", {
         host: this.currentTab,
         accounts,
+        active: this.active.address,
       });
     },
   },
