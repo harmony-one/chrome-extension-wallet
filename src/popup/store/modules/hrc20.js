@@ -1,10 +1,14 @@
-import HRCTokens from "services/hrc20/config";
 import _ from "lodash";
 
 export default {
   namespaced: true,
   state: {
-    tokens: HRCTokens, //default hrc20 tokens
+    tokens: {
+      Mainnet: [],
+      Testnet: [],
+      Localnet: [],
+    },
+    initialized: false,
   },
   actions: {
     setTokenBalanceLoading({ commit, state }, payload) {
@@ -65,6 +69,9 @@ export default {
     },
     resetTokens(state) {
       state.tokens = HRCTokens;
+    },
+    setInitalized(state, payload) {
+      state.initialized = payload;
     },
     addToken(state, payload) {
       const { address, symbol, network, decimals } = payload;

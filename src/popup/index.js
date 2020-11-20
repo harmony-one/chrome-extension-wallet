@@ -20,6 +20,7 @@ import ToggleButton from "vue-js-toggle-button";
 import Tooltip from "vue-directive-tooltip";
 import "vue-directive-tooltip/dist/vueDirectiveTooltip.css";
 
+import { initHRC20Tokens } from "services/hrc20/init.js";
 import BigNumber from "bignumber.js";
 import Config from "~/config";
 
@@ -152,3 +153,5 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   sendResponse();
   return true;
 });
+
+initHRC20Tokens(store);
