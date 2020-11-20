@@ -34,12 +34,6 @@ export default {
           "Change the security settings (PIN Code, PIN digits and Lock timer)",
         route: "/settings/security",
       },
-      {
-        icon: "contacts",
-        name: "Contacts",
-        description: "Add, edit and remove your contacts",
-        route: "/settings/contacts",
-      },
     ],
   }),
 };

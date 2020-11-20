@@ -1,152 +1,149 @@
 <template>
   <div>
-    <app-header
-      :subtitle="getHeaderName"
-      @refresh="refreshData"
-      backRoute="/home"
-    />
+    <app-header :subtitle="getHeaderName" @refresh="refreshData" />
     <main class="main">
       <div v-if="scene === 1">
-        <div
-          v-show="message.show"
-          class="message"
-          :class="[message.type]"
-          @click="onMessageClick"
+        <form
+          @submit.prevent="showConfirmDialog"
+          action
+          method="post"
+          class="send-form"
+          autocomplete="off"
         >
-          <span v-if="message.type === 'success'"
-            >Transaction Succeed: Click here to see the transaction</span
+          <div
+            v-show="message.show"
+            class="message"
+            :class="[message.type]"
+            @click="onMessageClick"
           >
-          <span v-else>{{ message.text }}</span>
-        </div>
-        <div :class="{ row: !isToken, 'token-row': isToken }">
-          <label class="input-label" :class="{ recipient: !isToken }">
-            Recipient Address
-            <ContactSelect :onSelected="onContactSelect" :value="recipient" />
-            <div v-if="recipient && recipient.name" class="recipient-name">
-              {{ recipient.name }}
-            </div>
-          </label>
-          <label
-            v-if="!isToken"
-            class="input-label shard"
-            :class="{ disabled: isHRCToken }"
-          >
-            To Shard
-            <select
-              class="input-field"
-              v-model="toShard"
-              :disabled="isHRCToken"
+            <span v-if="message.type === 'success'"
+              >Transaction Succeed: Click here to see the transaction</span
             >
-              <option
-                v-for="shard in account.shardArray"
-                :key="shard.shardID"
-                :value="shard.shardID"
+            <span v-else>{{ message.text }}</span>
+          </div>
+          <div :class="{ row: !isToken }">
+            <label class="input-label" :class="{ recipient: !isToken }">
+              Recipient Address
+              <input
+                class="input-field"
+                type="text"
+                name="address"
+                ref="address"
+                placeholder="Recipient Address"
+                v-model="recipient"
+              />
+            </label>
+            <label
+              v-if="!isToken"
+              class="input-label shard"
+              :class="{ disabled: isHRCToken }"
+            >
+              To Shard
+              <select
+                class="input-field"
+                v-model="toShard"
+                :disabled="isHRCToken"
               >
-                {{ shard.shardID }}
-              </option>
-            </select>
-          </label>
-        </div>
-        <div
-          :class="{ row: !isToken, 'token-row': isToken }"
-          class="amount-row"
-        >
-          <label class="input-label" :class="{ amount: !isToken }">
-            Amount
-            <input
-              class="input-field"
-              type="number"
-              name="amount"
-              ref="amount"
-              step="any"
-              placeholder="Amount"
-              v-model="amount"
-              v-on:keyup.enter="checkContactExist"
-            />
-          </label>
-          <label v-if="!isToken" class="input-label token">
-            Token
-            <select class="input-field" v-model="selectedToken">
-              <option
-                v-for="(token, index) in tokenList"
-                :key="index"
-                :value="token"
+                <option
+                  v-for="shard in account.shardArray"
+                  :key="shard.shardID"
+                  :value="shard.shardID"
+                  >{{ shard.shardID }}</option
+                >
+              </select>
+            </label>
+          </div>
+          <div :class="{ row: !isToken }">
+            <label class="input-label" :class="{ amount: !isToken }">
+              Amount
+              <input
+                class="input-field"
+                type="number"
+                name="amount"
+                ref="amount"
+                step="any"
+                placeholder="Amount"
+                v-model="amount"
+                v-on:keyup.enter="showConfirmDialog"
+              />
+              <div
+                class="maximum-label"
+                v-show="!loading"
+                @click="setMaxBalance"
               >
-                {{ token.symbol }}
-              </option>
-            </select>
-          </label>
-        </div>
-        <div
-          class="maximum-label"
-          v-show="!loading"
-          @click="setMaxBalance"
-          v-tooltip.bottom="'Max amount to send excluding network fee'"
-        >
-          Max:
-          {{
-            formatBalance(getMaxBalance, selectedToken.decimals) +
-              " " +
-              selectedToken.symbol
-          }}
-        </div>
-        <div class="row">
-          <label class="input-label gas-price">
-            Gas Price
-            <input
-              class="input-field"
-              type="number"
-              name="gasprice"
-              ref="gasprice"
-              placeholder="Gas Price"
-              v-model="gasPrice"
-              step="any"
+                Maximum: {{ getMaxBalance + " " + selectedToken.symbol }}
+              </div>
+            </label>
+            <label v-if="!isToken" class="input-label token">
+              Token
+              <select class="input-field" v-model="selectedToken">
+                <option
+                  v-for="(token, index) in tokenList"
+                  :key="index"
+                  :value="token"
+                  >{{ token.symbol }}</option
+                >
+              </select>
+            </label>
+          </div>
+          <div class="row">
+            <label class="input-label gas-price">
+              Gas Price
+              <input
+                class="input-field"
+                type="number"
+                name="gasprice"
+                ref="gasprice"
+                placeholder="Gas Price"
+                v-model="gasPrice"
+                step="any"
+              />
+            </label>
+            <label class="input-label gas-limit">
+              Gas Limit
+              <input
+                class="input-field"
+                type="number"
+                name="gaslimit"
+                ref="gaslimit"
+                v-model="gasLimit"
+                placeholder="Gas Limit"
+              />
+            </label>
+            <label class="input-label gas-one">
+              Gas Fee
+              <input
+                class="input-field"
+                type="text"
+                name="gasfee"
+                ref="gasfee"
+                readonly
+                :value="`${getGasFee} ONE`"
+              />
+            </label>
+          </div>
+          <label class="input-label" :class="{ disabled: isHRCToken }">
+            Input Data
+            <textarea
+              class="input-field input-data"
+              type="textarea"
+              name="inputdata"
+              placeholder="Please enter hexadecimal data (optional)"
+              v-model="inputData"
+              :disabled="isHRCToken"
             />
           </label>
-          <label class="input-label gas-limit">
-            Gas Limit
-            <input
-              class="input-field"
-              type="number"
-              name="gaslimit"
-              ref="gaslimit"
-              v-model="gasLimit"
-              placeholder="Gas Limit"
-            />
-          </label>
-          <label class="input-label gas-one">
-            Network Fee
-            <input
-              class="input-field"
-              type="text"
-              name="gasfee"
-              ref="gasfee"
-              readonly
-              :value="`${getGasFee} ONE`"
-            />
-          </label>
-        </div>
-        <label class="input-label" :class="{ disabled: isHRCToken }">
-          Input Data
-          <textarea
-            class="input-field input-data"
-            type="textarea"
-            name="inputdata"
-            placeholder="Please enter hexadecimal data (optional)"
-            v-model="inputData"
-            :disabled="isHRCToken"
-          />
-        </label>
-        <button class="primary flex" @click="checkContactExist">Send</button>
+          <button class="primary flex" type="submit">Send</button>
+        </form>
       </div>
       <!-- Approve Transaction Dialog -->
       <div v-else>
         <h3 class="center">Approve Transaction</h3>
         <p class="addressRow">
           From
-          <span class="address__name">{{
-            compressAddress(getFromAddress)
-          }}</span>
+          <span class="address__name">
+            {{ compressAddress(getFromAddress) }}
+          </span>
           of Shard
           <b>{{ fromShard }}</b>
         </p>
@@ -162,14 +159,7 @@
           </div>
           <div class="transaction__information">
             To
-            <span class="to_recipient_name" v-if="recipient.name">{{
-              recipient.name
-            }}</span>
-            <span v-if="recipient.name">(</span>
-            <span class="address__name">{{
-              compressAddress(recipient.address)
-            }}</span>
-            <span v-if="recipient.name">)</span>
+            <span class="address__name">{{ compressAddress(recipient) }}</span>
             of Shard
             <b>{{ toShard }}</b>
           </div>
@@ -211,7 +201,7 @@
         </div>
         <div v-if="!wallet.isLedger" class="button-group">
           <button class="outline" @click="onBackClick()">Back</button>
-          <button class="primary" @click="sendPayment" :disabled="!password">
+          <button @click="sendPayment" class="primary" :disabled="!password">
             Approve
           </button>
         </div>
@@ -228,45 +218,6 @@
           </button>
         </div>
       </div>
-      <modal
-        name="modal-contact-add"
-        :adaptive="true"
-        transition="scale"
-        :width="330"
-        height="auto"
-      >
-        <div class="modal-header">Add a contact</div>
-        <div class="modal-body">
-          <input
-            type="text"
-            name="name"
-            class="modal-input-name"
-            v-model="newName"
-            ref="addName"
-            placeholder="Input the name"
-            v-on:keydown.enter="addContact"
-          />
-          <input
-            type="text"
-            name="address"
-            class="modal-input-address"
-            readonly
-            v-model="newAddress"
-            ref="addAddress"
-            placeholder="Input the address"
-          />
-        </div>
-        <div class="modal-footer">
-          <div class="secondary" @click="onCloseModal">CLOSE</div>
-          <div
-            class="primary"
-            @click="addContact"
-            :class="{ disabled: !newName || !newAddress }"
-          >
-            ADD
-          </div>
-        </div>
-      </modal>
       <notifications
         group="notify"
         width="250"
@@ -285,29 +236,27 @@ import {
   transferOne,
   getNetworkLink,
   sendTransction,
-} from "services/AccountService";
-import { sendToken } from "services/Hrc20Service";
+} from "../../../services/AccountService";
+import { sendToken } from "../../../services/Hrc20Service";
 import { isValidAddress } from "@harmony-js/utils";
-import account from "mixins/account";
-import helper from "mixins/helper";
-import ContactSelect from "components/ContactSelect";
+import account from "../../mixins/account";
+import helper from "../../mixins/helper";
 import {
   signTransactionWithLedger,
   signHRCTransactionWithLedger,
-} from "services/LedgerService";
+  isLedgerLocked,
+} from "../../../services/LedgerService";
 import {
   LEDGER_CONFIRM_PREPARE,
   LEDGER_CONFIRM_SUCCESS,
   LEDGER_CONFIRM_REJECT,
   LEDGER_LOCKED,
-} from "~/types";
+} from "../../../types";
 
 export default {
   name: "send-transaction",
   mixins: [account, helper],
-  components: {
-    ContactSelect,
-  },
+
   props: {
     isToken: {
       type: Boolean,
@@ -323,9 +272,7 @@ export default {
     fromShard: 0,
     toShard: 0,
     tokenList: [],
-    newName: "",
-    newAddress: "",
-    recipient: null,
+    recipient: "",
     gasPrice: 1,
     gasLimit: 25000,
     inputData: "",
@@ -344,7 +291,6 @@ export default {
     ...mapState({
       wallet: (state) => state.wallets.active,
       loading: (state) => state.loading,
-      contacts: (state) => state.settings.contacts,
     }),
     getFromAddress() {
       return this.wallet.address;
@@ -357,20 +303,17 @@ export default {
     },
     getTotal() {
       if (!this.isHRCToken)
-        return new BigNumber(this.amount).plus(this.getGasFee).toFixed();
+        return new BigNumber(this.amount).plus(this.getGasFee).toFixed(8);
       else return this.amount;
     },
     getOneBalance() {
-      return new BigNumber(this.account.balance).toFixed();
+      return new BigNumber(this.account.balance).toFixed(8);
     },
     getMaxBalance() {
       let max;
-      if (!this.isHRCToken) {
-        max = BigNumber.maximum(
-          new BigNumber(this.account.balance).minus(this.getGasFee),
-          0
-        ).toFixed();
-      } else {
+      if (!this.isHRCToken)
+        max = new BigNumber(this.account.balance).toFixed(8);
+      else {
         max = this.getTokenBalance(this.selectedToken);
       }
       if (max === undefined) return Number(0);
@@ -384,11 +327,8 @@ export default {
 
   async mounted() {
     this.fromShard = this.account.shard;
-    if (this.wallet.isLedger) await this.refreshData();
-    else {
-      this.initSelectedToken();
-      await this.loadBalance();
-    }
+    this.initSelectedToken();
+    await this.loadBalance();
   },
 
   updated() {
@@ -404,7 +344,7 @@ export default {
     amount() {
       if (
         !RegExp(
-          `^[0-9]*[.]?[0-9]{0,${this.selectedToken.decimals}}$`,
+          `^[0-9]*[.]?[0-9]{0,${Math.min(8, this.selectedToken.decimals)}}$`,
           "g"
         ).test(this.amount)
       )
@@ -412,31 +352,6 @@ export default {
     },
   },
   methods: {
-    onContactSelect(recipient) {
-      const address = recipient;
-      const findByAddress = _.find(this.contacts, { address });
-      let name = "";
-      if (findByAddress) name = findByAddress.name;
-      this.recipient = { name, address };
-    },
-    renameIfExist(newName) {
-      const findContactbyName = _.find(this.contacts, { name: newName });
-      if (!findContactbyName) return newName;
-      return this.renameIfExist(newName + " (2)");
-    },
-    onCloseModal() {
-      this.$modal.hide("modal-contact-add");
-      this.showConfirmDialog();
-    },
-    addContact() {
-      this.newName = this.renameIfExist(this.newName);
-      this.$modal.hide("modal-contact-add");
-      this.$store.dispatch("settings/addContact", {
-        name: this.newName,
-        address: this.newAddress,
-      });
-      this.showConfirmDialog();
-    },
     setMaxBalance(e) {
       e.preventDefault();
       this.amount = this.getMaxBalance;
@@ -475,7 +390,7 @@ export default {
     initScene() {
       this.scene = 1;
       this.amount = 0;
-      this.recipient = null;
+      this.recipient = "";
       this.toShard = 0;
       this.password = "";
       this.ledgerError = false;
@@ -487,7 +402,7 @@ export default {
         if (this.isHRCToken) {
           signedRes = await signHRCTransactionWithLedger(
             this.address,
-            this.recipient.address,
+            this.recipient,
             this.amount,
             this.gasLimit,
             this.gasPrice,
@@ -496,7 +411,7 @@ export default {
           );
         } else {
           signedRes = await signTransactionWithLedger(
-            this.recipient.address,
+            this.recipient,
             this.fromShard,
             this.toShard,
             this.amount,
@@ -555,7 +470,7 @@ export default {
             type: "error",
             text: "Password is not correct",
           });
-          return;
+          return false;
         }
       }
 
@@ -565,7 +480,7 @@ export default {
         let ret;
         if (!this.isHRCToken) {
           ret = await transferOne(
-            this.recipient.address,
+            this.recipient,
             this.fromShard,
             this.toShard,
             this.amount,
@@ -578,7 +493,7 @@ export default {
           //token transfer part
           ret = await sendToken(
             this.address,
-            this.recipient.address,
+            this.recipient,
             this.amount,
             privateKey,
             this.gasLimit,
@@ -617,32 +532,34 @@ export default {
       this.message.type = "error";
       this.message.text = err;
     },
-    checkContactExist(e) {
-      e.preventDefault();
-      console.log("checkcontactexist");
+    async showConfirmDialog() {
       this.message.show = false;
-      if (!isValidAddress(this.recipient.address)) {
+
+      if (!isValidAddress(this.recipient)) {
         this.showErrMessage("Invalid recipient address");
-        return;
+        return false;
       }
 
       if (!this.selectedToken) {
         this.showErrMessage("Please select token that you want to send");
-        return;
+        return false;
       }
 
       if (this.amount <= 0) {
         this.showErrMessage("Invalid token amount");
-        return;
+        return false;
       } else {
-        const minAmount = new BigNumber(1)
-          .dividedBy(Math.pow(10, this.selectedToken.decimals))
-          .toFixed();
+        const minAmount =
+          1 /
+          Math.pow(
+            10,
+            this.selectedToken.decimals >= 8 ? 8 : this.selectedToken.decimals
+          );
         if (new BigNumber(this.amount).isLessThan(new BigNumber(minAmount))) {
           this.showErrMessage(
             `Minimum send amount is ${minAmount} ${this.selectedToken.symbol}`
           );
-          return;
+          return false;
         }
       }
 
@@ -653,7 +570,7 @@ export default {
           )
         ) {
           this.showErrMessage("Your balance is not enough");
-          return;
+          return false;
         }
       } else {
         if (
@@ -662,46 +579,18 @@ export default {
           )
         ) {
           this.showErrMessage("Your ONE balance is not enough");
-          return;
+          return false;
         }
         if (
-          new BigNumber(this.amount).isGreaterThan(
+          new BigNumber(this.getTotal).isGreaterThan(
             new BigNumber(this.getMaxBalance),
             10
           )
         ) {
           this.showErrMessage("Your token balance is not enough");
-          return;
+          return false;
         }
       }
-      if (!this.recipient.name) {
-        console.log("showing modal");
-        this.$modal.show("dialog", {
-          text:
-            "This address is not found in the contacts. Do you want to add this address?",
-          buttons: [
-            {
-              title: "Cancel",
-              handler: () => {
-                this.$modal.hide("dialog");
-                this.showConfirmDialog();
-              },
-            },
-            {
-              title: "Add",
-              handler: () => {
-                this.$modal.hide("dialog");
-                this.newAddress = this.recipient.address;
-                this.$modal.show("modal-contact-add");
-              },
-            },
-          ],
-        });
-        return;
-      }
-      this.showConfirmDialog();
-    },
-    showConfirmDialog() {
       this.amount = new BigNumber(this.amount)
         .decimalPlaces(
           Number(this.selectedToken.decimals),
@@ -725,7 +614,7 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
+<style scoped>
 h3 {
   margin-top: 0px;
 }
@@ -761,7 +650,6 @@ h3 {
 }
 .maximum-label {
   color: red;
-  cursor: pointer;
   font-size: 12px;
   font-style: italic;
   margin-top: 3px;
@@ -770,32 +658,10 @@ h3 {
 .gray {
   color: #bbb;
 }
-.amount-row {
-  margin-bottom: -13px;
-}
 
 .invoice-content {
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   font-size: 14px;
-}
-.recipient-name {
-  position: absolute;
-  left: 1.25rem;
-  z-index: -1;
-  color: #1f6bb7;
-  font-style: italic;
-  word-break: break-all;
-  right: 1.25rem;
-}
-.to_recipient_name {
-  font-weight: 700;
-  color: black;
-}
-.token-row {
-  display: flex;
-  & > label {
-    flex: 1;
-  }
 }
 </style>
