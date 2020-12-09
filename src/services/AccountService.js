@@ -183,7 +183,7 @@ export async function transferOne(
     await getShardInfo();
     const account = harmony.wallet.addByPrivateKey(privateKey);
     const signedTxn = await account.signTransaction(txn);
-    const res = await sendTransction(signedTxn);
+    const res = await sendTransaction(signedTxn);
     return res;
   } catch (err) {
     return {
@@ -193,7 +193,7 @@ export async function transferOne(
   }
 }
 
-export async function sendTransction(signedTxn) {
+export async function sendTransaction(signedTxn) {
   try {
     signedTxn
       .observed()

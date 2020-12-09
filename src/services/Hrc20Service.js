@@ -2,7 +2,7 @@ import artifact from "./hrc20/artifacts/artifact.json";
 import { getHarmony } from "./AccountService";
 import BN from "bn.js";
 import BigNumber from "bignumber.js";
-import { sendTransction } from "services/AccountService";
+import { sendTransaction } from "services/AccountService";
 import { toBech32, fromBech32 } from "@harmony-js/crypto";
 
 export const oneToHexAddress = (address) =>
@@ -63,7 +63,7 @@ export async function sendToken(
     });
     const account = harmony.wallet.addByPrivateKey(privateKey);
     const signedTxn = await account.signTransaction(txn);
-    const res = await sendTransction(signedTxn);
+    const res = await sendTransaction(signedTxn);
     return res;
   } catch (err) {
     return {

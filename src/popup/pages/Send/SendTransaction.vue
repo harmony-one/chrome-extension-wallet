@@ -235,7 +235,7 @@ import {
   decryptKeyStore,
   transferOne,
   getNetworkLink,
-  sendTransction,
+  sendTransaction,
 } from "../../../services/AccountService";
 import { sendToken } from "../../../services/Hrc20Service";
 import { isValidAddress } from "@harmony-js/utils";
@@ -430,7 +430,7 @@ export default {
             text: LEDGER_CONFIRM_SUCCESS,
           });
           this.$store.commit("loading", true);
-          const sendRes = await sendTransction(signedTxn);
+          const sendRes = await sendTransaction(signedTxn);
           this.$store.commit("loading", false);
 
           if (sendRes.result) {

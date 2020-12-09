@@ -143,6 +143,7 @@ export default {
     type: "Send",
     hasError: false,
     caption: LEDGER_CONFIRM_PREPARE,
+    privateKey: null,
     wallet: {
       isLedger: false,
       name: "",
@@ -184,32 +185,56 @@ export default {
   watch: {
     async transaction() {
       if (this.transaction && this.wallet.isLedger) {
-        await this.signwithLedger();
+        await this.signTransaction(true);
       }
     },
   },
   methods: {
-    async signwithLedger() {
+    async signTransaction(isLedger) {
       try {
-        this.caption = LEDGER_CONFIRM_PREPARE;
-        this.hasError = false;
-        const app = await getHarmonyApp();
-        let signedTxParams;
+        let app, signer;
+        if (isLedger) {
+          this.caption = LEDGER_CONFIRM_PREPARE;
+          this.hasError = false;
+          app = await getHarmonyApp();
+        } else {
+          signer = new Account(this.privateKey, this.transaction.messenger);
+        }
+        let signedTxParams, signedTransaction;
+        const { updateNonce, encodeMode, blockNumber, shardID } = this.params;
         if (this.type === TRANSACTIONTYPE.SEND) {
-          const signedTransaction = await app.signTransaction(
-            this.transaction,
-            this.transaction.chainId,
-            this.transaction.shardID,
-            this.transaction.messenger
-          );
+          if (isLedger)
+            signedTransaction = await app.signTransaction(
+              this.transaction,
+              this.transaction.chainId,
+              this.transaction.shardID,
+              this.transaction.messenger
+            );
+          else
+            signedTransaction = await signer.signTransaction(
+              this.transaction,
+              updateNonce,
+              encodeMode,
+              blockNumber
+            );
           signedTxParams = signedTransaction.txParams;
         } else {
-          const signedTransaction = await app.signStakingTransaction(
-            this.transaction,
-            this.transaction.chainId,
-            this.transaction.shardID,
-            this.transaction.messenger
-          );
+          if (isLedger)
+            signedTransaction = await app.signStakingTransaction(
+              this.transaction,
+              this.transaction.chainId,
+              this.transaction.shardID,
+              this.transaction.messenger
+            );
+          else
+            signedTransaction = await signer.signStaking(
+              this.transaction,
+              updateNonce,
+              encodeMode,
+              blockNumber,
+              shardID
+            );
+
           const parsedTxn = JSON.parse(JSON.stringify(signedTransaction));
           signedTxParams = {
             from: parsedTxn.from,
@@ -219,12 +244,14 @@ export default {
             signature: parsedTxn.signature,
           };
         }
-        this.caption = LEDGER_CONFIRM_SUCCESS;
-        this.$notify({
-          group: "notify",
-          type: "success",
-          text: LEDGER_CONFIRM_SUCCESS,
-        });
+        if (isLedger) {
+          this.caption = LEDGER_CONFIRM_SUCCESS;
+          this.$notify({
+            group: "notify",
+            type: "success",
+            text: LEDGER_CONFIRM_SUCCESS,
+          });
+        }
         setTimeout(
           () =>
             chrome.runtime.sendMessage({
@@ -233,7 +260,7 @@ export default {
                 txParams: signedTxParams,
               },
             }),
-          200
+          isLedger ? 200 : 0
         );
       } catch (err) {
         this.hasError = true;
@@ -265,43 +292,10 @@ export default {
         });
         return false;
       }
+      this.privateKey = privateKey;
 
       this.$store.commit("loading", true);
-      const signer = new Account(privateKey, this.transaction.messenger);
-      let signedTxParams;
-      const { updateNonce, encodeMode, blockNumber, shardID } = this.params;
-      if (this.type == TRANSACTIONTYPE.SEND) {
-        const signedTransaction = await signer.signTransaction(
-          this.transaction,
-          updateNonce,
-          encodeMode,
-          blockNumber
-        );
-        signedTxParams = signedTransaction.txParams;
-      } else if (this.type == FACTORYTYPE.STAKINGTRANSACTION) {
-        const signedTransaction = await signer.signStaking(
-          this.transaction,
-          updateNonce,
-          encodeMode,
-          blockNumber,
-          shardID
-        );
-        const parsedTxn = JSON.parse(JSON.stringify(signedTransaction));
-        signedTxParams = {
-          from: parsedTxn.from,
-          nonce: parsedTxn.nonce,
-          unsignedRawTransaction: parsedTxn.unsignedRawTransaction,
-          rawTransaction: parsedTxn.rawTransaction,
-          signature: parsedTxn.signature,
-        };
-      }
-
-      chrome.runtime.sendMessage({
-        action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
-        payload: {
-          txParams: signedTxParams,
-        },
-      });
+      await this.signTransaction(false);
       this.$store.commit("loading", false);
     },
 
