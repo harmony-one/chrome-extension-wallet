@@ -3,26 +3,28 @@
     <app-header @refresh="refreshAccount" headerTab="main-tab" />
     <main class="main">
       <div class="relative">
-        <!-- <ConnectedSites v-if="!isExtendedView" /> -->
+        <connected-status v-if="!isExtendedView" />
         <div class="main-logo">
           <img src="images/harmony-big.png" class="logo-img" alt="Harmony" />
         </div>
-        <span
-          v-if="wallets.active.isLedger"
-          class="ledger-badge big account-badge"
+        <span v-if="active.isLedger" class="badge big account-badge"
           >Ledger</span
         >
       </div>
       <div class="container">
-        <div
-          class="account-box"
-          @click="onClickAccount()"
-          v-tooltip.top="'Click to copy'"
-        >
-          <h2 class="name-label">{{ compressName(wallets.active.name) }}</h2>
-          <div class="box-address">{{ compressAddress(address, 20, 5) }}</div>
+        <div class="account-container">
+          <div
+            class="account-box"
+            @click="onClickAccount()"
+            v-tooltip.top="'Click to copy'"
+          >
+            <h2 class="name-label">
+              {{ compressString(active.name, 10, 5) }}
+            </h2>
+            <div class="box-address">{{ compressString(address, 20, 5) }}</div>
+          </div>
+          <AccountMenu />
         </div>
-
         <div class="box-label">Account Balance</div>
 
         <div class="box-balance">
@@ -90,15 +92,16 @@ import account from "mixins/account";
 import MainTab from "components/MainTab.vue";
 import { mapState } from "vuex";
 import BigNumber from "bignumber.js";
-import ConnectedSites from "./ConnectedSites";
+import ConnectedStatus from "./ConnectedStatus";
 import axios from "axios";
-
+import AccountMenu from "./AccountMenu";
 export default {
   mixins: [account, helper],
 
   components: {
     MainTab,
-    ConnectedSites,
+    ConnectedStatus,
+    AccountMenu,
   },
 
   data: () => ({
@@ -107,7 +110,10 @@ export default {
   }),
 
   computed: {
-    ...mapState(["wallets"]),
+    ...mapState({
+      active: (state) => state.wallets.active,
+      dontShowSwitchModal: (state) => state.settings.dontShowSwitchModal,
+    }),
     getUSDBalance() {
       return new BigNumber(this.account.balance)
         .multipliedBy(this.tokenPrice["one"])
@@ -136,6 +142,21 @@ export default {
       this.$store.commit("account/shard", newValue);
       this.loadOneBalance();
     },
+    active(newVal, oldVal) {
+      this.refreshAccount();
+      if (!this.isSessionExist(this.currentTab)) return;
+      const session = this.getSessionByHost(this.currentTab);
+      this.$store.dispatch("provider/updateAllSessions", {
+        newAddr: newVal.address,
+      });
+      if (
+        !this.dontShowSwitchModal &&
+        !session.accounts.includes(newVal.address)
+      ) {
+        this.$modal.show("modal-switch-account");
+        this.$store.commit("global/showCheckBox", true);
+      }
+    },
   },
 
   methods: {
@@ -153,7 +174,7 @@ export default {
       setTimeout(this.fetchTokenPrice, 30000);
     },
     onSendClick() {
-      if (this.wallets.active.isLedger) this.openExpandPopup("/send");
+      if (this.active.isLedger) this.openExpandPopup("/send");
       else this.$router.push("/send");
     },
     onClickAccount() {
@@ -165,17 +186,10 @@ export default {
         });
       });
     },
-    compressName(str) {
-      if (str.length > 15)
-        return (
-          str.substr(0, 10) + "..." + str.substr(str.length - 5, str.length)
-        );
-      return str;
-    },
   },
 };
 </script>
-<style scoped>
+<style lang="scss" scoped>
 .shard-box {
   display: flex;
   flex-direction: row;
@@ -190,6 +204,9 @@ export default {
 }
 .name-label {
   margin: 0.5rem;
+}
+.account-container {
+  position: relative;
 }
 .account-box {
   border-radius: 10px;

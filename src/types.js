@@ -47,10 +47,6 @@ export const THIRDPARTY_SIGN_CONNECT = "THIRDPARTY_SIGN_CONNECT";
 export const APP_CONNECT = "APP_CONNECT";
 export const THIRDPARTY_GET_ACCOUNT_CONNECT = "THIRDPARTY_GET_ACCOUNT_CONNECT";
 
-//window state
-export const FROM_BACK_TO_POPUP = "FROM_BACK_TO_POPUP";
-export const CLOSE_WINDOW = "CLOSE_WINDOW";
-
 //wallet provider messages
 export const LOGIN_REJECT = "User rejected login request";
 export const SIGN_REJECT = "User rejected sign transaction request";
@@ -69,4 +65,3 @@ export const NO_ACCOUNTS_ERROR =
 export const UNKNOWN_ERROR = "Request failed. Something went wrong.";
 export const ONEWALLETPROVIDER_MESSAGE_LISTENER =
   "ONEWALLETPROVIDER_MESSAGE_LISTENER";
-export const SESSION_REVOKED = "SESSION_REVOKED";

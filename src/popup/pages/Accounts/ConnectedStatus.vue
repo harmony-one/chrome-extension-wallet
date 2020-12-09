@@ -2,8 +2,9 @@
   <section>
     <div
       class="connected-sites-container"
+      v-if="currentTab"
       :class="{ connected: connected }"
-      @click="showConnectedSite"
+      @click="showSwitchAccounts"
     >
       <div v-if="connected" class="wifi-icon">
         <img src="images/wifi.svg" alt="connected" />
@@ -14,54 +15,43 @@
       <span v-if="connected">Connected</span>
       <span v-else>Not connected</span>
     </div>
-    <ConnectedModal @refresh="loadSession" />
+    <switch-account v-if="currentTab" />
   </section>
 </template>
 
 <script>
-import apiService from "services/APIService";
-import ConnectedModal from "./ConnectedModal";
+import SwitchAccount from "./SwitchAccount";
 import _ from "lodash";
 import { mapState } from "vuex";
 import helper from "mixins/helper";
 export default {
-  data: () => ({
-    connected: false,
-    domain: "",
-  }),
   mixins: [helper],
   components: {
-    ConnectedModal,
+    SwitchAccount,
   },
   computed: {
     ...mapState({
       active: (state) => state.wallets.active,
     }),
-  },
-  watch: {
-    async active() {
-      await this.loadSession();
+    connected() {
+      if (!this.currentTab) return false;
+      const findbyAddress = this.sessions.filter(
+        (session) =>
+          session.accounts && session.accounts.includes(this.active.address)
+      );
+      const sites = findbyAddress.map((elem) => elem.host);
+      if (this.currentTab && sites.includes(this.currentTab)) return true;
+      return false;
     },
-  },
-  async mounted() {
-    await this.loadSession();
   },
   methods: {
-    async loadSession() {
-      const res = await this.checkSession(this.active.address);
-      this.connected = res.connected;
-    },
-    showConnectedSite() {
-      this.$modal.show("modal-connected-sites");
+    showSwitchAccounts() {
+      this.$modal.show("modal-switch-account");
     },
   },
 };
 </script>
 <style lang="scss">
-.wifi-icon {
-  width: 13px;
-  height: 13px;
-}
 .connected-sites-container {
   position: absolute;
   left: 0;

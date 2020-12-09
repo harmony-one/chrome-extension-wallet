@@ -48,10 +48,10 @@
                 v-if="isOutgoingTransfer(transfer)"
                 class="transfer-address"
                 v-tooltip.top="transfer.to"
-                >{{ compressAddress(transfer.to, 15, 10) }}</span
+                >{{ compressString(transfer.to, 15, 10) }}</span
               >
               <span v-else class="transfer-address">
-                {{ compressAddress(transfer.from, 20, 10) }}
+                {{ compressString(transfer.from, 20, 10) }}
               </span>
               <span v-if="isOutgoingTransfer(transfer)" class="transfer-amount"
                 >- {{ formatTokenAmount(transfer) }}</span

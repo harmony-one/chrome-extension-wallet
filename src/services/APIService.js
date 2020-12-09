@@ -3,11 +3,8 @@ import {
   THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
   THIRDPARTY_SIGN_REQUEST_RESPONSE,
   HARMONY_RESPONSE_TYPE,
-  FROM_BACK_TO_POPUP,
   ONEWALLETPROVIDER_MESSAGE_LISTENER,
-  CLOSE_WINDOW,
 } from "~/types";
-import * as storage from "./StorageService";
 import _ from "lodash";
 import Config from "~/config";
 import { Harmony } from "@harmony-js/core";
@@ -156,6 +153,7 @@ class APIService {
     this.txnInfo = null;
     this.type = null;
     this.sender = null;
+    this.popupId = null;
     this.host = "";
     this.activeSession = null;
   }
@@ -172,40 +170,55 @@ class APIService {
     chrome.tabs.sendMessage(this.sender, msgToContentScript(type, payload));
   };
   openPopup = async (route, width, height) => {
+    const _this = this;
     chrome.windows.getCurrent({ windowTypes: ["normal"] }, function(window) {
-      chrome.windows.create({
-        url: `chrome-extension://${chrome.runtime.id}/popup.html#/${route}`,
-        type: "popup",
-        left: screen.width / 2 - width / 2 + window.left,
-        top: screen.height / 2 - height / 2 + window.top,
-        width: width,
-        height: height,
-      });
+      chrome.windows.create(
+        {
+          url: `chrome-extension://${chrome.runtime.id}/popup.html#/${route}`,
+          type: "popup",
+          left: screen.width / 2 - width / 2 + window.left,
+          top: screen.height / 2 - height / 2 + window.top,
+          width: width,
+          height: height,
+        },
+        function(window) {
+          _this.popupId = window.id;
+        }
+      );
     });
+  };
+  revokeSession = (index) => {
+    //access vuex store via local storage directly, bad implementation
+    const storefromLocal = this.getVuexState();
+    console.log(storefromLocal);
+    const { sessions } = storefromLocal.provider;
+    if (!sessions[index]) {
+      console.error("revokeSession ===> Session is not found");
+      return;
+    }
+    storefromLocal.provider.sessions.splice(index, 1);
+    console.log(storefromLocal);
+    this.setVuexState(storefromLocal);
   };
   forgetIdentity = async (tabid, hostname) => {
     this.sender = tabid;
     this.host = hostname;
 
-    let sessionList = await this.getHostSessions();
-    const existIndex = sessionList.findIndex((elem) => elem.host === hostname);
-    if (existIndex >= 0) {
-      sessionList.splice(existIndex, 1);
-      await storage.saveValue({
-        session: sessionList,
-      });
+    if (this.getSessionByHost(hostname)) {
+      this.revokeSession(this.getSessionIndex(hostname));
     }
     this.sendMessageToInjectScript(THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE);
   };
   getAccount = async (tabid, hostname) => {
     try {
-      const store = this.getVuexStore();
+      const storefromLocal = this.getVuexState(); //vuex store from localstorage, it's not syncing correctly
       this.sender = tabid;
       this.host = hostname;
-      const session = await this.getSession(hostname);
-      if (session.exist) {
-        const findAcc = _.find(store.wallets.accounts, {
-          address: session.account.address,
+      const session = this.getSessionByHost(hostname);
+      if (storefromLocal && session && session.accounts.length > 0) {
+        const address = session.accounts[0];
+        const findAcc = _.find(storefromLocal.wallets.accounts, {
+          address,
         });
         if (!findAcc) {
           this.sendMessageToInjectScript(
@@ -213,14 +226,14 @@ class APIService {
             {
               rejected: true,
               message:
-                "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out",
+                "The account is found in the session but not in the extension. Please use window.onewallet.forgetIdentity() first to sign out",
             }
           );
           return;
         }
         this.sendMessageToInjectScript(
           THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
-          session.account
+          address
         );
       } else this.openPopup("login", 400, 600);
     } catch (err) {
@@ -230,35 +243,46 @@ class APIService {
       });
     }
   };
-  getVuexStore = () => {
+  setVuexState = (state) => {
     try {
-      if (!window.localStorage.vuex) throw new Error("Vuex Store is not found");
-      const vuex = JSON.parse(window.localStorage.vuex);
+      const vuex = JSON.stringify(state);
+      window.localStorage.setItem("vuex", vuex);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  getVuexState = () => {
+    try {
+      if (!window.localStorage.getItem("vuex"))
+        throw new Error("Vuex Store is not found");
+      const vuex = JSON.parse(window.localStorage.getItem("vuex"));
       if (!vuex || !vuex.wallets)
         throw new Error("Wallet is not defined in the vuex store");
       return vuex;
     } catch (err) {
       console.error(err);
+      return false;
     }
   };
   prepareSignTransaction = async (tabid, hostname, payload) => {
     try {
-      const store = this.getVuexStore();
+      const storefromLocal = this.getVuexState();
       this.sender = tabid;
       this.host = hostname;
       this.type = payload.type;
       this.params = payload.params;
       this.txnInfo = payload.txnInfo;
-      const session = await this.getSession(hostname);
-      if (session.exist) {
-        const findAcc = _.find(store.wallets.accounts, {
-          address: session.account.address,
+      const session = this.getSessionByHost(hostname);
+      if (storefromLocal && session && session.accounts.length > 0) {
+        const address = session.accounts[0];
+        const findAcc = _.find(storefromLocal.wallets.accounts, {
+          address,
         });
         if (!findAcc) {
           this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
             rejected: true,
             message:
-              "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out",
+              "The account is found in the session but not in the extension. Please use window.onewallet.forgetIdentity() first to sign out",
           });
           return;
         }
@@ -269,7 +293,7 @@ class APIService {
         this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
           rejected: true,
           message:
-            "The account is not selected. Please use getAccount first to sign the transaction",
+            "The account is not selected. Please use window.onewallet.getAccount() first to sign the transaction",
         });
       }
     } catch (err) {
@@ -293,40 +317,45 @@ class APIService {
     });
     this.closeWindow();
   };
-  getHostSessions = async () => {
-    let currentSession = await storage.getValue("session");
-    let sessionList = [];
-    if (currentSession && Array.isArray(currentSession.session))
-      sessionList = currentSession.session;
-    return sessionList;
-  };
-  getSession = async (hostname) => {
-    let sessionList = await this.getHostSessions();
-    const existIndex = sessionList.findIndex((elem) => elem.host === hostname);
-    if (existIndex >= 0) {
-      return {
-        exist: true,
-        ...sessionList[existIndex],
-      };
-    }
-    return {
-      exist: false,
-    };
+
+  getSessionIndex = (hostname) => {
+    const storefromLocal = this.getVuexState();
+    return _.findIndex(storefromLocal.provider.sessions, { host: hostname });
   };
 
+  getAllSession = () => {
+    const storefromLocal = this.getVuexState();
+    const { sessions } = storefromLocal.provider;
+    if (!sessions) return false;
+    return sessions;
+  };
+
+  getSessionByHost = (hostname) => {
+    const storefromLocal = this.getVuexState();
+    let sessionList = storefromLocal.provider.sessions;
+    const session = _.find(sessionList, { host: hostname });
+    if (!session) {
+      return false;
+    }
+    return session;
+  };
+  setSessionAccounts = (host, accounts) => {
+    //access vuex store via local storage directly, bad implementation
+    const storefromLocal = this.getVuexState();
+    const index = this.getSessionIndex(host);
+    if (index < 0)
+      storefromLocal.provider.sessions.push({
+        host,
+        accounts,
+      });
+    else storefromLocal.provider.sessions[index].accounts = [...accounts];
+    this.setVuexState(storefromLocal);
+  };
   onGetAccountSuccess = async (payload) => {
-    let sessionList = await this.getHostSessions();
-    const newHost = {
-      host: this.host,
-      account: payload,
-    };
-    sessionList.push(newHost);
-    await storage.saveValue({
-      session: sessionList,
-    });
+    this.setSessionAccounts(this.host, payload);
     this.sendMessageToInjectScript(
       THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
-      payload
+      payload[0]
     );
     this.closeWindow();
   };
@@ -338,10 +367,7 @@ class APIService {
     this.closeWindow();
   };
   closeWindow = () => {
-    chrome.runtime.sendMessage({
-      type: FROM_BACK_TO_POPUP,
-      action: CLOSE_WINDOW,
-    });
+    chrome.windows.remove(this.popupId);
   };
 }
 const apiService = new APIService();

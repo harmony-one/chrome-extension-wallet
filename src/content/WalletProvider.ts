@@ -12,7 +12,6 @@ import {
   LOGIN_REJECT,
   SIGN_REJECT,
   SIGNOUT_SUCCEED,
-  SESSION_REVOKED,
   ONEWALLETPROVIDER_MESSAGE_LISTENER,
 } from "../types";
 import networkConfig from "../config";
@@ -31,7 +30,7 @@ interface Network {
 }
 
 interface WalletProviderEvents {
-  sessionRevoked: (host: string) => void;
+  accountChanged: (address: string) => void;
 }
 class WalletProvider extends TypedEmitter<WalletProviderEvents> {
   isOneWallet: boolean;
@@ -63,14 +62,18 @@ class WalletProvider extends TypedEmitter<WalletProviderEvents> {
     );
   }
   processEvent(type: any, payload: any) {
-    if (type === SESSION_REVOKED) {
-      this.emit("sessionRevoked", payload);
+    const { hosts, accounts } = payload;
+    if (type === "accountChanged") {
+      if (hosts.includes(window.location.host)) {
+        console.log(hosts, accounts);
+        this.emit("accountChanged", accounts);
+      }
     }
   }
   async forgetIdentity() {
     return new Promise(async (resolve) => {
       await sendAsyncMessageToContentScript({
-        hostname: window.location.hostname,
+        hostname: window.location.host,
         type: THIRDPARTY_FORGET_IDENTITY_REQUEST,
       });
       resolve(SIGNOUT_SUCCEED);
@@ -80,9 +83,10 @@ class WalletProvider extends TypedEmitter<WalletProviderEvents> {
     return new Promise(async (resolve, reject) => {
       try {
         const res = await sendAsyncMessageToContentScript({
-          hostname: window.location.hostname,
+          hostname: window.location.host,
           type: THIRDPARTY_GET_ACCOUNT_REQUEST,
         });
+        console.log(res);
         if (res.rejected) {
           if (res.message) return reject(res.message);
           return reject(LOGIN_REJECT);
@@ -109,7 +113,7 @@ class WalletProvider extends TypedEmitter<WalletProviderEvents> {
           );
         const txnType = checkTransactionType(transaction);
         const res = await sendAsyncMessageToContentScript({
-          hostname: window.location.hostname,
+          hostname: window.location.host,
           type: THIRDPARTY_SIGN_REQUEST,
           payload: parsedTxn,
         });

@@ -222,6 +222,7 @@ router.beforeEach(async (to, from, next) => {
   if (to.matched.some((record) => record.meta.authenticate)) {
     if (!store.getters.getPassword && store.state.wallets.accounts.length) {
       next({ path: "/migrate-accounts" });
+      return;
     }
   }
 

@@ -164,7 +164,7 @@
         <p class="addressRow">
           From
           <span class="address__name">{{
-            compressAddress(getFromAddress)
+            compressString(getFromAddress)
           }}</span>
           of Shard
           <b>{{ fromShard }}</b>
@@ -186,7 +186,7 @@
             }}</span>
             <span v-if="recipient.name">(</span>
             <span class="address__name">{{
-              compressAddress(recipient.address)
+              compressString(recipient.address)
             }}</span>
             <span v-if="recipient.name">)</span>
             of Shard

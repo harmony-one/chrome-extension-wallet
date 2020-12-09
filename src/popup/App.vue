@@ -30,7 +30,24 @@ export default {
   computed: mapState({
     isLoading: (state) => state.loading,
   }),
-  mounted() {
+  methods: {
+    async getCurrentTabUrl() {
+      const tabs = await window.browser.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      const activeTab = tabs[0];
+      if (activeTab && activeTab.url) {
+        return new URL(activeTab.url).host;
+      }
+      return false;
+    },
+  },
+  async created() {
+    const currentTab = await this.getCurrentTabUrl();
+    this.$store.commit("currentTab", currentTab);
+  },
+  async mounted() {
     this.$router.beforeEach((to, from, next) => {
       if ((from.name !== "auth" && to.name === "lock") || from.name === "lock")
         this.transitionName = "fade";
