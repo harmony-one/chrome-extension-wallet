@@ -230,7 +230,6 @@ export default {
             chrome.runtime.sendMessage({
               action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
               payload: {
-                isLedger: true,
                 txParams: signedTxParams,
               },
             }),
@@ -258,7 +257,6 @@ export default {
         return false;
       }
       privateKey = await decryptKeyStore(this.password, this.wallet.keystore);
-
       if (!privateKey) {
         this.$notify({
           group: "notify",
@@ -267,14 +265,44 @@ export default {
         });
         return false;
       }
+
+      this.$store.commit("loading", true);
+      const signer = new Account(privateKey, this.transaction.messenger);
+      let signedTxParams;
+      const { updateNonce, encodeMode, blockNumber, shardID } = this.params;
+      if (this.type == TRANSACTIONTYPE.SEND) {
+        const signedTransaction = await signer.signTransaction(
+          this.transaction,
+          updateNonce,
+          encodeMode,
+          blockNumber
+        );
+        signedTxParams = signedTransaction.txParams;
+      } else if (this.type == FACTORYTYPE.STAKINGTRANSACTION) {
+        const signedTransaction = await signer.signStaking(
+          this.transaction,
+          updateNonce,
+          encodeMode,
+          blockNumber,
+          shardID
+        );
+        const parsedTxn = JSON.parse(JSON.stringify(signedTransaction));
+        signedTxParams = {
+          from: parsedTxn.from,
+          nonce: parsedTxn.nonce,
+          unsignedRawTransaction: parsedTxn.unsignedRawTransaction,
+          rawTransaction: parsedTxn.rawTransaction,
+          signature: parsedTxn.signature,
+        };
+      }
+
       chrome.runtime.sendMessage({
         action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
         payload: {
-          isLedger: false,
-          keystore: this.wallet.keystore,
-          password: this.password,
+          txParams: signedTxParams,
         },
       });
+      this.$store.commit("loading", false);
     },
 
     async reject() {
@@ -292,7 +320,7 @@ export default {
   updated() {
     if (this.$refs.password) this.$refs.password.focus();
   },
-  mounted() {
+  created() {
     chrome.runtime.sendMessage(
       { action: GET_WALLET_SERVICE_STATE },
       ({ state } = {}) => {
@@ -305,7 +333,6 @@ export default {
           this.wallet = _.find(this.wallets.accounts, {
             address: session.account.address,
           });
-          if (!this.wallet.isLedger) return;
           try {
             if (type === TRANSACTIONTYPE.SEND) {
               this.transaction = createTransaction(txnInfo);
