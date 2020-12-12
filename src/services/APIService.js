@@ -4,13 +4,15 @@ import {
   THIRDPARTY_SIGN_REQUEST_RESPONSE,
   HARMONY_RESPONSE_TYPE,
   FROM_BACK_TO_POPUP,
-  CLOSE_WINDOW,
+  CLOSE_WINDOW
 } from "~/types";
 import * as storage from "./StorageService";
 import _ from "lodash";
 import Config from "~/config";
 import { Harmony } from "@harmony-js/core";
 import { Unit } from "@harmony-js/utils";
+import { getHostNameFromTab } from "./utils/getHostnameFromTab";
+import * as lock from "~/background/lock";
 
 const getHarmony = (chainId) => {
   const network = _.find(Config.networks, { chainId });
@@ -19,23 +21,23 @@ const getHarmony = (chainId) => {
     network.apiUrl,
     {
       chainType: network.type,
-      chainId: network.chainId,
+      chainId: network.chainId
     }
   );
   return harmony;
 };
 export const createTransaction = ({
-  chainId,
-  from,
-  to,
-  amount,
-  gasLimit,
-  fromShard,
-  toShard,
-  gasPrice,
-  nonce,
-  data,
-}) => {
+                                    chainId,
+                                    from,
+                                    to,
+                                    amount,
+                                    gasLimit,
+                                    fromShard,
+                                    toShard,
+                                    gasPrice,
+                                    nonce,
+                                    data
+                                  }) => {
   const harmony = getHarmony(chainId);
   const txn = harmony.transactions.newTx({
     from,
@@ -52,77 +54,77 @@ export const createTransaction = ({
       .toWei()
       .toString(),
     nonce,
-    data,
+    data
   });
   return txn;
 };
 export const createDelegateTransaction = ({
-  from,
-  to,
-  amount,
-  gasLimit,
-  gasPrice,
-  chainId,
-  nonce,
-}) => {
+                                            from,
+                                            to,
+                                            amount,
+                                            gasLimit,
+                                            gasPrice,
+                                            chainId,
+                                            nonce
+                                          }) => {
   const harmony = getHarmony(chainId);
   const stakingTxn = harmony.stakings
     .delegate({
       delegatorAddress: from,
       validatorAddress: to,
-      amount: new Unit(amount).asEther().toHex(),
+      amount: new Unit(amount).asEther().toHex()
     })
     .setTxParams({
       nonce,
       gasLimit: new Unit(gasLimit).asWei().toHex(),
       gasPrice: new Unit(gasPrice).asGwei().toHex(),
-      chainId,
+      chainId
     })
     .build();
   return stakingTxn;
 };
 export const createUndelegateTransaction = ({
-  from,
-  to,
-  amount,
-  gasLimit,
-  gasPrice,
-  chainId,
-  nonce,
-}) => {
+                                              from,
+                                              to,
+                                              amount,
+                                              gasLimit,
+                                              gasPrice,
+                                              chainId,
+                                              nonce
+                                            }) => {
   const harmony = getHarmony(chainId);
   const stakingTxn = harmony.stakings
     .undelegate({
       delegatorAddress: from,
       validatorAddress: to,
-      amount: new Unit(amount).asEther().toHex(),
+      amount: new Unit(amount).asEther().toHex()
     })
     .setTxParams({
       nonce,
       gasLimit: new Unit(gasLimit).asWei().toHex(),
       gasPrice: new Unit(gasPrice).asGwei().toHex(),
-      chainId,
+      chainId
     })
     .build();
   return stakingTxn;
 };
 export const createRewardsTransaction = ({
-  from,
-  gasLimit,
-  gasPrice,
-  chainId,
-  nonce,
-}) => {
+                                           from,
+                                           gasLimit,
+                                           gasPrice,
+                                           chainId,
+                                           nonce
+                                         }) => {
   const harmony = getHarmony(chainId);
   const stakingTxn = harmony.stakings
     .collectRewards({
-      delegatorAddress: from,
+      delegatorAddress: from
     })
     .setTxParams({
       nonce,
       gasLimit: new Unit(gasLimit).asWei().toHex(),
       gasPrice: new Unit(gasPrice).asGwei().toHex(),
-      chainId,
+      chainId
     })
     .build();
   return stakingTxn;
@@ -132,8 +134,8 @@ export const msgToContentScript = (type, payload) => ({
   type: HARMONY_RESPONSE_TYPE,
   message: {
     type,
-    payload,
-  },
+    payload
+  }
 });
 
 class APIService {
@@ -145,16 +147,22 @@ class APIService {
     this.host = "";
     this.activeSession = null;
   }
+
   getState = () => {
     return {
       type: this.type,
       host: this.host,
       txnInfo: this.txnInfo,
       params: this.params,
-      session: this.activeSession,
+      session: this.activeSession
     };
   };
   sendMessageToInjectScript = (type, payload) => {
+    if (!payload) {
+      payload = {};
+    }
+
+    payload.sender = this.sender;
     chrome.tabs.sendMessage(this.sender, msgToContentScript(type, payload));
   };
   openPopup = async (route, width, height) => {
@@ -165,33 +173,34 @@ class APIService {
         left: screen.width / 2 - width / 2 + window.left,
         top: screen.height / 2 - height / 2 + window.top,
         width: width,
-        height: height,
+        height: height
       });
     });
   };
-  forgetIdentity = async (tabid, hostname) => {
-    this.sender = tabid;
-    this.host = hostname;
+  forgetIdentity = async (sender) => {
+    this.sender = sender.tab.id;
+    this.host = getHostNameFromTab(sender.tab);
 
     let sessionList = await this.getHostSessions();
-    const existIndex = sessionList.findIndex((elem) => elem.host === hostname);
+    const existIndex = sessionList.findIndex((elem) => elem.host === this.host);
     if (existIndex >= 0) {
       sessionList.splice(existIndex, 1);
       await storage.saveValue({
-        session: sessionList,
+        session: sessionList
       });
     }
     this.sendMessageToInjectScript(THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE);
+    lock.unlock()
   };
-  getAccount = async (tabid, hostname) => {
+  getAccount = async (sender) => {
     try {
       const store = this.getVuexStore();
-      this.sender = tabid;
-      this.host = hostname;
-      const session = await this.getSession(hostname);
+      this.sender = sender.tab.id;
+      this.host = getHostNameFromTab(sender.tab);
+      const session = await this.getSession(this.host);
       if (session.exist) {
         const findAcc = _.find(store.wallets.accounts, {
-          address: session.account.address,
+          address: session.account.address
         });
         if (!findAcc) {
           this.sendMessageToInjectScript(
@@ -199,7 +208,7 @@ class APIService {
             {
               rejected: true,
               message:
-                "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out",
+                "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out"
             }
           );
           return;
@@ -212,7 +221,7 @@ class APIService {
     } catch (err) {
       this.sendMessageToInjectScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
         rejected: true,
-        message: JSON.stringify(err),
+        message: JSON.stringify(err)
       });
     }
   };
@@ -227,24 +236,25 @@ class APIService {
       console.error(err);
     }
   };
-  prepareSignTransaction = async (tabid, hostname, payload) => {
+  prepareSignTransaction = async (sender, payload) => {
     try {
       const store = this.getVuexStore();
-      this.sender = tabid;
-      this.host = hostname;
+      this.sender = sender.tab.id;
+      this.host = getHostNameFromTab(sender.tab);
+
       this.type = payload.type;
       this.params = payload.params;
       this.txnInfo = payload.txnInfo;
-      const session = await this.getSession(hostname);
+      const session = await this.getSession(this.host);
       if (session.exist) {
         const findAcc = _.find(store.wallets.accounts, {
-          address: session.account.address,
+          address: session.account.address
         });
         if (!findAcc) {
           this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
             rejected: true,
             message:
-              "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out",
+              "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out"
           });
           return;
         }
@@ -255,13 +265,13 @@ class APIService {
         this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
           rejected: true,
           message:
-            "The account is not selected. Please use getAccount first to sign the transaction",
+            "The account is not selected. Please use getAccount first to sign the transaction"
         });
       }
     } catch (err) {
       this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
         rejected: true,
-        message: JSON.stringify(err),
+        message: JSON.stringify(err)
       });
     }
   };
@@ -275,7 +285,7 @@ class APIService {
   onGetSignatureKeyReject = ({ message }) => {
     this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
       rejected: true,
-      message,
+      message
     });
     this.closeWindow();
   };
@@ -292,11 +302,11 @@ class APIService {
     if (existIndex >= 0) {
       return {
         exist: true,
-        ...sessionList[existIndex],
+        ...sessionList[existIndex]
       };
     }
     return {
-      exist: false,
+      exist: false
     };
   };
 
@@ -304,11 +314,11 @@ class APIService {
     let sessionList = await this.getHostSessions();
     const newHost = {
       host: this.host,
-      account: payload,
+      account: payload
     };
     sessionList.push(newHost);
     await storage.saveValue({
-      session: sessionList,
+      session: sessionList
     });
     this.sendMessageToInjectScript(
       THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
@@ -319,17 +329,19 @@ class APIService {
   onGetAccountReject = ({ message }) => {
     this.sendMessageToInjectScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
       rejected: true,
-      message,
+      message
     });
     this.closeWindow();
   };
   closeWindow = () => {
+    lock.unlock();
     chrome.runtime.sendMessage({
       type: FROM_BACK_TO_POPUP,
-      action: CLOSE_WINDOW,
+      action: CLOSE_WINDOW
     });
   };
 }
+
 const apiService = new APIService();
 
 export default apiService;
