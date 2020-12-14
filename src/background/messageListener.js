@@ -17,7 +17,10 @@ import {
   THIRDPARTY_SIGN_REQUEST_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
+  GET_TAB_ID_INNER_EVENT_REQUEST,
+  POPUP_CLOSED
 } from "~/types";
+import * as lock from './lock'
 
 function externalMessageListener(message, sender, sendResponse) {
   const { messageSource, payload } = message;
@@ -26,20 +29,26 @@ function externalMessageListener(message, sender, sendResponse) {
     return false;
   }
 
+  if (lock.isLocked(sender)) {
+    sendResponse({ isLocked: true })
+    console.log('Wallet is currently locked by other tab')
+    return
+  }
+  lock.lock(sender)
+
   const { type } = payload;
   switch (type) {
     case THIRDPARTY_SIGN_REQUEST:
       apiService.prepareSignTransaction(
-        sender.tab.id,
-        payload.hostname,
+        sender,
         payload.payload
       );
       break;
     case THIRDPARTY_GET_ACCOUNT_REQUEST:
-      apiService.getAccount(sender.tab.id, payload.hostname);
+      apiService.getAccount(sender);
       break;
     case THIRDPARTY_FORGET_IDENTITY_REQUEST:
-      apiService.forgetIdentity(sender.tab.id, payload.hostname);
+      apiService.forgetIdentity(sender);
       break;
     default:
       console.warn("Unknown message from content script - ", message);
@@ -78,6 +87,7 @@ function internalMessageListener(message, sender, sendResponse) {
   sendResponse();
   return true;
 }
+
 //disconnect listener when the popup is close
 function onConnectListener(externalPort) {
   const name = externalPort.name;
@@ -90,19 +100,23 @@ function onConnectListener(externalPort) {
               case THIRDPARTY_SIGN_CONNECT: {
                 chrome.tabs.sendMessage(
                   tab.id,
-                  msgToContentScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
+                  msgToContentScript(POPUP_CLOSED, {
                     rejected: true,
+                    sender: tab.id
                   })
                 );
+                lock.unlock()
                 break;
               }
               case THIRDPARTY_GET_ACCOUNT_CONNECT: {
                 chrome.tabs.sendMessage(
                   tab.id,
-                  msgToContentScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
+                  msgToContentScript(POPUP_CLOSED, {
                     rejected: true,
+                    sender: tab.id
                   })
                 );
+                lock.unlock()
                 break;
               }
             }
@@ -112,12 +126,23 @@ function onConnectListener(externalPort) {
     } else {
       const { AppState } = await storage.getValue("AppState");
       storage.saveValue({
-        AppState: { ...AppState, lastClosed: Date.now() },
+        AppState: { ...AppState, lastClosed: Date.now() }
       });
     }
   });
 }
+
+export function getTabId({ action }, sender, sendResponse) {
+  if (action !== GET_TAB_ID_INNER_EVENT_REQUEST) {
+    return false;
+  }
+
+  sendResponse(sender.tab.id);
+  return true
+}
+
 export function setupExtensionMessageListeners() {
+  chrome.runtime.onMessage.addListener(getTabId);
   chrome.runtime.onMessage.addListener(externalMessageListener);
   chrome.runtime.onMessage.addListener(internalMessageListener);
   chrome.runtime.onConnect.addListener(onConnectListener);
