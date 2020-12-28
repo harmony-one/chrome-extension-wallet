@@ -10,16 +10,10 @@ const hmy = new Harmony("https://api.s0.t.hmny.io", {
 
 function contract(abi, to) {
   let contract = hmy.contracts.createContract(abi, to);
-  // if (window.harmony)
-  //   contract.wallet.signTransaction = window.harmony.signTransaction // or importPrivate
   let decodeParameters = (abi, hexdata) => {
     if (0 === abi.length) return [];
     let params = contract.abiCoder.decodeParameters(abi, hexdata);
     params.length = abi.length;
-    /* for (let i = 0; i < abi.length; i++) {
-      if (abi[i].type.startsWith('address'))
-        params[i] = hmySDK.crypto.toBech32(params[i]);
-    }*/
     return Array.from(params);
   };
   for (let name in contract.abiModel.getMethods()) {
@@ -32,19 +26,13 @@ function contract(abi, to) {
   contract.decodeInput = (hexData) => {
     const no0x = hexData.startsWith("0x") ? hexData.slice(2) : hexData;
     const sig = no0x.slice(0, 8).toLowerCase();
-    console.log("sig===>", sig);
     const method = contract.abiModel.getMethod("0x" + sig);
-    console.log("method===>", method);
     if (!method) {
       return false;
     }
 
     const argv = method.decodeInputs("0x" + no0x.slice(8));
-    console.log("argv===>", argv);
-    console.log("contract.methods===>", contract.methods);
-    //const obj = contract.methods["0x" + sig](...argv);
-    console.log("obj===>", contract.methods["0x" + sig]);
-    console.log("AAA");
+    const obj = contract.methods["0x" + sig](...argv);
 
     for (let i = 0; i < obj.params.length; i++) {
       if (obj.abiItem.inputs[i].type === "address") {
@@ -53,7 +41,6 @@ function contract(abi, to) {
         obj.params[i] = obj.params[i].map((a) => hmy.crypto.toBech32(a));
       }
     }
-    console.log("BBB");
 
     obj.toString = () => {
       let str = obj.abiItem.name + "(";

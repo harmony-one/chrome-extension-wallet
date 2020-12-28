@@ -25,7 +25,10 @@
         <span class="address__name">{{ txnParams.to }}</span>
       </p>
       <span class="action_caption">Transaction Details</span>
-      <div class="invoice" :class="{ 'withdraw-section': isWithdrawal }">
+      <div
+        class="invoice txn_container"
+        :class="{ 'withdraw-section': isWithdrawal }"
+      >
         <div class="invoice__row" v-if="!isWithdrawal">
           <span>Amount</span>
           <span>{{ txnParams.amount }} ONE</span>
@@ -38,9 +41,36 @@
           <span>Gas Limit</span>
           <span>{{ txnParams.gasLimit }}</span>
         </div>
-        <div v-if="isDataExist">
-          <p class="data_caption">Data</p>
-          <div class="data_content">{{ txnParams.data }}</div>
+        <div class="data_container">
+          <span class="data_caption">Data</span>
+          <select class="data_view_select" v-model="viewOption">
+            <option value="default">Default</option>
+            <option value="utf-8">Utf-8</option>
+            <option value="decode">Decode Input</option>
+          </select>
+        </div>
+        <div class="data_content">
+          <div v-if="viewOption === 'default'">{{ txnParams.data }}</div>
+          <div v-else-if="viewOption === 'utf-8'">
+            {{ toUtf8(txnParams.data) }}
+          </div>
+          <div v-else>
+            <div v-if="suggestion && suggestion.length">
+              <div
+                v-for="(decode, index) in suggestion"
+                :key="index"
+                class="input-data"
+              >
+                <div>{{ getFunctionName(decode) }}</div>
+                <div v-for="(input, index2) in decode.inputs" :key="index2">
+                  Param {{ `${index2 + 1} - ${input.value}` }}
+                </div>
+              </div>
+            </div>
+            <div v-else>
+              Decode failed or nothing to decode
+            </div>
+          </div>
         </div>
       </div>
       <div v-if="!wallet.isLedger" class="password-content">
@@ -120,12 +150,14 @@ import {
 export default {
   data: () => ({
     transaction: null,
+    viewOption: "default",
     params: {
       updateNonce: true,
       encodeMode: "rlp",
       blockNumber: "latest",
       shardID: null,
     },
+    suggestion: null,
     txnParams: {
       gasLimit: null,
       gasPrice: null,
@@ -164,9 +196,6 @@ export default {
     getTotal() {
       return Number(this.txnParams.amount) + Number(this.txnParams.getGasFee);
     },
-    isDataExist() {
-      return this.txnParams.data && this.txnParams.data !== "0x";
-    },
     displayAction() {
       switch (this.type) {
         case TRANSACTIONTYPE.DELEGATE:
@@ -191,6 +220,25 @@ export default {
     },
   },
   methods: {
+    toUtf8(data) {
+      const hexString = data.substring(2);
+      let strOut = "";
+      for (let x = 0; x < hexString.length; x += 2) {
+        strOut += String.fromCharCode(parseInt(hexString.substr(x, 2), 16));
+      }
+      return strOut;
+    },
+    getFunctionName(decode) {
+      let str = "";
+      const { method, inputs } = decode;
+      const { name } = method;
+      str = "- " + name + " (";
+      inputs.forEach((param, index) => {
+        str += param.type + (index === inputs.length - 1 ? "" : ",");
+      });
+      str += ")";
+      return str;
+    },
     async signTransaction(isLedger) {
       try {
         let app, signer;
@@ -323,9 +371,9 @@ export default {
           const { type, txnInfo, params, session } = state;
           this.type = type;
           this.txnParams = txnInfo;
+          this.suggestion = await fetchSuggestions(this.txnParams.data);
+          console.log(this.suggestion);
           this.params = { ...params };
-          console.log(this.txnParams);
-          console.log(await fetchSuggestions(this.txnParams.data));
           this.host = session.host;
           this.wallet = _.find(this.wallets.accounts, {
             address: session.account.address,
@@ -394,7 +442,25 @@ h3 {
   cursor: pointer;
   font-weight: 700;
 }
-.data_caption {
+.data_container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.txn_container {
+  height: 170px;
+  padding-right: 5px;
+  overflow: auto;
+  border-bottom: 1px solid #ddd;
+}
+.data_view_select {
+  border: 1px solid #989494;
+  border-radius: 6px;
+}
+.data_view_select:focus {
+  outline: none;
+}
+.data_container .data_caption {
   font-weight: 600;
   margin-top: 5px;
   margin-bottom: 5px;
@@ -403,8 +469,7 @@ h3 {
   word-break: break-word;
   font-size: 12px;
   font-style: italic;
-  height: 35px;
-  overflow: auto;
+  padding: 5px 0 10px 0;
 }
 .action_caption {
   font-size: 16px;

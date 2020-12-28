@@ -4,7 +4,7 @@ import {
   THIRDPARTY_SIGN_REQUEST_RESPONSE,
   HARMONY_RESPONSE_TYPE,
   FROM_BACK_TO_POPUP,
-  CLOSE_WINDOW
+  CLOSE_WINDOW,
 } from "~/types";
 import * as storage from "./StorageService";
 import _ from "lodash";
@@ -21,23 +21,23 @@ const getHarmony = (chainId) => {
     network.apiUrl,
     {
       chainType: network.type,
-      chainId: network.chainId
+      chainId: network.chainId,
     }
   );
   return harmony;
 };
 export const createTransaction = ({
-                                    chainId,
-                                    from,
-                                    to,
-                                    amount,
-                                    gasLimit,
-                                    fromShard,
-                                    toShard,
-                                    gasPrice,
-                                    nonce,
-                                    data
-                                  }) => {
+  chainId,
+  from,
+  to,
+  amount,
+  gasLimit,
+  fromShard,
+  toShard,
+  gasPrice,
+  nonce,
+  data,
+}) => {
   const harmony = getHarmony(chainId);
   const txn = harmony.transactions.newTx({
     from,
@@ -54,77 +54,77 @@ export const createTransaction = ({
       .toWei()
       .toString(),
     nonce,
-    data
+    data,
   });
   return txn;
 };
 export const createDelegateTransaction = ({
-                                            from,
-                                            to,
-                                            amount,
-                                            gasLimit,
-                                            gasPrice,
-                                            chainId,
-                                            nonce
-                                          }) => {
+  from,
+  to,
+  amount,
+  gasLimit,
+  gasPrice,
+  chainId,
+  nonce,
+}) => {
   const harmony = getHarmony(chainId);
   const stakingTxn = harmony.stakings
     .delegate({
       delegatorAddress: from,
       validatorAddress: to,
-      amount: new Unit(amount).asEther().toHex()
+      amount: new Unit(amount).asEther().toHex(),
     })
     .setTxParams({
       nonce,
       gasLimit: new Unit(gasLimit).asWei().toHex(),
       gasPrice: new Unit(gasPrice).asGwei().toHex(),
-      chainId
+      chainId,
     })
     .build();
   return stakingTxn;
 };
 export const createUndelegateTransaction = ({
-                                              from,
-                                              to,
-                                              amount,
-                                              gasLimit,
-                                              gasPrice,
-                                              chainId,
-                                              nonce
-                                            }) => {
+  from,
+  to,
+  amount,
+  gasLimit,
+  gasPrice,
+  chainId,
+  nonce,
+}) => {
   const harmony = getHarmony(chainId);
   const stakingTxn = harmony.stakings
     .undelegate({
       delegatorAddress: from,
       validatorAddress: to,
-      amount: new Unit(amount).asEther().toHex()
+      amount: new Unit(amount).asEther().toHex(),
     })
     .setTxParams({
       nonce,
       gasLimit: new Unit(gasLimit).asWei().toHex(),
       gasPrice: new Unit(gasPrice).asGwei().toHex(),
-      chainId
+      chainId,
     })
     .build();
   return stakingTxn;
 };
 export const createRewardsTransaction = ({
-                                           from,
-                                           gasLimit,
-                                           gasPrice,
-                                           chainId,
-                                           nonce
-                                         }) => {
+  from,
+  gasLimit,
+  gasPrice,
+  chainId,
+  nonce,
+}) => {
   const harmony = getHarmony(chainId);
   const stakingTxn = harmony.stakings
     .collectRewards({
-      delegatorAddress: from
+      delegatorAddress: from,
     })
     .setTxParams({
       nonce,
       gasLimit: new Unit(gasLimit).asWei().toHex(),
       gasPrice: new Unit(gasPrice).asGwei().toHex(),
-      chainId
+      chainId,
     })
     .build();
   return stakingTxn;
@@ -134,8 +134,8 @@ export const msgToContentScript = (type, payload) => ({
   type: HARMONY_RESPONSE_TYPE,
   message: {
     type,
-    payload
-  }
+    payload,
+  },
 });
 
 class APIService {
@@ -154,7 +154,7 @@ class APIService {
       host: this.host,
       txnInfo: this.txnInfo,
       params: this.params,
-      session: this.activeSession
+      session: this.activeSession,
     };
   };
   sendMessageToInjectScript = (type, payload) => {
@@ -173,7 +173,7 @@ class APIService {
         left: screen.width / 2 - width / 2 + window.left,
         top: screen.height / 2 - height / 2 + window.top,
         width: width,
-        height: height
+        height: height,
       });
     });
   };
@@ -186,11 +186,11 @@ class APIService {
     if (existIndex >= 0) {
       sessionList.splice(existIndex, 1);
       await storage.saveValue({
-        session: sessionList
+        session: sessionList,
       });
     }
     this.sendMessageToInjectScript(THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE);
-    lock.unlock()
+    lock.unlock();
   };
   getAccount = async (sender) => {
     try {
@@ -200,7 +200,7 @@ class APIService {
       const session = await this.getSession(this.host);
       if (session.exist) {
         const findAcc = _.find(store.wallets.accounts, {
-          address: session.account.address
+          address: session.account.address,
         });
         if (!findAcc) {
           this.sendMessageToInjectScript(
@@ -208,7 +208,7 @@ class APIService {
             {
               rejected: true,
               message:
-                "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out"
+                "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out",
             }
           );
           return;
@@ -221,7 +221,7 @@ class APIService {
     } catch (err) {
       this.sendMessageToInjectScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
         rejected: true,
-        message: JSON.stringify(err)
+        message: JSON.stringify(err),
       });
     }
   };
@@ -248,30 +248,29 @@ class APIService {
       const session = await this.getSession(this.host);
       if (session.exist) {
         const findAcc = _.find(store.wallets.accounts, {
-          address: session.account.address
+          address: session.account.address,
         });
         if (!findAcc) {
           this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
             rejected: true,
             message:
-              "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out"
+              "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out",
           });
           return;
         }
         this.activeSession = session;
-        if (this.isDataExist()) this.openPopup("sign", 400, 610);
-        else this.openPopup("sign", 400, 550);
+        this.openPopup("sign", 400, 610);
       } else {
         this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
           rejected: true,
           message:
-            "The account is not selected. Please use getAccount first to sign the transaction"
+            "The account is not selected. Please use getAccount first to sign the transaction",
         });
       }
     } catch (err) {
       this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
         rejected: true,
-        message: JSON.stringify(err)
+        message: JSON.stringify(err),
       });
     }
   };
@@ -279,13 +278,10 @@ class APIService {
     this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, payload);
     this.closeWindow();
   };
-  isDataExist = () => {
-    return this.txnInfo.data && this.txnInfo.data !== "0x";
-  };
   onGetSignatureKeyReject = ({ message }) => {
     this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
       rejected: true,
-      message
+      message,
     });
     this.closeWindow();
   };
@@ -302,11 +298,11 @@ class APIService {
     if (existIndex >= 0) {
       return {
         exist: true,
-        ...sessionList[existIndex]
+        ...sessionList[existIndex],
       };
     }
     return {
-      exist: false
+      exist: false,
     };
   };
 
@@ -314,11 +310,11 @@ class APIService {
     let sessionList = await this.getHostSessions();
     const newHost = {
       host: this.host,
-      account: payload
+      account: payload,
     };
     sessionList.push(newHost);
     await storage.saveValue({
-      session: sessionList
+      session: sessionList,
     });
     this.sendMessageToInjectScript(
       THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
@@ -329,7 +325,7 @@ class APIService {
   onGetAccountReject = ({ message }) => {
     this.sendMessageToInjectScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
       rejected: true,
-      message
+      message,
     });
     this.closeWindow();
   };
@@ -337,7 +333,7 @@ class APIService {
     lock.unlock();
     chrome.runtime.sendMessage({
       type: FROM_BACK_TO_POPUP,
-      action: CLOSE_WINDOW
+      action: CLOSE_WINDOW,
     });
   };
 }
