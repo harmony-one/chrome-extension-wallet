@@ -95,6 +95,7 @@
 <script>
 import { decryptKeyStore } from "services/AccountService";
 import { mapState, mapGetters } from "vuex";
+import { fetchSuggestions } from "services/ContractService";
 import {
   createTransaction,
   createDelegateTransaction,
@@ -317,12 +318,14 @@ export default {
   created() {
     chrome.runtime.sendMessage(
       { action: GET_WALLET_SERVICE_STATE },
-      ({ state } = {}) => {
+      async ({ state } = {}) => {
         if (state && state.type && state.txnInfo && state.session) {
           const { type, txnInfo, params, session } = state;
           this.type = type;
           this.txnParams = txnInfo;
           this.params = { ...params };
+          console.log(this.txnParams);
+          console.log(await fetchSuggestions(this.txnParams.data));
           this.host = session.host;
           this.wallet = _.find(this.wallets.accounts, {
             address: session.account.address,
