@@ -61,9 +61,10 @@
                 :key="index"
                 class="input-data"
               >
-                <div>{{ getFunctionName(decode) }}</div>
+                <div class="input-function">{{ getFunctionName(decode) }}</div>
                 <div v-for="(input, index2) in decode.inputs" :key="index2">
-                  Param {{ `${index2 + 1} - ${input.value}` }}
+                  <span class="input-param">Param {{ `${index2 + 1}` }}</span
+                  >{{ ` - ${input.value}` }}
                 </div>
               </div>
             </div>
@@ -234,7 +235,7 @@ export default {
       const { name } = method;
       str = "- " + name + " (";
       inputs.forEach((param, index) => {
-        str += param.type + (index === inputs.length - 1 ? "" : ",");
+        str += param.type + (index === inputs.length - 1 ? "" : ", ");
       });
       str += ")";
       return str;
@@ -456,6 +457,12 @@ h3 {
 .data_view_select {
   border: 1px solid #989494;
   border-radius: 6px;
+}
+.input-function {
+  color: blue;
+}
+.input-param {
+  color: rgb(28, 51, 177);
 }
 .data_view_select:focus {
   outline: none;
