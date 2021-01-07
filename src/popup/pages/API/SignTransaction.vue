@@ -41,7 +41,7 @@
           <span>Gas Limit</span>
           <span>{{ txnParams.gasLimit }}</span>
         </div>
-        <div class="data_container">
+        <div class="data_container" v-if="txnParams.data">
           <span class="data_caption">Data</span>
           <select class="data_view_select" v-model="viewOption">
             <option value="default">Default</option>
@@ -49,7 +49,7 @@
             <option value="decode">Decode Input</option>
           </select>
         </div>
-        <div class="data_content">
+        <div class="data_content" v-if="txnParams.data">
           <div v-if="viewOption === 'default'">{{ txnParams.data }}</div>
           <div v-else-if="viewOption === 'utf-8'">
             {{ toUtf8(txnParams.data) }}
@@ -369,17 +369,17 @@ export default {
       { action: GET_WALLET_SERVICE_STATE },
       async ({ state } = {}) => {
         if (state && state.type && state.txnInfo && state.session) {
-          const { type, txnInfo, params, session } = state;
-          this.type = type;
-          this.txnParams = txnInfo;
-          this.suggestion = await fetchSuggestions(this.txnParams.data);
-          console.log(this.suggestion);
-          this.params = { ...params };
-          this.host = session.host;
-          this.wallet = _.find(this.wallets.accounts, {
-            address: session.account.address,
-          });
           try {
+            const { type, txnInfo, params, session } = state;
+            this.type = type;
+            this.txnParams = txnInfo;
+            if (this.txnParams.data)
+              this.suggestion = await fetchSuggestions(this.txnParams.data);
+            this.params = { ...params };
+            this.host = session.host;
+            this.wallet = _.find(this.wallets.accounts, {
+              address: session.account.address,
+            });
             if (type === TRANSACTIONTYPE.SEND) {
               this.transaction = createTransaction(txnInfo);
             } else if (type === TRANSACTIONTYPE.DELEGATE) {
@@ -391,6 +391,11 @@ export default {
             }
           } catch (err) {
             console.error(err);
+            this.$notify({
+              group: "notify",
+              type: "error",
+              text: err.message,
+            });
           }
         } else {
           window.close();
@@ -495,6 +500,6 @@ h3 {
   height: 360px;
 }
 .withdraw-section {
-  margin-bottom: 80px;
+  margin-bottom: 40px;
 }
 </style>

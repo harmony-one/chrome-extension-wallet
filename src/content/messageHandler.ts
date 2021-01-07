@@ -38,8 +38,8 @@ const sendMessageToContentScript = (payload: any) => {
     new CustomEvent(ONEWALLET_SERVICE_EVENT_REQUEST, {
       detail: {
         type: HARMONY_REQUEST_TYPE,
-        payload
-      }
+        payload,
+      },
     })
   );
 };
@@ -47,12 +47,10 @@ const sendMessageToContentScript = (payload: any) => {
 export const sendAsyncMessageToContentScript = async (payload: any) => {
   sendMessageToContentScript(payload);
 
-  const response: any = await Promise.race(
-    [
-      waitForResponse(`${payload.type}_RESPONSE`),
-      waitForResponse(POPUP_CLOSED)
-    ]
-  );
+  const response: any = await Promise.race([
+    waitForResponse(`${payload.type}_RESPONSE`),
+    waitForResponse(POPUP_CLOSED),
+  ]);
 
   return response;
 };
@@ -85,8 +83,8 @@ export const getTxnInfo = (transaction: any) =>
             toShard: txnParams.toShardID,
             data: txnParams.data,
             nonce: txnParams.nonce,
-            chainId: transaction.chainId
-          }
+            chainId: transaction.chainId,
+          },
         };
       } else if (txnType === FACTORYTYPE.STAKINGTRANSACTION) {
         const stakeTransaction: any = JSON.parse(JSON.stringify(transaction));
@@ -112,8 +110,8 @@ export const getTxnInfo = (transaction: any) =>
               gasPrice,
               nonce: stakeTransaction.nonce,
               chainId: stakeTransaction.chainId,
-              shardID: stakeTransaction.shardID
-            }
+              shardID: stakeTransaction.shardID,
+            },
           };
         } else if (
           stakeTransaction.directive === Directive.DirectiveCollectRewards
@@ -126,8 +124,8 @@ export const getTxnInfo = (transaction: any) =>
               gasPrice,
               nonce: stakeTransaction.nonce,
               chainId: stakeTransaction.chainId,
-              shardID: stakeTransaction.shardID
-            }
+              shardID: stakeTransaction.shardID,
+            },
           };
         }
       }
