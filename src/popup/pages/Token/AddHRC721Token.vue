@@ -1,15 +1,15 @@
 <template>
   <div>
-    <app-header subtitle="Add HRC20 Token" backRoute="/hrc20tokens" />
+    <app-header subtitle="Add HRC721 Token" backRoute="/hrc721tokens" />
     <main class="main">
       <div class="main-logo">
         <img src="images/harmony.png" alt="Harmony" />
       </div>
       <div class="addtoken-header">
-        <h4>Add Token to the {{ network.name }}</h4>
+        <h4>Add HRC721 Token to the {{ network.name }}</h4>
       </div>
       <label class="input-label">
-        Token Contract Address
+        Contract Address
         <input
           class="input-field"
           type="text"
@@ -21,40 +21,26 @@
       </label>
       <label class="input-label">
         <div class="label-header">
-          <span>Token Symbol</span>
-          <clip-loader :loading="isLoading" color="#0a93eb" size="13px" />
-        </div>
-        <input
-          class="input-field symbol-input"
-          type="text"
-          name="symbol"
-          ref="symbol"
-          @keydown.space.prevent
-          v-model="symbol"
-          placeholder="Input the token symbol"
-        />
-      </label>
-      <label class="input-label">
-        <div class="label-header">
-          <span>Decimals of Precision</span>
+          <span>Contract Name</span>
           <clip-loader :loading="isLoading" color="#0a93eb" size="13px" />
         </div>
         <input
           class="input-field"
-          type="number"
-          name="precision"
-          ref="precision"
-          v-model="precision"
-          placeholder="Input the decimals of precision"
-          v-on:keyup.enter="createToken"
+          type="text"
+          name="name"
+          ref="name"
+          @keydown.space.prevent
+          v-model="name"
+          placeholder="Input the token name"
         />
       </label>
+
       <div class="button-group">
         <button class="outline" @click="$router.go(-1)">Back</button>
         <button
           class="primary"
           @click="createToken"
-          :disabled="!precision || !symbol || !contractAddress"
+          :disabled="!name || !contractAddress"
         >
           Add
         </button>
@@ -72,18 +58,13 @@
 <script>
 import { mapState } from "vuex";
 import { HarmonyAddress } from "@harmony-js/crypto";
-import {
-  getTokenSymbol,
-  getTokenDecimals,
-  getContractInstance,
-} from "services/Hrc20Service";
+import { getContractName } from "services/Hrc721Service";
 import token from "mixins/token";
 export default {
   data: () => ({
-    symbol: "",
+    name: "",
     contractAddress: "",
     isLoading: false,
-    precision: 0,
     selectedNetwork: null,
   }),
   mixins: [token],
@@ -92,15 +73,12 @@ export default {
       if (this.isValidAddress(this.contractAddress)) {
         try {
           this.isLoading = true;
-          const symbol = await getTokenSymbol(this.contractAddress);
-          if (!symbol) throw new Error("Symbol not found");
-          const precision = await getTokenDecimals(this.contractAddress);
-          this.symbol = symbol;
-          this.precision = precision;
+          const name = await getContractName(this.contractAddress);
+          if (!name) throw new Error("Name not found");
+          this.name = name;
           this.isLoading = false;
         } catch (err) {
-          this.symbol = "";
-          this.precision = 0;
+          this.name = "";
           this.isLoading = false;
         }
       }
@@ -118,9 +96,8 @@ export default {
     },
     async isContractExist(address) {
       try {
-        const symbol = await getTokenSymbol(address);
-        if (!symbol) throw new Error("Symbol not found");
-        await getTokenDecimals(address);
+        const name = await getContractName(address);
+        if (!name) throw new Error("Symbol not found");
         return true;
       } catch (err) {
         return false;
@@ -128,14 +105,6 @@ export default {
     },
     async createToken() {
       try {
-        if (this.precision < 0 || this.precision > 36) {
-          this.$notify({
-            group: "notify",
-            type: "error",
-            text: "Decimals must be at least 0, and not over 36",
-          });
-          return;
-        }
         if (!this.isValidAddress(this.contractAddress)) {
           this.$notify({
             group: "notify",
@@ -155,21 +124,20 @@ export default {
           });
           return;
         }
-        if (this.getHRC20ContractAddressList.includes(this.contractAddress)) {
+        if (this.getHRC721ContractAddressList.includes(this.contractAddress)) {
           this.$notify({
             group: "notify",
             type: "error",
-            text: "Token is already added",
+            text: "Contract is already added",
           });
           return;
         }
-        this.$store.commit("hrc20/addToken", {
+        this.$store.commit("hrc721/addToken", {
           address: this.contractAddress,
-          symbol: this.symbol,
+          name: this.name,
           network: this.network.name,
-          decimals: this.precision,
         });
-        this.$router.push("/hrc20tokens");
+        this.$router.push("/hrc721tokens");
       } catch (err) {
         console.error(err);
       }

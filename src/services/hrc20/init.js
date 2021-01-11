@@ -49,7 +49,7 @@ const initArray = {
   Localnet: [],
 };
 
-const getContractAddressList = (tokens) => {
+const getHRC20ContractAddressList = (tokens) => {
   const networkList = Object.keys(tokens);
   let addressList = [];
   networkList.forEach((network) => {
@@ -66,7 +66,7 @@ export const initHRC20Tokens = (store) => {
   Object.keys(initArray).forEach((network) => {
     initArray[network].forEach((token) => {
       if (
-        getContractAddressList(store.state.hrc20.tokens).includes(
+        getHRC20ContractAddressList(store.state.hrc20.tokens).includes(
           new HarmonyAddress(token.address).bech32
         )
       )

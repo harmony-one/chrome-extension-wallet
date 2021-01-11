@@ -1,6 +1,10 @@
 <template>
   <div>
-    <app-header :subtitle="getHeaderName" @refresh="refreshData" />
+    <app-header
+      :subtitle="getHeaderName"
+      @refresh="refreshData"
+      backRoute="/home"
+    />
     <main class="main">
       <div v-if="scene === 1">
         <form
@@ -327,8 +331,11 @@ export default {
 
   async mounted() {
     this.fromShard = this.account.shard;
-    this.initSelectedToken();
-    await this.loadBalance();
+    if (this.wallet.isLedger) await this.refreshData();
+    else {
+      this.initSelectedToken();
+      await this.loadBalance();
+    }
   },
 
   updated() {
@@ -364,7 +371,7 @@ export default {
       if (!this.isToken) {
         this.tokenList = [
           { symbol: "ONE", decimals: 18, isMainToken: true },
-          ...this.tokenArrayOfNetwork,
+          ...this.hrc20tokenArrayOfNetwork,
         ];
         this.selectedToken = this.tokenList[0];
       } else {

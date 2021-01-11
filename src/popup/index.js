@@ -21,6 +21,7 @@ import Tooltip from "vue-directive-tooltip";
 import "vue-directive-tooltip/dist/vueDirectiveTooltip.css";
 
 import { initHRC20Tokens } from "services/hrc20/init.js";
+import { initHRC721Tokens } from "services/hrc721/init.js";
 import BigNumber from "bignumber.js";
 import Config from "~/config";
 
@@ -90,48 +91,6 @@ BigNumber.config({
 });
 //change the state
 
-const HRCTokens = store.state.hrc20.tokens;
-const isPreviousVersion = HRCTokens["1"] && !Array.isArray(HRCTokens["1"]);
-if (isPreviousVersion) {
-  const networkKeys = ["1", "2"];
-  let newTokenArray = {
-    Mainnet: [],
-    Testnet: [],
-  };
-  networkKeys.forEach((network) => {
-    const tokenArray = Object.keys(HRCTokens[network]);
-    tokenArray.forEach((token) => {
-      if (network === "1") {
-        newTokenArray["Mainnet"].push({
-          symbol: token,
-          address: HRCTokens[network][token].address,
-          decimals: HRCTokens[network][token].decimals,
-          balance: 0,
-        });
-      } else if (network === "2") {
-        newTokenArray["Testnet"].push({
-          symbol: token,
-          address: HRCTokens[network][token].address,
-          decimals: HRCTokens[network][token].decimals,
-          balance: 0,
-        });
-      }
-    });
-  });
-
-  store.commit("hrc20/resetTokens");
-
-  store.commit("hrc20/setTokenArray", {
-    network: "Mainnet",
-    tokenArray: newTokenArray["Mainnet"],
-  });
-  store.commit("hrc20/setTokenArray", {
-    network: "Testnet",
-    tokenArray: newTokenArray["Testnet"],
-  });
-}
-///
-
 //save the version info
 storage.getValue("meta").then(({ meta }) => {
   storage.saveValue({
@@ -155,3 +114,4 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 });
 
 initHRC20Tokens(store);
+initHRC721Tokens(store);

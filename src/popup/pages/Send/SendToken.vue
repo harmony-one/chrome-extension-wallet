@@ -19,7 +19,7 @@ export default {
   },
   created() {
     const address = this.$route.params.address;
-    this.token = _.find(this.tokenArrayOfNetwork, { address });
+    this.token = _.find(this.hrc20tokenArrayOfNetwork, { address });
   },
 };
 </script>

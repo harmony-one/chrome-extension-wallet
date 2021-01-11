@@ -9,8 +9,11 @@ import ConnectHardwareWallet from "./pages/Wallet/ConnectHardwareWallet.vue";
 import LogIn from "./pages/API/LogIn.vue";
 import SignTransaction from "./pages/API/SignTransaction.vue";
 
-import Tokens from "./pages/Token/Tokens.vue";
+import Hrc20Tokens from "./pages/Token/Hrc20Tokens.vue";
+import Hrc721Tokens from "./pages/Token/Hrc721Tokens.vue";
 import AddToken from "./pages/Token/AddToken.vue";
+import AddHRC721Token from "./pages/Token/AddHRC721Token.vue";
+import Gallery from "./pages/Token/HRC721/Gallery.vue";
 
 import SendOne from "./pages/Send/SendOne.vue";
 import SendToken from "./pages/Send/SendToken.vue";
@@ -64,9 +67,9 @@ const router = new Router({
     },
     {
       //token view route
-      path: "/tokens",
-      name: "tokens",
-      component: Tokens,
+      path: "/hrc20tokens",
+      name: "hrc20tokens",
+      component: Hrc20Tokens,
       meta: {
         requiredAccount: true,
         authenticate: true,
@@ -74,9 +77,38 @@ const router = new Router({
     },
     {
       // add token route
-      path: "/tokens/add",
-      name: "addtoken",
+      path: "/hrc20tokens/add",
+      name: "addhrctoken",
       component: AddToken,
+      meta: {
+        requiredAccount: true,
+        authenticate: true,
+      },
+    },
+    {
+      //token view route
+      path: "/hrc721tokens",
+      name: "hrc721tokens",
+      component: Hrc721Tokens,
+      meta: {
+        requiredAccount: true,
+        authenticate: true,
+      },
+    },
+    {
+      // add token route
+      path: "/hrc721tokens/add",
+      name: "addhrc721token",
+      component: AddHRC721Token,
+      meta: {
+        requiredAccount: true,
+        authenticate: true,
+      },
+    },
+    {
+      path: "/gallery/:address",
+      name: "gallery",
+      component: Gallery,
       meta: {
         requiredAccount: true,
         authenticate: true,

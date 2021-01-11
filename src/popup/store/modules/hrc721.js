@@ -11,37 +11,6 @@ export default {
     initialized: false,
   },
   actions: {
-    setTokenBalanceLoading({ commit, state }, payload) {
-      const tokenArray = state.tokens[payload.network];
-      const index = _.findIndex(tokenArray, {
-        address: payload.token.address,
-      });
-      if (index < 0) return;
-      tokenArray[index] = {
-        ...tokenArray[index],
-        isLoading: payload.loading,
-      };
-      commit("setTokenArray", {
-        network: payload.network,
-        tokenArray,
-      });
-    },
-    loadTokenBalance({ commit, state }, payload) {
-      const tokenArray = state.tokens[payload.network];
-      const index = _.findIndex(tokenArray, {
-        address: payload.token.address,
-      });
-      if (index < 0) return;
-      tokenArray[index] = {
-        ...tokenArray[index],
-        balance: payload.balance,
-        isLoading: false,
-      };
-      commit("setTokenArray", {
-        network: payload.network,
-        tokenArray,
-      });
-    },
     deleteToken({ commit, state }, payload) {
       const tokenArray = state.tokens[payload.network];
       _.remove(tokenArray, { address: payload.token.address });
@@ -56,7 +25,7 @@ export default {
         address: payload.token.address,
       });
       if (index < 0) return;
-      tokenArray[index].symbol = payload.token.symbol;
+      tokenArray[index].name = payload.token.name;
       commit("setTokenArray", {
         network: payload.network,
         tokenArray,
@@ -71,12 +40,10 @@ export default {
       state.initialized = payload;
     },
     addToken(state, payload) {
-      const { address, symbol, network, decimals } = payload;
+      const { address, name, network } = payload;
       state.tokens[network].push({
-        symbol,
+        name,
         address,
-        decimals,
-        balance: 0,
       });
     },
   },
