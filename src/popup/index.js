@@ -13,6 +13,7 @@ import RadioButton from "./components/RadioButton";
 import PincodeInput from "vue-pincode-input";
 import PincodeModal from "./pages/Settings/Security/PincodeModal.vue";
 import MoonLoader from "vue-spinner/src/MoonLoader";
+import PulseLoader from "vue-spinner/src/PulseLoader";
 import ScaleLoader from "vue-spinner/src/ScaleLoader";
 import ClipLoader from "vue-spinner/src/ClipLoader";
 import MarqueeText from "vue-marquee-text-component";
@@ -43,6 +44,7 @@ sync(store, router);
 Vue.use(ToggleButton);
 Vue.component("marquee-text", MarqueeText);
 Vue.component("MoonLoader", MoonLoader);
+Vue.component("PulseLoader", PulseLoader);
 Vue.component("ClipLoader", ClipLoader);
 Vue.component("ScaleLoader", ScaleLoader);
 Vue.component("AppHeader", AppHeader);
@@ -77,7 +79,7 @@ if (!store.state.settings.auth.lockState)
 ///
 
 BigNumber.config({
-  EXPONENTIAL_AT: [-50, 50],
+  EXPONENTIAL_AT: [-100, 100],
   FORMAT: {
     prefix: "",
     decimalSeparator: ".",

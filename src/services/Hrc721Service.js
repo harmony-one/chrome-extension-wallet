@@ -23,9 +23,10 @@ export async function getTokenURI(tokenid, contractAddress) {
   return uri;
 }
 
-export async function getTokenByIndex(index, contractAddress) {
+export async function getTokenOfOwnerByIndex(address, index, contractAddress) {
   const instance = getContractInstance(contractAddress);
-  let id = await instance.methods.tokenByIndex(index).call();
+  const hexAddress = oneToHexAddress(address);
+  let id = await instance.methods.tokenOfOwnerByIndex(hexAddress, index).call();
   return new BigNumber(id).toString();
 }
 
