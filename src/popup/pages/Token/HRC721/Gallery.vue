@@ -7,14 +7,14 @@
         <div class="token-balance">
           You have <span>{{ balance }}</span> items.
         </div>
-        <div class="nft-container">
+        <div
+          class="nft-container"
+          @wheel.prevent="handleScroll"
+          ref="nftcontainer"
+        >
           <div class="nft-item" v-for="(nft, index) in nfts" :key="index">
             <div v-if="nft.loading" class="pulse-loader">
-              <pulse-loader
-                :loading="nft.loading"
-                color="#0a93eb"
-                size="20px"
-              />
+              <NFTLoading color="#0a93eb" size="80px" />
             </div>
             <div v-else>
               <img :src="nft.image" :alt="nft.name" />
@@ -44,6 +44,7 @@ import {
   getTokenURI,
 } from "services/Hrc721Service";
 import Vue from "vue";
+import NFTLoading from "./NFTLoading";
 import token from "mixins/token";
 export default {
   data: () => ({
@@ -52,7 +53,13 @@ export default {
     nfts: [],
   }),
   mixins: [token],
+  components: {
+    NFTLoading,
+  },
   methods: {
+    handleScroll(e) {
+      this.$refs["nftcontainer"].scrollLeft += e.deltaY;
+    },
     compress(address) {
       if (address.length > 60)
         return (
@@ -92,8 +99,8 @@ export default {
 <style lang="scss" scoped>
 .nft-container {
   display: flex;
-  overflow-x: auto;
   padding: 1rem 1rem 2rem 1rem;
+  overflow-x: auto;
 }
 .token-balance {
   font-size: 14px;
@@ -106,11 +113,13 @@ export default {
   &:not(:last-child) {
     margin-right: 20px;
   }
+
   border: 1px solid #ddd;
   box-shadow: 0px 5px 15px #00000033;
   padding: 20px;
   display: flex;
   min-width: 250px;
+  position: relative;
   min-height: 300px;
   flex-direction: column;
   align-items: center;
@@ -122,6 +131,9 @@ export default {
   }
   .pulse-loader {
     top: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     position: absolute;
   }
   .name {
@@ -131,6 +143,7 @@ export default {
   .description {
     text-align: center;
     font-size: 12px;
+    margin-top: 10px;
   }
 }
 </style>
