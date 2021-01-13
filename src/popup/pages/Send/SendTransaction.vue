@@ -3,6 +3,7 @@
     <app-header
       :subtitle="getHeaderName"
       @refresh="refreshData"
+      @networkChanged="refreshData"
       backRoute="/home"
     />
     <main class="main">

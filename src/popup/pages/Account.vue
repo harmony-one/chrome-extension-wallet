@@ -1,6 +1,10 @@
 <template>
   <div>
-    <app-header @refresh="refreshAccount" headerTab="main-tab" />
+    <app-header
+      @refresh="refreshAccount"
+      @networkChanged="refreshAccount"
+      headerTab="main-tab"
+    />
     <main class="main">
       <div class="relative">
         <div class="main-logo">

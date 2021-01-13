@@ -19,10 +19,13 @@
           >
             <span class="contract-name">{{ token.name }}</span>
             <div v-if="editing" class="token-edit-box">
-              <button class="primary edit_but" @click="editToken(token)">
+              <button class="primary edit_but" @click.stop="editToken(token)">
                 Edit
               </button>
-              <button class="primary delete_but" @click="deleteToken(token)">
+              <button
+                class="primary delete_but"
+                @click.stop="deleteToken(token)"
+              >
                 Delete
               </button>
             </div>

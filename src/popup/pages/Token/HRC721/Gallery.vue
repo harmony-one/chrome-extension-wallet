@@ -1,6 +1,11 @@
 <template>
   <div>
-    <app-header subtitle="My Gallery" backRoute="/hrc721tokens" />
+    <app-header
+      subtitle="My Gallery"
+      @refresh="refreshData"
+      @networkChanged="$router.push('/hrc721tokens')"
+      backRoute="/hrc721tokens"
+    />
 
     <main class="main">
       <div v-if="balance">
@@ -12,11 +17,23 @@
           @wheel.prevent="handleScroll"
           ref="nftcontainer"
         >
-          <div class="nft-item" v-for="(nft, index) in nfts" :key="index">
+          <div class="nft-wrapper" v-for="(nft, index) in nfts" :key="index">
             <div v-if="nft.loading" class="pulse-loader">
-              <NFTLoading color="#0a93eb" size="80px" />
+              <div v-if="!error">
+                <NFTLoading color="#0a93eb" size="80px" />
+              </div>
+              <div
+                v-else
+                :style="{
+                  'white-space': 'nowrap',
+                  'text-align': 'center',
+                  color: '#888',
+                }"
+              >
+                Image is not available
+              </div>
             </div>
-            <div v-else>
+            <div class="nft-item" v-else>
               <img :src="nft.image" :alt="nft.name" />
               <div class="name">{{ nft.name }}</div>
               <div class="description" v-tooltip.bottom="nft.description">
@@ -31,6 +48,12 @@
           You don't own any nfts.
         </div>
       </div>
+      <notifications
+        group="notify"
+        width="200"
+        :max="2"
+        class="notifiaction-container"
+      />
     </main>
   </div>
 </template>
@@ -46,11 +69,13 @@ import {
 import Vue from "vue";
 import NFTLoading from "./NFTLoading";
 import token from "mixins/token";
+import BigNumber from "bignumber.js";
 export default {
   data: () => ({
     contractAddress: null,
     balance: 0,
     nfts: [],
+    error: null,
   }),
   mixins: [token],
   components: {
@@ -68,30 +93,59 @@ export default {
           address.substr(address.length - 30, address.length)
         );
     },
+    async refreshData() {
+      try {
+        this.$store.commit("loading", true);
+        this.error = null;
+        this.contractAddress = this.$route.params.address;
+        const bnBalance = await getTokenBalance(
+          this.address,
+          this.contractAddress
+        );
+        if (!bnBalance) throw new Error("Contract address is invalid");
+        this.balance = new BigNumber(bnBalance).toNumber();
+        const totalSupply = await getTotalSupply(this.contractAddress);
+        this.nfts = Array(this.balance).fill({ loading: true });
+        this.$store.commit("loading", false);
+        this.nfts.forEach(async (elem, index) => {
+          try {
+            const id = await getTokenOfOwnerByIndex(
+              this.address,
+              index,
+              this.contractAddress
+            );
+            const uri = await getTokenURI(id, this.contractAddress);
+            if (!uri) throw new Error("Get tokenURI failed");
+            const response = await fetch(uri, { mode: "cors" });
+            const { image, name, description } = await response.json();
+            Vue.set(this.nfts, index, {
+              image,
+              name,
+              description,
+              loading: false,
+            });
+          } catch (error) {
+            console.error(error);
+            this.error = error.message;
+            this.$notify({
+              group: "notify",
+              type: "error",
+              text: error.message,
+            });
+          }
+        });
+      } catch (error) {
+        console.error(error);
+        this.$notify({
+          group: "notify",
+          type: "error",
+          text: error.message,
+        });
+      }
+    },
   },
   async mounted() {
-    this.$store.commit("loading", true);
-    this.contractAddress = this.$route.params.address;
-    this.balance = await getTokenBalance(this.address, this.contractAddress);
-    const totalSupply = await getTotalSupply(this.contractAddress);
-    this.nfts = Array(this.balance).fill({ loading: true });
-    this.$store.commit("loading", false);
-    this.nfts.forEach(async (elem, index) => {
-      const id = await getTokenOfOwnerByIndex(
-        this.address,
-        index,
-        this.contractAddress
-      );
-      const uri = await getTokenURI(id, this.contractAddress);
-      const response = await fetch(uri, { mode: "cors" });
-      const { image, name, description } = await response.json();
-      Vue.set(this.nfts, index, {
-        image,
-        name,
-        description,
-        loading: false,
-      });
-    });
+    await this.refreshData();
   },
 };
 </script>
@@ -109,18 +163,23 @@ export default {
     color: #0a93eb;
   }
 }
-.nft-item {
+.nft-wrapper {
   &:not(:last-child) {
     margin-right: 20px;
   }
+  .nft-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
   border: 1px solid #ddd;
-  box-shadow: 0px 5px 15px #00000033;
+  box-shadow: 0px 3px 5px #00000033;
   padding: 20px;
   display: flex;
-  min-width: 250px;
+  min-width: 308px;
   position: relative;
-  min-height: 300px;
+  min-height: 400px;
   flex-direction: column;
   align-items: center;
   background: white;
@@ -128,6 +187,7 @@ export default {
   img {
     width: 200px;
     object-fit: contain;
+    margin-bottom: 1rem;
   }
   .pulse-loader {
     top: 50%;
@@ -139,6 +199,7 @@ export default {
   .name {
     text-align: center;
     font-weight: 600;
+    font-size: 1.25rem;
   }
   .description {
     text-align: center;

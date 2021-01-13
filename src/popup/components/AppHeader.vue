@@ -136,7 +136,7 @@
                   class="material-icons"
                   v-show="
                     account.address === wallets.active.address &&
-                    ((selectedIndex = index) || 1)
+                      ((selectedIndex = index) || 1)
                   "
                   >check</i
                 >
@@ -306,7 +306,8 @@ export default {
       this.showNetworkDropdown = false;
       this.$store.commit("account/shard", 0);
       this.$store.commit("network/change", network);
-      this.refreshData();
+      this.$emit("networkChanged");
+      this.showDropdownMenu = false;
     },
     selectAccount(address) {
       this.$store.commit("wallets/setActive", address);

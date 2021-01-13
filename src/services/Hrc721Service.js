@@ -14,7 +14,7 @@ export async function getTokenBalance(address, contractAddress) {
   const instance = getContractInstance(contractAddress);
   const hexAddress = oneToHexAddress(address);
   let balance = await instance.methods.balanceOf(hexAddress).call();
-  return new BigNumber(balance).toNumber();
+  return balance;
 }
 
 export async function getTokenURI(tokenid, contractAddress) {
@@ -39,6 +39,5 @@ export async function getTotalSupply(contractAddress) {
 export async function getContractName(contractAddress) {
   const instance = getContractInstance(contractAddress);
   let name = await instance.methods.name().call();
-  console.log(name);
   return name;
 }

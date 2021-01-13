@@ -1,6 +1,10 @@
 <template>
   <div>
-    <app-header @refresh="refreshData" headerTab="main-tab" />
+    <app-header
+      @refresh="refreshData"
+      @networkChanged="refreshData"
+      headerTab="main-tab"
+    />
     <main class="main" :style="{ 'padding-right': '0px' }">
       <div class="token-header">
         <span class="hide-label">Hide low balances</span>
