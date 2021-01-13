@@ -102,7 +102,9 @@
           <button class="primary" v-if="!hasError" @click="reject">
             Close
           </button>
-          <button class="primary" v-else @click="signwithLedger">Retry</button>
+          <button class="primary" v-else @click="() => signTransaction(true)">
+            Retry
+          </button>
         </div>
       </div>
     </div>
@@ -253,14 +255,14 @@ export default {
         let signedTxParams, signedTransaction;
         const { updateNonce, encodeMode, blockNumber, shardID } = this.params;
         if (this.type === TRANSACTIONTYPE.SEND) {
-          if (isLedger)
+          if (isLedger) {
             signedTransaction = await app.signTransaction(
               this.transaction,
               this.transaction.chainId,
               this.transaction.shardID,
               this.transaction.messenger
             );
-          else
+          } else
             signedTransaction = await signer.signTransaction(
               this.transaction,
               updateNonce,
@@ -313,6 +315,7 @@ export default {
           isLedger ? 200 : 0
         );
       } catch (err) {
+        console.log(err);
         this.hasError = true;
         this.caption = err.message;
         this.$notify({

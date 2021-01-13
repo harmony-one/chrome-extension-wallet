@@ -97,6 +97,7 @@ export default {
       try {
         this.$store.commit("loading", true);
         this.error = null;
+
         this.contractAddress = this.$route.params.address;
         const bnBalance = await getTokenBalance(
           this.address,
