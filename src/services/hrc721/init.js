@@ -42,7 +42,3 @@ export const initHRC721Tokens = (store) => {
   });
   store.commit("hrc721/setInitalized", true);
 };
-
-const config = {};
-
-export default config;
