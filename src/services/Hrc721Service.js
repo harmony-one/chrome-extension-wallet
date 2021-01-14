@@ -23,11 +23,18 @@ export async function getTokenURI(tokenid, contractAddress) {
   return uri;
 }
 
+export async function getTokensOfOwner(address, contractAddress) {
+  const instance = getContractInstance(contractAddress);
+  const hexAddress = oneToHexAddress(address);
+  let uri = await instance.methods.tokensOfOwner(hexAddress).call();
+  return uri;
+}
+
 export async function getTokenOfOwnerByIndex(address, index, contractAddress) {
   const instance = getContractInstance(contractAddress);
   const hexAddress = oneToHexAddress(address);
   let id = await instance.methods.tokenOfOwnerByIndex(hexAddress, index).call();
-  return new BigNumber(id).toString();
+  return id;
 }
 
 export async function getTotalSupply(contractAddress) {

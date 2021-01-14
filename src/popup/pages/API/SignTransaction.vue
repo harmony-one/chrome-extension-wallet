@@ -74,22 +74,24 @@
           </div>
         </div>
       </div>
-      <div v-if="!wallet.isLedger" class="password-content">
-        <label class="input-label">
-          Password
-          <input
-            class="input-field"
-            type="password"
-            name="password"
-            ref="password"
-            v-model="password"
-            placeholder="Input your password"
-            v-on:keyup.enter="approve"
-          />
-        </label>
-      </div>
-      <div class="ledger-content" v-else>
-        <b>{{ caption }}</b>
+      <div v-if="!loading">
+        <div v-if="!wallet.isLedger" class="password-content">
+          <label class="input-label">
+            Password
+            <input
+              class="input-field"
+              type="password"
+              name="password"
+              ref="password"
+              v-model="password"
+              placeholder="Input your password"
+              v-on:keyup.enter="approve"
+            />
+          </label>
+        </div>
+        <div class="ledger-content" v-else>
+          <b>{{ caption }}</b>
+        </div>
       </div>
       <div class="footer">
         <div class="button-group" v-if="!wallet.isLedger">
@@ -161,6 +163,7 @@ export default {
       shardID: null,
     },
     suggestion: null,
+    loading: false,
     txnParams: {
       gasLimit: null,
       gasPrice: null,
@@ -368,6 +371,7 @@ export default {
     if (this.$refs.password) this.$refs.password.focus();
   },
   created() {
+    this.loading = true;
     chrome.runtime.sendMessage(
       { action: GET_WALLET_SERVICE_STATE },
       async ({ state } = {}) => {
@@ -376,6 +380,7 @@ export default {
             const { type, txnInfo, params, session } = state;
             this.type = type;
             this.txnParams = txnInfo;
+            console.log(this.txnParams);
             if (this.txnParams.data)
               this.suggestion = await fetchSuggestions(this.txnParams.data);
             this.params = { ...params };
@@ -392,8 +397,10 @@ export default {
             } else {
               this.transaction = createRewardsTransaction(txnInfo);
             }
+            this.loading = false;
           } catch (err) {
             console.error(err);
+            this.loading = false;
             this.$notify({
               group: "notify",
               type: "error",

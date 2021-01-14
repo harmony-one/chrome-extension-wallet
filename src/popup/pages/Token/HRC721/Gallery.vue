@@ -10,7 +10,8 @@
     <main class="main">
       <div v-if="balance">
         <div class="token-balance">
-          You have <span>{{ balance }}</span> items.
+          You owned <span>{{ balance }}</span>
+          {{ balance > 1 ? "items" : "item" }}
         </div>
         <div
           class="nft-container"
@@ -19,26 +20,18 @@
         >
           <div class="nft-wrapper" v-for="(nft, index) in nfts" :key="index">
             <div v-if="nft.loading" class="pulse-loader">
-              <div v-if="!error">
-                <NFTLoading color="#0a93eb" size="80px" />
-              </div>
-              <div
-                v-else
-                :style="{
-                  'white-space': 'nowrap',
-                  'text-align': 'center',
-                  color: '#888',
-                }"
-              >
-                Image is not available
-              </div>
+              <NFTLoading color="#0a93eb" size="80px" />
             </div>
-            <div class="nft-item" v-else>
+            <div class="nft-item" v-else-if="nft.uri">
               <img :src="nft.image" :alt="nft.name" />
               <div class="name">{{ nft.name }}</div>
               <div class="description" v-tooltip.bottom="nft.description">
                 {{ compress(nft.description) }}
               </div>
+            </div>
+            <div v-else class="nft-item">
+              <div class="help">?</div>
+              <div class="tokenId" v-if="nft.id">Item ID: {{ nft.id }}</div>
             </div>
           </div>
         </div>
@@ -64,6 +57,7 @@ import {
   getTokenBalance,
   getTokenOfOwnerByIndex,
   getTotalSupply,
+  getTokensOfOwner,
   getTokenURI,
 } from "services/Hrc721Service";
 import Vue from "vue";
@@ -75,7 +69,6 @@ export default {
     contractAddress: null,
     balance: 0,
     nfts: [],
-    error: null,
   }),
   mixins: [token],
   components: {
@@ -96,7 +89,6 @@ export default {
     async refreshData() {
       try {
         this.$store.commit("loading", true);
-        this.error = null;
 
         this.contractAddress = this.$route.params.address;
         const bnBalance = await getTokenBalance(
@@ -108,33 +100,65 @@ export default {
         const totalSupply = await getTotalSupply(this.contractAddress);
         this.nfts = Array(this.balance).fill({ loading: true });
         this.$store.commit("loading", false);
-        this.nfts.forEach(async (elem, index) => {
-          try {
-            const id = await getTokenOfOwnerByIndex(
-              this.address,
-              index,
-              this.contractAddress
-            );
-            const uri = await getTokenURI(id, this.contractAddress);
-            if (!uri) throw new Error("Get tokenURI failed");
-            const response = await fetch(uri, { mode: "cors" });
-            const { image, name, description } = await response.json();
+        console.log(this.balance);
+        const itemList = await getTokensOfOwner(
+          this.address,
+          this.contractAddress
+        );
+        if (itemList && itemList.length > 0) {
+          itemList.forEach((elem, index) => {
+            const id = new BigNumber(elem).toString();
             Vue.set(this.nfts, index, {
-              image,
-              name,
-              description,
+              id,
               loading: false,
             });
-          } catch (error) {
-            console.error(error);
-            this.error = error.message;
-            this.$notify({
-              group: "notify",
-              type: "error",
-              text: error.message,
-            });
-          }
-        });
+          });
+        } else {
+          this.nfts.forEach(async (elem, index) => {
+            try {
+              const id = await getTokenOfOwnerByIndex(
+                this.address,
+                index,
+                this.contractAddress
+              );
+              const uri = await getTokenURI(
+                new BigNumber(id).toString(),
+                this.contractAddress
+              );
+              if (uri) {
+                const response = await fetch(uri, { mode: "cors" });
+                const { image, name, description } = await response.json();
+                Vue.set(this.nfts, index, {
+                  uri: true,
+                  image,
+                  name,
+                  description,
+                  loading: false,
+                });
+              } else {
+                if (id) {
+                  Vue.set(this.nfts, index, {
+                    id: new BigNumber(id).toString(),
+                    uri: false,
+                    loading: false,
+                  });
+                } else {
+                  Vue.set(this.nfts, index, {
+                    uri: false,
+                    loading: false,
+                  });
+                }
+              }
+            } catch (error) {
+              console.error(error);
+              this.$notify({
+                group: "notify",
+                type: "error",
+                text: error.message,
+              });
+            }
+          });
+        }
       } catch (error) {
         console.error(error);
         this.$notify({
@@ -172,6 +196,11 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+  }
+  .help {
+    color: rgb(234 234 234);
+    font-size: 12rem;
+    text-align: center;
   }
 
   border: 1px solid #ddd;
