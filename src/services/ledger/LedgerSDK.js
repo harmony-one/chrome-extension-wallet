@@ -88,7 +88,7 @@ export default class HarmonyApp {
   }
 
   async signTx(message) {
-    let resp = null;
+    let resp;
     const p = hexToBytes(message);
     const buffer = Buffer.from(p);
     const chunks = [];
@@ -99,12 +99,13 @@ export default class HarmonyApp {
       }
       chunks.push(buffer.slice(i, end));
     }
-
     try {
+      //resp = await this.transport.send(CLA, INS.SIGN_TX, 0, 0, Buffer.from(p));
       for (let i = 0; i < chunks.length; i += 1) {
         const p1 = i === 0 ? CMDS.P1_FIRST : CMDS.P1_MORE;
         const p2 = i === chunks.length - 1 ? CMDS.P2_FINISH : CMDS.P2_SIGNHASH;
         // eslint-disable-next-line
+        console.log(p1, p2);
         resp = await this.transport.send(CLA, INS.SIGN_TX, p1, p2, chunks[i]);
       }
     } catch (err) {
@@ -190,6 +191,7 @@ export default class HarmonyApp {
 
     // sign RLP encoded raw transaction using ledger private key
     const [unsignedRawTransaction, raw] = txn.getRLPUnsigned();
+    console.log(unsignedRawTransaction, raw);
     response = await this.signTx(unsignedRawTransaction);
 
     if (response.return_code == SW_ERR) {
@@ -216,7 +218,9 @@ export default class HarmonyApp {
     raw.push(stripZeros(arrayify(s) || []));
 
     const encodedRaw = encode(raw);
+    console.log("encodedRaw =====> ", encodedRaw);
     txn.setParams({ ...txn.txParams, rawTransaction: encodedRaw });
+    console.log("txn======>", txn);
 
     return txn;
   }

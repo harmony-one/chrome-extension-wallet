@@ -24,13 +24,38 @@
             </div>
             <div class="nft-item" v-else-if="nft.uri">
               <img :src="nft.image" :alt="nft.name" />
-              <div class="name">{{ nft.name }}</div>
+              <div class="info-container">
+                <div class="name">
+                  {{ nft.name }}
+                  <popper
+                    trigger="click"
+                    :options="{ placement: 'top' }"
+                    v-if="nft.attributes && nft.attributes.length > 0"
+                  >
+                    <div class="popper">
+                      <div
+                        v-for="(info, index) in nft.attributes"
+                        :key="index"
+                        class="popper-item"
+                      >
+                        <span class="trait_type">{{
+                          `${toTraitTypeString(info["trait_type"])}:`
+                        }}</span>
+                        <span class="value">{{ info["value"] }}</span>
+                      </div>
+                    </div>
+                    <a href="#" slot="reference" class="info">
+                      <i class="material-icons">info</i>
+                    </a>
+                  </popper>
+                </div>
+              </div>
               <div class="description" v-tooltip.bottom="nft.description">
                 {{ compress(nft.description) }}
               </div>
             </div>
             <div v-else class="nft-item">
-              <div class="help">?</div>
+              <img src="images/NFT_icon.png" width="200px" height="300px" />
               <div class="tokenId" v-if="nft.id">Item ID: {{ nft.id }}</div>
             </div>
           </div>
@@ -78,6 +103,16 @@ export default {
     handleScroll(e) {
       this.$refs["nftcontainer"].scrollLeft += e.deltaY;
     },
+    toTraitTypeString(trait) {
+      const str = trait
+        .split("_")
+        .map(
+          (elem) =>
+            elem.charAt(0).toUpperCase() + elem.substr(1, elem.length - 1)
+        )
+        .join(" ");
+      return str;
+    },
     compress(address) {
       if (address.length > 60)
         return (
@@ -100,7 +135,6 @@ export default {
         const totalSupply = await getTotalSupply(this.contractAddress);
         this.nfts = Array(this.balance).fill({ loading: true });
         this.$store.commit("loading", false);
-        console.log(this.balance);
         const itemList = await getTokensOfOwner(
           this.address,
           this.contractAddress
@@ -127,12 +161,18 @@ export default {
               );
               if (uri) {
                 const response = await fetch(uri, { mode: "cors" });
-                const { image, name, description } = await response.json();
+                const {
+                  image,
+                  name,
+                  description,
+                  attributes,
+                } = await response.json();
                 Vue.set(this.nfts, index, {
                   uri: true,
                   image,
                   name,
                   description,
+                  attributes,
                   loading: false,
                 });
               } else {
@@ -226,14 +266,36 @@ export default {
     transform: translate(-50%, -50%);
     position: absolute;
   }
-  .name {
-    text-align: center;
-    font-weight: 600;
-    font-size: 1.25rem;
+  .info-container {
+    .name {
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.25rem;
+      position: relative;
+      .popper {
+        width: 200px;
+        padding: 1rem;
+        text-align: left;
+        .popper-item {
+          display: flex;
+          gap: 5px;
+          .trait_type {
+            color: #0a93eb;
+          }
+        }
+      }
+    }
+    .info {
+      color: #bbb;
+      position: absolute;
+      top: 0px;
+      font-size: 0.8rem;
+    }
   }
   .description {
     text-align: center;
     font-size: 12px;
+    height: 20px;
     margin-top: 10px;
   }
 }

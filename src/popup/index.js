@@ -36,12 +36,15 @@ import "./css/normalize.scss";
 import "./css/style.scss";
 import "./css/modal.scss";
 import "./css/vue-select.scss";
+import Popper from "vue-popperjs";
+import "vue-popperjs/dist/vue-popper.css";
 
 Vue.config.productionTip = false;
 
 sync(store, router);
 
 Vue.use(ToggleButton);
+Vue.component("Popper", Popper);
 Vue.component("marquee-text", MarqueeText);
 Vue.component("MoonLoader", MoonLoader);
 Vue.component("PulseLoader", PulseLoader);
