@@ -4,6 +4,7 @@ import {
   FACTORYTYPE,
   ONEWALLET_SERVICE_EVENT_REQUEST,
   ONEWALLET_SERVICE_EVENT_RESPONSE,
+  POPUP_CLOSED,
 } from "../types";
 import { Directive } from "@harmony-js/staking";
 import { HarmonyAddress } from "@harmony-js/crypto";
@@ -45,7 +46,12 @@ const sendMessageToContentScript = (payload: any) => {
 
 export const sendAsyncMessageToContentScript = async (payload: any) => {
   sendMessageToContentScript(payload);
-  const response: any = await waitForResponse(`${payload.type}_RESPONSE`);
+
+  const response: any = await Promise.race([
+    waitForResponse(`${payload.type}_RESPONSE`),
+    waitForResponse(POPUP_CLOSED),
+  ]);
+
   return response;
 };
 

@@ -1,20 +1,10 @@
 <template>
   <div>
-    <app-header @refresh="refreshData" headerTab="main-tab" />
+    <app-header headerTab="main-tab" />
     <main class="main" :style="{ 'padding-right': '0px' }">
-      <div class="token-header">
-        <span class="hide-label">Hide low balances</span>
-        <toggle-button
-          :value="hideLowBalance"
-          color="#0a93eb"
-          :sync="true"
-          :labels="false"
-          @change="onChangeHideButton"
-        />
-      </div>
       <div class="token-container">
         <div
-          v-if="!filteredTokens.length || account.shard"
+          v-if="!hrc721tokenArrayOfNetwork.length || account.shard"
           class="message-empty"
         >
           No tokens found
@@ -23,37 +13,19 @@
         <div v-else>
           <div
             class="token-row"
-            v-for="(token, index) in filteredTokens"
+            v-for="(token, index) in hrc721tokenArrayOfNetwork"
+            @click="selectToken(token)"
             :key="index"
           >
-            <span class="token-name">{{ compressSymbol(token.symbol) }}</span>
-            <div v-if="!editing">
-              <moon-loader
-                :loading="token.isLoading"
-                color="#0a93eb"
-                size="26px"
-              />
-              <div class="token-box" v-if="!token.isLoading">
-                <span class="token-balance">
-                  {{
-                    formatBalance(token.balance, Math.min(4, token.decimals))
-                  }}
-                </span>
-                <button
-                  class="token_send_but"
-                  :disabled="token.balance <= 0"
-                  @click="sendToken(token)"
-                  v-tooltip.top="'Send token'"
-                >
-                  Send
-                </button>
-              </div>
-            </div>
-            <div v-else class="token-edit-box">
-              <button class="primary edit_but" @click="editToken(token)">
+            <span class="contract-name">{{ token.name }}</span>
+            <div v-if="editing" class="token-edit-box">
+              <button class="primary edit_but" @click.stop="editToken(token)">
                 Edit
               </button>
-              <button class="primary delete_but" @click="deleteToken(token)">
+              <button
+                class="primary delete_but"
+                @click.stop="deleteToken(token)"
+              >
                 Delete
               </button>
             </div>
@@ -64,13 +36,13 @@
         <div class="token-button-group" v-if="!editing">
           <button
             class="round"
-            @click="$router.push('/tokens/add')"
+            @click="$router.push('/hrc721tokens/add')"
             v-tooltip.top="'Add token'"
           >
             <i class="material-icons">add</i>
           </button>
           <button
-            v-if="filteredTokens.length > 0"
+            v-if="hrc721tokenArrayOfNetwork.length > 0"
             class="round green"
             @click="editStart"
             v-tooltip.top="'Edit token'"
@@ -95,20 +67,20 @@
         :width="250"
         height="auto"
       >
-        <div class="modal-header">Change the token symbol</div>
+        <div class="modal-header">Change the token name</div>
         <div class="modal-body">
           <input
             type="text"
-            name="tokenSymbol"
-            v-model="tokenSymbol"
-            placeholder="Input the token symbol"
+            name="tokenName"
+            v-model="tokenName"
+            placeholder="Input the token name"
           />
         </div>
         <div class="modal-footer">
           <div class="secondary" @click="$modal.hide('modal-token-edit')">
             CLOSE
           </div>
-          <div class="primary" @click="saveTokenSymbol">SAVE</div>
+          <div class="primary" @click="saveTokenName">SAVE</div>
         </div>
       </modal>
     </main>
@@ -125,45 +97,32 @@ export default {
   data: () => ({
     editing: false,
     editingToken: null,
-    tokenSymbol: null,
+    tokenName: null,
   }),
   mixins: [account, helper],
   computed: {
     ...mapState({
-      activeAcc: (state) => state.wallets.active,
       account: (state) => state.account,
       network: (state) => state.network,
-      hideLowBalance: (state) => state.settings.hideLowBalance,
     }),
-    filteredTokens() {
-      if (this.hideLowBalance)
-        return _.filter(this.tokenArrayOfNetwork, (item) =>
-          new BigNumber(item.balance).isGreaterThan(0)
-        );
-      return this.tokenArrayOfNetwork;
-    },
-  },
-  async mounted() {
-    await this.loadAllTokenBalance();
-    this.$forceUpdate();
   },
   methods: {
-    onChangeHideButton(e) {
-      this.$store.commit("settings/setHideLowBalance", e.value);
+    selectToken(token) {
+      this.$router.push(`/gallery/${token.address}`);
     },
-    saveTokenSymbol() {
+    saveTokenName() {
       this.$modal.hide("modal-token-edit");
-      this.$store.dispatch("hrc20/editToken", {
+      this.$store.dispatch("hrc721/editToken", {
         network: this.network.name,
         token: {
           ...this.editingToken,
-          symbol: this.tokenSymbol,
+          name: this.tokenName,
         },
       });
     },
     editToken(token) {
       this.editingToken = token;
-      this.tokenSymbol = token.symbol;
+      this.tokenName = token.name;
       this.$modal.show("modal-token-edit");
     },
     deleteToken(token) {
@@ -181,11 +140,11 @@ export default {
             title: "Delete",
             handler: () => {
               this.$modal.hide("dialog");
-              this.$store.dispatch("hrc20/deleteToken", {
+              this.$store.dispatch("hrc721/deleteToken", {
                 network: this.network.name,
                 token,
               });
-              if (!this.filteredTokens.length) this.editStop();
+              if (!this.hrc721tokenArrayOfNetwork.length) this.editStop();
             },
           },
         ],
@@ -196,24 +155,8 @@ export default {
     },
     editStop() {
       this.editing = false;
-      this.tokenSymbol = "";
+      this.tokenName = "";
       this.editingToken = null;
-    },
-    compressSymbol(str) {
-      if (str.length > 15)
-        return (
-          str.substr(0, 8) + "..." + str.substr(str.length - 5, str.length)
-        );
-      return str;
-    },
-    async refreshData() {
-      await this.refreshTokens();
-      await this.loadOneBalance();
-    },
-    sendToken(token) {
-      if (this.activeAcc.isLedger)
-        this.openExpandPopup(`/send-token/${token.address}`);
-      else this.$router.push(`/send-token/${token.address}`);
     },
   },
 };
@@ -223,14 +166,17 @@ export default {
 .token-row {
   display: flex;
   align-items: center;
+  cursor: pointer;
   justify-content: space-between;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   background: #ffffff;
   border-radius: 5px;
   padding: 1rem;
   margin-bottom: 0.75rem;
+  &:hover {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
 }
-.token-box,
 .token-edit-box {
   justify-content: space-between;
   display: flex;
@@ -269,52 +215,11 @@ export default {
 .token span {
   display: block;
 }
-.token-name {
+.contract-name {
   color: black;
   font-size: 0.875rem;
-  max-width: 120px;
   min-width: 60px;
   overflow: hidden;
-}
-.token-balance {
-  font-size: 15px;
-  font-weight: 600;
-  text-align: right;
-  word-break: break-all;
-  padding-left: 1rem;
-}
-.hide-label {
-  font-size: 14px;
-  margin-right: 0.5rem;
-}
-.token-header {
-  margin-bottom: 1rem;
-}
-button.token_send_but {
-  border-radius: 5px;
-  color: black;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 400;
-  min-width: 60px;
-  white-space: nowrap;
-  outline: none;
-  width: 60px;
-  background: white;
-  border: 1px solid #aaa;
-  &:hover:enabled {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-  }
-  &:active:enabled {
-    background: #f0f0f0;
-  }
-  &:disabled {
-    cursor: default;
-    color: #ddd;
-    background: white;
-    border: 1px solid #ddd;
-  }
 }
 
 .token-container {

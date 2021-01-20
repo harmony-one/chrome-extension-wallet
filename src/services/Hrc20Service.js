@@ -1,7 +1,8 @@
 import artifact from "./hrc20/artifacts/artifact.json";
-import { getNetworkLink, getHarmony } from "./AccountService";
+import { getHarmony } from "./AccountService";
 import BN from "bn.js";
 import BigNumber from "bignumber.js";
+import { sendTransaction } from "services/AccountService";
 import { toBech32, fromBech32 } from "@harmony-js/crypto";
 
 export const oneToHexAddress = (address) =>
@@ -43,44 +44,27 @@ export async function sendToken(
   contractAddress
 ) {
   try {
-    let txHash, receipt;
     let harmony = getHarmony();
     const instance = getContractInstance(contractAddress);
     const toHex = oneToHexAddress(to);
-    harmony.wallet.addByPrivateKey(privateKey);
     const weiAmount = new BN(
       new BigNumber(amount).multipliedBy(Math.pow(10, decimals)).toFixed(),
       10
     );
-    await new Promise(async (resolve, reject) => {
-      await instance.methods
-        .transfer(toHex, weiAmount)
-        .send({
-          from,
-          gasLimit,
-          gasPrice: new harmony.utils.Unit(gasPrice).asGwei().toWei(),
-        })
-        .on("transactionHash", (_hash) => {
-          txHash = _hash;
-        })
-        .on("receipt", (_receipt) => {
-          receipt = _receipt;
-        })
-        .on("confirmation", (confirmation) => {
-          if (confirmation !== "CONFIRMED") {
-            reject("Gas fee is too low or something is wrong.");
-          }
-        })
-        .on("error", (error) => {
-          reject(error);
-        });
-      resolve("Confirmed");
-    });
 
-    return {
-      result: true,
-      mesg: getNetworkLink("/tx/" + txHash),
-    };
+    const txn = await instance.methods
+      .transfer(toHex, weiAmount)
+      .createTransaction();
+    txn.setParams({
+      ...txn.txParams,
+      from: oneToHexAddress(from),
+      gasLimit,
+      gasPrice: new harmony.utils.Unit(gasPrice).asGwei().toWei(),
+    });
+    const account = harmony.wallet.addByPrivateKey(privateKey);
+    const signedTxn = await account.signTransaction(txn);
+    const res = await sendTransaction(signedTxn);
+    return res;
   } catch (err) {
     return {
       result: false,

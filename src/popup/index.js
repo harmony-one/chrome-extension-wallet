@@ -13,6 +13,7 @@ import RadioButton from "./components/RadioButton";
 import PincodeInput from "vue-pincode-input";
 import PincodeModal from "./pages/Settings/Security/PincodeModal.vue";
 import MoonLoader from "vue-spinner/src/MoonLoader";
+import PulseLoader from "vue-spinner/src/PulseLoader";
 import ScaleLoader from "vue-spinner/src/ScaleLoader";
 import ClipLoader from "vue-spinner/src/ClipLoader";
 import MarqueeText from "vue-marquee-text-component";
@@ -20,6 +21,8 @@ import ToggleButton from "vue-js-toggle-button";
 import Tooltip from "vue-directive-tooltip";
 import "vue-directive-tooltip/dist/vueDirectiveTooltip.css";
 
+import { initHRC20Tokens } from "services/hrc20/init.js";
+import { initHRC721Tokens } from "services/hrc721/init.js";
 import BigNumber from "bignumber.js";
 import Config from "~/config";
 
@@ -33,14 +36,18 @@ import "./css/normalize.scss";
 import "./css/style.scss";
 import "./css/modal.scss";
 import "./css/vue-select.scss";
+import Popper from "vue-popperjs";
+import "vue-popperjs/dist/vue-popper.css";
 
 Vue.config.productionTip = false;
 
 sync(store, router);
 
 Vue.use(ToggleButton);
+Vue.component("Popper", Popper);
 Vue.component("marquee-text", MarqueeText);
 Vue.component("MoonLoader", MoonLoader);
+Vue.component("PulseLoader", PulseLoader);
 Vue.component("ClipLoader", ClipLoader);
 Vue.component("ScaleLoader", ScaleLoader);
 Vue.component("AppHeader", AppHeader);
@@ -75,7 +82,7 @@ if (!store.state.settings.auth.lockState)
 ///
 
 BigNumber.config({
-  EXPONENTIAL_AT: [-50, 50],
+  EXPONENTIAL_AT: [-100, 100],
   FORMAT: {
     prefix: "",
     decimalSeparator: ".",
@@ -88,48 +95,6 @@ BigNumber.config({
   },
 });
 //change the state
-
-const HRCTokens = store.state.hrc20.tokens;
-const isPreviousVersion = HRCTokens["1"] && !Array.isArray(HRCTokens["1"]);
-if (isPreviousVersion) {
-  const networkKeys = ["1", "2"];
-  let newTokenArray = {
-    Mainnet: [],
-    Testnet: [],
-  };
-  networkKeys.forEach((network) => {
-    const tokenArray = Object.keys(HRCTokens[network]);
-    tokenArray.forEach((token) => {
-      if (network === "1") {
-        newTokenArray["Mainnet"].push({
-          symbol: token,
-          address: HRCTokens[network][token].address,
-          decimals: HRCTokens[network][token].decimals,
-          balance: 0,
-        });
-      } else if (network === "2") {
-        newTokenArray["Testnet"].push({
-          symbol: token,
-          address: HRCTokens[network][token].address,
-          decimals: HRCTokens[network][token].decimals,
-          balance: 0,
-        });
-      }
-    });
-  });
-
-  store.commit("hrc20/resetTokens");
-
-  store.commit("hrc20/setTokenArray", {
-    network: "Mainnet",
-    tokenArray: newTokenArray["Mainnet"],
-  });
-  store.commit("hrc20/setTokenArray", {
-    network: "Testnet",
-    tokenArray: newTokenArray["Testnet"],
-  });
-}
-///
 
 //save the version info
 storage.getValue("meta").then(({ meta }) => {
@@ -152,3 +117,6 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   sendResponse();
   return true;
 });
+
+initHRC20Tokens(store);
+initHRC721Tokens(store);

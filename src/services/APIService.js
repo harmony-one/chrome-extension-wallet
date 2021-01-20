@@ -11,6 +11,8 @@ import _ from "lodash";
 import Config from "~/config";
 import { Harmony } from "@harmony-js/core";
 import { Unit } from "@harmony-js/utils";
+import { getHostNameFromTab } from "./utils/getHostnameFromTab";
+import * as lock from "~/background/lock";
 
 const getHarmony = (chainId) => {
   const network = _.find(Config.networks, { chainId });
@@ -145,6 +147,7 @@ class APIService {
     this.host = "";
     this.activeSession = null;
   }
+
   getState = () => {
     return {
       type: this.type,
@@ -155,6 +158,11 @@ class APIService {
     };
   };
   sendMessageToInjectScript = (type, payload) => {
+    if (!payload) {
+      payload = {};
+    }
+
+    payload.sender = this.sender;
     chrome.tabs.sendMessage(this.sender, msgToContentScript(type, payload));
   };
   openPopup = async (route, width, height) => {
@@ -169,12 +177,12 @@ class APIService {
       });
     });
   };
-  forgetIdentity = async (tabid, hostname) => {
-    this.sender = tabid;
-    this.host = hostname;
+  forgetIdentity = async (sender) => {
+    this.sender = sender.tab.id;
+    this.host = getHostNameFromTab(sender.tab);
 
     let sessionList = await this.getHostSessions();
-    const existIndex = sessionList.findIndex((elem) => elem.host === hostname);
+    const existIndex = sessionList.findIndex((elem) => elem.host === this.host);
     if (existIndex >= 0) {
       sessionList.splice(existIndex, 1);
       await storage.saveValue({
@@ -182,13 +190,14 @@ class APIService {
       });
     }
     this.sendMessageToInjectScript(THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE);
+    lock.unlock();
   };
-  getAccount = async (tabid, hostname) => {
+  getAccount = async (sender) => {
     try {
       const store = this.getVuexStore();
-      this.sender = tabid;
-      this.host = hostname;
-      const session = await this.getSession(hostname);
+      this.sender = sender.tab.id;
+      this.host = getHostNameFromTab(sender.tab);
+      const session = await this.getSession(this.host);
       if (session.exist) {
         const findAcc = _.find(store.wallets.accounts, {
           address: session.account.address,
@@ -227,15 +236,16 @@ class APIService {
       console.error(err);
     }
   };
-  prepareSignTransaction = async (tabid, hostname, payload) => {
+  prepareSignTransaction = async (sender, payload) => {
     try {
       const store = this.getVuexStore();
-      this.sender = tabid;
-      this.host = hostname;
+      this.sender = sender.tab.id;
+      this.host = getHostNameFromTab(sender.tab);
+
       this.type = payload.type;
       this.params = payload.params;
       this.txnInfo = payload.txnInfo;
-      const session = await this.getSession(hostname);
+      const session = await this.getSession(this.host);
       if (session.exist) {
         const findAcc = _.find(store.wallets.accounts, {
           address: session.account.address,
@@ -249,8 +259,7 @@ class APIService {
           return;
         }
         this.activeSession = session;
-        if (this.isDataExist()) this.openPopup("sign", 400, 610);
-        else this.openPopup("sign", 400, 550);
+        this.openPopup("sign", 400, 610);
       } else {
         this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
           rejected: true,
@@ -268,9 +277,6 @@ class APIService {
   onGetSignatureKeySuccess = (payload) => {
     this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, payload);
     this.closeWindow();
-  };
-  isDataExist = () => {
-    return this.txnInfo.data && this.txnInfo.data !== "0x";
   };
   onGetSignatureKeyReject = ({ message }) => {
     this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
@@ -324,12 +330,14 @@ class APIService {
     this.closeWindow();
   };
   closeWindow = () => {
+    lock.unlock();
     chrome.runtime.sendMessage({
       type: FROM_BACK_TO_POPUP,
       action: CLOSE_WINDOW,
     });
   };
 }
+
 const apiService = new APIService();
 
 export default apiService;

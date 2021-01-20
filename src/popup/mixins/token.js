@@ -6,18 +6,32 @@ import _ from "lodash";
 export default {
   computed: {
     ...mapState({
-      tokens: (state) => state.hrc20.tokens,
+      hrc20tokens: (state) => state.hrc20.tokens,
+      hrc721tokens: (state) => state.hrc721.tokens,
       network: (state) => state.network,
       address: (state) => state.wallets.active.address,
     }),
-    tokenArrayOfNetwork() {
-      return this.tokens[this.network.name];
+    hrc20tokenArrayOfNetwork() {
+      return this.hrc20tokens[this.network.name];
     },
-    getContractAddressList() {
-      const networkList = Object.keys(this.tokens);
+    hrc721tokenArrayOfNetwork() {
+      return this.hrc721tokens[this.network.name];
+    },
+    getHRC20ContractAddressList() {
+      const networkList = Object.keys(this.hrc20tokens);
       let addressList = [];
       networkList.forEach((network) => {
-        this.tokens[network].forEach((token) => {
+        this.hrc20tokens[network].forEach((token) => {
+          addressList.push(token.address);
+        });
+      });
+      return addressList;
+    },
+    getHRC721ContractAddressList() {
+      const networkList = Object.keys(this.hrc721tokens);
+      let addressList = [];
+      networkList.forEach((network) => {
+        this.hrc20tokens[network].forEach((token) => {
           addressList.push(token.address);
         });
       });
@@ -26,12 +40,12 @@ export default {
   },
   methods: {
     loadAllTokenBalance() {
-      this.tokenArrayOfNetwork.forEach(async (token) => {
+      this.hrc20tokenArrayOfNetwork.forEach(async (token) => {
         await this.loadTokenBalance(token);
       });
     },
     getTokenBalance(token) {
-      const { balance } = _.find(this.tokenArrayOfNetwork, {
+      const { balance } = _.find(this.hrc20tokenArrayOfNetwork, {
         address: token.address,
       });
       return balance;

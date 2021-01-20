@@ -25,7 +25,10 @@
         <span class="address__name">{{ txnParams.to }}</span>
       </p>
       <span class="action_caption">Transaction Details</span>
-      <div class="invoice" :class="{ 'withdraw-section': isWithdrawal }">
+      <div
+        class="invoice txn_container"
+        :class="{ 'withdraw-section': isWithdrawal }"
+      >
         <div class="invoice__row" v-if="!isWithdrawal">
           <span>Amount</span>
           <span>{{ txnParams.amount }} ONE</span>
@@ -38,27 +41,57 @@
           <span>Gas Limit</span>
           <span>{{ txnParams.gasLimit }}</span>
         </div>
-        <div v-if="isDataExist">
-          <p class="data_caption">Data</p>
-          <div class="data_content">{{ txnParams.data }}</div>
+        <div class="data_container" v-if="txnParams.data">
+          <span class="data_caption">Data</span>
+          <select class="data_view_select" v-model="viewOption">
+            <option value="default">Default</option>
+            <option value="utf-8">Utf-8</option>
+            <option value="decode">Decode Input</option>
+          </select>
+        </div>
+        <div class="data_content" v-if="txnParams.data">
+          <div v-if="viewOption === 'default'">{{ txnParams.data }}</div>
+          <div v-else-if="viewOption === 'utf-8'">
+            {{ toUtf8(txnParams.data) }}
+          </div>
+          <div v-else>
+            <div v-if="suggestion && suggestion.length">
+              <div
+                v-for="(decode, index) in suggestion"
+                :key="index"
+                class="input-data"
+              >
+                <div class="input-function">{{ getFunctionName(decode) }}</div>
+                <div v-for="(input, index2) in decode.inputs" :key="index2">
+                  <span class="input-param">Param {{ `${index2 + 1}` }}</span
+                  >{{ ` - ${input.value}` }}
+                </div>
+              </div>
+            </div>
+            <div v-else>
+              Decode failed or nothing to decode
+            </div>
+          </div>
         </div>
       </div>
-      <div v-if="!wallet.isLedger" class="password-content">
-        <label class="input-label">
-          Password
-          <input
-            class="input-field"
-            type="password"
-            name="password"
-            ref="password"
-            v-model="password"
-            placeholder="Input your password"
-            v-on:keyup.enter="approve"
-          />
-        </label>
-      </div>
-      <div class="ledger-content" v-else>
-        <b>{{ caption }}</b>
+      <div v-if="!loading">
+        <div v-if="!wallet.isLedger" class="password-content">
+          <label class="input-label">
+            Password
+            <input
+              class="input-field"
+              type="password"
+              name="password"
+              ref="password"
+              v-model="password"
+              placeholder="Input your password"
+              v-on:keyup.enter="approve"
+            />
+          </label>
+        </div>
+        <div class="ledger-content" v-else>
+          <b>{{ caption }}</b>
+        </div>
       </div>
       <div class="footer">
         <div class="button-group" v-if="!wallet.isLedger">
@@ -71,7 +104,9 @@
           <button class="primary" v-if="!hasError" @click="reject">
             Close
           </button>
-          <button class="primary" v-else @click="signwithLedger">Retry</button>
+          <button class="primary" v-else @click="() => signTransaction(true)">
+            Retry
+          </button>
         </div>
       </div>
     </div>
@@ -95,6 +130,7 @@
 <script>
 import { decryptKeyStore } from "services/AccountService";
 import { mapState, mapGetters } from "vuex";
+import { fetchSuggestions } from "services/ContractService";
 import {
   createTransaction,
   createDelegateTransaction,
@@ -119,12 +155,15 @@ import {
 export default {
   data: () => ({
     transaction: null,
+    viewOption: "default",
     params: {
       updateNonce: true,
       encodeMode: "rlp",
       blockNumber: "latest",
       shardID: null,
     },
+    suggestion: null,
+    loading: false,
     txnParams: {
       gasLimit: null,
       gasPrice: null,
@@ -143,6 +182,7 @@ export default {
     type: "Send",
     hasError: false,
     caption: LEDGER_CONFIRM_PREPARE,
+    privateKey: null,
     wallet: {
       isLedger: false,
       name: "",
@@ -161,9 +201,6 @@ export default {
     },
     getTotal() {
       return Number(this.txnParams.amount) + Number(this.txnParams.getGasFee);
-    },
-    isDataExist() {
-      return this.txnParams.data && this.txnParams.data !== "0x";
     },
     displayAction() {
       switch (this.type) {
@@ -184,32 +221,75 @@ export default {
   watch: {
     async transaction() {
       if (this.transaction && this.wallet.isLedger) {
-        await this.signwithLedger();
+        await this.signTransaction(true);
       }
     },
   },
   methods: {
-    async signwithLedger() {
+    toUtf8(data) {
+      const hexString = data.substring(2);
+      let strOut = "";
+      for (let x = 0; x < hexString.length; x += 2) {
+        strOut += String.fromCharCode(parseInt(hexString.substr(x, 2), 16));
+      }
+      return strOut;
+    },
+    getFunctionName(decode) {
+      let str = "";
+      const { method, inputs } = decode;
+      const { name } = method;
+      str = "- " + name + " (";
+      inputs.forEach((param, index) => {
+        str += param.type + (index === inputs.length - 1 ? "" : ", ");
+      });
+      str += ")";
+      return str;
+    },
+    async signTransaction(isLedger) {
       try {
-        this.caption = LEDGER_CONFIRM_PREPARE;
-        this.hasError = false;
-        const app = await getHarmonyApp();
-        let signedTxParams;
+        let app, signer;
+        if (isLedger) {
+          this.caption = LEDGER_CONFIRM_PREPARE;
+          this.hasError = false;
+          app = await getHarmonyApp();
+        } else {
+          signer = new Account(this.privateKey, this.transaction.messenger);
+        }
+        let signedTxParams, signedTransaction;
+        const { updateNonce, encodeMode, blockNumber, shardID } = this.params;
         if (this.type === TRANSACTIONTYPE.SEND) {
-          const signedTransaction = await app.signTransaction(
-            this.transaction,
-            this.transaction.chainId,
-            this.transaction.shardID,
-            this.transaction.messenger
-          );
+          if (isLedger) {
+            signedTransaction = await app.signTransaction(
+              this.transaction,
+              this.transaction.chainId,
+              this.transaction.shardID,
+              this.transaction.messenger
+            );
+          } else
+            signedTransaction = await signer.signTransaction(
+              this.transaction,
+              updateNonce,
+              encodeMode,
+              blockNumber
+            );
           signedTxParams = signedTransaction.txParams;
         } else {
-          const signedTransaction = await app.signStakingTransaction(
-            this.transaction,
-            this.transaction.chainId,
-            this.transaction.shardID,
-            this.transaction.messenger
-          );
+          if (isLedger)
+            signedTransaction = await app.signStakingTransaction(
+              this.transaction,
+              this.transaction.chainId,
+              this.transaction.shardID,
+              this.transaction.messenger
+            );
+          else
+            signedTransaction = await signer.signStaking(
+              this.transaction,
+              updateNonce,
+              encodeMode,
+              blockNumber,
+              shardID
+            );
+
           const parsedTxn = JSON.parse(JSON.stringify(signedTransaction));
           signedTxParams = {
             from: parsedTxn.from,
@@ -219,24 +299,26 @@ export default {
             signature: parsedTxn.signature,
           };
         }
-        this.caption = LEDGER_CONFIRM_SUCCESS;
-        this.$notify({
-          group: "notify",
-          type: "success",
-          text: LEDGER_CONFIRM_SUCCESS,
-        });
+        if (isLedger) {
+          this.caption = LEDGER_CONFIRM_SUCCESS;
+          this.$notify({
+            group: "notify",
+            type: "success",
+            text: LEDGER_CONFIRM_SUCCESS,
+          });
+        }
         setTimeout(
           () =>
             chrome.runtime.sendMessage({
               action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
               payload: {
-                isLedger: true,
                 txParams: signedTxParams,
               },
             }),
-          200
+          isLedger ? 200 : 0
         );
       } catch (err) {
+        console.log(err);
         this.hasError = true;
         this.caption = err.message;
         this.$notify({
@@ -258,7 +340,6 @@ export default {
         return false;
       }
       privateKey = await decryptKeyStore(this.password, this.wallet.keystore);
-
       if (!privateKey) {
         this.$notify({
           group: "notify",
@@ -267,14 +348,11 @@ export default {
         });
         return false;
       }
-      chrome.runtime.sendMessage({
-        action: THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
-        payload: {
-          isLedger: false,
-          keystore: this.wallet.keystore,
-          password: this.password,
-        },
-      });
+      this.privateKey = privateKey;
+
+      this.$store.commit("loading", true);
+      await this.signTransaction(false);
+      this.$store.commit("loading", false);
     },
 
     async reject() {
@@ -292,21 +370,24 @@ export default {
   updated() {
     if (this.$refs.password) this.$refs.password.focus();
   },
-  mounted() {
+  created() {
+    this.loading = true;
     chrome.runtime.sendMessage(
       { action: GET_WALLET_SERVICE_STATE },
-      ({ state } = {}) => {
+      async ({ state } = {}) => {
         if (state && state.type && state.txnInfo && state.session) {
-          const { type, txnInfo, params, session } = state;
-          this.type = type;
-          this.txnParams = txnInfo;
-          this.params = { ...params };
-          this.host = session.host;
-          this.wallet = _.find(this.wallets.accounts, {
-            address: session.account.address,
-          });
-          if (!this.wallet.isLedger) return;
           try {
+            const { type, txnInfo, params, session } = state;
+            this.type = type;
+            this.txnParams = txnInfo;
+            console.log(this.txnParams);
+            if (this.txnParams.data)
+              this.suggestion = await fetchSuggestions(this.txnParams.data);
+            this.params = { ...params };
+            this.host = session.host;
+            this.wallet = _.find(this.wallets.accounts, {
+              address: session.account.address,
+            });
             if (type === TRANSACTIONTYPE.SEND) {
               this.transaction = createTransaction(txnInfo);
             } else if (type === TRANSACTIONTYPE.DELEGATE) {
@@ -316,8 +397,15 @@ export default {
             } else {
               this.transaction = createRewardsTransaction(txnInfo);
             }
+            this.loading = false;
           } catch (err) {
             console.error(err);
+            this.loading = false;
+            this.$notify({
+              group: "notify",
+              type: "error",
+              text: err.message,
+            });
           }
         } else {
           window.close();
@@ -370,7 +458,31 @@ h3 {
   cursor: pointer;
   font-weight: 700;
 }
-.data_caption {
+.data_container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.txn_container {
+  height: 170px;
+  padding-right: 5px;
+  overflow: auto;
+  border-bottom: 1px solid #ddd;
+}
+.data_view_select {
+  border: 1px solid #989494;
+  border-radius: 6px;
+}
+.input-function {
+  color: blue;
+}
+.input-param {
+  color: rgb(28, 51, 177);
+}
+.data_view_select:focus {
+  outline: none;
+}
+.data_container .data_caption {
   font-weight: 600;
   margin-top: 5px;
   margin-bottom: 5px;
@@ -379,8 +491,7 @@ h3 {
   word-break: break-word;
   font-size: 12px;
   font-style: italic;
-  height: 35px;
-  overflow: auto;
+  padding: 5px 0 10px 0;
 }
 .action_caption {
   font-size: 16px;
@@ -399,6 +510,6 @@ h3 {
   height: 360px;
 }
 .withdraw-section {
-  margin-bottom: 80px;
+  margin-bottom: 40px;
 }
 </style>

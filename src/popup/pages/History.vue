@@ -1,6 +1,10 @@
 <template>
   <div>
-    <app-header @refresh="refreshHistory" headerTab="main-tab" />
+    <app-header
+      @refresh="refreshHistory"
+      @networkChanged="refreshHistory"
+      headerTab="main-tab"
+    />
     <main class="main">
       <div v-if="history.length === 0" class="message-empty">
         No transactions yet

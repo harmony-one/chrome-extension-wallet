@@ -4,6 +4,7 @@ import VuexPersistence from "vuex-persist";
 import wallets from "./modules/wallets";
 import network from "./modules/network";
 import hrc20 from "./modules/hrc20";
+import hrc721 from "./modules/hrc721";
 import account from "./modules/account";
 import settings from "./modules/settings";
 import * as getters from "./getters";
@@ -12,7 +13,7 @@ Vue.use(Vuex);
 
 const vuexLocal = new VuexPersistence({
   storage: window.localStorage,
-  modules: ["wallets", "network", "hrc20", "settings"],
+  modules: ["wallets", "network", "hrc20", "hrc721", "settings"],
 });
 
 export default new Vuex.Store({
@@ -22,6 +23,7 @@ export default new Vuex.Store({
     network,
     account,
     hrc20,
+    hrc721,
     settings,
   },
 

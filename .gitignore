@@ -7,3 +7,7 @@ key/
 node_modules/
 package-lock.json
 .zip
+*.lock
+builds/
+*.iml
+*.zip
