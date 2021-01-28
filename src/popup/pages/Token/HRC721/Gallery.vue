@@ -121,10 +121,17 @@ export default {
           address.substr(address.length - 30, address.length)
         );
     },
+    IsValidJson(str) {
+      try {
+        JSON.parse(str);
+      } catch (e) {
+        return false;
+      }
+      return true;
+    },
     async refreshData() {
       try {
         this.$store.commit("loading", true);
-
         this.contractAddress = this.$route.params.address;
         const bnBalance = await getTokenBalance(
           this.address,
@@ -161,33 +168,31 @@ export default {
               );
               if (uri) {
                 const response = await fetch(uri, { mode: "cors" });
-                const {
-                  image,
-                  name,
-                  description,
-                  attributes,
-                } = await response.json();
+                const jsonResponse = await response.json();
+                if (this.IsValidJson(jsonResponse)) {
+                  const { image, name, description, attributes } = jsonResponse;
+                  Vue.set(this.nfts, index, {
+                    uri: true,
+                    image,
+                    name,
+                    description,
+                    attributes,
+                    loading: false,
+                  });
+                  return;
+                }
+              }
+              if (id) {
                 Vue.set(this.nfts, index, {
-                  uri: true,
-                  image,
-                  name,
-                  description,
-                  attributes,
+                  id: new BigNumber(id).toString(),
+                  uri: false,
                   loading: false,
                 });
               } else {
-                if (id) {
-                  Vue.set(this.nfts, index, {
-                    id: new BigNumber(id).toString(),
-                    uri: false,
-                    loading: false,
-                  });
-                } else {
-                  Vue.set(this.nfts, index, {
-                    uri: false,
-                    loading: false,
-                  });
-                }
+                Vue.set(this.nfts, index, {
+                  uri: false,
+                  loading: false,
+                });
               }
             } catch (error) {
               console.error(error);

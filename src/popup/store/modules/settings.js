@@ -17,6 +17,7 @@ export default {
       countdown: 60, //sec, delay 1min when auth fails
     },
     hideLowBalance: false,
+    displayMode: 0,
     contacts: [],
   },
   mutations: {
@@ -28,6 +29,9 @@ export default {
     },
     setPindigits(state, payload) {
       state.auth.pindigits = payload;
+    },
+    setDisplayMode(state, payload) {
+      state.displayMode = payload;
     },
     setLockState(state, payload) {
       state.auth.lockState = { ...payload };
