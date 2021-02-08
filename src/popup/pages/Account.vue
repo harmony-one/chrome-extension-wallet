@@ -8,7 +8,13 @@
     <main class="main">
       <div class="relative">
         <div class="main-logo">
-          <img src="images/harmony-big.png" class="logo-img" alt="Harmony" />
+          <img
+            :src="
+              displayMode ? 'images/ethereum.svg' : 'images/harmony-big.png'
+            "
+            class="logo-img"
+            alt="Harmony"
+          />
         </div>
         <span
           v-if="wallets.active.isLedger"
@@ -17,13 +23,38 @@
         >
       </div>
       <div class="container">
-        <div
-          class="account-box"
-          @click="onClickAccount()"
-          v-tooltip.top="'Click to copy'"
-        >
-          <h2 class="name-label">{{ compressName(wallets.active.name) }}</h2>
-          <div class="box-address">{{ compressAddress(address, 20, 5) }}</div>
+        <div class="account-container">
+          <div
+            class="account-box"
+            @click="onClickAccount()"
+            v-tooltip.top="'Click to copy'"
+          >
+            <h2 class="name-label">{{ compressName(wallets.active.name) }}</h2>
+            <div class="box-address">
+              {{
+                compressAddress(
+                  displayMode ? switchToHexAddress(this.address) : this.address,
+                  20,
+                  5
+                )
+              }}
+            </div>
+          </div>
+          <div
+            class="switch-box"
+            @click="switchAddress"
+            v-tooltip.top="
+              displayMode
+                ? 'Switch to ONE Address'
+                : 'Switch to Ethereum Address'
+            "
+          >
+            <img
+              :src="!displayMode ? 'images/ethereum.svg' : 'images/harmony.png'"
+              height="20px"
+              alt="Harmony"
+            />
+          </div>
         </div>
 
         <div class="box-label">Account Balance</div>
@@ -101,7 +132,7 @@ import account from "mixins/account";
 import MainTab from "components/MainTab.vue";
 import { mapState } from "vuex";
 import BigNumber from "bignumber.js";
-
+import { oneToHexAddress } from "services/Hrc20Service";
 import axios from "axios";
 
 export default {
@@ -113,11 +144,15 @@ export default {
 
   data: () => ({
     shard: 0,
+    switchToHexAddress: oneToHexAddress,
     tokenPrice: null,
   }),
 
   computed: {
-    ...mapState(["wallets"]),
+    ...mapState({
+      wallets: (state) => state.wallets,
+      displayMode: (state) => state.settings.displayMode,
+    }),
     getUSDBalance() {
       return new BigNumber(this.account.balance)
         .multipliedBy(this.tokenPrice["one"])
@@ -149,6 +184,9 @@ export default {
   },
 
   methods: {
+    switchAddress() {
+      this.$store.commit("settings/setDisplayMode", 1 - this.displayMode);
+    },
     async fetchTokenPrice() {
       const {
         data: {
@@ -167,7 +205,9 @@ export default {
       else this.$router.push("/send");
     },
     onClickAccount() {
-      this.$copyText(this.address).then(() => {
+      this.$copyText(
+        this.displayMode ? oneToHexAddress(this.address) : this.address
+      ).then(() => {
         this.$notify({
           group: "copied",
           type: "info",
@@ -185,7 +225,7 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style lang="scss" scoped>
 .shard-box {
   display: flex;
   flex-direction: row;
@@ -201,12 +241,23 @@ export default {
 .name-label {
   margin: 0.5rem;
 }
-.account-box {
-  border-radius: 10px;
-  padding: 0.5rem;
-  margin: 0 3rem 0.5rem 3rem;
-  word-wrap: break-word;
-  transition: box-shadow 0.5s ease;
+.account-container {
+  position: relative;
+  .account-box {
+    border-radius: 10px;
+    padding: 0.5rem;
+    margin: 0 3rem 0.5rem 3rem;
+    word-wrap: break-word;
+    transition: box-shadow 0.5s ease;
+  }
+  .switch-box {
+    position: absolute;
+    right: 15px;
+    bottom: 10px;
+    width: 20px;
+    align-items: center;
+    cursor: pointer;
+  }
 }
 .account-box:hover {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);

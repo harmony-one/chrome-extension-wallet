@@ -3,6 +3,7 @@ import {
   THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
   THIRDPARTY_SIGN_REQUEST_RESPONSE,
   HARMONY_RESPONSE_TYPE,
+  THIRDPARTY_PERSONAL_SIGN_REQUEST_RESPONSE,
   FROM_BACK_TO_POPUP,
   CLOSE_WINDOW,
 } from "~/types";
@@ -13,6 +14,7 @@ import { Harmony } from "@harmony-js/core";
 import { Unit } from "@harmony-js/utils";
 import { getHostNameFromTab } from "./utils/getHostnameFromTab";
 import * as lock from "~/background/lock";
+import { THIRDPARTY_PERSONAL_SIGN_SUCCESS_RESPONSE } from "../types";
 
 const getHarmony = (chainId) => {
   const network = _.find(Config.networks, { chainId });
@@ -142,6 +144,7 @@ class APIService {
   constructor() {
     this.params = null;
     this.txnInfo = null;
+    this.msgData = null;
     this.type = null;
     this.sender = null;
     this.host = "";
@@ -153,6 +156,7 @@ class APIService {
       type: this.type,
       host: this.host,
       txnInfo: this.txnInfo,
+      msgData: this.msgData,
       params: this.params,
       session: this.activeSession,
     };
@@ -191,6 +195,50 @@ class APIService {
     }
     this.sendMessageToInjectScript(THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE);
     lock.unlock();
+  };
+  sign = async (sender, payload) => {
+    try {
+      const store = this.getVuexStore();
+      this.sender = sender.tab.id;
+      this.host = getHostNameFromTab(sender.tab);
+      this.msgData = payload.data;
+      const session = await this.getSession(this.host);
+      if (session.exist) {
+        const findAcc = _.find(store.wallets.accounts, {
+          address: session.account.address,
+        });
+        if (!findAcc) {
+          this.sendMessageToInjectScript(
+            THIRDPARTY_PERSONAL_SIGN_REQUEST_RESPONSE,
+            {
+              rejected: true,
+              message:
+                "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out",
+            }
+          );
+          return;
+        }
+        this.activeSession = session;
+        this.openPopup("personal_sign", 400, 570);
+      } else {
+        this.sendMessageToInjectScript(
+          THIRDPARTY_PERSONAL_SIGN_REQUEST_RESPONSE,
+          {
+            rejected: true,
+            message:
+              "The account is not selected. Please use getAccount first to sign the transaction",
+          }
+        );
+      }
+    } catch (error) {
+      this.sendMessageToInjectScript(
+        THIRDPARTY_PERSONAL_SIGN_REQUEST_RESPONSE,
+        {
+          rejected: true,
+          message: JSON.stringify(err),
+        }
+      );
+    }
   };
   getAccount = async (sender) => {
     try {
@@ -305,7 +353,20 @@ class APIService {
       exist: false,
     };
   };
-
+  onPersonalSignSuccess = async (payload) => {
+    this.sendMessageToInjectScript(
+      THIRDPARTY_PERSONAL_SIGN_REQUEST_RESPONSE,
+      payload
+    );
+    this.closeWindow();
+  };
+  onPersonalSignReject = async ({ message }) => {
+    this.sendMessageToInjectScript(THIRDPARTY_PERSONAL_SIGN_REQUEST_RESPONSE, {
+      rejected: true,
+      message,
+    });
+    this.closeWindow();
+  };
   onGetAccountSuccess = async (payload) => {
     let sessionList = await this.getHostSessions();
     const newHost = {

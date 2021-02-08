@@ -1,5 +1,11 @@
 import aesjs from "aes-js";
-
+import {
+  bufferToHex,
+  calculateSigRecovery,
+  toBuffer,
+  setLengthLeft,
+  isValidSigRecovery,
+} from "./utils/eth-util";
 export function encryptString(data, salt) {
   const textBytes = aesjs.utils.utf8.toBytes(data);
   const aesCtr = new aesjs.ModeOfOperation.ctr(aesjs.utils.utf8.toBytes(salt));
@@ -27,3 +33,15 @@ export function stringToHex(str) {
   }
   return arr.join("");
 }
+
+export const toRpcSig = (v, r, s, chainId) => {
+  const recovery = calculateSigRecovery(v, chainId);
+  if (!isValidSigRecovery(recovery)) {
+    throw new Error("Invalid signature v value");
+  }
+
+  // geth (and the RPC eth_sign method) uses the 65 byte format used by Bitcoin
+  return bufferToHex(
+    Buffer.concat([setLengthLeft(r, 32), setLengthLeft(s, 32), toBuffer(v)])
+  );
+};

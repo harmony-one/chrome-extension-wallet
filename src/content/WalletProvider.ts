@@ -1,11 +1,11 @@
 "use strict";
 import { Transaction } from "@harmony-js/transaction";
 import { StakingTransaction } from "@harmony-js/staking";
-import { Account } from "@harmony-js/account";
-import { decryptKeyStore } from "../services/AccountService";
+import { sign } from "@harmony-js/crypto";
 import {
   THIRDPARTY_FORGET_IDENTITY_REQUEST,
   THIRDPARTY_GET_ACCOUNT_REQUEST,
+  THIRDPARTY_PERSONAL_SIGN_REQUEST,
   THIRDPARTY_SIGN_REQUEST,
   FACTORYTYPE,
   LOGIN_REJECT,
@@ -61,6 +61,27 @@ class WalletProvider {
           return reject(LOGIN_REJECT);
         }
         resolve(res);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+  sign(data: string) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const res = await sendAsyncMessageToContentScript({
+          type: THIRDPARTY_PERSONAL_SIGN_REQUEST,
+          payload: {
+            data,
+          },
+        });
+        if (res.rejected) {
+          if (res.message) return reject(res.message);
+          return reject("User rejected the personal sign request");
+        }
+        if (res.data) {
+          resolve(res.data);
+        } else reject("Sign failed. Something went wrong");
       } catch (err) {
         reject(err);
       }

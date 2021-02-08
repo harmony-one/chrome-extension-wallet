@@ -121,18 +121,29 @@ export default {
           address.substr(address.length - 30, address.length)
         );
     },
+    IsValidJson(str) {
+      try {
+        JSON.parse(str);
+        console.log("success");
+      } catch (e) {
+        console.log("error");
+        return false;
+      }
+      return true;
+    },
     async refreshData() {
       try {
         this.$store.commit("loading", true);
-
         this.contractAddress = this.$route.params.address;
+        // const testAddress = "one1km7xg8e3xjys7azp9f4xp8hkw79vm2h3f2lade";
+        console.log(this.contractAddress);
         const bnBalance = await getTokenBalance(
           this.address,
           this.contractAddress
         );
         if (!bnBalance) throw new Error("Contract address is invalid");
         this.balance = new BigNumber(bnBalance).toNumber();
-        const totalSupply = await getTotalSupply(this.contractAddress);
+        // const totalSupply = await getTotalSupply(this.contractAddress);
         this.nfts = Array(this.balance).fill({ loading: true });
         this.$store.commit("loading", false);
         const itemList = await getTokensOfOwner(
@@ -161,33 +172,38 @@ export default {
               );
               if (uri) {
                 const response = await fetch(uri, { mode: "cors" });
-                const {
-                  image,
-                  name,
-                  description,
-                  attributes,
-                } = await response.json();
+                if (response.status === 200) {
+                  const jsonResponse = await response.json();
+                  if (this.IsValidJson(jsonResponse)) {
+                    const {
+                      image,
+                      name,
+                      description,
+                      attributes,
+                    } = jsonResponse;
+                    Vue.set(this.nfts, index, {
+                      uri: true,
+                      image,
+                      name,
+                      description,
+                      attributes,
+                      loading: false,
+                    });
+                    return;
+                  }
+                }
+              }
+              if (id) {
                 Vue.set(this.nfts, index, {
-                  uri: true,
-                  image,
-                  name,
-                  description,
-                  attributes,
+                  id: new BigNumber(id).toString(),
+                  uri: false,
                   loading: false,
                 });
               } else {
-                if (id) {
-                  Vue.set(this.nfts, index, {
-                    id: new BigNumber(id).toString(),
-                    uri: false,
-                    loading: false,
-                  });
-                } else {
-                  Vue.set(this.nfts, index, {
-                    uri: false,
-                    loading: false,
-                  });
-                }
+                Vue.set(this.nfts, index, {
+                  uri: false,
+                  loading: false,
+                });
               }
             } catch (error) {
               console.error(error);

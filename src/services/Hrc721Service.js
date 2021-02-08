@@ -24,10 +24,15 @@ export async function getTokenURI(tokenid, contractAddress) {
 }
 
 export async function getTokensOfOwner(address, contractAddress) {
-  const instance = getContractInstance(contractAddress);
-  const hexAddress = oneToHexAddress(address);
-  let uri = await instance.methods.tokensOfOwner(hexAddress).call();
-  return uri;
+  try {
+    const instance = getContractInstance(contractAddress);
+    const hexAddress = oneToHexAddress(address);
+    let uri = await instance.methods.tokensOfOwner(hexAddress).call();
+    return uri;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 }
 
 export async function getTokenOfOwnerByIndex(address, index, contractAddress) {
