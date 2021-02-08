@@ -8,6 +8,7 @@ import ConnectHardwareWallet from "./pages/Wallet/ConnectHardwareWallet.vue";
 
 import LogIn from "./pages/API/LogIn.vue";
 import SignTransaction from "./pages/API/SignTransaction.vue";
+import PersonalSign from "./pages/API/PersonalSign.vue";
 
 import Hrc20Tokens from "./pages/Token/Hrc20Tokens.vue";
 import Hrc721Tokens from "./pages/Token/Hrc721Tokens.vue";
@@ -45,6 +46,11 @@ const router = new Router({
       path: "/sign",
       name: "signtransaction",
       component: SignTransaction,
+    },
+    {
+      path: "/personal_sign",
+      name: "personalsign",
+      component: PersonalSign,
     },
     //end
     {

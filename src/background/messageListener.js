@@ -9,18 +9,20 @@ import {
   THIRDPARTY_SIGN_REQUEST,
   THIRDPARTY_SIGNATURE_KEY_SUCCESS_RESPONSE,
   THIRDPARTY_SIGNATURE_KEY_REJECT_RESPONSE,
+  THIRDPARTY_PERSONAL_SIGN_SUCCESS_RESPONSE,
+  THIRDPARTY_PERSONAL_SIGN_REJECT_RESPONSE,
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_SIGN_CONNECT,
+  THIRDPARTY_PERSONAL_SIGN_CONNECT,
+  THIRDPARTY_PERSONAL_SIGN_REQUEST,
   THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_CONNECT,
   APP_CONNECT,
-  THIRDPARTY_SIGN_REQUEST_RESPONSE,
-  THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
   THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
   GET_TAB_ID_INNER_EVENT_REQUEST,
-  POPUP_CLOSED
+  POPUP_CLOSED,
 } from "~/types";
-import * as lock from './lock'
+import * as lock from "./lock";
 
 function externalMessageListener(message, sender, sendResponse) {
   const { messageSource, payload } = message;
@@ -30,22 +32,22 @@ function externalMessageListener(message, sender, sendResponse) {
   }
 
   if (lock.isLocked(sender)) {
-    sendResponse({ isLocked: true })
-    console.log('Wallet is currently locked by other tab')
-    return
+    sendResponse({ isLocked: true });
+    console.log("Wallet is currently locked by other tab");
+    return;
   }
-  lock.lock(sender)
-
+  lock.lock(sender);
   const { type } = payload;
   switch (type) {
     case THIRDPARTY_SIGN_REQUEST:
-      apiService.prepareSignTransaction(
-        sender,
-        payload.payload
-      );
+      apiService.prepareSignTransaction(sender, payload.payload);
       break;
     case THIRDPARTY_GET_ACCOUNT_REQUEST:
       apiService.getAccount(sender);
+      break;
+    case THIRDPARTY_PERSONAL_SIGN_REQUEST:
+      console.log("THIRDPARTY_PERSONAL_SIGN_REQUEST ===> ", payload);
+      apiService.sign(sender, payload.payload);
       break;
     case THIRDPARTY_FORGET_IDENTITY_REQUEST:
       apiService.forgetIdentity(sender);
@@ -75,6 +77,12 @@ function internalMessageListener(message, sender, sendResponse) {
     case THIRDPARTY_SIGNATURE_KEY_REJECT_RESPONSE:
       apiService.onGetSignatureKeyReject(payload);
       break;
+    case THIRDPARTY_PERSONAL_SIGN_SUCCESS_RESPONSE:
+      apiService.onPersonalSignSuccess(payload);
+      break;
+    case THIRDPARTY_PERSONAL_SIGN_REJECT_RESPONSE:
+      apiService.onPersonalSignReject(payload);
+      break;
     case THIRDPARTY_GET_ACCOUNT_SUCCESS_RESPONSE:
       apiService.onGetAccountSuccess(payload);
       break;
@@ -97,26 +105,17 @@ function onConnectListener(externalPort) {
         tabs.forEach((tab) => {
           setTimeout(() => {
             switch (name) {
-              case THIRDPARTY_SIGN_CONNECT: {
-                chrome.tabs.sendMessage(
-                  tab.id,
-                  msgToContentScript(POPUP_CLOSED, {
-                    rejected: true,
-                    sender: tab.id
-                  })
-                );
-                lock.unlock()
-                break;
-              }
+              case THIRDPARTY_SIGN_CONNECT:
+              case THIRDPARTY_PERSONAL_SIGN_CONNECT:
               case THIRDPARTY_GET_ACCOUNT_CONNECT: {
                 chrome.tabs.sendMessage(
                   tab.id,
                   msgToContentScript(POPUP_CLOSED, {
                     rejected: true,
-                    sender: tab.id
+                    sender: tab.id,
                   })
                 );
-                lock.unlock()
+                lock.unlock();
                 break;
               }
             }
@@ -126,7 +125,7 @@ function onConnectListener(externalPort) {
     } else {
       const { AppState } = await storage.getValue("AppState");
       storage.saveValue({
-        AppState: { ...AppState, lastClosed: Date.now() }
+        AppState: { ...AppState, lastClosed: Date.now() },
       });
     }
   });
@@ -138,7 +137,7 @@ export function getTabId({ action }, sender, sendResponse) {
   }
 
   sendResponse(sender.tab.id);
-  return true
+  return true;
 }
 
 export function setupExtensionMessageListeners() {
