@@ -12,7 +12,7 @@
       <div class="sign__address">{{ wallet.address }}</div>
       <span class="action_caption">Data</span>
       <div class="data_container">
-        {{ msgData }}
+        {{ getString(signData) }}
       </div>
       <div v-if="!loading">
         <div v-if="!wallet.isLedger" class="password-content">
@@ -76,8 +76,10 @@
 <script>
 import { decryptKeyStore } from "services/AccountService";
 import { mapState, mapGetters } from "vuex";
-import { sign } from "@harmony-js/crypto";
+import { joinSignature, hexZeroPad, keccak256 } from "@harmony-js/crypto";
 import _ from "lodash";
+import { strip0x } from "@harmony-js/utils";
+import elliptic from "elliptic";
 import {
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_PERSONAL_SIGN_CONNECT,
@@ -93,7 +95,7 @@ export default {
     host: "",
     password: "",
     hasError: false,
-    msgData: "",
+    signData: false,
     caption: LEDGER_CONFIRM_PREPARE,
     privateKey: null,
     wallet: {
@@ -109,15 +111,46 @@ export default {
     }),
   },
   methods: {
-    async personal_sign(msgData) {
+    getString(signData) {
+      const { msgData } = signData;
+      return typeof msgData === "string"
+        ? msgData
+        : Buffer.from(Object.values(msgData)).toString();
+    },
+    async personal_sign(signData) {
       try {
-        let signature;
-        signature = sign(msgData, this.privateKey);
+        const { msgData, prefixMsg } = signData;
+        const data =
+          typeof msgData === "string"
+            ? Buffer.from(msgData, "utf8")
+            : Buffer.from(Object.values(msgData));
+        const secp256k1 = elliptic.ec("secp256k1");
+        const prefix = Buffer.from(
+          `\u0019${prefixMsg}:\n${data.length.toString()}`,
+          "utf-8"
+        );
+        const msgHashHarmony = keccak256(Buffer.concat([prefix, data])).slice(
+          2
+        );
+
+        const keyPair = secp256k1.keyFromPrivate(
+          strip0x(this.privateKey),
+          "hex"
+        );
+
+        const signature = keyPair.sign(msgHashHarmony, { canonical: true });
+
+        const result = {
+          recoveryParam: signature.recoveryParam,
+          r: hexZeroPad("0x" + signature.r.toString(16), 32),
+          s: hexZeroPad("0x" + signature.s.toString(16), 32),
+          v: 27 + signature.recoveryParam,
+        };
 
         chrome.runtime.sendMessage({
           action: THIRDPARTY_PERSONAL_SIGN_SUCCESS_RESPONSE,
           payload: {
-            data: signature,
+            data: joinSignature(result),
           },
         });
       } catch (err) {
@@ -154,7 +187,7 @@ export default {
       this.privateKey = privateKey;
 
       this.$store.commit("loading", true);
-      await this.personal_sign(this.msgData);
+      await this.personal_sign(this.signData);
       this.$store.commit("loading", false);
     },
 
@@ -178,10 +211,10 @@ export default {
     chrome.runtime.sendMessage(
       { action: GET_WALLET_SERVICE_STATE },
       async ({ state } = {}) => {
-        if (state && state.msgData && state.session) {
+        if (state && state.signData && state.session) {
           try {
-            const { msgData, session } = state;
-            this.msgData = msgData;
+            const { signData, session } = state;
+            this.signData = signData;
             this.host = session.host;
             this.wallet = _.find(this.wallets.accounts, {
               address: session.account.address,

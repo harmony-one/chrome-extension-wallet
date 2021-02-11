@@ -144,7 +144,7 @@ class APIService {
   constructor() {
     this.params = null;
     this.txnInfo = null;
-    this.msgData = null;
+    this.signData = null;
     this.type = null;
     this.sender = null;
     this.host = "";
@@ -156,7 +156,7 @@ class APIService {
       type: this.type,
       host: this.host,
       txnInfo: this.txnInfo,
-      msgData: this.msgData,
+      signData: this.signData,
       params: this.params,
       session: this.activeSession,
     };
@@ -201,7 +201,7 @@ class APIService {
       const store = this.getVuexStore();
       this.sender = sender.tab.id;
       this.host = getHostNameFromTab(sender.tab);
-      this.msgData = payload.data;
+      this.signData = payload;
       const session = await this.getSession(this.host);
       if (session.exist) {
         const findAcc = _.find(store.wallets.accounts, {

@@ -66,13 +66,14 @@ class WalletProvider {
       }
     });
   }
-  sign(data: string) {
+  sign(msgData: string | Uint8Array, prefixMsg = "Ethereum Signed Message") {
     return new Promise(async (resolve, reject) => {
       try {
         const res = await sendAsyncMessageToContentScript({
           type: THIRDPARTY_PERSONAL_SIGN_REQUEST,
           payload: {
-            data,
+            msgData,
+            prefixMsg,
           },
         });
         if (res.rejected) {
