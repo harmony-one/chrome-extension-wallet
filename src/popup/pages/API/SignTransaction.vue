@@ -380,7 +380,6 @@ export default {
             const { type, txnInfo, params, session } = state;
             this.type = type;
             this.txnParams = txnInfo;
-            console.log(this.txnParams);
             if (this.txnParams.data)
               this.suggestion = await fetchSuggestions(this.txnParams.data);
             this.params = { ...params };

@@ -168,6 +168,7 @@ class APIService {
 
     payload.sender = this.sender;
     chrome.tabs.sendMessage(this.sender, msgToContentScript(type, payload));
+    lock.unlock();
   };
   openPopup = async (route, width, height) => {
     chrome.windows.getCurrent({ windowTypes: ["normal"] }, function(window) {
@@ -194,7 +195,6 @@ class APIService {
       });
     }
     this.sendMessageToInjectScript(THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE);
-    lock.unlock();
   };
   sign = async (sender, payload) => {
     try {
