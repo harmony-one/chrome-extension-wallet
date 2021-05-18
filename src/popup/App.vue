@@ -1,13 +1,6 @@
 <template>
   <div id="app">
-    <loading
-      :active.sync="isLoading"
-      color="#0a93eb"
-      :opacity="0.88"
-      :height="75"
-      :width="55"
-      :z-index="500"
-    ></loading>
+    <loading :active.sync="isLoading" color="#0a93eb" :opacity="0.88" :height="75" :width="55" :z-index="500"></loading>
     <v-dialog transition="scale" :width="250" />
     <transition :name="transitionName" mode="out-in">
       <router-view />
@@ -32,8 +25,7 @@ export default {
   }),
   mounted() {
     this.$router.beforeEach((to, from, next) => {
-      if ((from.name !== "auth" && to.name === "lock") || from.name === "lock")
-        this.transitionName = "fade";
+      if ((from.name !== "auth" && to.name === "lock") || from.name === "lock") this.transitionName = "fade";
       else this.transitionName = "none";
       next();
     });

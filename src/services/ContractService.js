@@ -19,8 +19,7 @@ function contract(abi, to) {
   for (let name in contract.abiModel.getMethods()) {
     let method = contract.abiModel.getMethod(name);
     method.decodeInputs = (hexData) => decodeParameters(method.inputs, hexData);
-    method.decodeOutputs = (hexData) =>
-      decodeParameters(method.outputs, hexData);
+    method.decodeOutputs = (hexData) => decodeParameters(method.outputs, hexData);
   }
 
   contract.decodeInput = (hexData) => {
@@ -57,30 +56,31 @@ function contract(abi, to) {
   return contract;
 }
 export const fetchSuggestions = (hexData) => {
-  const sig = hexData.slice(0, 10).toLowerCase();
-  return (
-    axios
-      .get(
-        `https://www.4byte.directory/api/v1/signatures/?hex_signature=${sig}`
-      )
-      .then((res) => res.data.results)
-      // sort as first-in seem more relevant
-      .then((res) => res.sort((a, b) => a.id - b.id))
-      .then((res) => {
-        // limit to 10
-        if (res.length > 10) {
-          res.length = 10;
-        }
+  try {
+    const sig = hexData.slice(0, 10).toLowerCase();
+    return (
+      axios
+        .get(`https://www.4byte.directory/api/v1/signatures/?hex_signature=${sig}`)
+        .then((res) => res.data.results)
+        // sort as first-in seem more relevant
+        .then((res) => res.sort((a, b) => a.id - b.id))
+        .then((res) => {
+          // limit to 10
+          if (res.length > 10) {
+            res.length = 10;
+          }
 
-        return res
-          .map((r) => createABI(hexData, r.text_signature))
-          .filter((res) => !!res);
-      })
-      .catch((err) => {
-        console.error(err);
-        return null;
-      })
-  );
+          return res.map((r) => createABI(hexData, r.text_signature)).filter((res) => !!res);
+        })
+        .catch((err) => {
+          console.error(err);
+          return null;
+        })
+    );
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 };
 
 const createABI = (hexData, stringSignature) => {
@@ -91,9 +91,7 @@ const createABI = (hexData, stringSignature) => {
   const abi = [
     {
       constant: true,
-      inputs: inputs
-        .filter((i) => !!i)
-        .map((v, i) => ({ type: v, name: "$" + (i + 1) })),
+      inputs: inputs.filter((i) => !!i).map((v, i) => ({ type: v, name: "$" + (i + 1) })),
       name: name,
       outputs: [],
       type: "function",

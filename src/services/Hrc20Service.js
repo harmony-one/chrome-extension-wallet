@@ -5,8 +5,9 @@ import BigNumber from "bignumber.js";
 import { sendTransaction } from "services/AccountService";
 import { toBech32, fromBech32 } from "@harmony-js/crypto";
 
-export const oneToHexAddress = (address) =>
-  getHarmony().crypto.getAddress(address).basicHex;
+export const oneToHexAddress = (address) => getHarmony().crypto.getAddress(address).basicHex;
+
+export const hexToOneAddress = (address) => getHarmony().crypto.getAddress(address).bech32;
 
 export const getContractInstance = (contractAddress) => {
   const hmy = getHarmony();
@@ -47,14 +48,9 @@ export async function sendToken(
     let harmony = getHarmony();
     const instance = getContractInstance(contractAddress);
     const toHex = oneToHexAddress(to);
-    const weiAmount = new BN(
-      new BigNumber(amount).multipliedBy(Math.pow(10, decimals)).toFixed(),
-      10
-    );
+    const weiAmount = new BN(new BigNumber(amount).multipliedBy(Math.pow(10, decimals)).toFixed(), 10);
 
-    const txn = await instance.methods
-      .transfer(toHex, weiAmount)
-      .createTransaction();
+    const txn = await instance.methods.transfer(toHex, weiAmount).createTransaction();
     txn.setParams({
       ...txn.txParams,
       from: oneToHexAddress(from),
@@ -93,9 +89,7 @@ export async function decodeInput(to, hexData) {
     const symbol = await contract.methods.symbol().call();
     return {
       to: toBech32(params[0]),
-      amount: new BigNumber(params[1])
-        .dividedBy(Math.pow(10, new BN(decimals, 16).toNumber()))
-        .toString(),
+      amount: new BigNumber(params[1]).dividedBy(Math.pow(10, new BN(decimals, 16).toNumber())).toString(),
       symbol,
     };
   } catch (err) {

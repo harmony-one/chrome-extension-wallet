@@ -1,60 +1,31 @@
 <template>
   <div>
-    <app-header
-      :subtitle="getHeaderName"
-      @refresh="refreshData"
-      @networkChanged="refreshData"
-      backRoute="/home"
-    />
+    <app-header :subtitle="getHeaderName" @refresh="refreshData" @networkChanged="refreshData" backRoute="/home" />
     <main class="main">
       <div v-if="scene === 1">
-        <form
-          @submit.prevent="showConfirmDialog"
-          action
-          method="post"
-          class="send-form"
-          autocomplete="off"
-        >
-          <div
-            v-show="message.show"
-            class="message"
-            :class="[message.type]"
-            @click="onMessageClick"
-          >
-            <span v-if="message.type === 'success'"
-              >Transaction Succeed: Click here to see the transaction</span
-            >
+        <form @submit.prevent="showConfirmDialog" action method="post" class="send-form" autocomplete="off">
+          <div v-show="message.show" class="message" :class="[message.type]" @click="onMessageClick">
+            <span v-if="message.type === 'success'">Transaction Succeed: Click here to see the transaction</span>
             <span v-else>{{ message.text }}</span>
           </div>
           <div :class="{ row: !isToken }">
             <label class="input-label" :class="{ recipient: !isToken }">
-              Recipient Address
+              Recipient Address or HNS
               <input
                 class="input-field"
                 type="text"
                 name="address"
                 ref="address"
-                placeholder="Recipient Address"
+                placeholder="Recipient Address or HNS"
                 v-model="recipient"
               />
             </label>
-            <label
-              v-if="!isToken"
-              class="input-label shard"
-              :class="{ disabled: isHRCToken }"
-            >
+            <label v-if="!isToken" class="input-label shard" :class="{ disabled: isHRCToken }">
               To Shard
-              <select
-                class="input-field"
-                v-model="toShard"
-                :disabled="isHRCToken"
-              >
-                <option
-                  v-for="shard in account.shardArray"
-                  :key="shard.shardID"
-                  :value="shard.shardID"
-                  >{{ shard.shardID }}</option
-                >
+              <select class="input-field" v-model="toShard" :disabled="isHRCToken">
+                <option v-for="shard in account.shardArray" :key="shard.shardID" :value="shard.shardID">{{
+                  shard.shardID
+                }}</option>
               </select>
             </label>
           </div>
@@ -71,23 +42,14 @@
                 v-model="amount"
                 v-on:keyup.enter="showConfirmDialog"
               />
-              <div
-                class="maximum-label"
-                v-show="!loading"
-                @click="setMaxBalance"
-              >
+              <div class="maximum-label" v-show="!loading" @click="setMaxBalance">
                 Maximum: {{ getMaxBalance + " " + selectedToken.symbol }}
               </div>
             </label>
             <label v-if="!isToken" class="input-label token">
               Token
               <select class="input-field" v-model="selectedToken">
-                <option
-                  v-for="(token, index) in tokenList"
-                  :key="index"
-                  :value="token"
-                  >{{ token.symbol }}</option
-                >
+                <option v-for="(token, index) in tokenList" :key="index" :value="token">{{ token.symbol }}</option>
               </select>
             </label>
           </div>
@@ -117,14 +79,7 @@
             </label>
             <label class="input-label gas-one">
               Gas Fee
-              <input
-                class="input-field"
-                type="text"
-                name="gasfee"
-                ref="gasfee"
-                readonly
-                :value="`${getGasFee} ONE`"
-              />
+              <input class="input-field" type="text" name="gasfee" ref="gasfee" readonly :value="`${getGasFee} ONE`" />
             </label>
           </div>
           <label class="input-label" :class="{ disabled: isHRCToken }">
@@ -164,7 +119,8 @@
           </div>
           <div class="transaction__information">
             To
-            <span class="address__name">{{ compressAddress(recipient) }}</span>
+            <span class="address__name" v-if="isEns">{{ ensName }}({{ compressAddress(receiver) }})</span>
+            <span class="address__name" v-else>{{ compressAddress(receiver) }}</span>
             of Shard
             <b>{{ toShard }}</b>
           </div>
@@ -211,11 +167,7 @@
           </button>
         </div>
         <div v-else class="footer">
-          <button
-            v-if="ledgerError"
-            @click="onBackClick()"
-            class="primary flex"
-          >
+          <button v-if="ledgerError" @click="onBackClick()" class="primary flex">
             Retry
           </button>
           <button v-else @click="onBackClick()" class="primary flex">
@@ -223,12 +175,7 @@
           </button>
         </div>
       </div>
-      <notifications
-        group="notify"
-        width="250"
-        :max="4"
-        class="notifiaction-container"
-      />
+      <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
     </main>
   </div>
 </template>
@@ -236,27 +183,14 @@
 <script>
 import { mapState } from "vuex";
 import BigNumber from "bignumber.js";
-import {
-  decryptKeyStore,
-  transferOne,
-  getNetworkLink,
-  sendTransaction,
-} from "../../../services/AccountService";
-import { sendToken } from "../../../services/Hrc20Service";
+import { decryptKeyStore, transferOne, sendTransaction } from "services/AccountService";
+import { sendToken, hexToOneAddress } from "services/Hrc20Service";
 import { isValidAddress } from "@harmony-js/utils";
-import account from "../../mixins/account";
-import helper from "../../mixins/helper";
-import {
-  signTransactionWithLedger,
-  signHRCTransactionWithLedger,
-  isLedgerLocked,
-} from "../../../services/LedgerService";
-import {
-  LEDGER_CONFIRM_PREPARE,
-  LEDGER_CONFIRM_SUCCESS,
-  LEDGER_CONFIRM_REJECT,
-  LEDGER_LOCKED,
-} from "../../../types";
+import account from "mixins/account";
+import helper from "mixins/helper";
+import { setupENS, ENS_ADDRESS_TYPE, getAddressType, isNullAddress } from "services/utils/ens";
+import { signTransactionWithLedger, signHRCTransactionWithLedger } from "services/LedgerService";
+import { LEDGER_CONFIRM_PREPARE, LEDGER_CONFIRM_SUCCESS, LEDGER_CONFIRM_REJECT, LEDGER_LOCKED } from "../../../types";
 
 export default {
   name: "send-transaction",
@@ -278,6 +212,9 @@ export default {
     toShard: 0,
     tokenList: [],
     recipient: "",
+    receiver: "",
+    ensName: "",
+    isEns: false,
     gasPrice: 1,
     gasLimit: 25000,
     inputData: "",
@@ -296,6 +233,7 @@ export default {
     ...mapState({
       wallet: (state) => state.wallets.active,
       loading: (state) => state.loading,
+      network: (state) => state.network,
     }),
     getFromAddress() {
       return this.wallet.address;
@@ -307,8 +245,7 @@ export default {
       return parseFloat((this.gasPrice * this.gasLimit) / Math.pow(10, 9));
     },
     getTotal() {
-      if (!this.isHRCToken)
-        return new BigNumber(this.amount).plus(this.getGasFee).toFixed(8);
+      if (!this.isHRCToken) return new BigNumber(this.amount).plus(this.getGasFee).toFixed(8);
       else return this.amount;
     },
     getOneBalance() {
@@ -316,8 +253,7 @@ export default {
     },
     getMaxBalance() {
       let max;
-      if (!this.isHRCToken)
-        max = new BigNumber(this.account.balance).toFixed(8);
+      if (!this.isHRCToken) max = new BigNumber(this.account.balance).toFixed(8);
       else {
         max = this.getTokenBalance(this.selectedToken);
       }
@@ -350,12 +286,7 @@ export default {
       this.setGasLimit();
     },
     amount() {
-      if (
-        !RegExp(
-          `^[0-9]*[.]?[0-9]{0,${Math.min(8, this.selectedToken.decimals)}}$`,
-          "g"
-        ).test(this.amount)
-      )
+      if (!RegExp(`^[0-9]*[.]?[0-9]{0,${Math.min(8, this.selectedToken.decimals)}}$`, "g").test(this.amount))
         this.amount = this.amount.slice(0, this.amount.length - 1);
     },
   },
@@ -370,10 +301,7 @@ export default {
     },
     initSelectedToken() {
       if (!this.isToken) {
-        this.tokenList = [
-          { symbol: "ONE", decimals: 18, isMainToken: true },
-          ...this.hrc20tokenArrayOfNetwork,
-        ];
+        this.tokenList = [{ symbol: "ONE", decimals: 18, isMainToken: true }, ...this.hrc20tokenArrayOfNetwork];
         this.selectedToken = this.tokenList[0];
       } else {
         this.selectedToken = this.token;
@@ -399,6 +327,9 @@ export default {
       this.scene = 1;
       this.amount = 0;
       this.recipient = "";
+      this.receiver = "";
+      this.isEns = false;
+      this.ensName = "";
       this.toShard = 0;
       this.password = "";
       this.ledgerError = false;
@@ -410,7 +341,7 @@ export default {
         if (this.isHRCToken) {
           signedRes = await signHRCTransactionWithLedger(
             this.address,
-            this.recipient,
+            this.receiver,
             this.amount,
             this.gasLimit,
             this.gasPrice,
@@ -419,7 +350,7 @@ export default {
           );
         } else {
           signedRes = await signTransactionWithLedger(
-            this.recipient,
+            this.receiver,
             this.fromShard,
             this.toShard,
             this.amount,
@@ -488,7 +419,7 @@ export default {
         let ret;
         if (!this.isHRCToken) {
           ret = await transferOne(
-            this.recipient,
+            this.receiver,
             this.fromShard,
             this.toShard,
             this.amount,
@@ -501,7 +432,7 @@ export default {
           //token transfer part
           ret = await sendToken(
             this.address,
-            this.recipient,
+            this.receiver,
             this.amount,
             privateKey,
             this.gasLimit,
@@ -525,9 +456,7 @@ export default {
         console.error(e);
         this.$store.commit("loading", false);
         this.initScene();
-        this.showErrMessage(
-          "Something went wrong while trying to send the payment"
-        );
+        this.showErrMessage("Something went wrong while trying to send the payment");
       }
     },
     showSuccessMsg(msg) {
@@ -543,7 +472,20 @@ export default {
     async showConfirmDialog() {
       this.message.show = false;
 
-      if (!isValidAddress(this.recipient)) {
+      if (getAddressType(this.recipient) == ENS_ADDRESS_TYPE.ADDRESS) {
+        this.receiver = this.recipient;
+        this.isEns = false;
+      } else if (getAddressType(this.recipient) == ENS_ADDRESS_TYPE.NAME) {
+        const ens = setupENS(this.network);
+        this.receiver = hexToOneAddress(await ens.name(this.recipient).getAddress());
+        this.ensName = this.recipient;
+        this.isEns = true;
+      } else {
+        this.showErrMessage("Invalid recipient address or HNS");
+        return false;
+      }
+
+      if (!isValidAddress(this.receiver) || isNullAddress(this.receiver)) {
         this.showErrMessage("Invalid recipient address");
         return false;
       }
@@ -557,53 +499,30 @@ export default {
         this.showErrMessage("Invalid token amount");
         return false;
       } else {
-        const minAmount =
-          1 /
-          Math.pow(
-            10,
-            this.selectedToken.decimals >= 8 ? 8 : this.selectedToken.decimals
-          );
+        const minAmount = 1 / Math.pow(10, this.selectedToken.decimals >= 8 ? 8 : this.selectedToken.decimals);
         if (new BigNumber(this.amount).isLessThan(new BigNumber(minAmount))) {
-          this.showErrMessage(
-            `Minimum send amount is ${minAmount} ${this.selectedToken.symbol}`
-          );
+          this.showErrMessage(`Minimum send amount is ${minAmount} ${this.selectedToken.symbol}`);
           return false;
         }
       }
 
       if (!this.isHRCToken) {
-        if (
-          new BigNumber(this.getTotal).isGreaterThan(
-            new BigNumber(this.getOneBalance)
-          )
-        ) {
+        if (new BigNumber(this.getTotal).isGreaterThan(new BigNumber(this.getOneBalance))) {
           this.showErrMessage("Your balance is not enough");
           return false;
         }
       } else {
-        if (
-          new BigNumber(this.getOneBalance).isLessThan(
-            new BigNumber(this.getGasFee)
-          )
-        ) {
+        if (new BigNumber(this.getOneBalance).isLessThan(new BigNumber(this.getGasFee))) {
           this.showErrMessage("Your ONE balance is not enough");
           return false;
         }
-        if (
-          new BigNumber(this.getTotal).isGreaterThan(
-            new BigNumber(this.getMaxBalance),
-            10
-          )
-        ) {
+        if (new BigNumber(this.getTotal).isGreaterThan(new BigNumber(this.getMaxBalance), 10)) {
           this.showErrMessage("Your token balance is not enough");
           return false;
         }
       }
       this.amount = new BigNumber(this.amount)
-        .decimalPlaces(
-          Number(this.selectedToken.decimals),
-          BigNumber.ROUND_HALF_DOWN
-        )
+        .decimalPlaces(Number(this.selectedToken.decimals), BigNumber.ROUND_HALF_DOWN)
         .toFixed();
       if (this.wallet.isLedger) {
         this.processLedgerTransfer();

@@ -1,59 +1,28 @@
 <template>
   <div>
-    <app-header
-      @refresh="refreshAccount"
-      @networkChanged="refreshAccount"
-      headerTab="main-tab"
-    />
+    <app-header @refresh="refreshAccount" @networkChanged="refreshAccount" headerTab="main-tab" />
     <main class="main">
       <div class="relative">
         <div class="main-logo">
-          <img
-            :src="
-              displayMode ? 'images/ethereum.svg' : 'images/harmony-big.png'
-            "
-            class="logo-img"
-            alt="Harmony"
-          />
+          <img :src="displayMode ? 'images/ethereum.svg' : 'images/harmony-big.png'" class="logo-img" alt="Harmony" />
         </div>
-        <span
-          v-if="wallets.active.isLedger"
-          class="ledger-badge big account-badge"
-          >Ledger</span
-        >
+        <span v-if="wallets.active.isLedger" class="ledger-badge big account-badge">Ledger</span>
       </div>
       <div class="container">
         <div class="account-container">
-          <div
-            class="account-box"
-            @click="onClickAccount()"
-            v-tooltip.top="'Click to copy'"
-          >
+          <div class="account-box" @click="onClickAccount()" v-tooltip.top="'Click to copy'">
             <h2 class="name-label">{{ compressName(wallets.active.name) }}</h2>
+            <div class="name-ens" v-if="ensName">{{ ensName }}</div>
             <div class="box-address">
-              {{
-                compressAddress(
-                  displayMode ? switchToHexAddress(this.address) : this.address,
-                  20,
-                  5
-                )
-              }}
+              {{ compressAddress(displayMode ? switchToHexAddress(this.address) : this.address, 20, 5) }}
             </div>
           </div>
           <div
             class="switch-box"
             @click="switchAddress"
-            v-tooltip.top="
-              displayMode
-                ? 'Switch to ONE Address'
-                : 'Switch to Ethereum Address'
-            "
+            v-tooltip.top="displayMode ? 'Switch to ONE Address' : 'Switch to Ethereum Address'"
           >
-            <img
-              :src="!displayMode ? 'images/ethereum.svg' : 'images/harmony.png'"
-              height="20px"
-              alt="Harmony"
-            />
+            <img :src="!displayMode ? 'images/ethereum.svg' : 'images/harmony.png'" height="20px" alt="Harmony" />
           </div>
         </div>
 
@@ -73,28 +42,16 @@
         <div class="shard-box">
           <div>Shard</div>
           <select v-model="shard" v-tooltip.top="'Select the shards'">
-            <option
-              v-for="item in account.shardArray"
-              :value="item.shardID"
-              :key="item.shardID"
-            >
+            <option v-for="item in account.shardArray" :value="item.shardID" :key="item.shardID">
               {{ item.shardID }}
             </option>
           </select>
         </div>
         <div class="button-group">
-          <button
-            class="outline"
-            @click="$router.push('/deposit')"
-            v-tooltip.top="'Deposit token'"
-          >
+          <button class="outline" @click="$router.push('/deposit')" v-tooltip.top="'Deposit token'">
             Deposit
           </button>
-          <button
-            class="primary"
-            @click="onSendClick"
-            v-tooltip.top="'Send token'"
-          >
+          <button class="primary" @click="onSendClick" v-tooltip.top="'Send token'">
             Send
           </button>
         </div>
@@ -102,26 +59,15 @@
         <div class="footer price-bar" v-if="tokenPrice">
           <marquee-text :duration="20">
             <span class="token-symbol-indicator">Harmony:</span>
-            <span class="token-price-indicator"
-              >{{ tokenPrice["one"] }} USD</span
-            >
+            <span class="token-price-indicator">{{ tokenPrice["one"] }} USD</span>
             <span class="token-symbol-indicator">Bitcoin:</span>
-            <span class="token-price-indicator"
-              >{{ tokenPrice["btc"] }} USD</span
-            >
+            <span class="token-price-indicator">{{ tokenPrice["btc"] }} USD</span>
             <span class="token-symbol-indicator">Ethereum:</span>
-            <span class="token-price-indicator"
-              >{{ tokenPrice["eth"] }} USD</span
-            >
+            <span class="token-price-indicator">{{ tokenPrice["eth"] }} USD</span>
           </marquee-text>
         </div>
       </div>
-      <notifications
-        group="copied"
-        width="180"
-        :max="2"
-        class="notifiaction-container"
-      />
+      <notifications group="copied" width="180" :max="2" class="notifiaction-container" />
     </main>
   </div>
 </template>
@@ -132,6 +78,7 @@ import account from "mixins/account";
 import MainTab from "components/MainTab.vue";
 import { mapState } from "vuex";
 import BigNumber from "bignumber.js";
+import { setupENS } from "services/utils/ens";
 import { oneToHexAddress } from "services/Hrc20Service";
 import axios from "axios";
 
@@ -146,34 +93,31 @@ export default {
     shard: 0,
     switchToHexAddress: oneToHexAddress,
     tokenPrice: null,
+    ensName: null,
   }),
 
   computed: {
     ...mapState({
       wallets: (state) => state.wallets,
+      network: (state) => state.network,
       displayMode: (state) => state.settings.displayMode,
     }),
     getUSDBalance() {
-      return new BigNumber(this.account.balance)
-        .multipliedBy(this.tokenPrice["one"])
-        .toFixed();
+      return new BigNumber(this.account.balance).multipliedBy(this.tokenPrice["one"]).toFixed();
     },
   },
 
-  mounted() {
-    if (
-      typeof this.account.shard !== "undefined" ||
-      this.account.shard !== null
-    ) {
+  async mounted() {
+    if (typeof this.account.shard !== "undefined" || this.account.shard !== null) {
       this.shard = this.account.shard;
     } else {
       this.$store.commit("account/shard", 0);
       this.shard = 0;
     }
-
     this.loadShardingInfo();
     this.loadOneBalance();
     this.fetchTokenPrice();
+    await this.loadEns();
   },
 
   watch: {
@@ -181,11 +125,19 @@ export default {
       this.$store.commit("account/shard", newValue);
       this.loadOneBalance();
     },
+    async address() {
+      await this.loadEns();
+    },
   },
 
   methods: {
     switchAddress() {
       this.$store.commit("settings/setDisplayMode", 1 - this.displayMode);
+    },
+    async loadEns() {
+      this.ensName = "";
+      const ens = setupENS(this.network);
+      this.ensName = (await ens.getName(oneToHexAddress(this.address))).name;
     },
     async fetchTokenPrice() {
       const {
@@ -205,9 +157,7 @@ export default {
       else this.$router.push("/send");
     },
     onClickAccount() {
-      this.$copyText(
-        this.displayMode ? oneToHexAddress(this.address) : this.address
-      ).then(() => {
+      this.$copyText(this.displayMode ? oneToHexAddress(this.address) : this.address).then(() => {
         this.$notify({
           group: "copied",
           type: "info",
@@ -216,10 +166,7 @@ export default {
       });
     },
     compressName(str) {
-      if (str.length > 15)
-        return (
-          str.substr(0, 10) + "..." + str.substr(str.length - 5, str.length)
-        );
+      if (str.length > 15) return str.substr(0, 10) + "..." + str.substr(str.length - 5, str.length);
       return str;
     },
   },
@@ -239,7 +186,12 @@ export default {
   text-align: center;
 }
 .name-label {
-  margin: 0.5rem;
+  margin: 0.1rem;
+}
+.name-ens {
+  font-size: 12px;
+  color: rgb(99, 98, 98);
+  margin: 0.1rem;
 }
 .account-container {
   position: relative;

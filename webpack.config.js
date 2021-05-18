@@ -96,12 +96,12 @@ const config = {
       {
         test: /\.js$/,
         use: ["source-map-loader"],
-        enforce: "pre",
+        exclude: /(node_modules)/,
       },
       {
         test: /\.ts?$/,
-        exclude: /(node_modules)/,
         use: ["ts-loader"],
+        exclude: /(node_modules)/,
       },
       {
         test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
@@ -144,14 +144,9 @@ function getPerformance(isProd) {
 }
 
 function getPlugins(isProd) {
-  let plugins = [
-    new VueLoaderPlugin(),
-    new CopyWebpackPlugin({ patterns: [{ from: "./static", to: "./" }] }),
-  ];
+  let plugins = [new VueLoaderPlugin(), new CopyWebpackPlugin({ patterns: [{ from: "./static", to: "./" }] })];
   if (!isProd) {
-    plugins.push(
-      new GenerateJsonPlugin("manifest.json", manifest_dev, null, 2)
-    );
+    plugins.push(new GenerateJsonPlugin("manifest.json", manifest_dev, null, 2));
   } else {
     plugins.push(
       new GenerateJsonPlugin("manifest.json", manifest_prod, null, 2),

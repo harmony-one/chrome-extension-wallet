@@ -12,9 +12,7 @@
       <div class="sign__address">{{ wallet.address }}</div>
       <p class="txRow">
         <span class="action_caption">{{ displayAction }}</span>
-        <span v-if="type === 'SEND'">
-          {{ txnParams.fromShard }} Shard -> {{ txnParams.toShard }} Shard
-        </span>
+        <span v-if="type === 'SEND'"> {{ txnParams.fromShard }} Shard -> {{ txnParams.toShard }} Shard </span>
       </p>
       <p class="txRow">
         <span>From</span>
@@ -25,10 +23,7 @@
         <span class="address__name">{{ txnParams.to }}</span>
       </p>
       <span class="action_caption">Transaction Details</span>
-      <div
-        class="invoice txn_container"
-        :class="{ 'withdraw-section': isWithdrawal }"
-      >
+      <div class="invoice txn_container" :class="{ 'withdraw-section': isWithdrawal }">
         <div class="invoice__row" v-if="!isWithdrawal">
           <span>Amount</span>
           <span>{{ txnParams.amount }} ONE</span>
@@ -56,11 +51,7 @@
           </div>
           <div v-else>
             <div v-if="suggestion && suggestion.length">
-              <div
-                v-for="(decode, index) in suggestion"
-                :key="index"
-                class="input-data"
-              >
+              <div v-for="(decode, index) in suggestion" :key="index" class="input-data">
                 <div class="input-function">{{ getFunctionName(decode) }}</div>
                 <div v-for="(input, index2) in decode.inputs" :key="index2">
                   <span class="input-param">Param {{ `${index2 + 1}` }}</span
@@ -113,18 +104,12 @@
     <div v-else>
       <div class="error-container">
         <p>
-          Sorry. The wallet is locked. You should unlock it first in the
-          extension.
+          Sorry. The wallet is locked. You should unlock it first in the extension.
         </p>
       </div>
       <button class="primary flex mt-20" @click="lockReject">OK</button>
     </div>
-    <notifications
-      group="notify"
-      width="250"
-      :max="4"
-      class="notifiaction-container"
-    />
+    <notifications group="notify" width="250" :max="4" class="notifiaction-container" />
   </main>
 </template>
 <script>
@@ -195,9 +180,7 @@ export default {
       wallets: (state) => state.wallets,
     }),
     getGasFee() {
-      return Unit.Gwei(
-        this.txnParams.gasPrice * this.txnParams.gasLimit
-      ).toOne();
+      return Unit.Gwei(this.txnParams.gasPrice * this.txnParams.gasLimit).toOne();
     },
     getTotal() {
       return Number(this.txnParams.amount) + Number(this.txnParams.getGasFee);
@@ -266,12 +249,7 @@ export default {
               this.transaction.messenger
             );
           } else
-            signedTransaction = await signer.signTransaction(
-              this.transaction,
-              updateNonce,
-              encodeMode,
-              blockNumber
-            );
+            signedTransaction = await signer.signTransaction(this.transaction, updateNonce, encodeMode, blockNumber);
           signedTxParams = signedTransaction.txParams;
         } else {
           if (isLedger)
@@ -372,56 +350,50 @@ export default {
   },
   created() {
     this.loading = true;
-    chrome.runtime.sendMessage(
-      { action: GET_WALLET_SERVICE_STATE },
-      async ({ state } = {}) => {
-        if (state && state.type && state.txnInfo && state.session) {
-          try {
-            const { type, txnInfo, params, session } = state;
-            this.type = type;
-            this.txnParams = txnInfo;
-            if (this.txnParams.data)
-              this.suggestion = await fetchSuggestions(this.txnParams.data);
-            this.params = { ...params };
-            this.host = session.host;
-            this.wallet = _.find(this.wallets.accounts, {
-              address: session.account.address,
-            });
-            if (type === TRANSACTIONTYPE.SEND) {
-              this.transaction = createTransaction(txnInfo);
-            } else if (type === TRANSACTIONTYPE.DELEGATE) {
-              this.transaction = createDelegateTransaction(txnInfo);
-            } else if (type === TRANSACTIONTYPE.UNDELEGATE) {
-              this.transaction = createUndelegateTransaction(txnInfo);
-            } else {
-              this.transaction = createRewardsTransaction(txnInfo);
-            }
-            this.loading = false;
-          } catch (err) {
-            console.error(err);
-            this.loading = false;
-            this.$notify({
-              group: "notify",
-              type: "error",
-              text: err.message,
-            });
+    chrome.runtime.sendMessage({ action: GET_WALLET_SERVICE_STATE }, async ({ state } = {}) => {
+      if (state && state.type && state.txnInfo && state.session) {
+        try {
+          const { type, txnInfo, params, session } = state;
+          this.type = type;
+          this.txnParams = txnInfo;
+          if (this.txnParams.data) {
+            this.suggestion = await fetchSuggestions(this.txnParams.data);
           }
-        } else {
-          window.close();
+          this.params = { ...params };
+          this.host = session.host;
+          this.wallet = _.find(this.wallets.accounts, {
+            address: session.account.address,
+          });
+          if (type === TRANSACTIONTYPE.SEND) {
+            this.transaction = createTransaction(txnInfo);
+          } else if (type === TRANSACTIONTYPE.DELEGATE) {
+            this.transaction = createDelegateTransaction(txnInfo);
+          } else if (type === TRANSACTIONTYPE.UNDELEGATE) {
+            this.transaction = createUndelegateTransaction(txnInfo);
+          } else {
+            this.transaction = createRewardsTransaction(txnInfo);
+          }
+          this.loading = false;
+        } catch (err) {
+          console.error(err);
+          this.loading = false;
+          this.$notify({
+            group: "notify",
+            type: "error",
+            text: err.message,
+          });
         }
+      } else {
+        window.close();
       }
-    );
+    });
     chrome.runtime.connect({ name: THIRDPARTY_SIGN_CONNECT });
   },
 };
 </script>
 <style scoped>
 .image-bg {
-  background-image: linear-gradient(
-      rgba(247, 247, 255, 0.97),
-      rgba(247, 247, 255, 0.97)
-    ),
-    url("images/harmony.png");
+  background-image: linear-gradient(rgba(247, 247, 255, 0.97), rgba(247, 247, 255, 0.97)), url("images/harmony.png");
 }
 h3 {
   margin-top: 0px;
