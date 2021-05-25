@@ -31,5 +31,5 @@ export const getAddressType = (addrOrName) => {
 };
 
 export const isNullAddress = (addr) => {
-  return addr === "0x0000000000000000000000000000000000000000";
+  return oneToHexAddress(addr) === "0x0000000000000000000000000000000000000000";
 };
