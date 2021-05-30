@@ -60,15 +60,7 @@ export const createTransaction = ({
   });
   return txn;
 };
-export const createDelegateTransaction = ({
-  from,
-  to,
-  amount,
-  gasLimit,
-  gasPrice,
-  chainId,
-  nonce,
-}) => {
+export const createDelegateTransaction = ({ from, to, amount, gasLimit, gasPrice, chainId, nonce }) => {
   const harmony = getHarmony(chainId);
   const stakingTxn = harmony.stakings
     .delegate({
@@ -85,15 +77,7 @@ export const createDelegateTransaction = ({
     .build();
   return stakingTxn;
 };
-export const createUndelegateTransaction = ({
-  from,
-  to,
-  amount,
-  gasLimit,
-  gasPrice,
-  chainId,
-  nonce,
-}) => {
+export const createUndelegateTransaction = ({ from, to, amount, gasLimit, gasPrice, chainId, nonce }) => {
   const harmony = getHarmony(chainId);
   const stakingTxn = harmony.stakings
     .undelegate({
@@ -110,13 +94,7 @@ export const createUndelegateTransaction = ({
     .build();
   return stakingTxn;
 };
-export const createRewardsTransaction = ({
-  from,
-  gasLimit,
-  gasPrice,
-  chainId,
-  nonce,
-}) => {
+export const createRewardsTransaction = ({ from, gasLimit, gasPrice, chainId, nonce }) => {
   const harmony = getHarmony(chainId);
   const stakingTxn = harmony.stakings
     .collectRewards({
@@ -185,15 +163,7 @@ class APIService {
   forgetIdentity = async (sender) => {
     this.sender = sender.tab.id;
     this.host = getHostNameFromTab(sender.tab);
-
-    let sessionList = await this.getHostSessions();
-    const existIndex = sessionList.findIndex((elem) => elem.host === this.host);
-    if (existIndex >= 0) {
-      sessionList.splice(existIndex, 1);
-      await storage.saveValue({
-        session: sessionList,
-      });
-    }
+    await this.removeSession(this.host);
     this.sendMessageToInjectScript(THIRDPARTY_FORGET_IDENTITY_REQUEST_RESPONSE);
   };
   sign = async (sender, payload) => {
@@ -208,38 +178,40 @@ class APIService {
           address: session.account.address,
         });
         if (!findAcc) {
-          this.sendMessageToInjectScript(
-            THIRDPARTY_PERSONAL_SIGN_REQUEST_RESPONSE,
-            {
-              rejected: true,
-              message:
-                "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out",
-            }
-          );
+          this.sendMessageToInjectScript(THIRDPARTY_PERSONAL_SIGN_REQUEST_RESPONSE, {
+            rejected: true,
+            message:
+              "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out",
+          });
           return;
         }
         this.activeSession = session;
         this.openPopup("personal_sign", 400, 570);
       } else {
-        this.sendMessageToInjectScript(
-          THIRDPARTY_PERSONAL_SIGN_REQUEST_RESPONSE,
-          {
-            rejected: true,
-            message:
-              "The account is not selected. Please use getAccount first to sign the transaction",
-          }
-        );
+        this.sendMessageToInjectScript(THIRDPARTY_PERSONAL_SIGN_REQUEST_RESPONSE, {
+          rejected: true,
+          message: "The account is not selected. Please use getAccount first to sign the transaction",
+        });
       }
     } catch (error) {
-      this.sendMessageToInjectScript(
-        THIRDPARTY_PERSONAL_SIGN_REQUEST_RESPONSE,
-        {
-          rejected: true,
-          message: JSON.stringify(err),
-        }
-      );
+      this.sendMessageToInjectScript(THIRDPARTY_PERSONAL_SIGN_REQUEST_RESPONSE, {
+        rejected: true,
+        message: JSON.stringify(err),
+      });
     }
   };
+
+  removeSession = async (host) => {
+    let sessionList = await this.getHostSessions();
+    const existIndex = sessionList.findIndex((elem) => elem.host === host);
+    if (existIndex >= 0) {
+      sessionList.splice(existIndex, 1);
+      await storage.saveValue({
+        session: sessionList,
+      });
+    }
+  };
+
   getAccount = async (sender) => {
     try {
       const store = this.getVuexStore();
@@ -251,21 +223,13 @@ class APIService {
           address: session.account.address,
         });
         if (!findAcc) {
-          this.sendMessageToInjectScript(
-            THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
-            {
-              rejected: true,
-              message:
-                "The account is found in the session but not in the extension. Please use forgetIdentity first to sign out",
-            }
-          );
+          await this.removeSession(this.host);
+        } else {
+          this.sendMessageToInjectScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, session.account);
           return;
         }
-        this.sendMessageToInjectScript(
-          THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
-          session.account
-        );
-      } else this.openPopup("login", 400, 600);
+      }
+      this.openPopup("login", 400, 600);
     } catch (err) {
       this.sendMessageToInjectScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, {
         rejected: true,
@@ -277,8 +241,7 @@ class APIService {
     try {
       if (!window.localStorage.vuex) throw new Error("Vuex Store is not found");
       const vuex = JSON.parse(window.localStorage.vuex);
-      if (!vuex || !vuex.wallets)
-        throw new Error("Wallet is not defined in the vuex store");
+      if (!vuex || !vuex.wallets) throw new Error("Wallet is not defined in the vuex store");
       return vuex;
     } catch (err) {
       console.error(err);
@@ -311,8 +274,7 @@ class APIService {
       } else {
         this.sendMessageToInjectScript(THIRDPARTY_SIGN_REQUEST_RESPONSE, {
           rejected: true,
-          message:
-            "The account is not selected. Please use getAccount first to sign the transaction",
+          message: "The account is not selected. Please use getAccount first to sign the transaction",
         });
       }
     } catch (err) {
@@ -336,8 +298,7 @@ class APIService {
   getHostSessions = async () => {
     let currentSession = await storage.getValue("session");
     let sessionList = [];
-    if (currentSession && Array.isArray(currentSession.session))
-      sessionList = currentSession.session;
+    if (currentSession && Array.isArray(currentSession.session)) sessionList = currentSession.session;
     return sessionList;
   };
   getSession = async (hostname) => {
@@ -354,10 +315,7 @@ class APIService {
     };
   };
   onPersonalSignSuccess = async (payload) => {
-    this.sendMessageToInjectScript(
-      THIRDPARTY_PERSONAL_SIGN_REQUEST_RESPONSE,
-      payload
-    );
+    this.sendMessageToInjectScript(THIRDPARTY_PERSONAL_SIGN_REQUEST_RESPONSE, payload);
     this.closeWindow();
   };
   onPersonalSignReject = async ({ message }) => {
@@ -377,10 +335,7 @@ class APIService {
     await storage.saveValue({
       session: sessionList,
     });
-    this.sendMessageToInjectScript(
-      THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE,
-      payload
-    );
+    this.sendMessageToInjectScript(THIRDPARTY_GET_ACCOUNT_REQUEST_RESPONSE, payload);
     this.closeWindow();
   };
   onGetAccountReject = ({ message }) => {
