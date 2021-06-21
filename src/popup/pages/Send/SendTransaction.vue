@@ -477,7 +477,15 @@ export default {
         this.isEns = false;
       } else if (getAddressType(this.recipient) == ENS_ADDRESS_TYPE.NAME) {
         const ens = setupENS(this.network);
-        this.receiver = hexToOneAddress(await ens.name(this.recipient).getAddress());
+        try {
+          const hexAddr = await ens.name(this.recipient).getAddress();
+          if (hexAddr === "0x0000000000000000000000000000000000000000")
+            throw new Error("Invalid Recipient or HNS address");
+          this.receiver = hexToOneAddress(hexAddr);
+        } catch (error) {
+          this.showErrMessage(error.message);
+          return false;
+        }
         this.ensName = this.recipient;
         this.isEns = true;
       } else {
@@ -485,8 +493,12 @@ export default {
         return false;
       }
 
-      if (!isValidAddress(this.receiver) || isNullAddress(this.receiver)) {
+      if (!isValidAddress(this.receiver)) {
         this.showErrMessage("Invalid recipient address");
+        return false;
+      }
+      if (isNullAddress(this.receiver)) {
+        this.showErrMessage("Recipient address ia a burn address");
         return false;
       }
 
