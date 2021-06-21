@@ -89,6 +89,8 @@ import Vue from "vue";
 import NFTLoading from "./NFTLoading";
 import token from "mixins/token";
 import BigNumber from "bignumber.js";
+import axios from "axios";
+
 export default {
   data: () => ({
     contractAddress: null,
@@ -135,8 +137,8 @@ export default {
       try {
         this.$store.commit("loading", true);
         this.contractAddress = this.$route.params.address;
-        // const testAddress = "one1km7xg8e3xjys7azp9f4xp8hkw79vm2h3f2lade";
-        console.log(this.contractAddress);
+        const testAddress = "one1km7xg8e3xjys7azp9f4xp8hkw79vm2h3f2lade";
+        // console.log(this.contractAddress);
         const bnBalance = await getTokenBalance(
           this.address,
           this.contractAddress
@@ -171,29 +173,26 @@ export default {
                 this.contractAddress
               );
               if (uri) {
-                const response = await fetch(uri, { mode: "cors" });
+                const response = await axios.get(uri);
                 if (response.status === 200) {
-                  const jsonResponse = await response.json();
-                  if (this.IsValidJson(jsonResponse)) {
                     const {
                       image,
                       name,
                       description,
                       attributes,
-                    } = jsonResponse;
+                    } = response.data;
                     Vue.set(this.nfts, index, {
                       uri: true,
                       image,
+                      id,
                       name,
                       description,
                       attributes,
                       loading: false,
                     });
-                    return;
-                  }
                 }
               }
-              if (id) {
+              else if (id) {
                 Vue.set(this.nfts, index, {
                   id: new BigNumber(id).toString(),
                   uri: false,
@@ -252,6 +251,9 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+    .tokenId {
+      word-break: break-all;
+    }
   }
   .help {
     color: rgb(234 234 234);
