@@ -36,33 +36,8 @@
           <span>Gas Limit</span>
           <span>{{ txnParams.gasLimit }}</span>
         </div>
-        <div class="data_container" v-if="txnParams.data">
-          <span class="data_caption">Data</span>
-          <select class="data_view_select" v-model="viewOption">
-            <option value="default">Default</option>
-            <option value="utf-8">Utf-8</option>
-            <option value="decode">Decode Input</option>
-          </select>
-        </div>
-        <div class="data_content" v-if="txnParams.data">
-          <div v-if="viewOption === 'default'">{{ txnParams.data }}</div>
-          <div v-else-if="viewOption === 'utf-8'">
-            {{ toUtf8(txnParams.data) }}
-          </div>
-          <div v-else>
-            <div v-if="suggestion && suggestion.length">
-              <div v-for="(decode, index) in suggestion" :key="index" class="input-data">
-                <div class="input-function">{{ getFunctionName(decode) }}</div>
-                <div v-for="(input, index2) in decode.inputs" :key="index2">
-                  <span class="input-param">Param {{ `${index2 + 1}` }}</span
-                  >{{ ` - ${input.value}` }}
-                </div>
-              </div>
-            </div>
-            <div v-else>
-              Decode failed or nothing to decode
-            </div>
-          </div>
+        <div class="data_content">
+          {{ txnParams.data }}
         </div>
       </div>
       <div v-if="!loading">
@@ -140,14 +115,12 @@ import {
 export default {
   data: () => ({
     transaction: null,
-    viewOption: "default",
     params: {
       updateNonce: true,
       encodeMode: "rlp",
       blockNumber: "latest",
       shardID: null,
     },
-    suggestion: null,
     loading: false,
     txnParams: {
       gasLimit: null,
@@ -356,9 +329,6 @@ export default {
           const { type, txnInfo, params, session } = state;
           this.type = type;
           this.txnParams = txnInfo;
-          if (this.txnParams.data) {
-            this.suggestion = await fetchSuggestions(this.txnParams.data);
-          }
           this.params = { ...params };
           this.host = session.host;
           this.wallet = _.find(this.wallets.accounts, {

@@ -13,11 +13,7 @@
           You owned <span>{{ balance }}</span>
           {{ balance > 1 ? "items" : "item" }}
         </div>
-        <div
-          class="nft-container"
-          @wheel.prevent="handleScroll"
-          ref="nftcontainer"
-        >
+        <div class="nft-container" @wheel.prevent="handleScroll" ref="nftcontainer">
           <div class="nft-wrapper" v-for="(nft, index) in nfts" :key="index">
             <div v-if="nft.loading" class="pulse-loader">
               <NFTLoading color="#0a93eb" size="80px" />
@@ -33,14 +29,8 @@
                     v-if="nft.attributes && nft.attributes.length > 0"
                   >
                     <div class="popper">
-                      <div
-                        v-for="(info, index) in nft.attributes"
-                        :key="index"
-                        class="popper-item"
-                      >
-                        <span class="trait_type">{{
-                          `${toTraitTypeString(info["trait_type"])}:`
-                        }}</span>
+                      <div v-for="(info, index) in nft.attributes" :key="index" class="popper-item">
+                        <span class="trait_type">{{ `${toTraitTypeString(info["trait_type"])}:` }}</span>
                         <span class="value">{{ info["value"] }}</span>
                       </div>
                     </div>
@@ -66,12 +56,7 @@
           You don't own any nfts.
         </div>
       </div>
-      <notifications
-        group="notify"
-        width="200"
-        :max="2"
-        class="notifiaction-container"
-      />
+      <notifications group="notify" width="200" :max="2" class="notifiaction-container" />
     </main>
   </div>
 </template>
@@ -106,20 +91,13 @@ export default {
     toTraitTypeString(trait) {
       const str = trait
         .split("_")
-        .map(
-          (elem) =>
-            elem.charAt(0).toUpperCase() + elem.substr(1, elem.length - 1)
-        )
+        .map((elem) => elem.charAt(0).toUpperCase() + elem.substr(1, elem.length - 1))
         .join(" ");
       return str;
     },
     compress(address) {
       if (address.length > 60)
-        return (
-          address.substr(0, 30) +
-          "..." +
-          address.substr(address.length - 30, address.length)
-        );
+        return address.substr(0, 30) + "..." + address.substr(address.length - 30, address.length);
     },
     IsValidJson(str) {
       try {
@@ -135,21 +113,13 @@ export default {
       try {
         this.$store.commit("loading", true);
         this.contractAddress = this.$route.params.address;
-        // const testAddress = "one1km7xg8e3xjys7azp9f4xp8hkw79vm2h3f2lade";
-        console.log(this.contractAddress);
-        const bnBalance = await getTokenBalance(
-          this.address,
-          this.contractAddress
-        );
+        const bnBalance = await getTokenBalance(this.address, this.contractAddress);
         if (!bnBalance) throw new Error("Contract address is invalid");
         this.balance = new BigNumber(bnBalance).toNumber();
         // const totalSupply = await getTotalSupply(this.contractAddress);
         this.nfts = Array(this.balance).fill({ loading: true });
         this.$store.commit("loading", false);
-        const itemList = await getTokensOfOwner(
-          this.address,
-          this.contractAddress
-        );
+        const itemList = await getTokensOfOwner(this.address, this.contractAddress);
         if (itemList && itemList.length > 0) {
           itemList.forEach((elem, index) => {
             const id = new BigNumber(elem).toString();
@@ -161,26 +131,14 @@ export default {
         } else {
           this.nfts.forEach(async (elem, index) => {
             try {
-              const id = await getTokenOfOwnerByIndex(
-                this.address,
-                index,
-                this.contractAddress
-              );
-              const uri = await getTokenURI(
-                new BigNumber(id).toString(),
-                this.contractAddress
-              );
+              const id = await getTokenOfOwnerByIndex(this.address, index, this.contractAddress);
+              const uri = await getTokenURI(new BigNumber(id).toString(), this.contractAddress);
               if (uri) {
                 const response = await fetch(uri, { mode: "cors" });
                 if (response.status === 200) {
                   const jsonResponse = await response.json();
                   if (this.IsValidJson(jsonResponse)) {
-                    const {
-                      image,
-                      name,
-                      description,
-                      attributes,
-                    } = jsonResponse;
+                    const { image, name, description, attributes } = jsonResponse;
                     Vue.set(this.nfts, index, {
                       uri: true,
                       image,
