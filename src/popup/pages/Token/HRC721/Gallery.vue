@@ -137,7 +137,6 @@ export default {
                 const response = await fetch(uri, { mode: "cors" });
                 if (response.status === 200) {
                   const jsonResponse = await response.json();
-                  if (this.IsValidJson(jsonResponse)) {
                     const { image, name, description, attributes } = jsonResponse;
                     Vue.set(this.nfts, index, {
                       uri: true,
@@ -148,7 +147,7 @@ export default {
                       loading: false,
                     });
                     return;
-                  }
+                  
                 }
               }
               if (id) {
