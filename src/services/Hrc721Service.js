@@ -30,7 +30,6 @@ export async function getTokensOfOwner(address, contractAddress) {
     let uri = await instance.methods.tokensOfOwner(hexAddress).call();
     return uri;
   } catch (err) {
-    console.error(err);
     return false;
   }
 }
