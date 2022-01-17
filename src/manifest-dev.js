@@ -29,6 +29,6 @@ module.exports = {
     },
   ],
   manifest_version: 2,
-  content_security_policy: "script-src 'self' 'unsafe-eval'; object-src 'self'",
-  web_accessible_resources: ["popup.html", "inject-script.js"],
+  content_security_policy: "script-src 'self'; object-src 'self'",
+  web_accessible_resources: ["inject-script.js"],
 };
