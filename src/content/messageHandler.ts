@@ -9,7 +9,10 @@ import {
 import { Directive } from "@harmony-js/staking";
 import { HarmonyAddress } from "@harmony-js/crypto";
 import { Unit } from "@harmony-js/utils";
-
+const extId = document
+  .getElementById("one-x-extension")
+  ?.getAttribute("data-extension-id")
+  
 const unWrapMessageFromContentScript = (data: any) => data.message;
 const filterExtensionMessage = (callback: any) => (message: any) => {
   if (message === undefined) return;
@@ -38,6 +41,7 @@ const sendMessageToContentScript = (payload: any) => {
     new CustomEvent(ONEWALLET_SERVICE_EVENT_REQUEST, {
       detail: {
         type: HARMONY_REQUEST_TYPE,
+        extensionId: extId,
         payload,
       },
     })

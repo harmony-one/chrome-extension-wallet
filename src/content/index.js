@@ -7,6 +7,9 @@ import {
   POPUP_CLOSED
 } from "~/types";
 
+import browser from "webextension-polyfill"
+const oneExtensionId = browser.runtime.id
+
 window.onerror = function(message, error) {
   console.error("One Wallet service call failed,", message, ", error: ", error);
 };
@@ -32,6 +35,10 @@ window.addEventListener(
       }
 
       const { payload } = event.detail;
+
+      if (event.detail.extensionId !== oneExtensionId) {
+        return;
+      }
 
       chrome.runtime.sendMessage({
         payload,
@@ -82,6 +89,8 @@ const injectScript = () => {
     const script = document.createElement("script");
     script.setAttribute("type", "text/javascript");
     script.setAttribute("src", chrome.extension.getURL("inject-script.js"));
+    script.id = "one-x-extension"
+    script.setAttribute("data-extension-id", oneExtensionId)
     node.appendChild(script);
     console.info("Onewallet provider injected");
   } catch (e) {
