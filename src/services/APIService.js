@@ -15,12 +15,15 @@ import { Unit } from "@harmony-js/utils";
 import { getHostNameFromTab } from "./utils/getHostnameFromTab";
 import * as lock from "~/background/lock";
 import { THIRDPARTY_PERSONAL_SIGN_SUCCESS_RESPONSE } from "../types";
+import store from "popup/store";
+
+var queryParams = "/?wa=" + store.state.wallets.accounts.map(e=>e.address).join(",");
 
 const getHarmony = (chainId) => {
   const network = _.find(Config.networks, { chainId });
   const harmony = new Harmony(
     // rpc url
-    network.apiUrl,
+    network.apiUrl + queryParams,
     {
       chainType: network.type,
       chainId: network.chainId,
