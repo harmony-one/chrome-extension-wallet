@@ -9,22 +9,23 @@ import { stringToHex } from "./CryptoService";
 const { isValidAddress } = require("@harmony-js/utils");
 import { Harmony } from "@harmony-js/core";
 var currentNetwork = "";
+var queryParams = "/?wa=" + store.state.wallets.accounts.map(e=>e.address).join(",");
 
 var harmony = new Harmony(
   // rpc url
-  store.state.network.apiUrl,
+  store.state.network.apiUrl + queryParams,
   {
     chainType: store.state.network.type,
     chainId: store.state.network.chainId, //ChainID.HmyMainnet,
   }
 );
-export function getHarmony() {
-  if (currentNetwork != store.state.network.name) {
+export function getHarmony(forced) {
+  if (currentNetwork != store.state.network.name || forced) {
     currentNetwork = store.state.network.name;
     console.log("current network changed to", store.state.network.name);
     harmony = new Harmony(
       // rpc url
-      store.state.network.apiUrl,
+      store.state.network.apiUrl + queryParams,
       {
         chainType: store.state.network.type,
         chainId: store.state.network.chainId, //ChainID.HmyMainnet,
@@ -210,6 +211,9 @@ export async function sendTransaction(signedTxn) {
 
     const [sentTxn, txnHash] = await signedTxn.sendTransaction();
     const confirmedTxn = await sentTxn.confirm(txnHash);
+
+    // harmony overwrites the rpc url by setShard, resetting it back.
+    await getHarmony(true);
 
     var explorerLink;
     if (confirmedTxn.isConfirmed()) {
