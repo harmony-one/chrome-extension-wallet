@@ -53,7 +53,7 @@
 - Build: ```docker build -t chrome-build .```
 - Run Container: ```docker create --name onewallet chrome-build```
 - Copy build to host: ```docker cp onewallet:/usr/src/app/chrome-extension-wallet/onewallet.zip .```
-
+- Verify signatures: ```unzip onewallet.zip -d onewallet```,  Verify local or an external checksum: ```md5sum -c checksums.md5``` 
 ---
 
 ## Documentation
