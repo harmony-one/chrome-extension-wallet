@@ -48,6 +48,12 @@
 - Go to Chrome Extensions page and activate the Developer Mode.
 - Click `Load Unpacked` button and point it to `/dist` folder.
 
+## Docker build
+
+- Build: ```docker build -t chrome-build .```
+- Run Container: ```docker create --name onewallet chrome-build```
+- Copy build to host: ```docker cp onewallet:/usr/src/app/chrome-extension-wallet/onewallet.zip .```
+
 ---
 
 ## Documentation
