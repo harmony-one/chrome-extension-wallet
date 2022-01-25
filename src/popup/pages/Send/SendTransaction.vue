@@ -215,7 +215,7 @@ export default {
     receiver: "",
     ensName: "",
     isEns: false,
-    gasPrice: 1,
+    gasPrice: 30,
     gasLimit: 25000,
     inputData: "",
     selectedToken: { symbol: "ONE", decimals: 18, isMainToken: true },

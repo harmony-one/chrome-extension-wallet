@@ -40,7 +40,7 @@ export async function sendToken(
   amount,
   privateKey,
   gasLimit = "250000",
-  gasPrice = 1,
+  gasPrice = 30,
   decimals,
   contractAddress
 ) {

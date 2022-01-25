@@ -118,7 +118,7 @@ export async function signHRCTransactionWithLedger(
   to,
   amount,
   gasLimit = "250000",
-  gasPrice = 1,
+  gasPrice = 30,
   decimals,
   contract
 ) {
@@ -166,7 +166,7 @@ export async function signTransactionWithLedger(
   toShard,
   amount,
   gasLimit = "21000",
-  gasPrice = 1,
+  gasPrice = 30,
   inputData
 ) {
   try {

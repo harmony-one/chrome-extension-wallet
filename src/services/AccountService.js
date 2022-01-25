@@ -154,7 +154,7 @@ export async function transferOne(
   amount,
   privateKey,
   gasLimit = "21000",
-  gasPrice = 1,
+  gasPrice = 30,
   inputData
 ) {
   try {
