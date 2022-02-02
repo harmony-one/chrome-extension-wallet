@@ -323,7 +323,7 @@ export default {
       this.ledgerConfirmTxt = LEDGER_CONFIRM_PREPARE;
       this.password = "";
     },
-    initScene() {
+    initScene() {      
       this.scene = 1;
       this.amount = 0;
       this.recipient = "";
@@ -334,6 +334,7 @@ export default {
       this.password = "";
       this.ledgerError = false;
       this.ledgerConfirmTxt = LEDGER_CONFIRM_PREPARE;
+      this.gasPrice = 30;
     },
     async processLedgerTransfer() {
       try {
