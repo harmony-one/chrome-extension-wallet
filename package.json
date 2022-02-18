@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "NODE_ENV=development webpack --progress --watch",
-    "build": "NODE_ENV=production webpack --progress && md5sum dist/*.js dist/*.html > dist/checksums.md5"
+    "build": "NODE_ENV=production webpack --progress && cd dist && find -type f -exec md5sum {} \\;|sort -s > checksums.md5"
   },
   "dependencies": {
     "@babel/core": "^7.10.1",
