@@ -21,13 +21,13 @@ import {
   THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
   GET_TAB_ID_INNER_EVENT_REQUEST,
   POPUP_CLOSED,
-  ADD_LOG
+  ADD_LOG,
+  GET_LOGS
 } from "~/types";
 import * as lock from "./lock";
 
 function externalMessageListener(message, sender, sendResponse) {
   const { messageSource, payload } = message;
-  console.log(message)
   if (!messageSource || !payload || messageSource !== HARMONY_REQUEST_TYPE) {
     return false;
   }
@@ -66,6 +66,7 @@ function internalMessageListener(message, sender, sendResponse) {
   if (messageSource && messageSource !== HARMONY_RESPONSE_TYPE) {
     return false;
   }
+
   switch (action) {
     case GET_WALLET_SERVICE_STATE: {
       const state = apiService.getState();
@@ -93,6 +94,12 @@ function internalMessageListener(message, sender, sendResponse) {
     case ADD_LOG:
       apiService.addLog(payload);
       break;      
+    case GET_LOGS:
+      apiService.getLogs().then(state=> {
+        sendResponse(state);
+      });
+      return true;
+      break;
     default:
       console.log("Unknown internal action received - ", action);
   }

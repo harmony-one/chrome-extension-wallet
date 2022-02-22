@@ -29,6 +29,7 @@ import Settings from "./pages/Settings/index.vue";
 import Security from "./pages/Settings/Security/index.vue";
 import Contacts from "./pages/Settings/Contacts/index.vue";
 import PincodeModal from "./pages/Settings/Security/PincodeModal.vue";
+import Logs from "./pages/Settings/Security/Logs.vue";
 
 import store from "./store";
 
@@ -211,6 +212,15 @@ const router = new Router({
       path: "/settings",
       name: "settings",
       component: Settings,
+      meta: {
+        requiredAccount: true,
+        authenticate: true,
+      },
+    },
+    {
+      path: "/settings/logs",
+      name: "logs",
+      component: Logs,
       meta: {
         requiredAccount: true,
         authenticate: true,

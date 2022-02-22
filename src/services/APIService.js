@@ -141,7 +141,12 @@ class APIService {
     })
   }
 
+  getLogs = async () => {
+    return await storage.getValue(null);
+  }
+
   addLog = (payload) => {
+    payload.created = new Date().toISOString();
     this.store.updateState({events: (this.store.getState().events||[]).concat(payload)})
   }
 

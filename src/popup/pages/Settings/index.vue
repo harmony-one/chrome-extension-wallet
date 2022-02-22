@@ -34,6 +34,13 @@ export default {
           "Change the security settings (PIN Code, PIN digits and Lock timer)",
         route: "/settings/security",
       },
+      {
+        icon: "file_download",
+        name: "Audit Logs",
+        description:
+          "Get audit logs",
+        route: "/settings/logs",        
+      }
     ],
   }),
 };
