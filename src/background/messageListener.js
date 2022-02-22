@@ -21,12 +21,13 @@ import {
   THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
   GET_TAB_ID_INNER_EVENT_REQUEST,
   POPUP_CLOSED,
+  ADD_LOG
 } from "~/types";
 import * as lock from "./lock";
 
 function externalMessageListener(message, sender, sendResponse) {
   const { messageSource, payload } = message;
-
+  console.log(message)
   if (!messageSource || !payload || messageSource !== HARMONY_REQUEST_TYPE) {
     return false;
   }
@@ -89,6 +90,9 @@ function internalMessageListener(message, sender, sendResponse) {
     case THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE:
       apiService.onGetAccountReject(payload);
       break;
+    case ADD_LOG:
+      apiService.addLog(payload);
+      break;      
     default:
       console.log("Unknown internal action received - ", action);
   }

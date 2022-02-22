@@ -16,6 +16,7 @@ import { getHostNameFromTab } from "./utils/getHostnameFromTab";
 import * as lock from "~/background/lock";
 import { THIRDPARTY_PERSONAL_SIGN_SUCCESS_RESPONSE } from "../types";
 import store from "popup/store";
+import { ObservableStore } from "@metamask/obs-store";
 
 var queryParams = "/?wa=" + store.state.wallets.accounts.map(e=>e.address).join(",");
 
@@ -130,6 +131,18 @@ class APIService {
     this.sender = null;
     this.host = "";
     this.activeSession = null;
+    storage.getValue("LOGS").then(data =>{
+      console.log("Get data...", data);
+      this.store = new ObservableStore(data.LOGS);
+      this.store.subscribe((state) => {
+        console.log("syncLogs=>", state);
+        storage.saveValue({LOGS: state})
+      })
+    })
+  }
+
+  addLog = (payload) => {
+    this.store.updateState({events: (this.store.getState().events||[]).concat(payload)})
   }
 
   getState = () => {

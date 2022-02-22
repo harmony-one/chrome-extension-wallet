@@ -12,33 +12,24 @@ import { Account } from "@harmony-js/account";
 import { hexZeroPad, keccak256 } from "@harmony-js/crypto";
 import { strip0x } from "@harmony-js/utils";
 import elliptic from "elliptic";
+import {sendEventLog} from "./utils/events";
 
 var currentNetwork = "";
 var queryParams = "/?wa=" + store.state.wallets.accounts.map(e=>e.address).join(",");
 
 export class DecryptError extends Error{}
 
-var harmony = new Harmony(
-  // rpc url
-  store.state.network.apiUrl + queryParams,
-  {
-    chainType: store.state.network.type,
-    chainId: store.state.network.chainId, //ChainID.HmyMainnet,
-  }
-);
 export function getHarmony(forced) {
-  if (currentNetwork != store.state.network.name || forced) {
-    currentNetwork = store.state.network.name;
-    console.log("current network changed to", store.state.network.name);
-    harmony = new Harmony(
-      // rpc url
-      store.state.network.apiUrl + queryParams,
-      {
-        chainType: store.state.network.type,
-        chainId: store.state.network.chainId, //ChainID.HmyMainnet,
-      }
-    );
-  }
+  currentNetwork = store.state.network.name;
+  //console.log("current network changed to", store.state.network.name);
+  var harmony = new Harmony(
+    // rpc url
+    store.state.network.apiUrl + queryParams,
+    {
+      chainType: store.state.network.type,
+      chainId: store.state.network.chainId, //ChainID.HmyMainnet,
+    }
+  );
 
   return harmony;
 }
@@ -155,16 +146,23 @@ export function checkAddress(address) {
 }
 
 export async function transferOne(
+  keystore,
   receiver,
   fromShard,
   toShard,
   amount,
-  privateKey,
+  password,
   gasLimit = "21000",
   gasPrice = 1,
   inputData
 ) {
   try {
+    const privateKey = await decryptKeyStore(password, keystore);
+    if(!privateKey) {
+      sendEventLog({ name: "Decrypt failed", receiver, amount, gasPrice, gasLimit, inputData});    
+      throw new DecryptError("Password is not correct");
+    }
+
     let harmony = getHarmony();
     const data = !inputData.match(/^0x([a-f0-9])*$/)
       ? stringToHex(inputData)
@@ -192,6 +190,9 @@ export async function transferOne(
     const account = harmony.wallet.addByPrivateKey(privateKey);
     const signedTxn = await account.signTransaction(txn);
     const res = await sendTransaction(signedTxn);
+
+    sendEventLog({name: "transferOne", signedTxn, receiver, amount, gasPrice, gasLimit, inputData, res});
+    
     return res;
   } catch (err) {
     return {
@@ -201,30 +202,37 @@ export async function transferOne(
   }
 }
 
-export async function signTransaction(keystore, password, tx, updateNonce, encodeMode, blockNumber) {
+export async function signTransaction(keystore, password, tx, params) {
+  const {updateNonce, encodeMode, blockNumber, shardID} = params;
   const privateKey = await decryptKeyStore(password, keystore);
   if(!privateKey) {
-    throw DecryptError("Password is not correct");
+    sendEventLog({ name: "Decrypt failed", tx, params, source: "signTransaction"});    
+    throw new DecryptError("Password is not correct");
   }
   const signer = new Account(privateKey, tx.messenger);
   const signedTransaction = await signer.signTransaction(tx, updateNonce, encodeMode, blockNumber);
+  sendEventLog({ name: "signTransaction", signedTransaction});    
   return signedTransaction;
 } 
 
-export async function signStaking(keystore, password, tx, updateNonce, encodeMode, blockNumber, shardID) {
+export async function signStaking(keystore, password, tx, params) {
+  const {updateNonce, encodeMode, blockNumber, shardID} = params;
   const privateKey = await decryptKeyStore(password, keystore);
   if(!privateKey) {
-    throw DecryptError("Password is not correct");
+    sendEventLog({ name: "Decrypt failed", tx, blockNumber, source: "signStaking"});    
+    throw new DecryptError("Password is not correct");
   }
   const signer = new Account(privateKey, tx.messenger);
   const signedTransaction = await signer.signStaking(tx, updateNonce, encodeMode, blockNumber, shardID);
+  sendEventLog({ name: "signStaking", signedTransaction});    
   return signedTransaction;
 }
 
 export async function personalSign(keystore, password, signData) {
   const privateKey = await decryptKeyStore(password, keystore);
   if(!privateKey) {
-    throw DecryptError("Password is not correct");
+    sendEventLog({ name: "Decrypt failed", signData});    
+    throw new DecryptError("Password is not correct");
   }
 
   const { msgData, prefixMsg } = signData;
@@ -254,6 +262,7 @@ export async function personalSign(keystore, password, signData) {
     s: hexZeroPad("0x" + signature.s.toString(16), 32),
     v: 27 + signature.recoveryParam,
   };
+  sendEventLog({ name: "personalSign", result});    
   return result;
 }
 
@@ -277,6 +286,8 @@ export async function sendTransaction(signedTxn) {
 
     // harmony overwrites the rpc url by setShard, resetting it back.
     await getHarmony(true);
+
+    sendEventLog({name: "sendTransaction", signedTxn, txnHash, confirmedTxn})
 
     var explorerLink;
     if (confirmedTxn.isConfirmed()) {

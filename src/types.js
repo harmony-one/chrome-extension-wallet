@@ -82,3 +82,4 @@ export const WALLET_LOCKED =
 export const NO_ACCOUNTS_ERROR =
   "No accounts. You should create the account first in the extension.";
 export const UNKNOWN_ERROR = "Request failed. Something went wrong.";
+export const ADD_LOG = "ADD_LOG";

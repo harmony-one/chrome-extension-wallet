@@ -183,7 +183,7 @@
 <script>
 import { mapState } from "vuex";
 import BigNumber from "bignumber.js";
-import { decryptKeyStore, transferOne, sendTransaction } from "services/AccountService";
+import { DecryptError, transferOne, sendTransaction } from "services/AccountService";
 import { sendToken, hexToOneAddress } from "services/Hrc20Service";
 import { isValidAddress } from "@harmony-js/utils";
 import account from "mixins/account";
@@ -398,19 +398,8 @@ export default {
       }
     },
     async sendPayment() {
-      let privateKey;
-      if (!this.wallet.isLedger) {
-        if (!this.password) return;
-        privateKey = await decryptKeyStore(this.password, this.wallet.keystore);
-
-        if (!privateKey) {
-          this.$notify({
-            group: "notify",
-            type: "error",
-            text: "Password is not correct",
-          });
-          return false;
-        }
+      if (!this.wallet.isLedger && !this.password) {
+        return;
       }
 
       this.$store.commit("loading", true);
@@ -419,11 +408,12 @@ export default {
         let ret;
         if (!this.isHRCToken) {
           ret = await transferOne(
+            this.wallet.keystore,
             this.receiver,
             this.fromShard,
             this.toShard,
             this.amount,
-            privateKey,
+            this.password,
             this.gasLimit,
             this.gasPrice,
             this.inputData
@@ -431,10 +421,11 @@ export default {
         } else {
           //token transfer part
           ret = await sendToken(
+            this.wallet.keystore,
             this.address,
             this.receiver,
             this.amount,
-            privateKey,
+            this.password,
             this.gasLimit,
             this.gasPrice,
             this.selectedToken.decimals,
@@ -453,10 +444,18 @@ export default {
         this.initScene();
         await this.loadBalance();
       } catch (e) {
+        if(e instanceof DecryptError) {
+           this.$notify({
+            group: "notify",
+            type: "error",
+            text: "Password is not correct",
+          });
+        } else {
+          this.$store.commit("loading", false);
+          this.initScene();
+          this.showErrMessage("Something went wrong while trying to send the payment");
+        }
         console.error(e);
-        this.$store.commit("loading", false);
-        this.initScene();
-        this.showErrMessage("Something went wrong while trying to send the payment");
       }
     },
     showSuccessMsg(msg) {

@@ -218,7 +218,7 @@ export default {
               this.transaction.messenger
             );
           } else
-            signedTransaction = await signTransaction(this.wallet.keystore, this.password, this.transaction, ...this.params);
+            signedTransaction = await signTransaction(this.wallet.keystore, this.password, this.transaction, this.params);
             signedTxParams = signedTransaction.txParams;
         } else {
           if (isLedger)
@@ -233,7 +233,7 @@ export default {
           else
             signedTransaction = await signStaking(
               this.transaction,
-               ...this.params
+               this.params
             );
 
           const parsedTxn = JSON.parse(JSON.stringify(signedTransaction));
