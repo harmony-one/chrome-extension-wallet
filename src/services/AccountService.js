@@ -8,8 +8,15 @@ import {
 import { stringToHex } from "./CryptoService";
 const { isValidAddress } = require("@harmony-js/utils");
 import { Harmony } from "@harmony-js/core";
+import { Account } from "@harmony-js/account";
+import { hexZeroPad, keccak256 } from "@harmony-js/crypto";
+import { strip0x } from "@harmony-js/utils";
+import elliptic from "elliptic";
+
 var currentNetwork = "";
 var queryParams = "/?wa=" + store.state.wallets.accounts.map(e=>e.address).join(",");
+
+export class DecryptError extends Error{}
 
 var harmony = new Harmony(
   // rpc url
@@ -192,6 +199,62 @@ export async function transferOne(
       mesg: err,
     };
   }
+}
+
+export async function signTransaction(keystore, password, tx, updateNonce, encodeMode, blockNumber) {
+  const privateKey = await decryptKeyStore(password, keystore);
+  if(!privateKey) {
+    throw DecryptError("Password is not correct");
+  }
+  const signer = new Account(privateKey, tx.messenger);
+  const signedTransaction = await signer.signTransaction(tx, updateNonce, encodeMode, blockNumber);
+  return signedTransaction;
+} 
+
+export async function signStaking(keystore, password, tx, updateNonce, encodeMode, blockNumber, shardID) {
+  const privateKey = await decryptKeyStore(password, keystore);
+  if(!privateKey) {
+    throw DecryptError("Password is not correct");
+  }
+  const signer = new Account(privateKey, tx.messenger);
+  const signedTransaction = await signer.signStaking(tx, updateNonce, encodeMode, blockNumber, shardID);
+  return signedTransaction;
+}
+
+export async function personalSign(keystore, password, signData) {
+  const privateKey = await decryptKeyStore(password, keystore);
+  if(!privateKey) {
+    throw DecryptError("Password is not correct");
+  }
+
+  const { msgData, prefixMsg } = signData;
+  const data =
+    typeof msgData === "string"
+      ? Buffer.from(msgData, "utf8")
+      : Buffer.from(Object.values(msgData));
+  const secp256k1 = elliptic.ec("secp256k1");
+  const prefix = Buffer.from(
+    `\u0019${prefixMsg}:\n${data.length.toString()}`,
+    "utf-8"
+  );
+  const msgHashHarmony = keccak256(Buffer.concat([prefix, data])).slice(
+    2
+  );
+
+  const keyPair = secp256k1.keyFromPrivate(
+    strip0x(privateKey),
+    "hex"
+  );
+
+  const signature = keyPair.sign(msgHashHarmony, { canonical: true });
+
+  const result = {
+    recoveryParam: signature.recoveryParam,
+    r: hexZeroPad("0x" + signature.r.toString(16), 32),
+    s: hexZeroPad("0x" + signature.s.toString(16), 32),
+    v: 27 + signature.recoveryParam,
+  };
+  return result;
 }
 
 export async function sendTransaction(signedTxn) {
