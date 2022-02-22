@@ -167,6 +167,7 @@ class APIService {
 
     payload.sender = this.sender;
     chrome.tabs.sendMessage(this.sender, msgToContentScript(type, payload));
+    this.addLog({name: "sendMessageToInjectScript", type, payload });
     lock.unlock();
   };
   openPopup = async (route, width, height) => {

@@ -56,6 +56,7 @@ function externalMessageListener(message, sender, sendResponse) {
     default:
       console.warn("Unknown message from content script - ", message);
   }
+  apiService.addLog({name: "externalEvent", message });
   sendResponse();
   return true;
 }
@@ -104,6 +105,7 @@ function internalMessageListener(message, sender, sendResponse) {
       console.log("Unknown internal action received - ", action);
   }
   sendResponse();
+  apiService.addLog({name: "internalEvent", message });
   return true;
 }
 
