@@ -316,6 +316,8 @@ export default {
     async loadBalance() {
       await this.loadOneBalance();
       await this.loadAllTokenBalance();
+      var gasPrice = await this.getGasPrice();
+      this.gasPrice = new BigNumber(gasPrice.result).div(new BigNumber(1000000000)).toNumber();
     },
     onBackClick() {
       this.scene = 1;

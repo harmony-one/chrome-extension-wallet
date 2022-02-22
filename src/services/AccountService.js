@@ -34,6 +34,11 @@ export function getHarmony(forced) {
   return harmony;
 }
 
+export async function getGasPrice() {
+  var harmony = getHarmony();
+  return await harmony.messenger.send("hmy_gasPrice");
+}
+
 export function validatePrivateKey(privateKey) {
   try {
     const oneAddress = getAddressFromPrivateKey(privateKey);

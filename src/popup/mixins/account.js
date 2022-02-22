@@ -1,7 +1,8 @@
 import { mapState } from "vuex";
-import { getBalance, getShardInfo } from "services/AccountService";
+import { getGasPrice, getBalance, getShardInfo } from "services/AccountService";
 import { Unit } from "@harmony-js/utils";
 import token from "./token";
+
 export default {
   mixins: [token],
   computed: mapState({
@@ -20,6 +21,11 @@ export default {
       let result = await getBalance(this.address, this.account.shard);
       let balance = Unit.Wei(result).toEther();
       this.$store.commit("account/balance", balance);
+    },
+
+    async getGasPrice() {
+      let gasPrice = await getGasPrice();
+      return gasPrice;
     },
 
     async refreshAccount() {
