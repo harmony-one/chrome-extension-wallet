@@ -215,7 +215,7 @@ export default {
     receiver: "",
     ensName: "",
     isEns: false,
-    gasPrice: 1,
+    gasPrice: 30,
     gasLimit: 25000,
     inputData: "",
     selectedToken: { symbol: "ONE", decimals: 18, isMainToken: true },
@@ -325,7 +325,7 @@ export default {
       this.ledgerConfirmTxt = LEDGER_CONFIRM_PREPARE;
       this.password = "";
     },
-    initScene() {
+    initScene() {      
       this.scene = 1;
       this.amount = 0;
       this.recipient = "";
@@ -336,6 +336,7 @@ export default {
       this.password = "";
       this.ledgerError = false;
       this.ledgerConfirmTxt = LEDGER_CONFIRM_PREPARE;
+      this.gasPrice = 30;
     },
     async processLedgerTransfer() {
       try {
