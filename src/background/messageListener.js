@@ -64,7 +64,7 @@ function externalMessageListener(message, sender, sendResponse) {
 // Listen messages from extension (e.g popup)
 function internalMessageListener(message, sender, sendResponse) {
   const { messageSource, action, payload } = message;
-  if (messageSource && messageSource !== HARMONY_RESPONSE_TYPE) {
+  if ((messageSource && messageSource !== HARMONY_RESPONSE_TYPE) || !action) {
     return false;
   }
 
@@ -102,10 +102,11 @@ function internalMessageListener(message, sender, sendResponse) {
       return true;
       break;
     default:
-      console.log("Unknown internal action received - ", action);
+      //console.log("Unknown internal action received - ", action);
   }
   sendResponse();
-  apiService.addLog({name: "internalEvent", message });
+  ![ADD_LOG, GET_TAB_ID_INNER_EVENT_REQUEST].includes(action) && apiService.addLog({name: "internalEvent", message });
+  
   return true;
 }
 
