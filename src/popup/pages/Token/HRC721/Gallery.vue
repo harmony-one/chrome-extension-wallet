@@ -96,18 +96,8 @@ export default {
       return str;
     },
     compress(address) {
-      if (address.length > 60)
+      if (address?.length > 60)
         return address.substr(0, 30) + "..." + address.substr(address.length - 30, address.length);
-    },
-    IsValidJson(str) {
-      try {
-        JSON.parse(str);
-        console.log("success");
-      } catch (e) {
-        console.log("error");
-        return false;
-      }
-      return true;
     },
     async refreshData() {
       try {
@@ -116,23 +106,48 @@ export default {
         const bnBalance = await getTokenBalance(this.address, this.contractAddress);
         if (!bnBalance) throw new Error("Contract address is invalid");
         this.balance = new BigNumber(bnBalance).toNumber();
-        // const totalSupply = await getTotalSupply(this.contractAddress);
         this.nfts = Array(this.balance).fill({ loading: true });
         this.$store.commit("loading", false);
+
         const itemList = await getTokensOfOwner(this.address, this.contractAddress);
-        if (itemList && itemList.length > 0) {
-          itemList.forEach((elem, index) => {
-            const id = new BigNumber(elem).toString();
-            Vue.set(this.nfts, index, {
-              id,
-              loading: false,
-            });
-          });
+        if (itemList) {
+          for (let index = 0; index < itemList.length; index += 1) {
+            const id = itemList[index].toString();
+            const uri = await getTokenURI(id, this.contractAddress);
+            if (uri) {
+              const response = await fetch(uri, { mode: "cors" });
+              if (response.status === 200) {
+                const jsonResponse = await response.json();
+                  const { image, name, description, attributes } = jsonResponse;
+                  Vue.set(this.nfts, index, {
+                    uri: true,
+                    image,
+                    name,
+                    description,
+                    attributes,
+                    loading: false,
+                  });
+              }
+            } else {
+              if (id) {
+                Vue.set(this.nfts, index, {
+                  id,
+                  uri: false,
+                  loading: false,
+                });
+              } else {
+                Vue.set(this.nfts, index, {
+                  uri: false,
+                  loading: false,
+                });
+              }
+            }
+          }
         } else {
-          this.nfts.forEach(async (elem, index) => {
+          for (let index = 0; index < this.nfts.length; index += 1) {
             try {
               const id = await getTokenOfOwnerByIndex(this.address, index, this.contractAddress);
-              const uri = await getTokenURI(new BigNumber(id).toString(), this.contractAddress);
+              const uri = await getTokenURI(id.toString(), this.contractAddress);
               if (uri) {
                 const response = await fetch(uri, { mode: "cors" });
                 if (response.status === 200) {
@@ -146,21 +161,20 @@ export default {
                       attributes,
                       loading: false,
                     });
-                    return;
-                  
                 }
-              }
-              if (id) {
-                Vue.set(this.nfts, index, {
-                  id: new BigNumber(id).toString(),
-                  uri: false,
-                  loading: false,
-                });
               } else {
-                Vue.set(this.nfts, index, {
-                  uri: false,
-                  loading: false,
-                });
+                if (id) {
+                  Vue.set(this.nfts, index, {
+                    id: id.toString(),
+                    uri: false,
+                    loading: false,
+                  });
+                } else {
+                  Vue.set(this.nfts, index, {
+                    uri: false,
+                    loading: false,
+                  });
+                }
               }
             } catch (error) {
               console.error(error);
@@ -170,7 +184,7 @@ export default {
                 text: error.message,
               });
             }
-          });
+          }
         }
       } catch (error) {
         console.error(error);
