@@ -275,7 +275,7 @@ export default {
         this.$notify({
           group: "notify",
           type: "error",
-          text: this.caption,
+          text: _.escape(this.caption),
         });
       }
     },
