@@ -25,6 +25,7 @@ import Deposit from "./pages/Deposit.vue";
 import Lock from "./pages/Lock.vue";
 import ExportPrivateKey from "./pages/ExportPrivateKey.vue";
 import About from "./pages/About.vue";
+import Terms from "./pages/Terms.vue";
 import Settings from "./pages/Settings/index.vue";
 import Security from "./pages/Settings/Security/index.vue";
 import Contacts from "./pages/Settings/Contacts/index.vue";
@@ -256,6 +257,11 @@ const router = new Router({
         requiredAccount: true,
       },
     },
+    {
+      path: "/terms",
+      name: "terms",
+      component: Terms,
+    },
     //end
   ],
 });
@@ -273,6 +279,13 @@ router.beforeEach(async (to, from, next) => {
       return;
     }
   }
+  if (["home"].includes(to.name)) {
+    if(!store.state.settings.termsAccepted) {
+      next({ path: "/terms" });
+      return;  
+    }
+  }
+  
   next();
 });
 

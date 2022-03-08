@@ -56,7 +56,7 @@
           </button>
         </div>
         <div class="divider"></div>
-        <div class="footer price-bar" v-if="tokenPrice">
+        <!-- <div class="footer price-bar" v-if="tokenPrice">
           <marquee-text :duration="20">
             <span class="token-symbol-indicator">Harmony:</span>
             <span class="token-price-indicator">{{ tokenPrice["one"] }} USD</span>
@@ -65,6 +65,10 @@
             <span class="token-symbol-indicator">Ethereum:</span>
             <span class="token-price-indicator">{{ tokenPrice["eth"] }} USD</span>
           </marquee-text>
+        </div> -->
+        <div class="footer-nomargin warning">
+          This wallet is no longer maintained or supported by Harmony. 
+          Please migrate your funds to Metamask. <external-link url="https://docs.harmony.one/home/network/wallets/browser-extensions-wallets/metamask-wallet">Instructions here</external-link>
         </div>
       </div>
       <notifications group="copied" width="180" :max="2" class="notifiaction-container" />
@@ -81,12 +85,14 @@ import BigNumber from "bignumber.js";
 import { setupENS } from "services/utils/ens";
 import { oneToHexAddress } from "services/Hrc20Service";
 import axios from "axios";
+import ExternalLink from 'components/ExternalLink.vue';
 
 export default {
   mixins: [account, helper],
 
   components: {
     MainTab,
+    ExternalLink
   },
 
   data: () => ({
@@ -244,6 +250,22 @@ export default {
   animation-iteration-count: 1;
   animation-timing-function: ease-in;
   animation-duration: 2s;
+}
+.footer-nomargin {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: 10px;
+}
+.footer-nomargin a {
+  color: white;
+  text-decoration: underline;
+}
+
+.warning {
+  background-color: #dc3545; 
+  color: white;
+  font-size: 12px;
 }
 
 .token-symbol-indicator {
