@@ -279,9 +279,9 @@ router.beforeEach(async (to, from, next) => {
       return;
     }
   }
-  if (["home"].includes(to.name)) {
+  if (["create-wallet", "home"].includes(to.name)) {
     if(!store.state.settings.termsAccepted) {
-      next({ path: "/terms" });
+      next({ path: "/terms", query: {redirect: to.path} });
       return;  
     }
   }

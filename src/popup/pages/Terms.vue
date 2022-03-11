@@ -28,9 +28,8 @@ export default {
   },
   methods: {
       onAcceptClick() {
-          console.log("accept!")
         this.$store.commit("settings/setTermsAccepted", true);
-        this.$router.push('/home');
+        this.$router.push(this.$route.query.redirect);
       }
   }
 };
