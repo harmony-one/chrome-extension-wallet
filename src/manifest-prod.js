@@ -12,7 +12,7 @@ module.exports = {
     128: "icons/128.ico",
   },
 
-  permissions: ["storage", "activeTab"],
+  permissions: ["storage"],
   browser_action: {
     default_title: "Harmony Chrome Extension Wallet",
     default_popup: "popup.html",
