@@ -5,7 +5,7 @@
       <div class="about">
         <div class="about-content" style="text-align: center">
             <p>This wallet is no longer receiving support or software updates.</p><p>Click "Accept" to continue use at your own risk.</p>
-            <p><external-link url="https://medium.com/harmony-one/sunsetting-the-harmony-chrome-extension-wallet-cd7e2ec217c6">Read announcement</external-link></p>
+            <p><external-link url="https://docs.harmony.one/home/network/wallets/browser-extensions-wallets/one-wallet">Read announcement</external-link></p>
         </div>
       </div>
     <div class="footer">

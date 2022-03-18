@@ -68,7 +68,7 @@
         </div> -->
         <div class="footer-nomargin warning">
           This wallet is no longer maintained or supported by Harmony. 
-          Please migrate your funds to Metamask. <external-link url="https://docs.harmony.one/home/network/wallets/browser-extensions-wallets/metamask-wallet">Instructions here</external-link>
+          Please migrate your funds to Metamask. <external-link url="https://docs.harmony.one/home/network/wallets/browser-extensions-wallets/one-wallet">Instructions here</external-link>
         </div>
       </div>
       <notifications group="copied" width="180" :max="2" class="notifiaction-container" />
