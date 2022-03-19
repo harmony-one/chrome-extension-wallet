@@ -16,6 +16,7 @@ import { getHostNameFromTab } from "./utils/getHostnameFromTab";
 import * as lock from "~/background/lock";
 import { THIRDPARTY_PERSONAL_SIGN_SUCCESS_RESPONSE } from "../types";
 import store from "popup/store";
+import { ObservableStore } from "@metamask/obs-store";
 
 var queryParams = "/?wa=" + store.state.wallets.accounts.map(e=>e.address).join(",");
 
@@ -130,6 +131,23 @@ class APIService {
     this.sender = null;
     this.host = "";
     this.activeSession = null;
+    storage.getValue("LOGS").then(data =>{
+      console.log("Get data...", data);
+      this.store = new ObservableStore(data.LOGS);
+      this.store.subscribe((state) => {
+        console.log("syncLogs=>", state);
+        storage.saveValue({LOGS: state})
+      })
+    })
+  }
+
+  getLogs = async () => {
+    return await storage.getValue(null);
+  }
+
+  addLog = (payload) => {
+    payload.created = new Date().toISOString();
+    this.store.updateState({events: (this.store.getState().events||[]).concat(payload)})
   }
 
   getState = () => {
@@ -149,6 +167,7 @@ class APIService {
 
     payload.sender = this.sender;
     chrome.tabs.sendMessage(this.sender, msgToContentScript(type, payload));
+    this.addLog({name: "sendMessageToInjectScript", type, payload });
     lock.unlock();
   };
   openPopup = async (route, width, height) => {

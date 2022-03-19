@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "NODE_ENV=development webpack --progress --watch",
-    "build": "NODE_ENV=production webpack --progress && md5sum dist/*.js dist/*.html > dist/checksums.md5"
+    "build": "NODE_ENV=production webpack --progress && cd dist && find -type f -exec md5sum {} \\;|sort -s > checksums.md5"
   },
   "dependencies": {
     "@babel/core": "^7.10.1",
@@ -19,6 +19,7 @@
     "@harmony-js/core": "0.1.36",
     "@ledgerhq/hw-transport-webhid": "^5.7.0",
     "@ledgerhq/hw-transport-webusb": "4.74.1",
+    "@metamask/obs-store": "^7.0.0",
     "@vue/babel-preset-app": "^4.4.1",
     "aes-js": "^3.1.2",
     "axios": "^0.21.1",

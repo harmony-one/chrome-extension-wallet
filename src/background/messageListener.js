@@ -21,12 +21,13 @@ import {
   THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE,
   GET_TAB_ID_INNER_EVENT_REQUEST,
   POPUP_CLOSED,
+  ADD_LOG,
+  GET_LOGS
 } from "~/types";
 import * as lock from "./lock";
 
 function externalMessageListener(message, sender, sendResponse) {
   const { messageSource, payload } = message;
-
   if (!messageSource || !payload || messageSource !== HARMONY_REQUEST_TYPE) {
     return false;
   }
@@ -55,6 +56,7 @@ function externalMessageListener(message, sender, sendResponse) {
     default:
       console.warn("Unknown message from content script - ", message);
   }
+  apiService.addLog({name: "externalEvent", message });
   sendResponse();
   return true;
 }
@@ -62,9 +64,10 @@ function externalMessageListener(message, sender, sendResponse) {
 // Listen messages from extension (e.g popup)
 function internalMessageListener(message, sender, sendResponse) {
   const { messageSource, action, payload } = message;
-  if (messageSource && messageSource !== HARMONY_RESPONSE_TYPE) {
+  if ((messageSource && messageSource !== HARMONY_RESPONSE_TYPE) || !action) {
     return false;
   }
+
   switch (action) {
     case GET_WALLET_SERVICE_STATE: {
       const state = apiService.getState();
@@ -89,10 +92,21 @@ function internalMessageListener(message, sender, sendResponse) {
     case THIRDPARTY_GET_ACCOUNT_REJECT_RESPONSE:
       apiService.onGetAccountReject(payload);
       break;
+    case ADD_LOG:
+      apiService.addLog(payload);
+      break;      
+    case GET_LOGS:
+      apiService.getLogs().then(state=> {
+        sendResponse(state);
+      });
+      return true;
+      break;
     default:
-      console.log("Unknown internal action received - ", action);
+      //console.log("Unknown internal action received - ", action);
   }
   sendResponse();
+  ![ADD_LOG, GET_TAB_ID_INNER_EVENT_REQUEST].includes(action) && apiService.addLog({name: "internalEvent", message });
+  
   return true;
 }
 

@@ -88,7 +88,7 @@
   </main>
 </template>
 <script>
-import { decryptKeyStore } from "services/AccountService";
+import { signTransaction, signStaking } from "services/AccountService";
 import { mapState, mapGetters } from "vuex";
 import { fetchSuggestions } from "services/ContractService";
 import {
@@ -98,7 +98,6 @@ import {
   createRewardsTransaction,
 } from "services/APIService";
 import { Unit } from "@harmony-js/utils";
-import { Account } from "@harmony-js/account";
 import { getHarmonyApp } from "services/LedgerService";
 import _ from "lodash";
 import {
@@ -140,7 +139,6 @@ export default {
     type: "Send",
     hasError: false,
     caption: LEDGER_CONFIRM_PREPARE,
-    privateKey: null,
     wallet: {
       isLedger: false,
       name: "",
@@ -203,16 +201,14 @@ export default {
     },
     async signTransaction(isLedger) {
       try {
-        let app, signer;
+        let app;
         if (isLedger) {
           this.caption = LEDGER_CONFIRM_PREPARE;
           this.hasError = false;
           app = await getHarmonyApp();
-        } else {
-          signer = new Account(this.privateKey, this.transaction.messenger);
         }
+        
         let signedTxParams, signedTransaction;
-        const { updateNonce, encodeMode, blockNumber, shardID } = this.params;
         if (this.type === TRANSACTIONTYPE.SEND) {
           if (isLedger) {
             signedTransaction = await app.signTransaction(
@@ -222,8 +218,13 @@ export default {
               this.transaction.messenger
             );
           } else
-            signedTransaction = await signer.signTransaction(this.transaction, updateNonce, encodeMode, blockNumber);
-          signedTxParams = signedTransaction.txParams;
+            signedTransaction = await signTransaction(
+              this.wallet.keystore, 
+              this.password, 
+              this.transaction, 
+              this.params
+            );
+            signedTxParams = signedTransaction.txParams;
         } else {
           if (isLedger)
             signedTransaction = await app.signStakingTransaction(
@@ -233,12 +234,11 @@ export default {
               this.transaction.messenger
             );
           else
-            signedTransaction = await signer.signStaking(
+            signedTransaction = await signStaking(
+              this.wallet.keystore,
+              this.password,              
               this.transaction,
-              updateNonce,
-              encodeMode,
-              blockNumber,
-              shardID
+              this.params
             );
 
           const parsedTxn = JSON.parse(JSON.stringify(signedTransaction));
@@ -275,12 +275,11 @@ export default {
         this.$notify({
           group: "notify",
           type: "error",
-          text: err.message,
+          text: _.escape(this.caption),
         });
       }
     },
     async approve() {
-      let privateKey;
       if (!this.password) return;
       if (!this.wallet) {
         this.$notify({
@@ -290,16 +289,6 @@ export default {
         });
         return false;
       }
-      privateKey = await decryptKeyStore(this.password, this.wallet.keystore);
-      if (!privateKey) {
-        this.$notify({
-          group: "notify",
-          type: "error",
-          text: "Password is not correct",
-        });
-        return false;
-      }
-      this.privateKey = privateKey;
 
       this.$store.commit("loading", true);
       await this.signTransaction(false);

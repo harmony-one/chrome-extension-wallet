@@ -1,9 +1,10 @@
 import artifact from "./hrc20/artifacts/artifact.json";
-import { getHarmony } from "./AccountService";
+import { DecryptError, getHarmony, decryptKeyStore } from "./AccountService";
 import BN from "bn.js";
 import BigNumber from "bignumber.js";
 import { sendTransaction } from "services/AccountService";
 import { toBech32, fromBech32 } from "@harmony-js/crypto";
+import { sendEventLog } from "./utils/events";
 
 export const oneToHexAddress = (address) => getHarmony().crypto.getAddress(address).basicHex;
 
@@ -35,16 +36,23 @@ export async function getTokenSymbol(contractAddress) {
 }
 
 export async function sendToken(
+  keystore,
   from,
   to,
   amount,
-  privateKey,
+  password,
   gasLimit = "250000",
   gasPrice = 30,
   decimals,
   contractAddress
 ) {
   try {
+    const privateKey = await decryptKeyStore(password, keystore);
+    if(!privateKey) {
+      sendEventLog({ name: "Decrypt failed", from, to, amount, gasLimit, gasPrice, contractAddress});    
+      throw new DecryptError("Password is not correct");
+    }
+
     let harmony = getHarmony();
     const instance = getContractInstance(contractAddress);
     const toHex = oneToHexAddress(to);
@@ -60,6 +68,9 @@ export async function sendToken(
     const account = harmony.wallet.addByPrivateKey(privateKey);
     const signedTxn = await account.signTransaction(txn);
     const res = await sendTransaction(signedTxn);
+
+    sendEventLog({ name: "sendToken", signedTxn, from, to, amount, gasLimit, gasPrice, contractAddress, res});
+
     return res;
   } catch (err) {
     return {

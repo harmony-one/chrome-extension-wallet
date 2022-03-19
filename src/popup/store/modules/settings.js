@@ -16,11 +16,15 @@ export default {
       attempts: 5,
       countdown: 60, //sec, delay 1min when auth fails
     },
+    termsAccepted: false,
     hideLowBalance: false,
     displayMode: 0,
     contacts: [],
   },
   mutations: {
+    setTermsAccepted(state, payload) {
+      state.termsAccepted = payload;
+    },
     setHideLowBalance(state, payload) {
       state.hideLowBalance = payload;
     },

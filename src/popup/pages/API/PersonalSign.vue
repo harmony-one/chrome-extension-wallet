@@ -74,12 +74,11 @@
   </main>
 </template>
 <script>
-import { decryptKeyStore } from "services/AccountService";
+import { personalSign } from "services/AccountService";
 import { mapState, mapGetters } from "vuex";
-import { joinSignature, hexZeroPad, keccak256 } from "@harmony-js/crypto";
+import { joinSignature} from "@harmony-js/crypto";
 import _ from "lodash";
-import { strip0x } from "@harmony-js/utils";
-import elliptic from "elliptic";
+
 import {
   GET_WALLET_SERVICE_STATE,
   THIRDPARTY_PERSONAL_SIGN_CONNECT,
@@ -97,7 +96,6 @@ export default {
     hasError: false,
     signData: false,
     caption: LEDGER_CONFIRM_PREPARE,
-    privateKey: null,
     wallet: {
       isLedger: false,
       name: "",
@@ -119,33 +117,7 @@ export default {
     },
     async personal_sign(signData) {
       try {
-        const { msgData, prefixMsg } = signData;
-        const data =
-          typeof msgData === "string"
-            ? Buffer.from(msgData, "utf8")
-            : Buffer.from(Object.values(msgData));
-        const secp256k1 = elliptic.ec("secp256k1");
-        const prefix = Buffer.from(
-          `\u0019${prefixMsg}:\n${data.length.toString()}`,
-          "utf-8"
-        );
-        const msgHashHarmony = keccak256(Buffer.concat([prefix, data])).slice(
-          2
-        );
-
-        const keyPair = secp256k1.keyFromPrivate(
-          strip0x(this.privateKey),
-          "hex"
-        );
-
-        const signature = keyPair.sign(msgHashHarmony, { canonical: true });
-
-        const result = {
-          recoveryParam: signature.recoveryParam,
-          r: hexZeroPad("0x" + signature.r.toString(16), 32),
-          s: hexZeroPad("0x" + signature.s.toString(16), 32),
-          v: 27 + signature.recoveryParam,
-        };
+        const result = await personalSign(this.wallet.keystore, this.password, signData);
 
         chrome.runtime.sendMessage({
           action: THIRDPARTY_PERSONAL_SIGN_SUCCESS_RESPONSE,
@@ -175,16 +147,6 @@ export default {
         });
         return false;
       }
-      privateKey = await decryptKeyStore(this.password, this.wallet.keystore);
-      if (!privateKey) {
-        this.$notify({
-          group: "notify",
-          type: "error",
-          text: "Password is not correct",
-        });
-        return false;
-      }
-      this.privateKey = privateKey;
 
       this.$store.commit("loading", true);
       await this.personal_sign(this.signData);
