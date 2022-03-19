@@ -86,13 +86,15 @@ import { setupENS } from "services/utils/ens";
 import { oneToHexAddress } from "services/Hrc20Service";
 import axios from "axios";
 import ExternalLink from 'components/ExternalLink.vue';
+import Terms from "components/Terms.vue";
 
 export default {
   mixins: [account, helper],
 
   components: {
     MainTab,
-    ExternalLink
+    ExternalLink,
+    Terms
   },
 
   data: () => ({
@@ -107,6 +109,7 @@ export default {
       wallets: (state) => state.wallets,
       network: (state) => state.network,
       displayMode: (state) => state.settings.displayMode,
+      termsAccepted: (state) => state.settings.termsAccepted
     }),
     getUSDBalance() {
       return new BigNumber(this.account.balance).multipliedBy(this.tokenPrice["one"]).toFixed();
@@ -124,6 +127,16 @@ export default {
     this.loadOneBalance();
     this.fetchTokenPrice();
     await this.loadEns();
+
+    if(!this.termsAccepted) {
+      this.$modal.show(Terms, {
+          onAccepted: ()=> {
+            this.$modal.hide("termsModal");
+          }
+        },
+        {name: "termsModal", clickToClose: false , width: "80%", height: "300px"}
+      );    
+    }
   },
 
   watch: {

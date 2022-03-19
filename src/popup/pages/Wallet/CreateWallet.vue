@@ -107,9 +107,11 @@ import {
   createAccountFromMnemonic,
 } from "services/AccountService";
 import { mapState } from "vuex";
+import Terms from "components/Terms.vue";
 
 export default {
   mixins: [account],
+  components: {Terms},
   data: () => ({
     name: "",
     password: "",
@@ -120,7 +122,19 @@ export default {
     wallet: null,
   }),
   computed: {
-    ...mapState(["wallets"]),
+    ...mapState({
+      wallets: (state) => state.wallets,
+      termsAccepted: (state) => state.settings.termsAccepted    
+    }),
+  },
+  async mounted() {
+    this.$modal.show(Terms, {
+        onAccepted: ()=> {
+          this.$modal.hide("termsModal");
+        }
+      },
+      {name: "termsModal", clickToClose: false , width: "250px", height: "300px"}
+    );    
   },
   methods: {
     addAccount() {
